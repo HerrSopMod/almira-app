@@ -1,0 +1,42 @@
+import { colors, typography } from '@almira/shared';
+import { Text, type TextProps } from 'react-native';
+
+const FAMILIA_POR_PESO = {
+  '400': 'Inter_400Regular',
+  '500': 'Inter_500Medium',
+  '600': 'Inter_600SemiBold',
+  '700': 'Inter_700Bold',
+} as const;
+
+type Props = TextProps & {
+  variante?: keyof typeof typography;
+  color?: string;
+  alineacion?: 'left' | 'right' | 'center';
+  tabular?: boolean;
+};
+
+export function Texto({
+  variante = 'bodyLg',
+  color = colors.text,
+  alineacion,
+  tabular,
+  style,
+  ...resto
+}: Props) {
+  const { fontWeight, ...estilo } = typography[variante];
+  return (
+    <Text
+      style={[
+        estilo,
+        {
+          color,
+          fontFamily: FAMILIA_POR_PESO[fontWeight],
+          textAlign: alineacion,
+          fontVariant: tabular ? ['tabular-nums'] : undefined,
+        },
+        style,
+      ]}
+      {...resto}
+    />
+  );
+}
