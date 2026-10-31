@@ -100,7 +100,7 @@ export interface Reclamo {
   descripcion: string | null;
   estado: EstadoReclamo;
   area: string | null;
-  fotoRuta: string | null;
+  fotoRuta: string;
   latitud: number | null;
   longitud: number | null;
   plazo: string | null;
