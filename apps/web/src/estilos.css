@@ -1,0 +1,228 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font: 400 16px/24px var(--fuente);
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-xl);
+  padding: var(--espacio-xl) var(--margen);
+  border-right: 1px solid var(--color-borde);
+}
+
+.marca {
+  color: var(--color-primario);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+}
+
+.selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-sm);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.selector select {
+  width: 100%;
+  height: var(--alto-boton);
+  padding: 0 var(--espacio-md);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  color: var(--color-texto);
+  font: 400 14px/20px var(--fuente);
+}
+
+.selector select:focus {
+  outline: none;
+  border: 1.5px solid var(--color-primario);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-sm);
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 var(--espacio-md);
+  border-radius: var(--radio-md);
+  color: var(--color-texto-secundario);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.menu a.active {
+  color: var(--color-primario);
+  border: 1.5px solid var(--color-primario);
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-xl);
+  min-width: 0;
+  padding: var(--espacio-xl);
+}
+
+.subtitulo {
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--espacio-md);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-sm);
+  padding: var(--espacio-md);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.indicador-valor {
+  font-size: 32px;
+  line-height: 38px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla {
+  overflow-x: auto;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+th {
+  color: var(--color-texto-secundario);
+  font-weight: 500;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 12px var(--espacio-md);
+  border-bottom: 1px solid var(--color-borde);
+  white-space: nowrap;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.monto {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--espacio-sm);
+  border-radius: var(--radio-insignia);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.insignia.exito {
+  color: var(--color-exito);
+  background: var(--color-exito-suave);
+}
+
+.insignia.atencion {
+  color: var(--color-atencion);
+  background: var(--color-atencion-suave);
+}
+
+.insignia.critico {
+  color: var(--color-critico);
+  background: var(--color-critico-suave);
+}
+
+.progreso {
+  display: inline-block;
+  vertical-align: middle;
+  width: 120px;
+  height: var(--alto-progreso);
+  border-radius: 9999px;
+  background: var(--color-borde);
+  overflow: hidden;
+}
+
+.progreso span {
+  display: block;
+  height: 100%;
+  background: var(--color-acento);
+}
+
+.vacio {
+  margin: 0;
+  padding: var(--espacio-md);
+  color: var(--color-texto-secundario);
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .panel {
+    grid-template-columns: 1fr;
+  }
+
+  .lateral {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-borde);
+  }
+
+  .contenido {
+    padding: var(--espacio-xl) var(--margen);
+  }
+}
