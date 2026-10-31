@@ -1,0 +1,6 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Expo y Metro necesitan node_modules sin enlaces simbólicos por paquete.
+nodeLinker: hoisted

@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+
+# Salidas de compilación
+dist/
+web-build/
+*.tsbuildinfo
+
+# Expo
+.expo/
+expo-env.d.ts
+ios/
+android/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+*.log
+.claude/settings.local.json
+
+# Copia anidada de Stitch (idéntica a la carpeta principal) y archivo vacío
+docs/design/stitch_almira_gesti_n_tributaria_municipal/stitch_almira_gesti_n_tributaria_municipal/
+DESIGN.md.txt

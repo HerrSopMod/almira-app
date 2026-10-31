@@ -1,0 +1,17 @@
+{
+  "name": "almira-app",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Almira: pago de tributos y reclamos con evidencia para vecinos de Lima",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "mobile": "pnpm --filter @almira/mobile start",
+    "web": "pnpm --filter @almira/web dev",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "build:web": "pnpm --filter @almira/web build"
+  }
+}
