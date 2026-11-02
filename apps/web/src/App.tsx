@@ -24,7 +24,10 @@ function Marco() {
   return (
     <div className="panel">
       <aside className="lateral">
-        <span className="marca">Almira</span>
+        <div className="marca-wrap">
+          <span className="marca">Almira</span>
+          <span className="marca-chip">Panel municipal</span>
+        </div>
         <label className="selector">
           Municipalidad
           <select value={municipalidadId} onChange={(e) => setMunicipalidadId(e.target.value)}>
