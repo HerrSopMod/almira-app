@@ -6,6 +6,7 @@ import {
   sizes,
   spacing,
   sumarDeudas,
+  typography,
 } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
@@ -146,12 +147,12 @@ const estilos = StyleSheet.create({
     flex: 1,
     height: sizes.input,
     paddingHorizontal: spacing.md,
-    borderWidth: 1,
+    borderWidth: sizes.borderWidth,
     borderColor: colors.border,
     borderRadius: radius.md,
     color: colors.text,
     fontFamily: 'Inter_400Regular',
-    fontSize: 16,
+    fontSize: typography.bodyLg.fontSize,
   },
   enviar: {
     width: sizes.button,
