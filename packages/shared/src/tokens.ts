@@ -56,8 +56,8 @@ export const colors = {
   surface: '#FFFFFF',
   surfaceBright: '#FFFFFF',
 
-  accent: '#2CC5C0',
-  highlight: '#E3F6F5',
+  accent: '#2FB7B2',
+  highlight: '#EAFDFB',
   text: '#0F2A2E',
   textSecondary: '#5B6B70',
   border: '#D6E3E4',

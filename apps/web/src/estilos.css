@@ -4,7 +4,7 @@
 
 body {
   margin: 0;
-  background: var(--color-fondo);
+  background: linear-gradient(180deg, #d9fbf9 0%, #b4f0eb 28%, #ffffff 100%);
   color: var(--color-texto);
   font: 400 16px/24px var(--fuente);
 }
@@ -35,14 +35,37 @@ h2 {
   flex-direction: column;
   gap: var(--espacio-xl);
   padding: var(--espacio-xl) var(--margen);
-  border-right: 1px solid var(--color-borde);
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, #0a6d72 0%, #0c7f86 32%, #0d8f95 100%);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.marca-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .marca {
-  color: var(--color-primario);
+  color: #ffffff;
   font-size: 24px;
   line-height: 32px;
   font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.marca-chip {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #e7ffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .selector {
@@ -53,12 +76,16 @@ h2 {
   font-weight: 500;
 }
 
+.selector {
+  color: rgba(255, 255, 255, 0.88);
+}
+
 .selector select {
   width: 100%;
   height: var(--alto-boton);
   padding: 0 var(--espacio-md);
-  background: var(--color-fondo);
-  border: 1px solid var(--color-borde);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radio-md);
   color: var(--color-texto);
   font: 400 14px/20px var(--fuente);
@@ -66,7 +93,7 @@ h2 {
 
 .selector select:focus {
   outline: none;
-  border: 1.5px solid var(--color-primario);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
 }
 
 .menu {
@@ -81,14 +108,17 @@ h2 {
   min-height: 48px;
   padding: 0 var(--espacio-md);
   border-radius: var(--radio-md);
-  color: var(--color-texto-secundario);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 600;
   text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .menu a.active {
-  color: var(--color-primario);
-  border: 1.5px solid var(--color-primario);
+  color: #0b7f86;
+  background: linear-gradient(90deg, #ecffff 0%, #ffffff 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .contenido {
@@ -117,11 +147,15 @@ h2 {
   flex-direction: column;
   gap: var(--espacio-sm);
   padding: var(--espacio-md);
-  border: 1px solid var(--color-borde);
+  border: 1px solid rgba(11, 127, 134, 0.14);
+  border-left: 4px solid var(--color-primario);
   border-radius: var(--radio-md);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfffe 100%);
+  box-shadow: 0 8px 18px rgba(12, 66, 71, 0.05);
 }
 
 .indicador-valor {
+  color: var(--color-primario);
   font-size: 32px;
   line-height: 38px;
   font-weight: 700;
@@ -131,8 +165,10 @@ h2 {
 
 .tabla {
   overflow-x: auto;
-  border: 1px solid var(--color-borde);
+  border: 2px solid rgba(11, 127, 134, 0.4);
   border-radius: var(--radio-md);
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(11, 127, 134, 0.08);
 }
 
 table {
@@ -151,8 +187,12 @@ th {
 th,
 td {
   padding: 12px var(--espacio-md);
-  border-bottom: 1px solid var(--color-borde);
+  border-bottom: 1px solid rgba(11, 127, 134, 0.25);
   white-space: nowrap;
+}
+
+th {
+  background: rgba(11, 127, 134, 0.04);
 }
 
 tr:last-child td {
