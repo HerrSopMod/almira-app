@@ -224,6 +224,10 @@ export function useDatosMunicipales() {
   }, [municipalidadId, canalesAviso, reclamosNuevos, pagosSimulados]);
 }
 
+// DNI de ejemplo de Rosa: llena el campo del ingreso para recorrer el prototipo.
+export const DOCUMENTO_EJEMPLO =
+  vecinos.find((vecino) => vecino.userId === USUARIO_EJEMPLO.id)?.dni ?? '';
+
 export function municipalidadesDelVecino() {
   const propias = vecinos.filter((v) => v.userId === USUARIO_EJEMPLO.id);
   return propias.map((vecino) => ({
