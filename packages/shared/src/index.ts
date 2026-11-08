@@ -7,3 +7,4 @@ export * from './asistente';
 export * from './reclamos';
 export * from './panel-ejemplo';
 export * from './pagos';
+export * from './ingreso';

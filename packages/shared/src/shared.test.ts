@@ -65,6 +65,7 @@ import {
   repartoDeuda,
   totalSeleccionado,
 } from './pagos';
+import { codigoValido, documentoValido } from './ingreso';
 
 describe('tokens', () => {
   it('aplica los colores de la guía turquesa', () => {
@@ -566,5 +567,25 @@ describe('pagar', () => {
     expect(proximoVencimiento(deRosa, '2026-11-30')).toBe('2026-11-30');
     expect(proximoVencimiento(deRosa, '2026-12-01')).toBeNull();
     expect(proximoVencimiento([], HOY_EJEMPLO)).toBeNull();
+  });
+});
+
+describe('ingreso', () => {
+  it('acepta DNI o carné de 8 a 12 letras o números', () => {
+    expect(documentoValido('40000082')).toBe(true);
+    expect(documentoValido(' 40000082 ')).toBe(true);
+    expect(documentoValido('CE0012345678')).toBe(true);
+    expect(documentoValido('4000008')).toBe(false);
+    expect(documentoValido('CE00123456789')).toBe(false);
+    expect(documentoValido('40••••82')).toBe(false);
+    expect(documentoValido('4000 0082')).toBe(false);
+  });
+
+  it('acepta cualquier código de 6 dígitos', () => {
+    expect(codigoValido(USUARIO_EJEMPLO.codigoSmsEjemplo)).toBe(true);
+    expect(codigoValido('000000')).toBe(true);
+    expect(codigoValido('48217')).toBe(false);
+    expect(codigoValido('4821755')).toBe(false);
+    expect(codigoValido('48a175')).toBe(false);
   });
 });
