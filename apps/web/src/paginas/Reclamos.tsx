@@ -1,16 +1,19 @@
+import { reclamos as reclamosTodos } from '@almira/shared';
 import { ETIQUETA_ESTADO_RECLAMO } from '@almira/shared';
-import { Encabezado, Insignia, Tabla } from '../componentes';
-import { datosDeMunicipalidad, useContextoPanel } from '../datos';
+import { Chip, Encabezado, Tabla } from '../componentes';
+import { useSesion } from '../estado';
 
 export function Reclamos() {
-  const { municipalidadId, municipalidadNombre } = useContextoPanel();
-  const { reclamos } = datosDeMunicipalidad(municipalidadId);
+  const { sesion } = useSesion();
+  const municipalidadNombre = sesion.municipalidad.nombre;
+  const propios = <T extends { municipalidadId: string }>(filas: T[]) =>
+    filas.filter((fila) => fila.municipalidadId === sesion.municipalidad.id);
+  const reclamos = propios(reclamosTodos);
 
   return (
     <>
       <Encabezado titulo="Reclamos" subtitulo={municipalidadNombre} />
       <Tabla
-        vacio={reclamos.length === 0}
         columnas={[
           { titulo: 'Código' },
           { titulo: 'Reclamo' },
@@ -26,9 +29,9 @@ export function Reclamos() {
             <td>{reclamo.area}</td>
             <td>{reclamo.plazo}</td>
             <td>
-              <Insignia tono={reclamo.estado === 'resuelto' ? 'exito' : 'atencion'}>
+              <Chip tono={reclamo.estado === 'resuelto' ? 'verde' : 'amarillo'}>
                 {ETIQUETA_ESTADO_RECLAMO[reclamo.estado]}
-              </Insignia>
+              </Chip>
             </td>
           </tr>
         ))}

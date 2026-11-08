@@ -48,6 +48,8 @@ export const colors = {
   notice3: '#5B1428',
 
   scrim: 'rgba(43, 43, 43, 0.4)',
+  // Sombra de la tarjeta de ingreso del panel web (web-01).
+  shadow: 'rgba(43, 43, 43, 0.12)',
 
   // Borde punteado de "Agregar foto" (pantalla 16).
   photoDashed: '#B9C6D4',
@@ -190,6 +192,74 @@ export const typography = {
   tabLabel: { fontSize: 12, fontWeight: '500', lineHeight: 16 },
 } as const satisfies Record<string, EstiloTexto>;
 
+// Medidas del panel web, tomadas de docs/design/prototipo/web (1440 px de ancho).
+export const panelSizes = {
+  // Barra lateral: ancho, distancia del menú a los bordes y alto de cada módulo.
+  sidebar: 248,
+  sidebarInset: 12,
+  sidebarBrandX: 22,
+  sidebarBrandY: 22,
+  navItem: 40,
+  navGap: 3,
+  navIcon: 16,
+  navBadge: 20,
+  // Contenido: márgenes, separación entre tarjetas y relleno interior.
+  contentX: 26,
+  contentY: 22,
+  gap: 14,
+  cardPadding: 18,
+  // Columna de "Requiere tu decisión" junto al gráfico (web-02).
+  decisionColumn: 478,
+  // Tarjeta de cifra y fila de tabla.
+  kpiHeight: 113,
+  tableRow: 46,
+  tableRowTall: 59,
+  // Gráfico de barras verticales: alto de la barra más alta.
+  barChart: 112,
+  // Barras horizontales: columna de etiqueta, de cifra, grosor y paso entre filas.
+  hBarLabel: 138,
+  hBarValue: 94,
+  hBar: 12,
+  hBarRow: 31,
+  // "Requiere tu decisión": cuadro del ícono y paso entre filas.
+  decisionIcon: 40,
+  decisionRow: 63,
+  // Número de la escalera de avisos (web-04).
+  ladderNumber: 24,
+  // Interruptor de "Publicada" (web-06) y del simulador (web-08).
+  toggleWidth: 42,
+  toggleHeight: 24,
+  toggleKnob: 18,
+  // Chips de estado y botones de fila.
+  chip: 24,
+  rowButton: 37,
+  rowButtonWide: 184,
+  progressWide: 148,
+  // Ingreso (web-01).
+  loginCard: 400,
+  loginHeader: 56,
+  loginTop: 258,
+} as const;
+
+export type EstiloTextoPanel = EstiloTexto & { familia: 'display' | 'text' };
+
+// Textos del panel web: Poppins para marca, títulos y cifras; Inter para el resto.
+export const panelTypography = {
+  brand: { familia: 'display', fontSize: 16, fontWeight: '600', lineHeight: 22 },
+  title: { familia: 'display', fontSize: 24, fontWeight: '600', lineHeight: 30 },
+  cardTitle: { familia: 'display', fontSize: 16, fontWeight: '600', lineHeight: 22 },
+  kpi: { familia: 'display', fontSize: 28, fontWeight: '700', lineHeight: 34 },
+  loginTitle: { familia: 'display', fontSize: 18, fontWeight: '600', lineHeight: 24 },
+  nav: { familia: 'text', fontSize: 14, fontWeight: '600', lineHeight: 20 },
+  subtitle: { familia: 'text', fontSize: 14, fontWeight: '400', lineHeight: 20 },
+  body: { familia: 'text', fontSize: 13, fontWeight: '400', lineHeight: 18 },
+  bodyStrong: { familia: 'text', fontSize: 13, fontWeight: '600', lineHeight: 18 },
+  button: { familia: 'text', fontSize: 14, fontWeight: '600', lineHeight: 20 },
+  small: { familia: 'text', fontSize: 12, fontWeight: '400', lineHeight: 16 },
+  smallStrong: { familia: 'text', fontSize: 12, fontWeight: '600', lineHeight: 16 },
+  tableHead: { familia: 'text', fontSize: 11, fontWeight: '600', lineHeight: 16 },
+} as const satisfies Record<string, EstiloTextoPanel>;
+
 export const tokens = {
   colors,
   spacing,
@@ -198,4 +268,6 @@ export const tokens = {
   fontFamily,
   displayFontFamily,
   typography,
+  panelSizes,
+  panelTypography,
 } as const;

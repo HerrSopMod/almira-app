@@ -1,24 +1,27 @@
+import { obras as obrasTodos } from '@almira/shared';
 import { ETIQUETA_ESTADO_OBRA, formatearSoles } from '@almira/shared';
-import { Encabezado, Insignia, Progreso, Tabla } from '../componentes';
-import { datosDeMunicipalidad, useContextoPanel } from '../datos';
+import { Chip, Encabezado, Progreso, Tabla } from '../componentes';
+import { useSesion } from '../estado';
 
 export function Obras() {
-  const { municipalidadId, municipalidadNombre } = useContextoPanel();
-  const { obras } = datosDeMunicipalidad(municipalidadId);
+  const { sesion } = useSesion();
+  const municipalidadNombre = sesion.municipalidad.nombre;
+  const propios = <T extends { municipalidadId: string }>(filas: T[]) =>
+    filas.filter((fila) => fila.municipalidadId === sesion.municipalidad.id);
+  const obras = propios(obrasTodos);
 
   return (
     <>
       <Encabezado titulo="Obras" subtitulo={municipalidadNombre} />
       <Tabla
-        vacio={obras.length === 0}
         columnas={[
           { titulo: 'Obra' },
           { titulo: 'Ubicación' },
           { titulo: 'Estado' },
           { titulo: 'Avance físico' },
           { titulo: 'Meta' },
-          { titulo: 'Asignado', monto: true },
-          { titulo: 'Ejecutado', monto: true },
+          { titulo: 'Asignado', derecha: true },
+          { titulo: 'Ejecutado', derecha: true },
         ]}
       >
         {obras.map((obra) => (
@@ -26,9 +29,9 @@ export function Obras() {
             <td>{obra.nombre}</td>
             <td>{obra.ubicacion}</td>
             <td>
-              <Insignia tono={obra.estado === 'finalizada' ? 'exito' : 'atencion'}>
+              <Chip tono={obra.estado === 'finalizada' ? 'verde' : 'amarillo'}>
                 {ETIQUETA_ESTADO_OBRA[obra.estado]}
-              </Insignia>
+              </Chip>
             </td>
             <td>
               <Progreso porcentaje={obra.avancePct} /> {obra.avancePct}%

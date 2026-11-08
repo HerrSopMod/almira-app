@@ -21,7 +21,10 @@ import {
   formatearFecha,
   formatearFechaCorta,
   formatearHora,
+  formatearNumero,
+  formatearPorcentaje,
   formatearSoles,
+  formatearVariacion,
   haceDias,
   iniciales,
   momentoAviso,
@@ -30,7 +33,8 @@ import {
   deudasPendientes,
   textoVencimiento,
 } from './formato';
-import { colors, sizes, spacing } from './tokens';
+import { colors, panelSizes, sizes, spacing } from './tokens';
+import { mejorVariante, panelEjemplo } from './panel-ejemplo';
 import {
   avisosRecibidos,
   mensajeAviso,
@@ -394,5 +398,48 @@ describe('obras y perfil', () => {
     expect(iniciales('Rosa Quispe Huamán')).toBe('RQ');
     expect(iniciales('María Ejemplo')).toBe('ME');
     expect(iniciales('Ana María Rojas Paz')).toBe('AR');
+  });
+});
+
+describe('panel municipal', () => {
+  const panel = panelEjemplo('m-lince')!;
+
+  it('escribe los montos y cifras del panel como el prototipo', () => {
+    expect(formatearSoles(1120400, { sinDecimales: true })).toBe('S/ 1,120,400');
+    expect(formatearSoles(312000, { enMiles: true })).toBe('S/ 312 mil');
+    expect(formatearNumero(18420)).toBe('18,420');
+    expect(formatearNumero(1.42)).toBe('1.42');
+    expect(formatearPorcentaje(62)).toBe('62 %');
+    expect(formatearVariacion(7.7)).toBe('+7.7 %');
+    expect(formatearVariacion(-18)).toBe('−18 %');
+  });
+
+  it('trae las cifras de Lince del prototipo y ninguna de otras municipalidades', () => {
+    expect(panel.recaudacion.mes).toBe(1120400);
+    expect(panel.pagosATiempo).toEqual({ porcentaje: 62, puntos: 9, meta: 70 });
+    expect(panel.recaudacionMensual.map((mes) => mes.millones)).toEqual([
+      1.42, 0.96, 1.01, 1.38, 1.04, 1.12,
+    ]);
+    expect(panelEjemplo('m-villa-verde')).toBeUndefined();
+  });
+
+  it('ordena los reclamos por área de mayor a menor', () => {
+    const cantidades = panel.reclamosPorArea.map((fila) => fila.cantidad);
+    expect(cantidades).toEqual([...cantidades].sort((a, b) => b - a));
+  });
+
+  it('calcula la ventaja de la mejor variante de la prueba A/B', () => {
+    expect(mejorVariante(panel.pruebaAB.variantes)).toEqual({ letra: 'B', puntos: 6 });
+  });
+
+  it('deja tres casos en cola humana con 40 minutos de espera máxima', () => {
+    const enCola = panel.casos.filter((caso) => caso.estado === 'en_cola');
+    expect(enCola).toHaveLength(3);
+    expect(Math.max(...enCola.map((caso) => caso.esperaMinutos ?? 0))).toBe(40);
+  });
+
+  it('usa las medidas del panel web del prototipo', () => {
+    expect(panelSizes.sidebar).toBe(248);
+    expect(panelSizes.navItem).toBe(40);
   });
 });

@@ -5,3 +5,4 @@ export * from './avisos';
 export * from './datos-ejemplo';
 export * from './asistente';
 export * from './reclamos';
+export * from './panel-ejemplo';

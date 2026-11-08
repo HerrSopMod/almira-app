@@ -1,69 +1,84 @@
-import { municipalidades } from '@almira/shared';
-import { useState } from 'react';
+import { PERSONAL_PANEL_EJEMPLO } from '@almira/shared';
 import { NavLink, Navigate, Outlet, Route, Routes } from 'react-router-dom';
-import type { ContextoPanel } from './datos';
+import { pendientes, usePanel, useSesion } from './estado';
+import { Icono, type NombreIcono } from './iconos';
+import { EnPreparacion } from './paginas/EnPreparacion';
+import { Ingreso } from './paginas/Ingreso';
 import { Obras } from './paginas/Obras';
+import { PanelMunicipal } from './paginas/PanelMunicipal';
 import { Recaudacion } from './paginas/Recaudacion';
 import { Reclamos } from './paginas/Reclamos';
 import { Recordatorios } from './paginas/Recordatorios';
-import { Resumen } from './paginas/Resumen';
 
-const SECCIONES = [
-  { ruta: '/resumen', titulo: 'Resumen' },
-  { ruta: '/recaudacion', titulo: 'Recaudación' },
-  { ruta: '/recordatorios', titulo: 'Recordatorios' },
-  { ruta: '/reclamos', titulo: 'Reclamos' },
-  { ruta: '/obras', titulo: 'Obras' },
-];
+type Modulo = { ruta: string; titulo: string; icono: NombreIcono; cifra?: number };
 
 function Marco() {
-  const [municipalidadId, setMunicipalidadId] = useState(municipalidades[0]!.id);
-  const municipalidad = municipalidades.find((m) => m.id === municipalidadId)!;
-  const contexto: ContextoPanel = { municipalidadId, municipalidadNombre: municipalidad.nombre };
+  const { sesion, datos } = useSesion();
+  const { reclamosVencidos, casosEnCola, alertas } = pendientes({ sesion, datos });
+
+  const modulos: Modulo[] = [
+    { ruta: '/panel', titulo: 'Panel municipal', icono: 'grafico' },
+    { ruta: '/recaudacion', titulo: 'Recaudación y pagos', icono: 'soles' },
+    { ruta: '/avisos', titulo: 'Avisos y respuestas', icono: 'mensaje' },
+    { ruta: '/reclamos', titulo: 'Reclamos por área', icono: 'camara', cifra: reclamosVencidos.length },
+    { ruta: '/obras', titulo: 'Obras publicadas', icono: 'casco' },
+    { ruta: '/atencion', titulo: 'Atención humana', icono: 'personas', cifra: casosEnCola.length },
+    { ruta: '/alertas', titulo: 'Alertas y auditoría', icono: 'alerta', cifra: alertas.length },
+    { ruta: '/datos', titulo: 'Datos y accesos', icono: 'escudo' },
+  ];
 
   return (
     <div className="panel">
       <aside className="lateral">
-        <div className="marca-wrap">
-          <span className="marca">Almira</span>
-          <span className="marca-chip">Panel municipal</span>
+        <div className="lateral-marca">
+          <strong>{sesion.municipalidad.nombre}</strong>
+          <span>Panel Almira · Unidad operativa</span>
         </div>
-        <label className="selector">
-          Municipalidad
-          <select value={municipalidadId} onChange={(e) => setMunicipalidadId(e.target.value)}>
-            {municipalidades.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-        <nav className="menu" aria-label="Secciones del panel">
-          {SECCIONES.map(({ ruta, titulo }) => (
+        <nav className="menu" aria-label="Módulos del panel">
+          {modulos.map(({ ruta, titulo, icono, cifra }) => (
             <NavLink key={ruta} to={ruta}>
-              {titulo}
+              <Icono nombre={icono} />
+              <span className="menu-titulo">{titulo}</span>
+              {cifra ? (
+                <span className="menu-cifra" aria-label={`${cifra} pendientes`}>
+                  {cifra}
+                </span>
+              ) : null}
             </NavLink>
           ))}
         </nav>
+        <div className="lateral-pie">
+          <strong>{PERSONAL_PANEL_EJEMPLO.cargo}</strong>
+          <span>{PERSONAL_PANEL_EJEMPLO.area} · Acceso por rol</span>
+        </div>
       </aside>
       <main className="contenido">
-        <Outlet context={contexto} />
+        <Outlet />
       </main>
     </div>
   );
 }
 
+function ConSesion() {
+  const { sesion } = usePanel();
+  return sesion ? <Marco /> : <Navigate to="/ingreso" replace />;
+}
+
 export function App() {
   return (
     <Routes>
-      <Route element={<Marco />}>
-        <Route index element={<Navigate to="/resumen" replace />} />
-        <Route path="resumen" element={<Resumen />} />
+      <Route path="ingreso" element={<Ingreso />} />
+      <Route element={<ConSesion />}>
+        <Route index element={<Navigate to="/panel" replace />} />
+        <Route path="panel" element={<PanelMunicipal />} />
         <Route path="recaudacion" element={<Recaudacion />} />
-        <Route path="recordatorios" element={<Recordatorios />} />
+        <Route path="avisos" element={<Recordatorios />} />
         <Route path="reclamos" element={<Reclamos />} />
         <Route path="obras" element={<Obras />} />
-        <Route path="*" element={<Navigate to="/resumen" replace />} />
+        <Route path="atencion" element={<EnPreparacion titulo="Atención humana" />} />
+        <Route path="alertas" element={<EnPreparacion titulo="Alertas y auditoría" />} />
+        <Route path="datos" element={<EnPreparacion titulo="Datos y accesos" />} />
+        <Route path="*" element={<Navigate to="/panel" replace />} />
       </Route>
     </Routes>
   );

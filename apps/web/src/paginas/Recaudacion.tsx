@@ -1,3 +1,4 @@
+import { pagos as pagosTodos, deudas as deudasTodos, vecinos as vecinosTodos } from '@almira/shared';
 import {
   ETIQUETA_ESTADO_DEUDA,
   ETIQUETA_ESTADO_PAGO,
@@ -7,12 +8,17 @@ import {
   formatearSoles,
   totalDeuda,
 } from '@almira/shared';
-import { Encabezado, Insignia, Tabla } from '../componentes';
-import { datosDeMunicipalidad, useContextoPanel } from '../datos';
+import { Chip, Encabezado, Tabla } from '../componentes';
+import { useSesion } from '../estado';
 
 export function Recaudacion() {
-  const { municipalidadId, municipalidadNombre } = useContextoPanel();
-  const { pagos, deudas, vecinos } = datosDeMunicipalidad(municipalidadId);
+  const { sesion } = useSesion();
+  const municipalidadNombre = sesion.municipalidad.nombre;
+  const propios = <T extends { municipalidadId: string }>(filas: T[]) =>
+    filas.filter((fila) => fila.municipalidadId === sesion.municipalidad.id);
+  const pagos = propios(pagosTodos);
+  const deudas = propios(deudasTodos);
+  const vecinos = propios(vecinosTodos);
   const nombreVecino = (id: string) => vecinos.find((vecino) => vecino.id === id)?.nombre ?? '';
   const conceptoDeuda = (id: string) => deudas.find((deuda) => deuda.id === id)?.concepto ?? '';
 
@@ -21,14 +27,13 @@ export function Recaudacion() {
       <Encabezado titulo="Recaudación" subtitulo={municipalidadNombre} />
       <h2>Pagos recibidos</h2>
       <Tabla
-        vacio={pagos.length === 0}
         columnas={[
           { titulo: 'Fecha' },
           { titulo: 'Vecino' },
           { titulo: 'Concepto' },
           { titulo: 'Medio de pago' },
           { titulo: 'Estado' },
-          { titulo: 'Monto', monto: true },
+          { titulo: 'Monto', derecha: true },
         ]}
       >
         {pagos.map((pago) => (
@@ -38,9 +43,9 @@ export function Recaudacion() {
             <td>{conceptoDeuda(pago.deudaId)}</td>
             <td>{ETIQUETA_MEDIO_PAGO[pago.medio]}</td>
             <td>
-              <Insignia tono={pago.estado === 'confirmado' ? 'exito' : 'atencion'}>
+              <Chip tono={pago.estado === 'confirmado' ? 'verde' : 'amarillo'}>
                 {ETIQUETA_ESTADO_PAGO[pago.estado]}
-              </Insignia>
+              </Chip>
             </td>
             <td className="monto">{formatearSoles(pago.monto)}</td>
           </tr>
@@ -49,13 +54,12 @@ export function Recaudacion() {
 
       <h2>Deudas pendientes</h2>
       <Tabla
-        vacio={deudasPendientes(deudas).length === 0}
         columnas={[
           { titulo: 'Vecino' },
           { titulo: 'Concepto' },
           { titulo: 'Vencimiento' },
           { titulo: 'Estado' },
-          { titulo: 'Total', monto: true },
+          { titulo: 'Total', derecha: true },
         ]}
       >
         {deudasPendientes(deudas).map((deuda) => (
@@ -64,9 +68,9 @@ export function Recaudacion() {
             <td>{deuda.concepto}</td>
             <td>{formatearFechaCorta(deuda.vencimiento)}</td>
             <td>
-              <Insignia tono={deuda.estado === 'vencida' ? 'critico' : 'exito'}>
+              <Chip tono={deuda.estado === 'vencida' ? 'rojo' : 'amarillo'}>
                 {ETIQUETA_ESTADO_DEUDA[deuda.estado]}
-              </Insignia>
+              </Chip>
             </td>
             <td className="monto">{formatearSoles(totalDeuda(deuda))}</td>
           </tr>
