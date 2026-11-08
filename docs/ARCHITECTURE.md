@@ -20,10 +20,11 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 
 | Pantalla | Ruta | Archivo |
 | --- | --- | --- |
-| Ingreso | `/ingreso` | `app/(auth)/ingreso.tsx` |
-| Verificación | `/verificacion` | `app/(auth)/verificacion.tsx` |
-| Vincular DNI | `/vincular-dni` | `app/(auth)/vincular-dni.tsx` |
-| Elegir municipalidad | `/municipalidad` | `app/(auth)/municipalidad.tsx` |
+| Entrada (01) | `/entrada` | `app/(auth)/entrada.tsx` |
+| Ingresa a tu cuenta (02) | `/ingreso` | `app/(auth)/ingreso.tsx` |
+| Tus datos, tus reglas (03) | `/consentimiento` | `app/(auth)/consentimiento.tsx` |
+| Sin smartphone (23, en construcción) | `/sin-smartphone` | `app/sin-smartphone.tsx` |
+| Privacidad y mis datos (22, en construcción) | `/privacidad` | `app/privacidad.tsx` |
 | Inicio | `/inicio` | `app/(tabs)/inicio.tsx` |
 | Detalle de deuda | `/deuda/[id]` | `app/deuda/[id].tsx` |
 | Pagar | `/pagar` | `app/(tabs)/pagar.tsx` |
@@ -34,8 +35,10 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 
 Flujo de entrada:
 
-- Con DNI: ingreso, verificación, municipalidad, inicio.
-- Con Google: ingreso, vincular DNI, verificación, municipalidad, inicio.
+- Entrada (se elige la municipalidad), ingresa a tu cuenta, tus datos tus reglas, inicio.
+- Desde la entrada, "No tengo cuenta ni smartphone propio" lleva a sin smartphone.
+
+El ingreso es simulado: los campos vienen llenos con los datos de ejemplo y cualquier código de 6 dígitos sirve. No se envía ningún SMS.
 
 `src/sesion.tsx` guarda la municipalidad elegida en memoria y filtra todos los datos por ella.
 
