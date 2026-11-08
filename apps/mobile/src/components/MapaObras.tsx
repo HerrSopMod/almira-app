@@ -88,7 +88,7 @@ const estilos = StyleSheet.create({
     position: 'absolute',
     width: porcentaje(TERCIO),
     height: porcentaje(TERCIO),
-    padding: spacing.block,
+    padding: spacing.blockDense,
   },
   manzana: { flex: 1, borderRadius: radius.md, backgroundColor: colors.drawingBlock },
   parque: { backgroundColor: colors.drawingPark },

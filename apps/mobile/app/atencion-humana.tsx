@@ -88,15 +88,15 @@ export default function AtencionHumana() {
 const estilos = StyleSheet.create({
   centro: { alignItems: 'center', gap: spacing.xs },
   icono: {
-    width: sizes.attentionIcon,
-    height: sizes.attentionIcon,
+    width: sizes.iconBoxLg,
+    height: sizes.iconBoxLg,
     marginBottom: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: sizes.attentionIcon / 2,
+    borderRadius: sizes.iconBoxLg / 2,
     backgroundColor: colors.backgroundPink,
   },
   lista: { gap: spacing.sm },
-  item: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  item: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
 });

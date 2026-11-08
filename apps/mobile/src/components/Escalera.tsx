@@ -83,11 +83,11 @@ const estilos = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
   },
-  numero: { width: sizes.noticeNumber },
+  numero: { width: sizes.ladderNumber },
   textos: { flex: 1 },
   insignia: {
     height: sizes.badge,
-    paddingHorizontal: spacing.block,
+    paddingHorizontal: spacing.blockDense,
     justifyContent: 'center',
     borderRadius: radius.full,
     backgroundColor: colors.backgroundPink,

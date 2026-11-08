@@ -217,7 +217,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   progreso: {
-    height: sizes.progressMobile,
+    height: sizes.progress,
     borderRadius: radius.full,
     backgroundColor: colors.backgroundPink,
     overflow: 'hidden',
@@ -234,8 +234,8 @@ const estilos = StyleSheet.create({
   chipPlazo: { backgroundColor: colors.backgroundPink, borderColor: colors.backgroundPink },
   chipPagado: { backgroundColor: colors.paidSoft, borderColor: colors.paidSoft },
   iconoCuadro: {
-    width: sizes.featureIcon,
-    height: sizes.featureIcon,
+    width: sizes.iconBox,
+    height: sizes.iconBox,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,

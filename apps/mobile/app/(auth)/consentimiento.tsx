@@ -67,10 +67,10 @@ export default function Consentimiento() {
 }
 
 const estilos = StyleSheet.create({
-  responsable: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  responsable: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   escudo: {
-    width: sizes.featureIcon,
-    height: sizes.featureIcon,
+    width: sizes.iconBox,
+    height: sizes.iconBox,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,

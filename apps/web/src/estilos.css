@@ -90,7 +90,7 @@ button {
 .ingreso-cuerpo {
   display: flex;
   flex-direction: column;
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
   padding: var(--s-lg);
 }
 
@@ -118,7 +118,7 @@ button {
 .campo input,
 .campo select {
   height: var(--z-input);
-  padding: 0 var(--s-block);
+  padding: 0 var(--s-block-dense);
   border: var(--z-border-width) solid var(--c-border);
   border-radius: var(--r-md);
   background: var(--c-surface);
@@ -227,10 +227,10 @@ button {
 .menu a {
   display: flex;
   align-items: center;
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
   min-height: var(--p-nav-item);
-  padding: 0 var(--s-block);
-  border-radius: var(--r-default);
+  padding: 0 var(--s-block-dense);
+  border-radius: var(--r-nav-item);
   color: var(--c-on-primary);
   font: var(--t-nav);
   text-decoration: none;
@@ -407,7 +407,7 @@ button {
 .barras-v {
   display: flex;
   flex-direction: column;
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
   padding-top: var(--s-lg);
 }
 
@@ -416,7 +416,7 @@ button {
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
   align-items: end;
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
 }
 
 .barras-v li {
@@ -504,7 +504,7 @@ button {
 .decisiones a {
   display: flex;
   align-items: center;
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
   min-height: var(--p-decision-row);
   color: var(--c-text);
   text-decoration: none;
@@ -516,7 +516,7 @@ button {
   flex: none;
   width: var(--p-decision-icon);
   height: var(--p-decision-icon);
-  border-radius: var(--r-default);
+  border-radius: var(--r-nav-item);
   background: var(--c-background-pink);
   color: var(--c-primary);
 }
@@ -547,7 +547,7 @@ button {
 .ciclo li {
   display: flex;
   flex-direction: column;
-  padding: var(--s-block);
+  padding: var(--s-block-dense);
   border-radius: var(--r-md);
   background: var(--c-background-pink-soft);
   font: var(--t-body);
@@ -593,7 +593,7 @@ td {
   display: flex;
   align-items: flex-start;
   gap: var(--s-sm);
-  padding: var(--s-block) var(--s-md);
+  padding: var(--s-block-dense) var(--s-md);
   border-radius: var(--r-md);
   background: var(--c-background-pink-soft);
   color: var(--c-primary);
@@ -696,7 +696,7 @@ td {
 .escalon {
   display: inline-flex;
   align-items: center;
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
 }
 
 .escalon-numero {
@@ -737,7 +737,7 @@ td {
 
 .filtro {
   min-height: var(--z-chip);
-  padding: 0 var(--s-block);
+  padding: 0 var(--s-block-dense);
   border: var(--z-focus-border-width) solid var(--c-primary);
   border-radius: var(--r-full);
   background: var(--c-surface);
@@ -760,7 +760,7 @@ td {
 }
 
 .detalle-reclamo {
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
 }
 
 .detalle-cabecera {
@@ -793,7 +793,7 @@ td {
 .recibo {
   display: flex;
   flex-direction: column;
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
   width: 30%;
   height: 100%;
   padding: var(--s-lg) var(--s-md);
@@ -909,7 +909,7 @@ td {
 .formulario-obra {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
 }
 
 .formulario-obra .campo-error,
@@ -937,7 +937,7 @@ td {
 /* Datos y accesos (web-09) */
 
 .principio {
-  gap: var(--s-block);
+  gap: var(--s-block-dense);
 }
 
 .principio h2 {

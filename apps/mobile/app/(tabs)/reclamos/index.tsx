@@ -100,7 +100,7 @@ function FilaReclamo({ reclamo }: { reclamo: Reclamo }) {
 }
 
 const estilos = StyleSheet.create({
-  contenido: { gap: spacing.block },
+  contenido: { gap: spacing.blockDense },
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   flexible: { flex: 1 },
 });

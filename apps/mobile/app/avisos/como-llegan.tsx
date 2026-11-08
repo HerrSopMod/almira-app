@@ -107,7 +107,7 @@ export default function ComoLleganLosAvisos() {
 const estilos = StyleSheet.create({
   burbuja: {
     gap: spacing.xs,
-    padding: spacing.block,
+    padding: spacing.blockDense,
     borderRadius: radius.md,
   },
   recibida: {

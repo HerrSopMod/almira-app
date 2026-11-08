@@ -126,7 +126,7 @@ export default function ConfirmarPago() {
 }
 
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   seccion: { marginTop: spacing.sm },
 });

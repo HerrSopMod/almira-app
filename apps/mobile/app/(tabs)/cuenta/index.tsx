@@ -156,7 +156,7 @@ function FilaDeuda({
 
 const estilos = StyleSheet.create({
   lista: { gap: spacing.lg },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   textosDeuda: { gap: spacing.xs },
   casilla: {
@@ -178,10 +178,10 @@ const estilos = StyleSheet.create({
     borderTopColor: colors.lines,
   },
   beneficio: {
-    padding: spacing.block,
+    padding: spacing.blockDense,
     borderRadius: radius.md,
     backgroundColor: colors.neutral,
   },
-  pago: { gap: spacing.block },
+  pago: { gap: spacing.blockDense },
   seccion: { marginTop: spacing.sm },
 });

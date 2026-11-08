@@ -90,8 +90,8 @@ const estilos = StyleSheet.create({
     paddingTop: spacing.xl,
     paddingHorizontal: spacing.margin,
     backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
   },
   lista: { gap: spacing.sm },
 });

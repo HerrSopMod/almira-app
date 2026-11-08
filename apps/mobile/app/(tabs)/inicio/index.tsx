@@ -184,16 +184,16 @@ const estilos = StyleSheet.create({
   aviso: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.block,
+    gap: spacing.blockDense,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.block,
+    paddingVertical: spacing.blockDense,
     borderWidth: sizes.borderWidth,
     borderColor: colors.primary,
     borderRadius: radius.md,
     backgroundColor: colors.backgroundPink,
   },
-  accesos: { gap: spacing.block },
-  filaAccesos: { flexDirection: 'row', gap: spacing.block },
+  accesos: { gap: spacing.blockDense },
+  filaAccesos: { flexDirection: 'row', gap: spacing.blockDense },
   acceso: {
     flex: 1,
     height: sizes.shortcut,
@@ -206,6 +206,6 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   obraTextos: { gap: spacing.xs },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
 });

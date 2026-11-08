@@ -125,6 +125,6 @@ function Valor({ monto }: { monto: number }) {
 
 const estilos = StyleSheet.create({
   encabezadoTarjeta: { gap: spacing.sm },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   explicacion: { gap: spacing.sm },
 });

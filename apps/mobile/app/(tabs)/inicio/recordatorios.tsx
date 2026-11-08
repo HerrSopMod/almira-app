@@ -126,7 +126,7 @@ function Seccion({ titulo, primera }: { titulo: string; primera?: boolean }) {
 }
 
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   seccion: { marginTop: spacing.sm },
   canales: {

@@ -133,7 +133,7 @@ const estilos = StyleSheet.create({
   flexible: { flex: 1, gap: spacing.xs },
   descripcion: {
     height: sizes.textArea,
-    paddingTop: spacing.block,
+    paddingTop: spacing.blockDense,
     textAlignVertical: 'top',
   },
 });

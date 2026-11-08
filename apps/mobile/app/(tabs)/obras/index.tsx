@@ -104,12 +104,12 @@ const estilos = StyleSheet.create({
   // El mapa va de borde a borde, pegado a la barra superior.
   cabecera: { marginHorizontal: -spacing.margin, marginTop: -spacing.md },
   hoja: {
-    gap: spacing.block,
-    marginTop: -radius.xl,
+    gap: spacing.blockDense,
+    marginTop: -radius.lg,
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.margin,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
     backgroundColor: colors.background,
   },
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
