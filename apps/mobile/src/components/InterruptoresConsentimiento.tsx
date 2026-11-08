@@ -13,13 +13,15 @@ export function InterruptoresConsentimiento({
   return (
     <Tarjeta>
       <Interruptor
-        titulo="Asistente con IA"
+        icono="support-agent"
+        titulo="Asistente"
         detalle="Guarda tus consultas para orientarte mejor."
         activo={valor.asistenteIa}
         onCambiar={(asistenteIa) => onCambiar({ ...valor, asistenteIa })}
       />
       <Separador />
       <Interruptor
+        icono="chat"
         titulo="Avisos por WhatsApp"
         detalle="Máximo 1 por día y 3 por semana."
         activo={valor.avisosWhatsapp}
@@ -27,6 +29,7 @@ export function InterruptoresConsentimiento({
       />
       <Separador />
       <Interruptor
+        icono="sms"
         titulo="Avisos por SMS"
         detalle="Canal alterno si WhatsApp falla."
         activo={valor.avisosSms}

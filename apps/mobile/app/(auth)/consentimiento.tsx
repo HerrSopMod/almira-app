@@ -1,17 +1,13 @@
-import { colors, radius, sizes, spacing } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Destacado, Tarjeta } from '@/components/Bloques';
+import { Destacado, Nota, Rotulo, TituloPantalla } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { InterruptoresConsentimiento } from '@/components/InterruptoresConsentimiento';
 import { Pantalla } from '@/components/Pantalla';
-import { Texto } from '@/components/Texto';
 import { useDatosMunicipales, useSesion } from '@/sesion';
 
-// Pantalla 03 del prototipo. Los permisos se guardan solo en memoria.
+// Pantalla 03 (maqueta 03-consentimiento). Los permisos se guardan solo en memoria.
 export default function Consentimiento() {
   const { municipalidad } = useDatosMunicipales();
   const { consentimientos, guardarConsentimientos } = useSesion();
@@ -21,38 +17,26 @@ export default function Consentimiento() {
 
   const entrar = () => {
     guardarConsentimientos(permisos);
-    // Al entrar, "volver" ya no regresa a las pantallas de entrada.
+    // Al entrar, "volver" ya no regresa a las pantallas de ingreso.
     if (router.canDismiss()) router.dismissAll();
     router.replace('/inicio');
   };
 
   return (
-    <Pantalla
-      encabezadoHastaArriba
-      separacion="blockDense"
-      encabezado={<BarraSuperior titulo="Tus datos, tus reglas" />}
-    >
-      <Tarjeta>
-        <View style={estilos.responsable}>
-          <View style={estilos.escudo}>
-            <MaterialIcons name="verified-user" size={22} color={colors.primary} />
-          </View>
-          <View style={estilos.flexible}>
-            <Texto variante="bodyLgMedium">{municipalidad.nombre} es responsable de tus datos</Texto>
-            <Texto variante="bodyMd" color={colors.textSecondary}>
-              Almira solo los trata por encargo (Ley N.° 29733).
-            </Texto>
-          </View>
-        </View>
-      </Tarjeta>
-
-      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
-        Autoriza lo que quieras usar
-      </Texto>
-      <InterruptoresConsentimiento valor={permisos} onCambiar={setPermisos} />
-
+    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 3 de 3" />}>
+      <TituloPantalla
+        titulo="Tus datos, tus reglas"
+        texto="Elige qué quieres usar. Puedes cambiarlo cuando quieras en Mi perfil."
+      />
       <Destacado
-        icono="check"
+        icono="verified-user"
+        titulo={`${municipalidad.nombre} es responsable de tus datos`}
+        texto="Almira solo los trata por encargo de la municipalidad (Ley N.° 29733)."
+      />
+      <Rotulo texto="Autoriza lo que quieras usar" />
+      <InterruptoresConsentimiento valor={permisos} onCambiar={setPermisos} />
+      <Nota
+        icono="block"
         texto="Nunca vendemos tus datos ni te calificamos como «buen» o «mal» pagador."
       />
       <Boton titulo="Aceptar y entrar" onPress={entrar} />
@@ -64,17 +48,3 @@ export default function Consentimiento() {
     </Pantalla>
   );
 }
-
-const estilos = StyleSheet.create({
-  responsable: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
-  escudo: {
-    width: sizes.iconBox,
-    height: sizes.iconBox,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.subtle,
-  },
-  flexible: { flex: 1 },
-  seccion: { marginTop: spacing.sm },
-});
