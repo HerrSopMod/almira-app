@@ -4,7 +4,7 @@ import {
   formatearSoles,
   spacing,
 } from '@almira/shared';
-import { router } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   Destacado,
@@ -18,11 +18,13 @@ import {
 import { Boton } from '@/components/Boton';
 import { Encabezado } from '@/components/Encabezado';
 import { Pantalla } from '@/components/Pantalla';
+import { SelectorMunicipalidad } from '@/components/SelectorMunicipalidad';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
 export default function Obras() {
   const { municipalidad, obras } = useDatosMunicipales();
+  const [listaAbierta, setListaAbierta] = useState(false);
   const asignado = obras.reduce((suma, obra) => suma + obra.montoAsignado, 0);
   const ejecutado = obras.reduce((suma, obra) => suma + obra.montoEjecutado, 0);
   const ejecucion = asignado > 0 ? (ejecutado / asignado) * 100 : 0;
@@ -36,7 +38,7 @@ export default function Obras() {
       <Boton
         tipo="secundario"
         titulo="Cambiar municipalidad"
-        onPress={() => router.push('/municipalidad')}
+        onPress={() => setListaAbierta(true)}
       />
 
       {obras.length === 0 ? (
@@ -73,6 +75,7 @@ export default function Obras() {
         titulo="Transparencia"
         texto="Los montos y avances se publican para consulta de los vecinos."
       />
+      <SelectorMunicipalidad visible={listaAbierta} onCerrar={() => setListaAbierta(false)} />
     </Pantalla>
   );
 }

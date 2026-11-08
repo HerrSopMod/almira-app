@@ -7,6 +7,7 @@ import type {
   EstadoReclamo,
   EstadoRecordatorio,
   MedioPago,
+  Municipalidad,
   TipoReclamo,
   TipoRecordatorio,
 } from './types';
@@ -42,6 +43,11 @@ export function formatearFechaCorta(fechaIso: string): string {
   const [anio, mes, dia] = fechaIso.slice(0, 10).split('-');
   const nombreMes = MESES[Number(mes) - 1] ?? '';
   return `${Number(dia)} ${nombreMes.charAt(0).toUpperCase()}${nombreMes.slice(1, 3)} ${anio}`;
+}
+
+// "Municipalidad de Lince" -> "Lince". Si el nombre no sigue ese formato, se usa entero.
+export function nombreDistrito(municipalidad: Pick<Municipalidad, 'nombre'>): string {
+  return municipalidad.nombre.replace(/^Municipalidad(\s+(Distrital|Provincial))?\s+de\s+/i, '');
 }
 
 export function totalDeuda(deuda: Deuda): number {

@@ -10,7 +10,13 @@ import {
   USUARIO_EJEMPLO,
   vecinos,
 } from './datos-ejemplo';
-import { formatearFecha, formatearSoles, sumarDeudas, deudasPendientes } from './formato';
+import {
+  formatearFecha,
+  formatearSoles,
+  nombreDistrito,
+  sumarDeudas,
+  deudasPendientes,
+} from './formato';
 import { colors, sizes, spacing } from './tokens';
 
 describe('tokens', () => {
@@ -37,9 +43,10 @@ describe('tokens', () => {
     expect(colors.border).toBe('#E8E8E8');
   });
 
-  it('mantiene las medidas actuales hasta medirlas en el prototipo', () => {
-    expect(sizes.button).toBe(52);
-    expect(spacing.margin).toBe(20);
+  it('usa las medidas de las imágenes del prototipo', () => {
+    expect(sizes.button).toBe(48);
+    expect(sizes.input).toBe(46);
+    expect(spacing.margin).toBe(18);
   });
 });
 
@@ -51,6 +58,12 @@ describe('formato', () => {
 
   it('escribe la fecha en español', () => {
     expect(formatearFecha('2025-02-28')).toBe('28 de febrero de 2025');
+  });
+
+  it('obtiene el distrito del nombre de la municipalidad', () => {
+    expect(nombreDistrito({ nombre: 'Municipalidad de Villa Verde' })).toBe('Villa Verde');
+    expect(nombreDistrito({ nombre: 'Municipalidad Distrital de Lince' })).toBe('Lince');
+    expect(nombreDistrito({ nombre: 'Lince' })).toBe('Lince');
   });
 });
 

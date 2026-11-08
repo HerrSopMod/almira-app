@@ -8,11 +8,21 @@ const FAMILIA_POR_PESO = {
   '700': 'Inter_700Bold',
 } as const;
 
+// Solo se cargan Poppins SemiBold y Bold (app/_layout.tsx).
+const POPPINS_POR_PESO = {
+  '400': 'Poppins_600SemiBold',
+  '500': 'Poppins_600SemiBold',
+  '600': 'Poppins_600SemiBold',
+  '700': 'Poppins_700Bold',
+} as const;
+
 type Props = TextProps & {
   variante?: keyof typeof typography;
   color?: string;
   alineacion?: 'left' | 'right' | 'center';
   tabular?: boolean;
+  // Poppins: montos, marca y títulos. Inter: el resto.
+  fuente?: 'inter' | 'poppins';
 };
 
 export function Texto({
@@ -20,6 +30,7 @@ export function Texto({
   color = colors.text,
   alineacion,
   tabular,
+  fuente = 'inter',
   style,
   ...resto
 }: Props) {
@@ -30,7 +41,7 @@ export function Texto({
         estilo,
         {
           color,
-          fontFamily: FAMILIA_POR_PESO[fontWeight],
+          fontFamily: (fuente === 'poppins' ? POPPINS_POR_PESO : FAMILIA_POR_PESO)[fontWeight],
           textAlign: alineacion,
           fontVariant: tabular ? ['tabular-nums'] : undefined,
         },

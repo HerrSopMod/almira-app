@@ -47,7 +47,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   primario: { backgroundColor: colors.primary },
-  secundario: { borderWidth: sizes.focusBorderWidth, borderColor: colors.primary },
+  secundario: { backgroundColor: colors.backgroundPink },
   terciario: { height: sizes.buttonTertiary },
   deshabilitado: { opacity: 0.5 },
   contenido: { flexDirection: 'row', alignItems: 'center', gap: 8 },

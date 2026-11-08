@@ -17,6 +17,8 @@ export const USUARIO_EJEMPLO = {
   nombre: 'Rosa',
   dniEnmascarado: '40••••82',
   telefonoEnmascarado: '+51 9•• ••• 417',
+  // Código SMS simulado de la pantalla 02 del prototipo: no se envía ningún SMS.
+  codigoSmsEjemplo: '482175',
 } as const;
 
 const LINCE = 'm-lince';
