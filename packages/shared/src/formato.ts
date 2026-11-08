@@ -39,10 +39,61 @@ export function formatearFecha(fechaIso: string): string {
   return `${Number(dia)} de ${MESES[Number(mes) - 1]} de ${anio}`;
 }
 
+// "28 oct 2026", como en el prototipo.
 export function formatearFechaCorta(fechaIso: string): string {
   const [anio, mes, dia] = fechaIso.slice(0, 10).split('-');
   const nombreMes = MESES[Number(mes) - 1] ?? '';
-  return `${Number(dia)} ${nombreMes.charAt(0).toUpperCase()}${nombreMes.slice(1, 3)} ${anio}`;
+  return `${Number(dia)} ${nombreMes.slice(0, 3)} ${anio}`;
+}
+
+// "2026-11-01T09:41:00" -> "9:41 h". Lee la hora escrita en la fecha, sin convertir zonas.
+export function formatearHora(fechaIso: string): string {
+  const [hora = '0', minutos = '00'] = fechaIso.slice(11, 16).split(':');
+  return `${Number(hora)}:${minutos} h`;
+}
+
+// "Vence 30 nov 2026" o, si la fecha ya pasó, "Venció 15 oct 2026".
+export function textoVencimiento(vencimientoIso: string, hoyIso: string): string {
+  const fecha = formatearFechaCorta(vencimientoIso);
+  return vencimientoIso.slice(0, 10) < hoyIso.slice(0, 10) ? `Venció ${fecha}` : `Vence ${fecha}`;
+}
+
+// Fechas ISO sin hora: se trabaja en UTC para no depender de la zona del teléfono.
+function aDia(fechaIso: string): number {
+  const [anio, mes, dia] = fechaIso.slice(0, 10).split('-').map(Number);
+  return Date.UTC(anio!, mes! - 1, dia!);
+}
+
+const UN_DIA = 24 * 60 * 60 * 1000;
+
+function esHabil(dia: number): boolean {
+  const semana = new Date(dia).getUTCDay();
+  return semana !== 0 && semana !== 6;
+}
+
+// Último día del plazo de un reclamo, en días hábiles (lunes a viernes, sin
+// feriados). El día de creación cuenta como el primero si es hábil.
+export function fechaLimitePlazo(creadoEnIso: string, plazoDias: number): string {
+  let dia = aDia(creadoEnIso);
+  let contados = esHabil(dia) ? 1 : 0;
+  while (contados < plazoDias) {
+    dia += UN_DIA;
+    if (esHabil(dia)) contados += 1;
+  }
+  return new Date(dia).toISOString().slice(0, 10);
+}
+
+// "Quedan 3 d" (días hábiles después de hoy), "Vence hoy" o "Vencido".
+export function etiquetaPlazo(fechaLimiteIso: string, hoyIso: string): string {
+  const limite = aDia(fechaLimiteIso);
+  const hoy = aDia(hoyIso);
+  if (hoy > limite) return 'Vencido';
+  if (hoy === limite) return 'Vence hoy';
+  let quedan = 0;
+  for (let dia = hoy + UN_DIA; dia <= limite; dia += UN_DIA) {
+    if (esHabil(dia)) quedan += 1;
+  }
+  return `Quedan ${quedan} d`;
 }
 
 // "Municipalidad de Lince" -> "Lince". Si el nombre no sigue ese formato, se usa entero.
@@ -99,9 +150,17 @@ export const ETIQUETA_CANAL: Record<CanalAviso, string> = {
 };
 
 export const ETIQUETA_MEDIO_PAGO: Record<MedioPago, string> = {
-  billetera: 'Billetera digital',
+  yape: 'Yape',
+  plin: 'Plin',
   tarjeta: 'Tarjeta de débito o crédito',
-  pagoefectivo: 'PagoEfectivo / Banca por internet',
+  banca_movil: 'Banca móvil o agente',
+};
+
+export const DETALLE_MEDIO_PAGO: Record<MedioPago, string> = {
+  yape: 'Confirma desde tu app',
+  plin: 'Confirma desde tu app',
+  tarjeta: 'Visa, Mastercard',
+  banca_movil: 'Con código de pago',
 };
 
 export const ETIQUETA_TIPO_RECORDATORIO: Record<TipoRecordatorio, string> = {

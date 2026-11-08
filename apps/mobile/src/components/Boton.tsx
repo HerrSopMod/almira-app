@@ -6,14 +6,15 @@ import { Texto } from './Texto';
 type Props = {
   titulo: string;
   onPress: () => void;
-  tipo?: 'primario' | 'secundario' | 'terciario';
+  tipo?: 'primario' | 'secundario' | 'linea' | 'terciario';
   icono?: keyof typeof MaterialIcons.glyphMap;
   deshabilitado?: boolean;
 };
 
 // Ocupa todo el ancho disponible: los márgenes de 20 px los pone Pantalla.
 export function Boton({ titulo, onPress, tipo = 'primario', icono, deshabilitado }: Props) {
-  const colorTexto = tipo === 'primario' ? colors.onPrimary : colors.primary;
+  const colorTexto =
+    tipo === 'primario' ? colors.onPrimary : tipo === 'linea' ? colors.text : colors.primary;
   return (
     <Pressable
       accessibilityRole="button"
@@ -24,6 +25,7 @@ export function Boton({ titulo, onPress, tipo = 'primario', icono, deshabilitado
         estilos.base,
         tipo === 'primario' && estilos.primario,
         tipo === 'secundario' && estilos.secundario,
+        tipo === 'linea' && estilos.linea,
         tipo === 'terciario' && estilos.terciario,
         deshabilitado && estilos.deshabilitado,
       ]}
@@ -47,7 +49,13 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   primario: { backgroundColor: colors.primary },
-  secundario: { backgroundColor: colors.backgroundPink },
+  // Las pantallas 06 y 08 usan el rosado más claro para el botón secundario.
+  secundario: { backgroundColor: colors.backgroundPinkSoft },
+  linea: {
+    backgroundColor: colors.surface,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.border,
+  },
   terciario: { height: sizes.buttonTertiary },
   deshabilitado: { opacity: 0.5 },
   contenido: { flexDirection: 'row', alignItems: 'center', gap: 8 },

@@ -1,168 +1,212 @@
 import {
   colors,
   deudasPendientes,
-  ETIQUETA_CANAL,
-  ETIQUETA_ESTADO_DEUDA,
-  ETIQUETA_TIPO_RECORDATORIO,
-  formatearFecha,
+  ETIQUETA_ESTADO_RECLAMO,
+  etiquetaPlazo,
+  fechaLimitePlazo,
+  formatearSoles,
+  HOY_EJEMPLO,
+  radius,
+  sizes,
   spacing,
   sumarDeudas,
-  USUARIO_EJEMPLO,
-  type Deuda,
+  type Reclamo,
 } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router, type Href } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import {
-  Destacado,
-  Insignia,
-  Monto,
-  Separador,
-  Tarjeta,
-  Vacio,
-} from '@/components/Bloques';
-import { Boton } from '@/components/Boton';
-import { Encabezado } from '@/components/Encabezado';
-import { Opcion } from '@/components/Opcion';
+import { ChipPlazo, IconoCuadro, PiePrototipo, Progreso, Tarjeta } from '@/components/Bloques';
+import { BarraSuperior } from '@/components/BarraSuperior';
 import { Pantalla } from '@/components/Pantalla';
-import { SelectorMunicipalidad } from '@/components/SelectorMunicipalidad';
 import { Texto } from '@/components/Texto';
-import { municipalidadesDelVecino, useDatosMunicipales, useSesion } from '@/sesion';
+import { useDatosMunicipales } from '@/sesion';
 
+type Acceso = {
+  titulo: string;
+  icono: keyof typeof MaterialCommunityIcons.glyphMap;
+  destino: Href;
+};
+
+const ACCESOS: Acceso[][] = [
+  [
+    { titulo: 'Mi cuenta', icono: 'wallet-outline', destino: '/cuenta' },
+    { titulo: 'Avisos', icono: 'bell-outline', destino: '/recordatorios' },
+  ],
+  [
+    { titulo: 'Asistente', icono: 'robot-outline', destino: '/asistente' },
+    { titulo: 'Reclamos', icono: 'camera-outline', destino: '/reclamos' },
+  ],
+  [
+    { titulo: 'Obras', icono: 'hard-hat', destino: '/obras' },
+    { titulo: 'Mi perfil', icono: 'account-outline', destino: '/perfil' },
+  ],
+];
+
+function plazoDe(reclamo: Reclamo): string | null {
+  if (reclamo.plazoDias) {
+    return etiquetaPlazo(fechaLimitePlazo(reclamo.creadoEn, reclamo.plazoDias), HOY_EJEMPLO);
+  }
+  return reclamo.plazo;
+}
+
+// Pantalla 04 del prototipo.
 export default function Inicio() {
-  const { elegirMunicipalidad } = useSesion();
-  const { municipalidad, deudas, recordatorios } = useDatosMunicipales();
-  const [selectorAbierto, setSelectorAbierto] = useState(false);
-  const [listaAbierta, setListaAbierta] = useState(false);
-
+  const { deudas, obras, reclamos } = useDatosMunicipales();
   const pendientes = deudasPendientes(deudas);
   const total = sumarDeudas(pendientes);
-  const proxima = pendientes
-    .filter((deuda) => deuda.estado === 'vigente')
-    .sort((a, b) => a.vencimiento.localeCompare(b.vencimiento))[0];
-
-  const ultimoAviso = (deuda: Deuda) => {
-    const entregados = recordatorios
-      .filter((r) => r.deudaId === deuda.id && r.entregadoEn)
-      .sort((a, b) => b.entregadoEn!.localeCompare(a.entregadoEn!));
-    return entregados[0];
-  };
+  const arbitrioPorVencer = pendientes.some(
+    (deuda) => deuda.tipo === 'arbitrios' && deuda.estado === 'vigente',
+  );
+  const obra = obras.find((fila) => fila.estado === 'en_ejecucion');
+  const reclamo = reclamos.find((fila) => fila.estado !== 'resuelto');
+  const plazo = reclamo ? plazoDe(reclamo) : null;
 
   return (
-    <Pantalla conPestanas encabezado={<Encabezado titulo="Inicio" conAvisos />}>
-      <View style={estilos.grupo}>
-        <Texto variante="headlineLg">Buenos días, {USUARIO_EJEMPLO.nombre}</Texto>
+    <Pantalla
+      conPestanas
+      encabezadoHastaArriba
+      separacion="block"
+      encabezado={
+        <BarraSuperior
+          titulo="Almira · Inicio"
+          conVolver={false}
+          accion={
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Mi perfil"
+              hitSlop={8}
+              onPress={() => router.push('/perfil')}
+            >
+              <MaterialCommunityIcons name="account-outline" size={28} color={colors.onPrimary} />
+            </Pressable>
+          }
+        />
+      }
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Ver detalle y pagar"
+        onPress={() => router.navigate('/cuenta')}
+        style={estilos.deuda}
+      >
+        <Texto>Deuda pendiente</Texto>
+        <Texto variante="displayCurrency" fuente="poppins" color={colors.primary} tabular>
+          {formatearSoles(total)}
+        </Texto>
+        <Texto variante="labelLg" color={colors.header}>
+          Ver detalle y pagar ›
+        </Texto>
+      </Pressable>
+
+      {arbitrioPorVencer ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityState={{ expanded: selectorAbierto }}
-          accessibilityLabel={`Municipalidad: ${municipalidad.nombre}. Cambiar`}
-          onPress={() => setSelectorAbierto((abierto) => !abierto)}
-          style={estilos.selector}
+          onPress={() => router.push('/recordatorios')}
+          style={estilos.aviso}
         >
-          <MaterialIcons name="location-city" size={20} color={colors.primary} />
-          <Texto variante="bodyLgMedium">{municipalidad.nombre}</Texto>
-          <MaterialIcons name="arrow-drop-down" size={24} color={colors.text} />
-        </Pressable>
-        {selectorAbierto ? (
-          <View style={estilos.grupo}>
-            {municipalidadesDelVecino().map(({ municipalidad: opcion, cantidadPredios }) => (
-              <Opcion
-                key={opcion.id}
-                titulo={opcion.nombre}
-                detalle={`${cantidadPredios} ${cantidadPredios === 1 ? 'predio registrado' : 'predios registrados'}`}
-                seleccionada={opcion.id === municipalidad.id}
-                onPress={() => {
-                  elegirMunicipalidad(opcion.id);
-                  setSelectorAbierto(false);
-                }}
-              />
-            ))}
-            <Boton
-              tipo="terciario"
-              titulo="Ver todas las municipalidades"
-              onPress={() => setListaAbierta(true)}
-            />
-          </View>
-        ) : null}
-      </View>
-
-      <Tarjeta>
-        <Texto variante="bodyMd" color={colors.textSecondary}>
-          Deuda total pendiente
-        </Texto>
-        <Monto valor={total} grande />
-        {proxima ? (
-          <Texto variante="bodyMd" color={colors.textSecondary}>
-            Próximo vencimiento: {formatearFecha(proxima.vencimiento)}
+          <MaterialCommunityIcons name="bell-outline" size={20} color={colors.header} />
+          <Texto variante="labelLg" color={colors.header} style={estilos.flexible}>
+            Aviso: tu arbitrio vence pronto
           </Texto>
-        ) : null}
-      </Tarjeta>
-      <Boton
-        icono="payments"
-        titulo="Pagar ahora"
-        deshabilitado={pendientes.length === 0}
-        onPress={() => router.push('/pagar')}
-      />
-
-      {municipalidad.avisoDestacado ? (
-        <Destacado icono="savings" texto={municipalidad.avisoDestacado} />
+        </Pressable>
       ) : null}
 
-      <View style={estilos.grupo}>
-        <Texto variante="headlineMd">Tributos registrados</Texto>
-        {pendientes.length === 0 ? (
-          <Vacio texto="No tienes tributos pendientes en esta municipalidad." />
-        ) : (
-          <Tarjeta>
-            {pendientes.map((deuda, indice) => {
-              const aviso = ultimoAviso(deuda);
-              return (
-                <View key={deuda.id} style={estilos.grupo}>
-                  {indice > 0 ? <Separador /> : null}
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Ver detalle de ${deuda.concepto}`}
-                    onPress={() => router.push(`/deuda/${deuda.id}`)}
-                    style={estilos.grupo}
-                  >
-                    <View style={estilos.fila}>
-                      <Texto variante="bodyLgMedium" style={estilos.flexible}>
-                        {deuda.concepto}
-                      </Texto>
-                      <Monto valor={deuda.montoInsoluto + deuda.interesMoratorio} />
-                    </View>
-                    <Insignia
-                      texto={ETIQUETA_ESTADO_DEUDA[deuda.estado]}
-                      tono={deuda.estado === 'vencida' ? 'critico' : 'exito'}
-                    />
-                    {aviso ? (
-                      <Texto variante="bodyMd" color={colors.textSecondary}>
-                        Último aviso: {ETIQUETA_TIPO_RECORDATORIO[aviso.tipo]} por{' '}
-                        {ETIQUETA_CANAL[aviso.canal]}
-                      </Texto>
-                    ) : null}
-                  </Pressable>
-                </View>
-              );
-            })}
-          </Tarjeta>
-        )}
+      <View style={estilos.accesos}>
+        {ACCESOS.map((fila, indice) => (
+          <View key={indice} style={estilos.filaAccesos}>
+            {fila.map(({ titulo, icono, destino }) => (
+              <Pressable
+                key={titulo}
+                accessibilityRole="button"
+                onPress={() => router.navigate(destino)}
+                style={estilos.acceso}
+              >
+                <MaterialCommunityIcons name={icono} size={26} color={colors.primary} />
+                <Texto variante="label">{titulo}</Texto>
+              </Pressable>
+            ))}
+          </View>
+        ))}
       </View>
 
-      <Boton
-        tipo="secundario"
-        titulo="Consultar al asistente"
-        onPress={() => router.push('/asistente')}
-      />
-      <SelectorMunicipalidad visible={listaAbierta} onCerrar={() => setListaAbierta(false)} />
+      {obra ? (
+        <Pressable accessibilityRole="button" onPress={() => router.navigate('/obras')}>
+          <Tarjeta>
+            <View style={estilos.obraTextos}>
+              <Texto variante="bodyMd" color={colors.textSecondary}>
+                En tu distrito
+              </Texto>
+              <View style={estilos.fila}>
+                <Texto variante="labelLg" style={estilos.flexible}>
+                  {obra.nombre}
+                </Texto>
+                <Texto variante="labelLg" alineacion="right" tabular>
+                  {obra.avancePct} %
+                </Texto>
+              </View>
+            </View>
+            <Progreso porcentaje={obra.avancePct} />
+          </Tarjeta>
+        </Pressable>
+      ) : null}
+
+      {reclamo ? (
+        <Pressable accessibilityRole="button" onPress={() => router.navigate('/reclamos')}>
+          <Tarjeta>
+            <View style={estilos.fila}>
+              <IconoCuadro icono="camera-outline" />
+              <View style={estilos.flexible}>
+                <Texto variante="labelLg">{reclamo.titulo}</Texto>
+                <Texto variante="bodyMd" color={colors.textSecondary}>
+                  {ETIQUETA_ESTADO_RECLAMO[reclamo.estado]}
+                  {reclamo.area ? ` · ${reclamo.area}` : ''}
+                </Texto>
+              </View>
+              {plazo ? <ChipPlazo texto={plazo} /> : null}
+            </View>
+          </Tarjeta>
+        </Pressable>
+      ) : null}
+
+      <PiePrototipo />
     </Pantalla>
   );
 }
 
 const estilos = StyleSheet.create({
-  grupo: { gap: spacing.sm },
-  selector: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48 },
-  fila: { flexDirection: 'row', gap: spacing.md },
+  deuda: {
+    gap: spacing.xs,
+    padding: spacing.md,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.pendingDebtBorder,
+    borderRadius: radius.lg,
+    backgroundColor: colors.pendingDebt,
+  },
+  aviso: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.block,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.block,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.primary,
+    borderRadius: radius.md,
+    backgroundColor: colors.backgroundPink,
+  },
+  accesos: { gap: spacing.block },
+  filaAccesos: { flexDirection: 'row', gap: spacing.block },
+  acceso: {
+    flex: 1,
+    height: sizes.shortcut,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.primary,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+  },
+  obraTextos: { gap: spacing.xs },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
   flexible: { flex: 1 },
 });

@@ -16,7 +16,7 @@ import {
   Vacio,
 } from '@/components/Bloques';
 import { Boton } from '@/components/Boton';
-import { Encabezado } from '@/components/Encabezado';
+import { BarraSuperior } from '@/components/BarraSuperior';
 import { Pantalla } from '@/components/Pantalla';
 import { SelectorMunicipalidad } from '@/components/SelectorMunicipalidad';
 import { Texto } from '@/components/Texto';
@@ -30,7 +30,7 @@ export default function Obras() {
   const ejecucion = asignado > 0 ? (ejecutado / asignado) * 100 : 0;
 
   return (
-    <Pantalla conPestanas encabezado={<Encabezado titulo="Obras" conAvisos />}>
+    <Pantalla conPestanas encabezadoHastaArriba encabezado={<BarraSuperior titulo="Mapa de obras" />}>
       <View style={estilos.grupo}>
         <Texto variante="headlineLg">Obras públicas distritales</Texto>
         <Texto color={colors.textSecondary}>{municipalidad.nombre}</Texto>

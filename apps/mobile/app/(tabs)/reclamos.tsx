@@ -19,7 +19,7 @@ import {
 } from '@/components/Bloques';
 import { Boton } from '@/components/Boton';
 import { Campo } from '@/components/Campo';
-import { Encabezado } from '@/components/Encabezado';
+import { BarraSuperior } from '@/components/BarraSuperior';
 import { Opcion } from '@/components/Opcion';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
@@ -74,7 +74,7 @@ export default function Reclamos() {
   };
 
   return (
-    <Pantalla conPestanas encabezado={<Encabezado titulo="Reclamos" conAvisos />}>
+    <Pantalla conPestanas encabezadoHastaArriba encabezado={<BarraSuperior titulo="Reclamos" />}>
       <View style={estilos.grupo}>
         <Texto variante="headlineLg">Reclamos ciudadanos</Texto>
         <Texto color={colors.textSecondary}>{municipalidad.nombre}</Texto>

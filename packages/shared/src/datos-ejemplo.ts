@@ -12,6 +12,10 @@ import type {
   Vecino,
 } from './types';
 
+// "Hoy" del prototipo. La app lo usa en vez de la fecha del teléfono para
+// los plazos, los vencimientos y la fecha de los pagos simulados.
+export const HOY_EJEMPLO = '2026-11-01';
+
 export const USUARIO_EJEMPLO = {
   id: 'u-rosa',
   nombre: 'Rosa',
@@ -201,7 +205,7 @@ export const pagos: Pago[] = [
     vecinoId: 'v-rosa-li',
     deudaId: 'd-predial-4c',
     monto: 186.4,
-    medio: 'billetera',
+    medio: 'yape',
     estado: 'confirmado',
     referencia: 'OP-77120',
     creadoEn: '2026-10-28',
@@ -212,7 +216,7 @@ export const pagos: Pago[] = [
     vecinoId: 'v-rosa-li',
     deudaId: 'd-arbitrios-3t',
     monto: 78,
-    medio: 'billetera',
+    medio: 'yape',
     estado: 'confirmado',
     referencia: 'OP-70318',
     creadoEn: '2026-08-28',
