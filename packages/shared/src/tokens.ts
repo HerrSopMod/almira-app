@@ -136,7 +136,6 @@ export const sizes = {
   // Medidas de pantallas que se rehacen en las etapas 2 a 4.
   // Entrada: espacio sobre el logo, debajo del área segura.
   entryTop: 56,
-  shortcut: 76,
   successCircle: 60,
   qr: 168,
   suggestionChip: 32,
