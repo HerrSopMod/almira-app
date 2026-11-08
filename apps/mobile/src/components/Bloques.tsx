@@ -7,150 +7,174 @@ import {
   spacing,
   type EstadoDeuda,
 } from '@almira/shared';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Texto } from './Texto';
 
-export function Tarjeta({ children }: { children: ReactNode }) {
-  return <View style={estilos.tarjeta}>{children}</View>;
+export type NombreIcono = keyof typeof MaterialIcons.glyphMap;
+
+// Tarjeta blanca con borde (LEEME.md → Tarjeta). Para agrupar filas, usa una sola
+// tarjeta con <Separador />; nunca tarjetas dentro de tarjetas.
+export function Tarjeta({
+  children,
+  grande,
+  style,
+}: {
+  children: ReactNode;
+  grande?: boolean;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return <View style={[estilos.tarjeta, grande && estilos.tarjetaGrande, style]}>{children}</View>;
 }
 
 export function Separador() {
   return <View style={estilos.separador} />;
 }
 
-// Tonos de los avisos: "primario" es el de siempre; "informacion" y "exito"
-// siguen las pantallas 02 y 03 del prototipo; "aviso" es el amarillo de la 13.
-type TonoDestacado = 'primario' | 'informacion' | 'exito' | 'aviso';
-
-const COLORES_DESTACADO: Record<TonoDestacado, { texto: string; fondo: string }> = {
-  primario: { texto: colors.primary, fondo: colors.highlight },
-  informacion: { texto: colors.header, fondo: colors.backgroundPinkSoft },
-  exito: { texto: colors.paidText, fondo: colors.paidSoft },
-  aviso: { texto: colors.pendingDebtText, fondo: colors.pendingDebt },
-};
-
-// DESIGN.md: como máximo uno por pantalla.
+// Bloque Destacado: lo más importante de la pantalla. Máximo uno por pantalla.
 export function Destacado({
   titulo,
   texto,
   icono = 'info-outline',
-  tono = 'primario',
+  children,
 }: {
   titulo?: string;
-  texto: string;
-  icono?: keyof typeof MaterialIcons.glyphMap;
-  tono?: TonoDestacado;
+  texto?: string;
+  icono?: NombreIcono;
+  children?: ReactNode;
 }) {
-  const { texto: color, fondo } = COLORES_DESTACADO[tono];
   return (
-    <View style={[estilos.destacado, { backgroundColor: fondo }]}>
-      <MaterialIcons name={icono} size={24} color={color} />
-      <View style={estilos.flexible}>
+    <View style={estilos.destacado}>
+      <MaterialIcons name={icono} size={sizes.icon} color={colors.primary} />
+      <View style={[estilos.flexible, estilos.textosDestacado]}>
         {titulo ? (
-          <Texto variante="bodyLgMedium" color={color}>
+          <Texto variante="titleSm" color={colors.primaryPressed}>
             {titulo}
           </Texto>
         ) : null}
-        <Texto variante="bodyMd" color={color}>
-          {texto}
-        </Texto>
+        {texto ? <Texto variante="bodyMd">{texto}</Texto> : null}
+        {children}
       </View>
     </View>
   );
 }
 
-export type Tono = 'exito' | 'atencion' | 'critico';
-
-const COLORES_TONO: Record<Tono, { texto: string; fondo: string }> = {
-  exito: { texto: colors.success, fondo: colors.successSoft },
-  atencion: { texto: colors.warning, fondo: colors.warningSoft },
-  critico: { texto: colors.danger, fondo: colors.dangerSoft },
-};
-
-export function Insignia({ texto, tono }: { texto: string; tono: Tono }) {
-  const { texto: color, fondo } = COLORES_TONO[tono];
+// Nota sin fondo para avisos legales, explicaciones y "Datos de ejemplo".
+export function Nota({
+  texto,
+  icono = 'info-outline',
+  conBorde,
+}: {
+  texto: string;
+  icono?: NombreIcono;
+  conBorde?: boolean;
+}) {
   return (
-    <View style={[estilos.insignia, { backgroundColor: fondo }]}>
-      <Texto variante="labelSm" color={color}>
+    <View style={[estilos.nota, conBorde && estilos.notaConBorde]}>
+      <MaterialIcons name={icono} size={sizes.iconSm} color={colors.textSecondary} />
+      <Texto variante="bodyMd" color={colors.textSecondary} style={estilos.flexible}>
         {texto}
       </Texto>
     </View>
   );
 }
 
-// Barra de avance: primaria o verde para lo resuelto (pantalla 15).
-export function Progreso({ porcentaje, tono = 'primario' }: { porcentaje: number; tono?: 'primario' | 'pagado' }) {
+export type TonoInsignia = 'ok' | 'warn' | 'bad' | 'info' | 'neutral';
+
+// Fondo, texto (contraste AA) y punto de cada insignia. La neutral no lleva punto.
+const COLORES_INSIGNIA: Record<TonoInsignia, { fondo: string; texto: string; punto?: string }> = {
+  ok: { fondo: colors.successSoft, texto: colors.successText, punto: colors.success },
+  warn: { fondo: colors.warningSoft, texto: colors.warningText, punto: colors.warning },
+  bad: { fondo: colors.dangerSoft, texto: colors.dangerText, punto: colors.danger },
+  info: { fondo: colors.highlight, texto: colors.primaryPressed, punto: colors.primary },
+  neutral: { fondo: colors.subtle, texto: colors.textSecondary },
+};
+
+export function Insignia({ texto, tono }: { texto: string; tono: TonoInsignia }) {
+  const { fondo, texto: color, punto } = COLORES_INSIGNIA[tono];
+  return (
+    <View style={[estilos.insignia, { backgroundColor: fondo }]}>
+      {punto ? <View style={[estilos.punto, { backgroundColor: punto }]} /> : null}
+      <Texto variante="labelSm" color={color} numberOfLines={1}>
+        {texto}
+      </Texto>
+    </View>
+  );
+}
+
+const TONO_ESTADO_DEUDA: Record<EstadoDeuda, TonoInsignia> = {
+  vencida: 'bad',
+  vigente: 'warn',
+  pagada: 'ok',
+};
+
+// «En mora», «Por vencer» y «Pagada».
+export function ChipEstadoDeuda({ estado }: { estado: EstadoDeuda }) {
+  return <Insignia texto={ETIQUETA_ESTADO_DEUDA[estado]} tono={TONO_ESTADO_DEUDA[estado]} />;
+}
+
+// Plazo de un reclamo («Quedan 3 d») o «Resuelto».
+export function ChipPlazo({ texto, tono = 'plazo' }: { texto: string; tono?: 'plazo' | 'resuelto' }) {
+  return <Insignia texto={texto} tono={tono === 'resuelto' ? 'ok' : 'warn'} />;
+}
+
+// Caja de 40 px (56 la grande) con un ícono primario sobre fondo suave. La variante
+// "exito" es para un estado logrado, como un pago confirmado.
+export function CajaIcono({
+  icono,
+  grande,
+  redonda,
+  tono = 'normal',
+}: {
+  icono: NombreIcono;
+  grande?: boolean;
+  redonda?: boolean;
+  tono?: 'normal' | 'exito';
+}) {
+  const lado = grande ? sizes.iconBoxLg : sizes.iconBox;
   return (
     <View
-      accessibilityRole="progressbar"
-      accessibilityValue={{ min: 0, max: 100, now: porcentaje }}
-      style={estilos.progreso}
+      style={[
+        estilos.cajaIcono,
+        {
+          width: lado,
+          height: lado,
+          borderRadius: redonda ? lado / 2 : grande ? radius.iconBoxLg : radius.iconBox,
+        },
+        tono === 'exito' && estilos.cajaIconoExito,
+      ]}
     >
-      <View
-        style={[
-          estilos.progresoRelleno,
-          { width: `${porcentaje}%` },
-          tono === 'pagado' && { backgroundColor: colors.paid },
-        ]}
+      <MaterialIcons
+        name={icono}
+        size={sizes.icon}
+        color={tono === 'exito' ? colors.successText : colors.primary}
       />
     </View>
   );
 }
 
-// Chips de estado de deuda de la guía de estilos: «En mora», «Por vencer» y «Pagada».
-const COLORES_ESTADO_DEUDA: Record<EstadoDeuda, { texto: string; fondo: string; borde: string }> = {
-  vencida: { texto: colors.onPrimary, fondo: colors.primary, borde: colors.primary },
-  vigente: {
-    texto: colors.pendingDebtText,
-    fondo: colors.pendingDebt,
-    borde: colors.pendingDebtBorder,
-  },
-  pagada: { texto: colors.paidText, fondo: colors.paidSoft, borde: colors.paidSoft },
-};
-
-export function ChipEstadoDeuda({ estado }: { estado: EstadoDeuda }) {
-  const { texto, fondo, borde } = COLORES_ESTADO_DEUDA[estado];
-  return (
-    <View style={[estilos.chip, { backgroundColor: fondo, borderColor: borde }]}>
-      <Texto variante="label" color={texto}>
-        {ETIQUETA_ESTADO_DEUDA[estado]}
-      </Texto>
-    </View>
-  );
-}
-
-// Chip rosado de plazo («Quedan 3 d») o verde para «Resuelto» (pantalla 15).
-export function ChipPlazo({ texto, tono = 'rosado' }: { texto: string; tono?: 'rosado' | 'pagado' }) {
-  return (
-    <View style={[estilos.chip, tono === 'pagado' ? estilos.chipPagado : estilos.chipPlazo]}>
-      <Texto variante="label" color={tono === 'pagado' ? colors.paidText : colors.header}>
-        {texto}
-      </Texto>
-    </View>
-  );
-}
-
-// Cuadro de 40 px con un ícono: rosado (por defecto), verde para lo pagado o
-// amarillo (módulo asistido de la pantalla 23).
-const COLORES_ICONO_CUADRO = {
-  rosado: { fondo: colors.backgroundPink, icono: colors.primary },
-  pagado: { fondo: colors.paidSoft, icono: colors.paidIcon },
-  amarillo: { fondo: colors.pendingDebt, icono: colors.pendingDebtText },
-} as const;
-
-export function IconoCuadro({
-  icono,
-  tono = 'rosado',
+// Barra de avance: riel de 6 px con relleno acento, o verde si la obra está concluida.
+export function Avance({
+  porcentaje,
+  tono = 'acento',
 }: {
-  icono: keyof typeof MaterialCommunityIcons.glyphMap;
-  tono?: keyof typeof COLORES_ICONO_CUADRO;
+  porcentaje: number;
+  tono?: 'acento' | 'concluida';
 }) {
-  const { fondo, icono: color } = COLORES_ICONO_CUADRO[tono];
   return (
-    <View style={[estilos.iconoCuadro, { backgroundColor: fondo }]}>
-      <MaterialCommunityIcons name={icono} size={22} color={color} />
+    <View
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(porcentaje) }}
+      style={estilos.avance}
+    >
+      <View
+        style={[
+          estilos.avanceRelleno,
+          { width: `${porcentaje}%` },
+          tono === 'concluida' && estilos.avanceConcluida,
+        ]}
+      />
     </View>
   );
 }
@@ -163,13 +187,38 @@ export function Monto({ valor, grande }: { valor: number; grande?: boolean }) {
   );
 }
 
-export function FilaDato({ etiqueta, valor }: { etiqueta: string; valor: ReactNode }) {
+// Fila clave–valor: etiqueta a la izquierda y valor a la derecha con cifras tabulares.
+// La fila "Total" va en 16 px y su monto en 18 px 700.
+export function FilaDato({
+  etiqueta,
+  valor,
+  total,
+}: {
+  etiqueta: string;
+  valor: ReactNode;
+  total?: boolean;
+}) {
   return (
     <View style={estilos.filaDato}>
-      <Texto variante="bodyMd" color={colors.textSecondary} style={estilos.flexible}>
+      <Texto
+        variante={total ? 'titleSm' : 'bodyMd'}
+        color={total ? colors.text : colors.textSecondary}
+        style={estilos.flexible}
+      >
         {etiqueta}
       </Texto>
-      {typeof valor === 'string' ? <Texto variante="bodyLgMedium">{valor}</Texto> : valor}
+      {typeof valor === 'string' ? (
+        <Texto
+          variante={total ? 'totalAmount' : 'bodyMdMedium'}
+          alineacion="right"
+          tabular
+          style={estilos.valor}
+        >
+          {valor}
+        </Texto>
+      ) : (
+        valor
+      )}
     </View>
   );
 }
@@ -201,44 +250,44 @@ const estilos = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.md,
   },
-  separador: { height: 1, backgroundColor: colors.border },
+  tarjetaGrande: { borderRadius: radius.lg, padding: spacing.lg },
+  separador: { height: sizes.borderWidth, backgroundColor: colors.border },
   destacado: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: spacing.blockDense,
     padding: spacing.md,
     borderRadius: radius.md,
+    backgroundColor: colors.highlight,
   },
+  textosDestacado: { gap: spacing.xs },
   flexible: { flex: 1 },
-  insignia: {
-    alignSelf: 'flex-start',
-    height: sizes.badge,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.badge,
-    justifyContent: 'center',
-  },
-  progreso: {
-    height: sizes.progressMobile,
-    borderRadius: radius.full,
-    backgroundColor: colors.backgroundPink,
-    overflow: 'hidden',
-  },
-  progresoRelleno: { height: '100%', borderRadius: radius.full, backgroundColor: colors.primary },
-  chip: {
-    alignSelf: 'flex-start',
-    height: sizes.badge,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.full,
+  nota: { flexDirection: 'row', gap: spacing.sm },
+  notaConBorde: {
+    padding: spacing.blockDense,
     borderWidth: sizes.borderWidth,
-    justifyContent: 'center',
-  },
-  chipPlazo: { backgroundColor: colors.backgroundPink, borderColor: colors.backgroundPink },
-  chipPagado: { backgroundColor: colors.paidSoft, borderColor: colors.paidSoft },
-  iconoCuadro: {
-    width: sizes.featureIcon,
-    height: sizes.featureIcon,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: colors.border,
     borderRadius: radius.md,
   },
-  filaDato: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  insignia: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    minHeight: sizes.badge,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.badge,
+  },
+  punto: { width: sizes.badgeDot, height: sizes.badgeDot, borderRadius: sizes.badgeDot / 2 },
+  cajaIcono: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.subtle },
+  cajaIconoExito: { backgroundColor: colors.successSoft },
+  avance: {
+    height: sizes.progress,
+    borderRadius: radius.full,
+    backgroundColor: colors.track,
+    overflow: 'hidden',
+  },
+  avanceRelleno: { height: '100%', borderRadius: radius.full, backgroundColor: colors.accent },
+  avanceConcluida: { backgroundColor: colors.success },
+  filaDato: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.blockDense },
+  valor: { flexShrink: 1 },
 });

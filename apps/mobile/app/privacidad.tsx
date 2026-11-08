@@ -1,8 +1,8 @@
 import { colors, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Destacado, IconoCuadro, Tarjeta } from '@/components/Bloques';
+import { Destacado, CajaIcono, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { InterruptoresConsentimiento } from '@/components/InterruptoresConsentimiento';
 import { Menu } from '@/components/Menu';
@@ -11,10 +11,10 @@ import { Texto } from '@/components/Texto';
 import { useDatosMunicipales, useSesion } from '@/sesion';
 
 const DERECHOS = [
-  { titulo: 'Acceder a mis datos', icono: 'eye-outline' },
-  { titulo: 'Rectificar un dato', icono: 'file-document-outline' },
+  { titulo: 'Acceder a mis datos', icono: 'visibility' },
+  { titulo: 'Rectificar un dato', icono: 'description' },
   { titulo: 'Cancelar mi cuenta', icono: 'close' },
-  { titulo: 'Oponerme a un uso', icono: 'alert-outline' },
+  { titulo: 'Oponerme a un uso', icono: 'warning-amber' },
 ] as const;
 
 const NO_HACE = [
@@ -34,14 +34,14 @@ export default function Privacidad() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Privacidad y mis datos" />}
     >
       <Tarjeta>
         <View style={estilos.fila}>
-          <IconoCuadro icono="bank-outline" />
+          <CajaIcono icono="account-balance" />
           <View style={estilos.flexible}>
-            <Texto variante="labelLg">Responsable: {municipalidad.nombre}</Texto>
+            <Texto variante="bodyLgMedium">Responsable: {municipalidad.nombre}</Texto>
             <Texto variante="bodyMd" color={colors.textSecondary}>
               Almira trata tus datos por encargo, solo para la gestión municipal.
             </Texto>
@@ -71,7 +71,7 @@ export default function Privacidad() {
       <Tarjeta>
         {NO_HACE.map((texto) => (
           <View key={texto} style={estilos.filaArriba}>
-            <MaterialCommunityIcons name="close" size={20} color={colors.header} />
+            <MaterialIcons name="close" size={20} color={colors.textSecondary} />
             <Texto color={colors.textSecondary} style={estilos.flexible}>
               {texto}
             </Texto>
@@ -81,7 +81,6 @@ export default function Privacidad() {
 
       {/* El prototipo afirma cifrado y registro de accesos, que aún no existen. */}
       <Destacado
-        tono="informacion"
         icono="lock-outline"
         texto="En este prototipo los datos son ficticios y no salen de tu teléfono. El cifrado y el registro de accesos aún no están implementados."
       />
@@ -91,7 +90,7 @@ export default function Privacidad() {
 
 function Seccion({ titulo }: { titulo: string }) {
   return (
-    <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header" style={estilos.seccion}>
+    <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
       {titulo}
     </Texto>
   );

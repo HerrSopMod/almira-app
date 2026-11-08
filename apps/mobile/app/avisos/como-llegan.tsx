@@ -52,7 +52,7 @@ export default function ComoLleganLosAvisos() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Cómo llegan los avisos" />}
     >
       <Chips opciones={CHIPS} elegida={canal} onElegir={setCanal} />
@@ -69,7 +69,7 @@ export default function ComoLleganLosAvisos() {
       {ejemplos.map(({ tipo, deuda }) =>
         deuda ? (
           <View key={tipo} style={[estilos.burbuja, estilos.recibida]}>
-            <Texto variante="label">{TITULO_EJEMPLO[tipo]}</Texto>
+            <Texto variante="bodyMdMedium">{TITULO_EJEMPLO[tipo]}</Texto>
             <Texto variante="bodyMd">
               {mensajeAviso({
                 tipo,
@@ -88,7 +88,9 @@ export default function ComoLleganLosAvisos() {
         onPress={() => router.push('/atencion-humana')}
         style={[estilos.burbuja, estilos.enviada]}
       >
-        <Texto variante="bodyMd">Quiero hablar con una persona</Texto>
+        <Texto variante="bodyMd" color={colors.onPrimary}>
+          Quiero hablar con una persona
+        </Texto>
       </Pressable>
       <View style={[estilos.burbuja, estilos.recibida]}>
         <Texto variante="bodyMd">
@@ -97,7 +99,6 @@ export default function ComoLleganLosAvisos() {
       </View>
 
       <Destacado
-        tono="informacion"
         texto="Las pruebas A/B ajustan el tono del mensaje, nunca el monto ni los plazos."
       />
     </Pantalla>
@@ -107,19 +108,19 @@ export default function ComoLleganLosAvisos() {
 const estilos = StyleSheet.create({
   burbuja: {
     gap: spacing.xs,
-    padding: spacing.block,
+    padding: spacing.blockDense,
     borderRadius: radius.md,
   },
   recibida: {
     alignSelf: 'flex-start',
     width: sizes.bubbleWidth,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.sm,
+    backgroundColor: colors.subtle,
   },
   enviada: {
     alignSelf: 'flex-end',
     maxWidth: sizes.bubbleWidth,
-    backgroundColor: colors.backgroundPink,
+    borderTopRightRadius: radius.sm,
+    backgroundColor: colors.primary,
   },
 });

@@ -9,11 +9,11 @@ import {
   totalDeuda,
   type MedioPago,
 } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Fragment, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Destacado, FilaDato, IconoCuadro, Separador, Tarjeta, Vacio } from '@/components/Bloques';
+import { Destacado, FilaDato, CajaIcono, Separador, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Pantalla } from '@/components/Pantalla';
@@ -21,11 +21,11 @@ import { Radio } from '@/components/Radio';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales, useSesion } from '@/sesion';
 
-const MEDIOS: { medio: MedioPago; icono: keyof typeof MaterialCommunityIcons.glyphMap }[] = [
-  { medio: 'yape', icono: 'cellphone' },
-  { medio: 'plin', icono: 'cellphone' },
-  { medio: 'tarjeta', icono: 'credit-card-outline' },
-  { medio: 'banca_movil', icono: 'bank-outline' },
+const MEDIOS: { medio: MedioPago; icono: keyof typeof MaterialIcons.glyphMap }[] = [
+  { medio: 'yape', icono: 'smartphone' },
+  { medio: 'plin', icono: 'smartphone' },
+  { medio: 'tarjeta', icono: 'credit-card' },
+  { medio: 'banca_movil', icono: 'account-balance' },
 ];
 
 // Pantalla 07 del prototipo. El pago es simulado: no se conecta a ninguna pasarela.
@@ -60,14 +60,14 @@ export default function ConfirmarPago() {
   };
 
   return (
-    <Pantalla encabezadoHastaArriba separacion="block" encabezado={encabezado}>
+    <Pantalla encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
       <Tarjeta>
         {elegidas.map((deuda) => (
           <FilaDato
             key={deuda.id}
             etiqueta={deuda.concepto}
             valor={
-              <Texto variante="labelLg" alineacion="right" tabular>
+              <Texto variante="bodyLgMedium" alineacion="right" tabular>
                 {formatearSoles(totalDeuda(deuda))}
               </Texto>
             }
@@ -75,7 +75,7 @@ export default function ConfirmarPago() {
         ))}
         <Separador />
         <View style={estilos.fila}>
-          <Texto variante="labelLg" style={estilos.flexible}>
+          <Texto variante="bodyLgMedium" style={estilos.flexible}>
             Total a pagar
           </Texto>
           <Texto variante="headlineMd" alineacion="right" tabular>
@@ -84,7 +84,7 @@ export default function ConfirmarPago() {
         </View>
       </Tarjeta>
 
-      <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header" style={estilos.seccion}>
+      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
         ¿Cómo quieres pagar?
       </Texto>
       <View accessibilityRole="radiogroup">
@@ -99,9 +99,9 @@ export default function ConfirmarPago() {
                 onPress={() => setMedio(opcion)}
                 style={estilos.fila}
               >
-                <IconoCuadro icono={icono} />
+                <CajaIcono icono={icono} />
                 <View style={estilos.flexible}>
-                  <Texto variante="labelLg">{ETIQUETA_MEDIO_PAGO[opcion]}</Texto>
+                  <Texto variante="bodyLgMedium">{ETIQUETA_MEDIO_PAGO[opcion]}</Texto>
                   <Texto variante="bodyMd" color={colors.textSecondary}>
                     {DETALLE_MEDIO_PAGO[opcion]}
                   </Texto>
@@ -114,7 +114,6 @@ export default function ConfirmarPago() {
       </View>
 
       <Destacado
-        tono="informacion"
         texto="Al confirmar, los avisos de estas deudas se detienen y no te contactaremos por 48 horas."
       />
       <Boton icono="lock-outline" titulo={`Pagar ${formatearSoles(total)}`} onPress={pagar} />
@@ -126,7 +125,7 @@ export default function ConfirmarPago() {
 }
 
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   seccion: { marginTop: spacing.sm },
 });

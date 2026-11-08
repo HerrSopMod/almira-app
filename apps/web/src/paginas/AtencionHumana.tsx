@@ -18,9 +18,9 @@ import {
 import { useSesion } from '../estado';
 
 const ESTADO: Record<EstadoCaso, { texto: string; tono: TonoChip }> = {
-  en_cola: { texto: 'En cola', tono: 'amarillo' },
-  en_atencion: { texto: 'En atención', tono: 'rosa' },
-  atendido: { texto: 'Atendido', tono: 'verde' },
+  en_cola: { texto: 'En cola', tono: 'neutral' },
+  en_atencion: { texto: 'En atención', tono: 'warn' },
+  atendido: { texto: 'Atendido', tono: 'ok' },
 };
 
 // Atención humana (web-07). Los casos son de ejemplo y "Tomar" solo cambia la

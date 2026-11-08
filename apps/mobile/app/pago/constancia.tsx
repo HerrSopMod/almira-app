@@ -8,7 +8,7 @@ import {
   sizes,
   spacing,
 } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams, type Href } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -42,17 +42,17 @@ export default function Constancia() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Constancia de pago" conVolver={false} />}
     >
       <View style={estilos.resumen}>
         <View style={estilos.circulo}>
-          <MaterialCommunityIcons name="check" size={32} color={colors.paidIcon} />
+          <MaterialIcons name="check" size={32} color={colors.successText} />
         </View>
-        <Texto variante="headlineMd" fuente="poppins" alineacion="center" accessibilityRole="header">
+        <Texto variante="headlineMd" alineacion="center" accessibilityRole="header">
           Pago registrado
         </Texto>
-        <Texto variante="displayCurrency" fuente="poppins" alineacion="center" tabular>
+        <Texto variante="displayCurrency" alineacion="center" tabular>
           {formatearSoles(total)}
         </Texto>
         <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
@@ -62,7 +62,7 @@ export default function Constancia() {
       </View>
 
       <Tarjeta>
-        <Texto variante="labelLg" alineacion="center">
+        <Texto variante="bodyLgMedium" alineacion="center">
           Constancia digital
         </Texto>
         <QrSimulado />
@@ -72,12 +72,10 @@ export default function Constancia() {
       </Tarjeta>
 
       <Destacado
-        tono="exito"
         icono="check"
         texto="Lleva este QR, tu DNI y tu tarjeta de propiedad al depósito. No tienes que volver a hacer cola en caja."
       />
       <Destacado
-        tono="informacion"
         icono="notifications-none"
         texto="Avisos de estas deudas detenidos. Rentas concilia tu pago en el día."
       />
@@ -108,7 +106,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.full,
-    backgroundColor: colors.paidSoft,
+    backgroundColor: colors.successSoft,
     marginBottom: spacing.sm,
   },
 });

@@ -62,7 +62,7 @@ export default function Asistente() {
 
   return (
     <View style={estilos.raiz}>
-      <BarraSuperior titulo="Asistente con IA" />
+      <BarraSuperior variante="raiz" titulo="Asistente" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={estilos.flexible}
@@ -79,13 +79,13 @@ export default function Asistente() {
           {mensajes.map((mensaje) =>
             mensaje.autor === 'vecino' ? (
               <View key={mensaje.id} style={[estilos.burbuja, estilos.vecino]}>
-                <Texto>{mensaje.texto}</Texto>
+                <Texto color={colors.onPrimary}>{mensaje.texto}</Texto>
               </View>
             ) : (
               <View key={mensaje.id} style={[estilos.burbuja, estilos.asistente]}>
                 <Texto>{mensaje.texto}</Texto>
                 {mensaje.accion === 'simular_cuotas' ? (
-                  <Boton compacto titulo="Simular cuotas" onPress={irASimulacion} />
+                  <Boton titulo="Simular cuotas" onPress={irASimulacion} />
                 ) : null}
               </View>
             ),
@@ -95,12 +95,11 @@ export default function Asistente() {
         <View style={estilos.acciones}>
           <View style={estilos.fila}>
             <View style={estilos.flexible}>
-              <Boton compacto titulo="Simular cuotas" onPress={irASimulacion} />
+              <Boton titulo="Simular cuotas" onPress={irASimulacion} />
             </View>
             <View style={estilos.flexible}>
               <Boton
-                compacto
-                tipo="contorno"
+                tipo="secundario"
                 titulo="Hablar con una persona"
                 onPress={irAAtencionHumana}
               />
@@ -122,7 +121,7 @@ export default function Asistente() {
                 onPress={() => preguntar(pregunta)}
                 style={estilos.sugerencia}
               >
-                <Texto variante="label" color={colors.primary}>
+                <Texto variante="bodyMdMedium" color={colors.primary}>
                   {pregunta}
                 </Texto>
               </Pressable>
@@ -165,36 +164,40 @@ const estilos = StyleSheet.create({
   },
   burbuja: {
     gap: spacing.md,
-    paddingHorizontal: spacing.block,
-    paddingVertical: spacing.block,
+    paddingHorizontal: spacing.blockDense,
+    paddingVertical: spacing.blockDense,
     borderRadius: radius.md,
   },
   asistente: {
     alignSelf: 'flex-start',
     width: sizes.bubbleWidth,
-    backgroundColor: colors.neutral,
+    borderTopLeftRadius: radius.sm,
+    backgroundColor: colors.subtle,
   },
   vecino: {
     alignSelf: 'flex-end',
     maxWidth: sizes.bubbleWidth,
-    backgroundColor: colors.backgroundPink,
+    borderTopRightRadius: radius.sm,
+    backgroundColor: colors.primary,
   },
-  acciones: { gap: spacing.sm, paddingTop: spacing.sm, paddingBottom: spacing.block },
+  acciones: { gap: spacing.sm, paddingTop: spacing.sm, paddingBottom: spacing.blockDense },
   fila: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.margin },
   sugerencias: { gap: spacing.sm, paddingHorizontal: spacing.margin },
   sugerencia: {
     height: sizes.suggestionChip,
     justifyContent: 'center',
-    paddingHorizontal: spacing.block,
+    paddingHorizontal: spacing.blockDense,
     borderRadius: radius.full,
-    backgroundColor: colors.backgroundPink,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   entrada: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.margin,
-    paddingVertical: spacing.block,
+    paddingVertical: spacing.blockDense,
     borderTopWidth: sizes.borderWidth,
     borderTopColor: colors.border,
   },

@@ -66,7 +66,7 @@ export function Alertas() {
                 <td>{umbral.evento}</td>
                 <td>{textoUmbral(umbral)}</td>
                 <td>
-                  <Chip tono={superaUmbral(umbral) ? 'rojo' : 'verde'}>{textoHoy(umbral)}</Chip>
+                  <Chip tono={superaUmbral(umbral) ? 'bad' : 'ok'}>{textoHoy(umbral)}</Chip>
                 </td>
               </tr>
             ))}

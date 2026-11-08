@@ -33,7 +33,7 @@ import {
   deudasPendientes,
   textoVencimiento,
 } from './formato';
-import { colors, panelSizes, sizes, spacing } from './tokens';
+import { colors, fontFamily, panelSizes, sizes, spacing, typography } from './tokens';
 import { mejorVariante, panelEjemplo, superaUmbral } from './panel-ejemplo';
 import {
   avisosRecibidos,
@@ -61,33 +61,55 @@ import {
 } from './reclamos';
 
 describe('tokens', () => {
-  it('aplica los colores de la guía de estilos del prototipo', () => {
-    expect(colors.header).toBe('#800404');
-    expect(colors.primary).toBe('#C00000');
-    expect(colors.chartSecondary).toBe('#F4A6A6');
-    expect(colors.backgroundPink).toBe('#F7ECEC');
-    expect(colors.pendingDebt).toBe('#FFFFCC');
-    expect(colors.neutral).toBe('#E8E8E8');
+  it('aplica los colores de la guía turquesa', () => {
+    expect(colors.primary).toBe('#0B7F86');
+    expect(colors.primaryPressed).toBe('#00646A');
+    expect(colors.primaryDisabled).toBe('#A9D2D4');
+    expect(colors.accent).toBe('#2CC5C0');
+    expect(colors.highlight).toBe('#E3F6F5');
+    expect(colors.subtle).toBe('#F2F8F8');
     expect(colors.background).toBe('#FFFFFF');
     expect(colors.surface).toBe('#FFFFFF');
-    expect(colors.text).toBe('#2B2B2B');
-    expect(colors.textSecondary).toBe('#595959');
-    expect(colors.lines).toBe('#808080');
-    expect(colors.paid).toBe('#2E8B57');
-    expect(colors.paidSoft).toBe('#E2F3E8');
-    expect(colors.notice3).toBe('#5B1428');
-    expect(colors.notice2).toBe('#9A5563');
-    expect(colors.notice1).toBe('#E9C1C6');
+    expect(colors.panelBackground).toBe('#F7FAFA');
+    expect(colors.text).toBe('#0F2A2E');
+    expect(colors.textSecondary).toBe('#5B6B70');
+    expect(colors.border).toBe('#D6E3E4');
+    expect(colors.track).toBe('#E6EFF0');
   });
 
-  it('usa el gris de apoyo para los bordes claros del prototipo', () => {
-    expect(colors.border).toBe('#E8E8E8');
+  it('usa colores de estado con texto legible sobre su fondo suave', () => {
+    expect([colors.success, colors.successSoft, colors.successText]).toEqual([
+      '#2E9E6B',
+      '#EAF6F0',
+      '#1F7A50',
+    ]);
+    expect([colors.warning, colors.warningSoft, colors.warningText]).toEqual([
+      '#C98A00',
+      '#FBF5E6',
+      '#8A5E00',
+    ]);
+    expect([colors.danger, colors.dangerSoft, colors.dangerText]).toEqual([
+      '#D64545',
+      '#FAEAEA',
+      '#B42F2F',
+    ]);
   });
 
-  it('usa las medidas de las imágenes del prototipo', () => {
-    expect(sizes.button).toBe(48);
-    expect(sizes.input).toBe(46);
-    expect(spacing.margin).toBe(18);
+  it('usa las medidas de la guía turquesa', () => {
+    expect(sizes.button).toBe(52);
+    expect(sizes.buttonTertiary).toBe(48);
+    expect(sizes.input).toBe(52);
+    expect(sizes.headerBar).toBe(56);
+    expect(sizes.tabBar).toBe(64);
+    expect(spacing.margin).toBe(20);
+    expect(spacing.block).toBe(16);
+  });
+
+  it('escribe con Inter y cifras legibles para adultos mayores', () => {
+    expect(fontFamily).toBe('Inter');
+    expect(typography.bodyMd.fontSize).toBeGreaterThanOrEqual(14);
+    expect(typography.bodyLg.fontSize).toBe(16);
+    expect(typography.tabLabel).toMatchObject({ fontSize: 11, lineHeight: 14 });
   });
 });
 

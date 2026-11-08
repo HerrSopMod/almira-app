@@ -12,7 +12,7 @@ import { StyleSheet, View } from 'react-native';
 import {
   ChipEstadoDeuda,
   FilaDato,
-  IconoCuadro,
+  CajaIcono,
   PiePrototipo,
   Separador,
   Tarjeta,
@@ -52,7 +52,7 @@ export default function DetalleDeuda() {
   const total = totalDeuda(deuda);
 
   return (
-    <Pantalla conPestanas encabezadoHastaArriba separacion="block" encabezado={encabezado}>
+    <Pantalla conPestanas encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
       <Tarjeta>
         <View style={estilos.encabezadoTarjeta}>
           <View style={estilos.fila}>
@@ -67,7 +67,7 @@ export default function DetalleDeuda() {
               {deuda.periodo}
             </Texto>
           </View>
-          <Texto variante="displayCurrency" fuente="poppins" tabular>
+          <Texto variante="displayCurrency" tabular>
             {formatearSoles(total)}
           </Texto>
         </View>
@@ -78,8 +78,8 @@ export default function DetalleDeuda() {
 
       <Tarjeta>
         <View style={estilos.fila}>
-          <IconoCuadro icono="robot-outline" />
-          <Texto variante="labelLg">En palabras simples</Texto>
+          <CajaIcono icono="smart-toy" />
+          <Texto variante="bodyLgMedium">En palabras simples</Texto>
         </View>
         <View style={estilos.explicacion}>
           <Texto color={colors.textSecondary}>{EN_PALABRAS_SIMPLES[deuda.tipo]}</Texto>
@@ -101,7 +101,7 @@ export default function DetalleDeuda() {
         onPress={() => router.push('/simulacion-cuotas')}
       />
       <Boton
-        tipo="linea"
+        tipo="secundario"
         titulo="Preguntar al asistente"
         onPress={() => router.navigate('/asistente')}
       />
@@ -117,7 +117,7 @@ export default function DetalleDeuda() {
 
 function Valor({ monto }: { monto: number }) {
   return (
-    <Texto variante="labelLg" alineacion="right" tabular>
+    <Texto variante="bodyLgMedium" alineacion="right" tabular>
       {formatearSoles(monto)}
     </Texto>
   );
@@ -125,6 +125,6 @@ function Valor({ monto }: { monto: number }) {
 
 const estilos = StyleSheet.create({
   encabezadoTarjeta: { gap: spacing.sm },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   explicacion: { gap: spacing.sm },
 });

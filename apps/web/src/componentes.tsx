@@ -2,10 +2,11 @@ import { formatearNumero, type MesRecaudacion } from '@almira/shared';
 import type { ReactNode } from 'react';
 import { Icono } from './iconos';
 
-export type TonoChip = 'rosa' | 'amarillo' | 'verde' | 'rojo';
+// Insignias de estado (LEEME.md → Insignia): el texto usa la variante …Text del color.
+export type TonoChip = 'ok' | 'warn' | 'bad' | 'info' | 'neutral';
 
 export function Chip({ tono, children }: { tono: TonoChip; children: ReactNode }) {
-  return <span className={`chip chip-${tono}`}>{children}</span>;
+  return <span className={`insignia insignia-${tono}`}>{children}</span>;
 }
 
 export function Encabezado({
@@ -25,13 +26,13 @@ export function Encabezado({
       </div>
       <div className="encabezado-extra">
         {extra}
-        <Chip tono="amarillo">Datos ficticios</Chip>
+        <Chip tono="neutral">Datos ficticios</Chip>
       </div>
     </header>
   );
 }
 
-// Tarjeta rosada con una cifra destacada.
+// Tarjeta blanca con una cifra destacada.
 export function Cifra({
   etiqueta,
   valor,
@@ -171,7 +172,7 @@ export function AvisoInfo({
 }: {
   children: ReactNode;
   icono?: 'info' | 'alerta';
-  // Fondo rosado más intenso, para alertas activas (web-08).
+  // Alerta activa (web-08): borde rojo y fondo suave.
   fuerte?: boolean;
 }) {
   return (

@@ -1,29 +1,32 @@
-import { colors, largeTextScale, typography } from '@almira/shared';
+import { colors, largeTextScale, typography, type EstiloTexto } from '@almira/shared';
 import { Text, type TextProps } from 'react-native';
 import { useTextoGrande } from '@/textoGrande';
 
-const FAMILIA_POR_PESO = {
+type Peso = EstiloTexto['fontWeight'];
+
+// Pesos de Inter que carga app/_layout.tsx.
+const FAMILIA_POR_PESO: Record<Peso, string> = {
   '400': 'Inter_400Regular',
   '500': 'Inter_500Medium',
   '600': 'Inter_600SemiBold',
   '700': 'Inter_700Bold',
-} as const;
+};
 
-// Solo se cargan Poppins SemiBold y Bold (app/_layout.tsx).
-const POPPINS_POR_PESO = {
-  '400': 'Poppins_600SemiBold',
-  '500': 'Poppins_600SemiBold',
-  '600': 'Poppins_600SemiBold',
-  '700': 'Poppins_700Bold',
-} as const;
+export const familiaInter = (peso: Peso) => FAMILIA_POR_PESO[peso];
+
+// Multiplica medidas de texto cuando el vecino activa "Texto más grande".
+export function useEscalaTexto() {
+  return useTextoGrande().activo ? largeTextScale : 1;
+}
 
 type Props = TextProps & {
   variante?: keyof typeof typography;
   color?: string;
   alineacion?: 'left' | 'right' | 'center';
+  // Cifras tabulares: montos, fechas y tablas.
   tabular?: boolean;
-  // Poppins: montos, marca y títulos. Inter: el resto.
-  fuente?: 'inter' | 'poppins';
+  // Cambia el peso de la variante, por ejemplo la opción activa de un segmentado.
+  peso?: Peso;
 };
 
 export function Texto({
@@ -31,12 +34,12 @@ export function Texto({
   color = colors.text,
   alineacion,
   tabular,
-  fuente = 'inter',
+  peso,
   style,
   ...resto
 }: Props) {
-  const { fontWeight, ...estilo } = typography[variante];
-  const escala = useTextoGrande().activo ? largeTextScale : 1;
+  const { fontWeight, ...estilo } = typography[variante] as EstiloTexto;
+  const escala = useEscalaTexto();
   return (
     <Text
       style={[
@@ -45,7 +48,7 @@ export function Texto({
           fontSize: estilo.fontSize * escala,
           lineHeight: estilo.lineHeight * escala,
           color,
-          fontFamily: (fuente === 'poppins' ? POPPINS_POR_PESO : FAMILIA_POR_PESO)[fontWeight],
+          fontFamily: familiaInter(peso ?? fontWeight),
           textAlign: alineacion,
           fontVariant: tabular ? ['tabular-nums'] : undefined,
         },

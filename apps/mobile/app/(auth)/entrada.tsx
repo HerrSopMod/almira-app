@@ -1,5 +1,5 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
@@ -8,13 +8,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PiePrototipo } from '@/components/Bloques';
 import { Boton } from '@/components/Boton';
 import { FilaMunicipalidad, SelectorMunicipalidad } from '@/components/SelectorMunicipalidad';
+import { Logo } from '@/components/Logo';
 import { Texto } from '@/components/Texto';
 
 const FUNCIONES = [
-  { titulo: 'Recuerda', icono: 'bell-outline' },
-  { titulo: 'Paga', icono: 'currency-usd' },
-  { titulo: 'Ve la obra', icono: 'hard-hat' },
-  { titulo: 'Reclama', icono: 'camera-outline' },
+  { titulo: 'Recuerda', icono: 'notifications-none' },
+  { titulo: 'Paga', icono: 'payments' },
+  { titulo: 'Ve la obra', icono: 'construction' },
+  { titulo: 'Reclama', icono: 'photo-camera' },
 ] as const;
 
 // Pantalla 01 del prototipo.
@@ -24,22 +25,15 @@ export default function Entrada() {
 
   return (
     <View style={estilos.raiz}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.lg + bottom }}>
         <View style={[estilos.portada, { paddingTop: top, minHeight: sizes.hero + top }]}>
-          <View style={estilos.icono}>
-            <MaterialCommunityIcons name="bank" size={32} color={colors.primary} />
-          </View>
+          <Logo grande />
           <View>
-            <Texto
-              variante="brand"
-              fuente="poppins"
-              color={colors.onPrimary}
-              accessibilityRole="header"
-            >
+            <Texto variante="brand" accessibilityRole="header">
               Almira
             </Texto>
-            <Texto color={colors.onPrimary}>Paga con claridad. Reclama con evidencia.</Texto>
+            <Texto color={colors.textSecondary}>Paga con claridad. Reclama con evidencia.</Texto>
           </View>
         </View>
 
@@ -48,9 +42,9 @@ export default function Entrada() {
             {FUNCIONES.map(({ titulo, icono }) => (
               <View key={titulo} style={estilos.funcion}>
                 <View style={estilos.funcionIcono}>
-                  <MaterialCommunityIcons name={icono} size={22} color={colors.primary} />
+                  <MaterialIcons name={icono} size={22} color={colors.primary} />
                 </View>
-                <Texto variante="label" alineacion="center" numberOfLines={1}>
+                <Texto variante="bodyMdMedium" alineacion="center" numberOfLines={1}>
                   {titulo}
                 </Texto>
               </View>
@@ -58,7 +52,7 @@ export default function Entrada() {
           </View>
 
           <View style={estilos.grupo}>
-            <Texto variante="label">Tu municipalidad</Texto>
+            <Texto variante="bodyMdMedium">Tu municipalidad</Texto>
             <FilaMunicipalidad onPress={() => setSelectorAbierto(true)} />
           </View>
 
@@ -84,21 +78,12 @@ const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: colors.background },
   portada: {
     justifyContent: 'flex-end',
-    gap: spacing.block,
+    gap: spacing.blockDense,
     paddingHorizontal: spacing.margin,
     paddingBottom: spacing.lg,
-    backgroundColor: colors.header,
-  },
-  icono: {
-    width: sizes.brandIcon,
-    height: sizes.brandIcon,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
   },
   contenido: {
-    gap: spacing.block,
+    gap: spacing.blockDense,
     paddingHorizontal: spacing.margin,
     paddingTop: spacing.margin,
   },
@@ -107,19 +92,19 @@ const estilos = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: spacing.xs,
-    paddingVertical: spacing.block,
+    paddingVertical: spacing.blockDense,
     paddingHorizontal: spacing.xs,
     borderWidth: sizes.borderWidth,
     borderColor: colors.border,
     borderRadius: radius.md,
   },
   funcionIcono: {
-    width: sizes.featureIcon,
-    height: sizes.featureIcon,
+    width: sizes.iconBox,
+    height: sizes.iconBox,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.backgroundPink,
+    borderRadius: radius.iconBox,
+    backgroundColor: colors.subtle,
   },
   grupo: { gap: spacing.sm },
 });

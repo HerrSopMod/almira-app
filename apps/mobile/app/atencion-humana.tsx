@@ -1,5 +1,5 @@
 import { colors, MINUTOS_ESPERA_EJEMPLO, sizes, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -25,19 +25,19 @@ export default function AtencionHumana() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Atención humana" />}
     >
       <Tarjeta>
         <View style={estilos.centro}>
           <View style={estilos.icono}>
-            <MaterialCommunityIcons
-              name="account-multiple-outline"
+            <MaterialIcons
+              name="people-outline"
               size={28}
               color={colors.primary}
             />
           </View>
-          <Texto variante="headlineSm" fuente="poppins" alineacion="center">
+          <Texto variante="headlineSm" alineacion="center">
             Te pasamos con Atención al vecino
           </Texto>
           <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
@@ -48,10 +48,10 @@ export default function AtencionHumana() {
 
       <Tarjeta>
         <View style={estilos.lista}>
-          <Texto variante="labelLg">La persona ya verá</Texto>
+          <Texto variante="bodyLgMedium">La persona ya verá</Texto>
           {loQueVera.map((item) => (
             <View key={item} style={estilos.item}>
-              <MaterialCommunityIcons name="check" size={20} color={colors.textSecondary} />
+              <MaterialIcons name="check" size={20} color={colors.textSecondary} />
               <Texto color={colors.textSecondary} style={estilos.flexible}>
                 {item}
               </Texto>
@@ -88,15 +88,15 @@ export default function AtencionHumana() {
 const estilos = StyleSheet.create({
   centro: { alignItems: 'center', gap: spacing.xs },
   icono: {
-    width: sizes.attentionIcon,
-    height: sizes.attentionIcon,
+    width: sizes.iconBoxLg,
+    height: sizes.iconBoxLg,
     marginBottom: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: sizes.attentionIcon / 2,
-    backgroundColor: colors.backgroundPink,
+    borderRadius: sizes.iconBoxLg / 2,
+    backgroundColor: colors.subtle,
   },
   lista: { gap: spacing.sm },
-  item: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  item: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
 });

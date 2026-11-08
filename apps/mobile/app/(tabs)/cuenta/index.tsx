@@ -10,11 +10,11 @@ import {
   totalDeuda,
   type Deuda,
 } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ChipEstadoDeuda, IconoCuadro, PiePrototipo, Tarjeta } from '@/components/Bloques';
+import { ChipEstadoDeuda, CajaIcono, PiePrototipo, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Pantalla } from '@/components/Pantalla';
@@ -45,9 +45,9 @@ export default function MiCuenta() {
       conPestanas
       encabezadoHastaArriba
       separacion="md"
-      encabezado={<BarraSuperior titulo="Mi cuenta municipal" />}
+      encabezado={<BarraSuperior variante="raiz" titulo="Pagar" />}
     >
-      <Texto variante="headlineSm" fuente="poppins" color={colors.primary} accessibilityRole="header">
+      <Texto variante="headlineSm" color={colors.primary} accessibilityRole="header">
         Detalle de la deuda
       </Texto>
 
@@ -82,7 +82,7 @@ export default function MiCuenta() {
         </Texto>
       </View>
 
-      <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header" style={estilos.seccion}>
+      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
         Pagos y constancias
       </Texto>
       {pagos.map((pago) => {
@@ -90,16 +90,16 @@ export default function MiCuenta() {
         return (
           <Tarjeta key={pago.id}>
             <View style={estilos.fila}>
-              <IconoCuadro icono="check" tono="pagado" />
+              <CajaIcono icono="check" tono="exito" />
               <View style={estilos.flexible}>
-                <Texto variante="labelLg">
+                <Texto variante="bodyLgMedium">
                   {deuda ? `${deuda.concepto} · ${deuda.periodo}` : pago.referencia}
                 </Texto>
                 <Texto variante="bodyMd" color={colors.textSecondary}>
                   {formatearFechaCorta(pago.creadoEn)} · {pago.referencia}
                 </Texto>
               </View>
-              <Texto variante="labelLg" alineacion="right" tabular>
+              <Texto variante="bodyLgMedium" alineacion="right" tabular>
                 {formatearSoles(pago.monto)}
               </Texto>
             </View>
@@ -132,7 +132,7 @@ function FilaDeuda({
         style={[estilos.casilla, marcada && estilos.casillaMarcada]}
       >
         {marcada ? (
-          <MaterialCommunityIcons name="check" size={16} color={colors.onPrimary} />
+          <MaterialIcons name="check" size={16} color={colors.onPrimary} />
         ) : null}
       </Pressable>
       <Pressable
@@ -145,10 +145,10 @@ function FilaDeuda({
           <Texto>{deuda.concepto}</Texto>
           <ChipEstadoDeuda estado={deuda.estado} />
         </View>
-        <Texto variante="labelLg" alineacion="right" tabular>
+        <Texto variante="bodyLgMedium" alineacion="right" tabular>
           {formatearSoles(totalDeuda(deuda))}
         </Texto>
-        <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text} />
+        <MaterialIcons name="chevron-right" size={24} color={colors.text} />
       </Pressable>
     </View>
   );
@@ -156,7 +156,7 @@ function FilaDeuda({
 
 const estilos = StyleSheet.create({
   lista: { gap: spacing.lg },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   textosDeuda: { gap: spacing.xs },
   casilla: {
@@ -165,8 +165,8 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.badge,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.lines,
+    borderWidth: sizes.controlBorder,
+    borderColor: colors.border,
     backgroundColor: colors.surface,
   },
   casillaMarcada: { borderColor: colors.primary, backgroundColor: colors.primary },
@@ -175,13 +175,13 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     paddingTop: spacing.md,
     borderTopWidth: sizes.borderWidth,
-    borderTopColor: colors.lines,
+    borderTopColor: colors.border,
   },
   beneficio: {
-    padding: spacing.block,
+    padding: spacing.blockDense,
     borderRadius: radius.md,
-    backgroundColor: colors.neutral,
+    backgroundColor: colors.subtle,
   },
-  pago: { gap: spacing.block },
+  pago: { gap: spacing.blockDense },
   seccion: { marginTop: spacing.sm },
 });

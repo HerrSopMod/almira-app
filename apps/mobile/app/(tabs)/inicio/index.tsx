@@ -10,10 +10,10 @@ import {
   spacing,
   sumarDeudas,
 } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ChipPlazo, IconoCuadro, PiePrototipo, Progreso, Tarjeta } from '@/components/Bloques';
+import { ChipPlazo, CajaIcono, PiePrototipo, Avance, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
@@ -21,22 +21,22 @@ import { useDatosMunicipales } from '@/sesion';
 
 type Acceso = {
   titulo: string;
-  icono: keyof typeof MaterialCommunityIcons.glyphMap;
+  icono: keyof typeof MaterialIcons.glyphMap;
   destino: Href;
 };
 
 const ACCESOS: Acceso[][] = [
   [
-    { titulo: 'Mi cuenta', icono: 'wallet-outline', destino: '/cuenta' },
-    { titulo: 'Avisos', icono: 'bell-outline', destino: '/inicio/recordatorios' },
+    { titulo: 'Mi cuenta', icono: 'payments', destino: '/cuenta' },
+    { titulo: 'Avisos', icono: 'notifications-none', destino: '/inicio/recordatorios' },
   ],
   [
-    { titulo: 'Asistente', icono: 'robot-outline', destino: '/asistente' },
-    { titulo: 'Reclamos', icono: 'camera-outline', destino: '/reclamos' },
+    { titulo: 'Asistente', icono: 'smart-toy', destino: '/asistente' },
+    { titulo: 'Reclamos', icono: 'photo-camera', destino: '/reclamos' },
   ],
   [
-    { titulo: 'Obras', icono: 'hard-hat', destino: '/obras' },
-    { titulo: 'Mi perfil', icono: 'account-outline', destino: '/inicio/perfil' },
+    { titulo: 'Obras', icono: 'construction', destino: '/obras' },
+    { titulo: 'Mi perfil', icono: 'person-outline', destino: '/inicio/perfil' },
   ],
 ];
 
@@ -56,23 +56,8 @@ export default function Inicio() {
     <Pantalla
       conPestanas
       encabezadoHastaArriba
-      separacion="block"
-      encabezado={
-        <BarraSuperior
-          titulo="Almira · Inicio"
-          conVolver={false}
-          accion={
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Mi perfil"
-              hitSlop={8}
-              onPress={() => router.push('/inicio/perfil')}
-            >
-              <MaterialCommunityIcons name="account-outline" size={28} color={colors.onPrimary} />
-            </Pressable>
-          }
-        />
-      }
+      separacion="blockDense"
+      encabezado={<BarraSuperior variante="raiz" titulo="Inicio" />}
     >
       <Pressable
         accessibilityRole="button"
@@ -81,10 +66,10 @@ export default function Inicio() {
         style={estilos.deuda}
       >
         <Texto>Deuda pendiente</Texto>
-        <Texto variante="displayCurrency" fuente="poppins" color={colors.primary} tabular>
+        <Texto variante="displayCurrency" color={colors.primary} tabular>
           {formatearSoles(total)}
         </Texto>
-        <Texto variante="labelLg" color={colors.header}>
+        <Texto variante="bodyLgMedium" color={colors.primary}>
           Ver detalle y pagar ›
         </Texto>
       </Pressable>
@@ -95,8 +80,8 @@ export default function Inicio() {
           onPress={() => router.push('/inicio/recordatorios')}
           style={estilos.aviso}
         >
-          <MaterialCommunityIcons name="bell-outline" size={20} color={colors.header} />
-          <Texto variante="labelLg" color={colors.header} style={estilos.flexible}>
+          <MaterialIcons name="notifications-none" size={sizes.iconSm} color={colors.primary} />
+          <Texto variante="bodyLgMedium" style={estilos.flexible}>
             Aviso: tu arbitrio vence pronto
           </Texto>
         </Pressable>
@@ -112,8 +97,8 @@ export default function Inicio() {
                 onPress={() => router.navigate(destino)}
                 style={estilos.acceso}
               >
-                <MaterialCommunityIcons name={icono} size={26} color={colors.primary} />
-                <Texto variante="label">{titulo}</Texto>
+                <MaterialIcons name={icono} size={26} color={colors.primary} />
+                <Texto variante="bodyMdMedium">{titulo}</Texto>
               </Pressable>
             ))}
           </View>
@@ -131,15 +116,15 @@ export default function Inicio() {
                 En tu distrito
               </Texto>
               <View style={estilos.fila}>
-                <Texto variante="labelLg" style={estilos.flexible}>
+                <Texto variante="bodyLgMedium" style={estilos.flexible}>
                   {obra.nombre}
                 </Texto>
-                <Texto variante="labelLg" alineacion="right" tabular>
+                <Texto variante="bodyLgMedium" alineacion="right" tabular>
                   {obra.avancePct} %
                 </Texto>
               </View>
             </View>
-            <Progreso porcentaje={obra.avancePct} />
+            <Avance porcentaje={obra.avancePct} />
           </Tarjeta>
         </Pressable>
       ) : null}
@@ -153,9 +138,9 @@ export default function Inicio() {
         >
           <Tarjeta>
             <View style={estilos.fila}>
-              <IconoCuadro icono="camera-outline" />
+              <CajaIcono icono="photo-camera" />
               <View style={estilos.flexible}>
-                <Texto variante="labelLg">{reclamo.titulo}</Texto>
+                <Texto variante="bodyLgMedium">{reclamo.titulo}</Texto>
                 <Texto variante="bodyMd" color={colors.textSecondary}>
                   {ETIQUETA_ESTADO_RECLAMO[reclamo.estado]}
                   {reclamo.area ? ` · ${reclamo.area}` : ''}
@@ -176,24 +161,22 @@ const estilos = StyleSheet.create({
   deuda: {
     gap: spacing.xs,
     padding: spacing.md,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.pendingDebtBorder,
-    borderRadius: radius.lg,
-    backgroundColor: colors.pendingDebt,
+    borderRadius: radius.md,
+    backgroundColor: colors.highlight,
   },
   aviso: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.block,
+    gap: spacing.blockDense,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.block,
+    paddingVertical: spacing.blockDense,
     borderWidth: sizes.borderWidth,
-    borderColor: colors.primary,
+    borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.backgroundPink,
+    backgroundColor: colors.surface,
   },
-  accesos: { gap: spacing.block },
-  filaAccesos: { flexDirection: 'row', gap: spacing.block },
+  accesos: { gap: spacing.blockDense },
+  filaAccesos: { flexDirection: 'row', gap: spacing.blockDense },
   acceso: {
     flex: 1,
     height: sizes.shortcut,
@@ -206,6 +189,6 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   obraTextos: { gap: spacing.xs },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
 });

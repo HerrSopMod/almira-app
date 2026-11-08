@@ -16,7 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Fragment } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Destacado, IconoCuadro, PiePrototipo, Separador, Tarjeta, Vacio } from '@/components/Bloques';
+import { Destacado, CajaIcono, PiePrototipo, Separador, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { EscaleraAvisos } from '@/components/Escalera';
@@ -40,7 +40,7 @@ export default function Recordatorios() {
     <Pantalla
       conPestanas
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Recordatorios" />}
     >
       <Seccion titulo="Mis avisos" primera />
@@ -59,9 +59,9 @@ export default function Recordatorios() {
             >
               <Tarjeta>
                 <View style={estilos.fila}>
-                  <IconoCuadro icono="message-outline" />
+                  <CajaIcono icono="chat-bubble-outline" />
                   <View style={estilos.flexible}>
-                    <Texto variante="labelLg">{titulo}</Texto>
+                    <Texto variante="bodyLgMedium">{titulo}</Texto>
                     <Texto variante="bodyMd" color={colors.textSecondary}>
                       {detalle}
                     </Texto>
@@ -103,7 +103,6 @@ export default function Recordatorios() {
       </View>
 
       <Destacado
-        tono="informacion"
         icono="schedule"
         texto="Te contactamos 1 vez por día y 3 por semana como máximo, de 8:00 a 20:00 h. Antes de avisar verificamos si ya pagaste."
       />
@@ -116,7 +115,7 @@ function Seccion({ titulo, primera }: { titulo: string; primera?: boolean }) {
   return (
     <Texto
       variante="headlineSm"
-      fuente="poppins"
+     
       accessibilityRole="header"
       style={primera ? undefined : estilos.seccion}
     >
@@ -126,7 +125,7 @@ function Seccion({ titulo, primera }: { titulo: string; primera?: boolean }) {
 }
 
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   seccion: { marginTop: spacing.sm },
   canales: {

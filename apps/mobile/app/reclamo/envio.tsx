@@ -8,11 +8,11 @@ import {
   TIPOS_RECLAMO,
   type TipoReclamo,
 } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { FilaDato, IconoCuadro, Separador, Tarjeta, Vacio } from '@/components/Bloques';
+import { FilaDato, CajaIcono, Separador, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Chips } from '@/components/Chips';
@@ -52,12 +52,12 @@ export default function EnvioAlArea() {
   };
 
   return (
-    <Pantalla encabezadoHastaArriba separacion="block" encabezado={encabezado}>
+    <Pantalla encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
       <Tarjeta>
         <View style={estilos.fila}>
-          <IconoCuadro icono="robot-outline" />
+          <CajaIcono icono="smart-toy" />
           <View style={estilos.flexible}>
-            <Texto variante="labelLg">Lo clasificamos así</Texto>
+            <Texto variante="bodyLgMedium">Lo clasificamos así</Texto>
             <Texto variante="bodyMd" color={colors.textSecondary}>
               Clasificación automática. Puedes corregirla.
             </Texto>
@@ -73,7 +73,7 @@ export default function EnvioAlArea() {
         </View>
       </Tarjeta>
 
-      <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header" style={estilos.seccion}>
+      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
         ¿Es otra categoría?
       </Texto>
       <Chips opciones={CATEGORIAS} elegida={tipo} onElegir={setTipo} />
@@ -84,7 +84,7 @@ export default function EnvioAlArea() {
         <Texto color={colors.textSecondary}>{descripcion}</Texto>
         <Separador />
         <View style={estilos.fila}>
-          <MaterialCommunityIcons name="map-marker-outline" size={20} color={colors.textSecondary} />
+          <MaterialIcons name="place" size={20} color={colors.textSecondary} />
           <Texto variante="bodyMd" color={colors.textSecondary} style={estilos.flexible}>
             {direccion}
           </Texto>
@@ -98,14 +98,14 @@ export default function EnvioAlArea() {
 
 function Valor({ texto }: { texto: string }) {
   return (
-    <Texto variante="labelLg" alineacion="right">
+    <Texto variante="bodyLgMedium" alineacion="right">
       {texto}
     </Texto>
   );
 }
 
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   filas: { gap: spacing.sm },
   seccion: { marginTop: spacing.sm },
