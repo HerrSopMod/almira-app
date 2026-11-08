@@ -143,6 +143,9 @@ export const sizes = {
   sliderThumbBorder: 3,
   sliderTouch: 44,
   evidencePhoto: 150,
+  // Miniaturas de la foto simulada: tarjetas de reclamo y envío (64) y seguimiento (72).
+  photoThumb: 64,
+  photoThumbLg: 72,
   workPhoto: 170,
   fundingBar: 12,
   legendDot: 10,

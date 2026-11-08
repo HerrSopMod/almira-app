@@ -9,6 +9,48 @@ type Props = {
   alto?: number;
 };
 
+// Miniatura cuadrada sin rótulo: dibuja la foto a su alto normal y la achica.
+export function MiniaturaFoto({
+  tipo,
+  lado = sizes.photoThumb,
+}: {
+  tipo: TipoReclamo | 'obra';
+  lado?: number;
+}) {
+  const desfase = (lado - ALTO) / 2;
+  return (
+    <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel="Foto simulada: dibujo de ejemplo"
+      style={[estilos.marco, { width: lado, height: lado }]}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          top: desfase,
+          left: desfase,
+          width: ALTO,
+          height: ALTO,
+          transform: [{ scale: lado / ALTO }],
+        }}
+      >
+        <Dibujo tipo={tipo} />
+      </View>
+    </View>
+  );
+}
+
+function Dibujo({ tipo }: { tipo: TipoReclamo | 'obra' }) {
+  if (tipo === 'pistas_veredas') return <Bache />;
+  if (tipo === 'alumbrado') return <Poste />;
+  return (
+    <View style={estilos.generico}>
+      <MaterialIcons name={ICONO_TIPO[tipo]} size={56} color={colors.textSecondary} />
+    </View>
+  );
+}
+
 // Dibujo fijo en lugar de una foto (pantallas 17, 18 y 20): no se usa la cámara
 // ni hay fotos publicadas. Pistas y veredas muestra un bache; alumbrado, un poste
 // de noche; el resto, un ícono.
@@ -20,12 +62,7 @@ export function FotoSimulada({ tipo, etiqueta = 'Foto simulada', alto = sizes.ev
       accessibilityLabel={`${etiqueta}: dibujo de ejemplo`}
       style={[estilos.marco, { height: alto }]}
     >
-      {tipo === 'pistas_veredas' ? <Bache /> : tipo === 'alumbrado' ? <Poste /> : null}
-      {tipo !== 'pistas_veredas' && tipo !== 'alumbrado' ? (
-        <View style={estilos.generico}>
-          <MaterialIcons name={ICONO_TIPO[tipo]} size={56} color={colors.textSecondary} />
-        </View>
-      ) : null}
+      <Dibujo tipo={tipo} />
       <View style={estilos.etiqueta}>
         <Texto variante="caption" color={colors.textSecondary}>
           {etiqueta}
