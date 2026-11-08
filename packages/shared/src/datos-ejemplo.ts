@@ -380,7 +380,8 @@ export const reclamos: Reclamo[] = [
     longitud: null,
     plazo: 'Quedan 8 d',
     plazoDias: 10,
-    creadoEn: '2026-10-28',
+    // Con 10 días hábiles desde el 29 oct quedan 8 al 1 nov, como en web-05.
+    creadoEn: '2026-10-29',
   },
 ];
 

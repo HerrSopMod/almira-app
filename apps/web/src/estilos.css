@@ -576,6 +576,11 @@ th {
   text-align: left;
 }
 
+th.monto,
+td.monto {
+  padding-right: var(--s-xl);
+}
+
 td {
   height: var(--p-table-row);
   padding: 0 var(--s-sm);
@@ -628,6 +633,290 @@ td {
   background: var(--c-paid);
 }
 
+/* Botones bajos de las páginas del panel */
+
+.boton-bajo {
+  min-height: var(--p-row-button);
+}
+
+.boton-fila {
+  width: var(--p-row-button-wide);
+  min-height: var(--p-row-button);
+}
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-sm);
+}
+
+.acciones-fila {
+  flex-direction: row;
+}
+
+/* Filas de tabla */
+
+.alta td {
+  height: var(--p-table-row-tall);
+}
+
+.doble {
+  display: flex;
+  flex-direction: column;
+}
+
+.doble strong {
+  font: var(--t-body-strong);
+}
+
+.doble span {
+  color: var(--c-text-secondary);
+  font: var(--t-small);
+}
+
+.fila-elegible {
+  cursor: pointer;
+}
+
+.fila-elegible:focus-visible {
+  outline: var(--z-focus-border-width) solid var(--c-primary);
+  outline-offset: calc(var(--z-focus-border-width) * -1);
+}
+
+.fila-elegible.elegida td {
+  background: var(--c-background-pink);
+}
+
+.celda-accion {
+  text-align: right;
+}
+
+/* Escalera de avisos (web-04): los tonos vino solo van aquí. */
+
+.escalon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-block);
+}
+
+.escalon-numero {
+  display: grid;
+  place-items: center;
+  width: var(--p-ladder-number);
+  height: var(--p-ladder-number);
+  border-radius: var(--r-sm);
+  font: var(--t-small-strong);
+}
+
+.aviso-1 {
+  background: var(--c-notice1);
+  color: var(--c-header);
+}
+
+.aviso-2 {
+  background: var(--c-notice2);
+  color: var(--c-on-primary);
+}
+
+.aviso-3 {
+  background: var(--c-notice3);
+  color: var(--c-on-primary);
+}
+
+.variante-elegida {
+  display: flex;
+}
+
+/* Reclamos (web-05) */
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-sm);
+}
+
+.filtro {
+  min-height: var(--z-chip);
+  padding: 0 var(--s-block);
+  border: var(--z-focus-border-width) solid var(--c-primary);
+  border-radius: var(--r-full);
+  background: var(--c-surface);
+  color: var(--c-primary);
+  font: var(--t-button);
+}
+
+.filtro.activo {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+}
+
+.filtro:focus-visible {
+  outline: var(--z-focus-border-width) solid var(--c-header);
+  outline-offset: var(--z-focus-border-width);
+}
+
+.fila-arriba {
+  align-items: start;
+}
+
+.detalle-reclamo {
+  gap: var(--s-block);
+}
+
+.detalle-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-sm);
+}
+
+.detalle-cabecera h2 {
+  font: var(--t-card-title);
+}
+
+.foto-evidencia {
+  display: grid;
+  place-items: center;
+  height: var(--z-evidence-photo);
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: var(--c-background-pink);
+}
+
+.foto-evidencia.generica {
+  align-content: center;
+  gap: var(--s-xs);
+  color: var(--c-text-secondary);
+  font: var(--t-small);
+}
+
+.recibo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-block);
+  width: 30%;
+  height: 100%;
+  padding: var(--s-lg) var(--s-md);
+  background: var(--c-surface);
+}
+
+.recibo i {
+  display: block;
+  width: 100%;
+  height: var(--s-sm);
+  background: var(--c-radio-off);
+}
+
+.recibo i:nth-child(2) {
+  background: var(--c-drawing-sky);
+}
+
+.recibo i:nth-child(3) {
+  width: 75%;
+  background: var(--c-drawing-sky);
+}
+
+.recibo b {
+  display: block;
+  width: 55%;
+  height: var(--s-xl);
+  margin-top: var(--s-lg);
+  background: var(--c-paid);
+}
+
+.detalle-texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-xs);
+}
+
+.detalle-texto strong {
+  font: var(--t-button);
+}
+
+.detalle-meta {
+  color: var(--c-text-secondary);
+  font: var(--t-body);
+}
+
+.datos-reclamo {
+  margin: 0;
+}
+
+.datos-reclamo div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-md);
+  min-height: var(--p-h-bar-row);
+}
+
+.datos-reclamo dt {
+  color: var(--c-text-secondary);
+}
+
+.datos-reclamo dd {
+  margin: 0;
+  font: var(--t-button);
+}
+
+.campo-en-linea select {
+  height: var(--p-row-button);
+}
+
+/* Obras (web-06) */
+
+.avance {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-sm);
+}
+
+.interruptor {
+  position: relative;
+  width: var(--p-toggle-width);
+  height: var(--p-toggle-height);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--c-radio-off);
+}
+
+.interruptor[aria-checked='true'] {
+  background: var(--c-primary);
+}
+
+.interruptor span {
+  position: absolute;
+  top: calc((var(--p-toggle-height) - var(--p-toggle-knob)) / 2);
+  left: calc((var(--p-toggle-height) - var(--p-toggle-knob)) / 2);
+  width: var(--p-toggle-knob);
+  height: var(--p-toggle-knob);
+  border-radius: var(--r-full);
+  background: var(--c-surface);
+  transition: transform 0.15s ease;
+}
+
+.interruptor[aria-checked='true'] span {
+  transform: translateX(calc(var(--p-toggle-width) - var(--p-toggle-height)));
+}
+
+.interruptor:focus-visible {
+  outline: var(--z-focus-border-width) solid var(--c-header);
+  outline-offset: var(--z-focus-border-width);
+}
+
+.formulario-obra {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-block);
+}
+
+.formulario-obra .campo-error,
+.formulario-obra .acciones {
+  grid-column: 1 / -1;
+}
+
 /* En pantallas angostas las columnas se apilan. CSS no admite variables en
    @media, por eso el corte va escrito aquí. */
 @media (max-width: 1100px) {
@@ -644,7 +933,8 @@ td {
   .cifras-4,
   .fila-2,
   .fila-decision,
-  .ciclo {
+  .ciclo,
+  .formulario-obra {
     grid-template-columns: minmax(0, 1fr);
   }
 }

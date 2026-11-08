@@ -72,7 +72,7 @@ Recordatorios vive dentro de la pestaña Inicio; el detalle del aviso y "Cómo l
 | Ingreso (web-01) | `/ingreso` | `src/paginas/Ingreso.tsx` |
 | Panel municipal (web-02) | `/panel` | `src/paginas/PanelMunicipal.tsx` |
 | Recaudación y pagos (web-03) | `/recaudacion` | `src/paginas/Recaudacion.tsx` |
-| Avisos y respuestas (web-04) | `/avisos` | `src/paginas/Recordatorios.tsx` |
+| Avisos y respuestas (web-04) | `/avisos` | `src/paginas/Avisos.tsx` |
 | Reclamos por área (web-05) | `/reclamos` | `src/paginas/Reclamos.tsx` |
 | Obras publicadas (web-06) | `/obras` | `src/paginas/Obras.tsx` |
 
@@ -81,6 +81,8 @@ El ingreso es simulado: no hay autenticación real y cualquier usuario y contras
 Las cifras agregadas (recaudación, pagos a tiempo, gráficos, casos de atención humana, alertas) son de ejemplo, iguales a las del prototipo, y viven en `packages/shared/src/panel-ejemplo.ts`, separadas de los datos de vecinos. Los reclamos y las obras salen de `datos-ejemplo.ts`, filtrados por la municipalidad.
 
 `src/estado.tsx` guarda la sesión y una copia en memoria de los reclamos, obras y casos de la municipalidad. Las cifras de la barra lateral y "Requiere tu decisión" se calculan con esa copia. Nada se guarda: al recargar, el panel vuelve al ingreso y a los datos de ejemplo.
+
+Recaudación y Avisos solo muestran cifras agregadas, sin nombres ni rankings de vecinos. Las acciones cambian solo la copia en memoria y lo avisan en pantalla: "Usar variante B" marca la variante elegida sin cambiar ningún envío; "Responder y cerrar" deja el reclamo resuelto sin guardar nada ni avisar al vecino; "Corregir área" cambia el área; en Obras se puede publicar o despublicar, sumar 5 % de avance (la obra queda actualizada hoy) y agregar una obra nueva, que entra sin publicar. La app del vecino no se entera de ninguno de estos cambios. La clasificación del reclamo se muestra sin porcentaje de confianza, porque sale de reglas fijas. La zona de cada reclamo de ejemplo está en `zonaReclamo` del panel, porque la tabla `reclamos` no tiene zona.
 
 `src/estilos.css` solo usa variables CSS que `src/tema.ts` crea con los tokens de `@almira/shared` (`panelSizes` y `panelTypography` para las medidas y textos del panel). Los gráficos son HTML y CSS, sin librerías.
 

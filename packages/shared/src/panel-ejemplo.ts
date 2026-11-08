@@ -40,6 +40,27 @@ export interface CasoAtencion {
   estado: EstadoCaso;
 }
 
+export interface PagoTributo {
+  tributo: string;
+  lineaBasePct: number;
+  actualPct: number;
+  metaPct: number;
+}
+
+export interface PasoEscalera {
+  numero: 1 | 2 | 3;
+  nombre: string;
+  enviados: number;
+  entregadosPct: number;
+  pagaronPct: number;
+}
+
+export interface Control {
+  etiqueta: string;
+  porcentaje: number;
+  detalle: string;
+}
+
 export interface PanelEjemplo {
   periodo: string;
   revisionMensual: string;
@@ -51,6 +72,17 @@ export interface PanelEjemplo {
   reclamosEnPlazo: { porcentaje: number; puntos: number; meta: number };
   avisos: { total: number; entregadosPct: number; pagaronPct: number };
   recaudacionMensual: MesRecaudacion[];
+  pagosApp: { cantidad: number; variacionPresencial: number };
+  // Montos en soles; el panel los muestra en miles.
+  recaudacionPorZona: { zona: string; soles: number }[];
+  pagosPorTributo: PagoTributo[];
+  escalera: PasoEscalera[];
+  // Días después del aviso en los que un pago cuenta como respuesta.
+  diasRespuestaAviso: number;
+  controlesAvisos: Control[];
+  canales: Cantidad[];
+  // Zona del distrito de cada reclamo de ejemplo, por código.
+  zonaReclamo: Record<string, string>;
   reclamosPorArea: Cantidad[];
   reclamosFrecuentes: Cantidad[];
   aprendizaje: {
@@ -60,7 +92,7 @@ export interface PanelEjemplo {
     reclamosConEvidencia: number;
     aprende: string;
   };
-  pruebaAB: { titulo: string; politica: string; variantes: VariantePrueba[] };
+  pruebaAB: { titulo: string; politica: string; nota: string; variantes: VariantePrueba[] };
   casos: CasoAtencion[];
   alertasActivas: string[];
 }
@@ -82,6 +114,52 @@ const LINCE: PanelEjemplo = {
     { mes: 'Set', millones: 1.04, vencimientoPredial: false },
     { mes: 'Oct', millones: 1.12, vencimientoPredial: false },
   ],
+  pagosApp: { cantidad: 6310, variacionPresencial: -18 },
+  recaudacionPorZona: [
+    { zona: 'Zona 1 · Risso', soles: 312000 },
+    { zona: 'Zona 2 · Candamo', soles: 268000 },
+    { zona: 'Zona 3 · Castilla', soles: 241000 },
+    { zona: 'Zona 4 · Lobatón', soles: 176000 },
+    { zona: 'Zona 5 · Conde', soles: 123000 },
+  ],
+  pagosPorTributo: [
+    { tributo: 'Impuesto predial', lineaBasePct: 61, actualPct: 69, metaPct: 75 },
+    { tributo: 'Arbitrios', lineaBasePct: 52, actualPct: 60, metaPct: 70 },
+    { tributo: 'Multas', lineaBasePct: 38, actualPct: 49, metaPct: 55 },
+  ],
+  escalera: [
+    { numero: 1, nombre: 'Recordatorio amable', enviados: 12480, entregadosPct: 97, pagaronPct: 41 },
+    { numero: 2, nombre: 'Aviso de mora', enviados: 4360, entregadosPct: 95, pagaronPct: 27 },
+    { numero: 3, nombre: 'Previo a coactiva', enviados: 1580, entregadosPct: 93, pagaronPct: 19 },
+  ],
+  diasRespuestaAviso: 7,
+  controlesAvisos: [
+    {
+      etiqueta: 'Avisos a deudas ya pagadas (I3)',
+      porcentaje: 0.2,
+      detalle: 'Se verifica el pago antes de avisar',
+    },
+    { etiqueta: 'Vecinos sobre el tope (I4)', porcentaje: 0, detalle: 'Tope: 1 por día y 3 por semana' },
+    {
+      etiqueta: 'Envíos diferidos por saturación (I2)',
+      porcentaje: 1.1,
+      detalle: 'Ventana asignada: 24-26 nov',
+    },
+  ],
+  canales: [
+    { nombre: 'WhatsApp', cantidad: 11240 },
+    { nombre: 'SMS', cantidad: 4820 },
+    { nombre: 'Notificación app', cantidad: 2360 },
+  ],
+  zonaReclamo: {
+    'R-01851': 'Zona 1',
+    'R-01863': 'Zona 4',
+    'R-01855': 'Zona 2',
+    'R-01842': 'Zona 2',
+    'R-01860': 'Zona 5',
+    'R-01866': 'Zona 1',
+    'R-01790': 'Zona 3',
+  },
   reclamosPorArea: [
     { nombre: 'Obras', cantidad: 77 },
     { nombre: 'Limpieza', cantidad: 24 },
@@ -106,6 +184,7 @@ const LINCE: PanelEjemplo = {
   pruebaAB: {
     titulo: 'Prueba A/B: recordatorio amable',
     politica: 'Política aprobada por el comité de datos e IA. Muestra: 6,000 vecinos.',
+    nota: 'La variante B menciona la obra que financia el pago. Solo cambia el tono: nunca montos ni plazos.',
     variantes: [
       { letra: 'A', nombre: 'Formal', pagoPct: 35 },
       { letra: 'B', nombre: 'Con la obra', pagoPct: 41 },

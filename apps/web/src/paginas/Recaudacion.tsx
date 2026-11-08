@@ -1,81 +1,74 @@
-import { pagos as pagosTodos, deudas as deudasTodos, vecinos as vecinosTodos } from '@almira/shared';
-import {
-  ETIQUETA_ESTADO_DEUDA,
-  ETIQUETA_ESTADO_PAGO,
-  ETIQUETA_MEDIO_PAGO,
-  deudasPendientes,
-  formatearFechaCorta,
-  formatearSoles,
-  totalDeuda,
-} from '@almira/shared';
-import { Chip, Encabezado, Tabla } from '../componentes';
+import { formatearNumero, formatearPorcentaje, formatearSoles, formatearVariacion } from '@almira/shared';
+import { BarrasHorizontales, BarrasMensuales, Cifra, Encabezado, Tabla, Tarjeta } from '../componentes';
 import { useSesion } from '../estado';
 
+// Recaudación y pagos a tiempo (web-03). Solo cifras agregadas: ningún vecino
+// aparece con nombre ni en rankings.
 export function Recaudacion() {
   const { sesion } = useSesion();
-  const municipalidadNombre = sesion.municipalidad.nombre;
-  const propios = <T extends { municipalidadId: string }>(filas: T[]) =>
-    filas.filter((fila) => fila.municipalidadId === sesion.municipalidad.id);
-  const pagos = propios(pagosTodos);
-  const deudas = propios(deudasTodos);
-  const vecinos = propios(vecinosTodos);
-  const nombreVecino = (id: string) => vecinos.find((vecino) => vecino.id === id)?.nombre ?? '';
-  const conceptoDeuda = (id: string) => deudas.find((deuda) => deuda.id === id)?.concepto ?? '';
+  const { panel } = sesion;
 
   return (
     <>
-      <Encabezado titulo="Recaudación" subtitulo={municipalidadNombre} />
-      <h2>Pagos recibidos</h2>
-      <Tabla
-        columnas={[
-          { titulo: 'Fecha' },
-          { titulo: 'Vecino' },
-          { titulo: 'Concepto' },
-          { titulo: 'Medio de pago' },
-          { titulo: 'Estado' },
-          { titulo: 'Monto', derecha: true },
-        ]}
-      >
-        {pagos.map((pago) => (
-          <tr key={pago.id}>
-            <td>{formatearFechaCorta(pago.creadoEn)}</td>
-            <td>{nombreVecino(pago.vecinoId)}</td>
-            <td>{conceptoDeuda(pago.deudaId)}</td>
-            <td>{ETIQUETA_MEDIO_PAGO[pago.medio]}</td>
-            <td>
-              <Chip tono={pago.estado === 'confirmado' ? 'verde' : 'amarillo'}>
-                {ETIQUETA_ESTADO_PAGO[pago.estado]}
-              </Chip>
-            </td>
-            <td className="monto">{formatearSoles(pago.monto)}</td>
-          </tr>
-        ))}
-      </Tabla>
+      <Encabezado
+        titulo="Recaudación y pagos a tiempo"
+        subtitulo={`${panel.periodo} · Solo datos agregados, sin rankings de vecinos`}
+      />
 
-      <h2>Deudas pendientes</h2>
-      <Tabla
-        columnas={[
-          { titulo: 'Vecino' },
-          { titulo: 'Concepto' },
-          { titulo: 'Vencimiento' },
-          { titulo: 'Estado' },
-          { titulo: 'Total', derecha: true },
-        ]}
-      >
-        {deudasPendientes(deudas).map((deuda) => (
-          <tr key={deuda.id}>
-            <td>{nombreVecino(deuda.vecinoId)}</td>
-            <td>{deuda.concepto}</td>
-            <td>{formatearFechaCorta(deuda.vencimiento)}</td>
-            <td>
-              <Chip tono={deuda.estado === 'vencida' ? 'rojo' : 'amarillo'}>
-                {ETIQUETA_ESTADO_DEUDA[deuda.estado]}
-              </Chip>
-            </td>
-            <td className="monto">{formatearSoles(totalDeuda(deuda))}</td>
-          </tr>
-        ))}
-      </Tabla>
+      <div className="cifras cifras-3">
+        <Cifra
+          etiqueta="Recaudado en el mes"
+          valor={formatearSoles(panel.recaudacion.mes, { sinDecimales: true })}
+          detalle={`${formatearVariacion(panel.recaudacion.variacionLineaBase)} frente a la línea base`}
+        />
+        <Cifra
+          etiqueta="Pagos a tiempo"
+          valor={formatearPorcentaje(panel.pagosATiempo.porcentaje)}
+          detalle={`Meta: ${formatearPorcentaje(panel.pagosATiempo.meta)}`}
+        />
+        <Cifra
+          etiqueta="Pagos por la app"
+          valor={formatearNumero(panel.pagosApp.cantidad)}
+          detalle={`${formatearVariacion(panel.pagosApp.variacionPresencial)} de atención presencial por trámite`}
+        />
+      </div>
+
+      <div className="fila fila-2">
+        <Tarjeta titulo="Recaudación mensual" subtitulo="Millones de soles, 2026.">
+          <BarrasMensuales meses={panel.recaudacionMensual} />
+        </Tarjeta>
+        <Tarjeta titulo="Recaudación por zona" subtitulo={`${panel.periodo}, en miles de soles.`}>
+          <BarrasHorizontales
+            filas={panel.recaudacionPorZona.map((zona) => ({
+              nombre: zona.zona,
+              valor: zona.soles,
+              etiqueta: formatearSoles(zona.soles, { enMiles: true }),
+            }))}
+          />
+        </Tarjeta>
+      </div>
+
+      <Tarjeta titulo="Pagos a tiempo por tributo" subtitulo="Frente a la línea base del distrito.">
+        <Tabla
+          columnas={[
+            { titulo: 'Tributo' },
+            { titulo: 'Línea base' },
+            { titulo: 'Actual' },
+            { titulo: 'Meta' },
+          ]}
+        >
+          {panel.pagosPorTributo.map((fila) => (
+            <tr key={fila.tributo}>
+              <td>
+                <strong>{fila.tributo}</strong>
+              </td>
+              <td>{formatearPorcentaje(fila.lineaBasePct)}</td>
+              <td>{formatearPorcentaje(fila.actualPct)}</td>
+              <td>{formatearPorcentaje(fila.metaPct)}</td>
+            </tr>
+          ))}
+        </Tabla>
+      </Tarjeta>
     </>
   );
 }

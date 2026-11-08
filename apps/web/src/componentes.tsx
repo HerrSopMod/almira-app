@@ -74,7 +74,12 @@ export function Tarjeta({
   );
 }
 
-export type FilaBarra = { nombre: string; valor: number; etiqueta?: string };
+export type FilaBarra = {
+  nombre: string;
+  valor: number;
+  etiqueta?: string;
+  tono?: 'primario' | 'secundario';
+};
 
 // Barras horizontales en HTML y CSS. La más larga llena la pista, salvo que
 // se indique un máximo (por ejemplo, 100 para porcentajes).
@@ -95,7 +100,7 @@ export function BarrasHorizontales({
           <span>{fila.nombre}</span>
           <span className="barras-h-pista">
             <span
-              className={`barras-h-barra ${tono}`}
+              className={`barras-h-barra ${fila.tono ?? tono}`}
               style={{ width: `${Math.min(100, (fila.valor / tope) * 100)}%` }}
             />
           </span>
@@ -188,5 +193,28 @@ export function Progreso({ porcentaje }: { porcentaje: number }) {
     >
       <span style={{ width: `${porcentaje}%` }} />
     </span>
+  );
+}
+
+export function Interruptor({
+  activo,
+  etiqueta,
+  onCambiar,
+}: {
+  activo: boolean;
+  etiqueta: string;
+  onCambiar: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={activo}
+      aria-label={etiqueta}
+      className="interruptor"
+      onClick={onCambiar}
+    >
+      <span />
+    </button>
   );
 }

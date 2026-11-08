@@ -2,13 +2,13 @@ import { PERSONAL_PANEL_EJEMPLO } from '@almira/shared';
 import { NavLink, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { pendientes, usePanel, useSesion } from './estado';
 import { Icono, type NombreIcono } from './iconos';
+import { Avisos } from './paginas/Avisos';
 import { EnPreparacion } from './paginas/EnPreparacion';
 import { Ingreso } from './paginas/Ingreso';
 import { Obras } from './paginas/Obras';
 import { PanelMunicipal } from './paginas/PanelMunicipal';
 import { Recaudacion } from './paginas/Recaudacion';
 import { Reclamos } from './paginas/Reclamos';
-import { Recordatorios } from './paginas/Recordatorios';
 
 type Modulo = { ruta: string; titulo: string; icono: NombreIcono; cifra?: number };
 
@@ -72,7 +72,7 @@ export function App() {
         <Route index element={<Navigate to="/panel" replace />} />
         <Route path="panel" element={<PanelMunicipal />} />
         <Route path="recaudacion" element={<Recaudacion />} />
-        <Route path="avisos" element={<Recordatorios />} />
+        <Route path="avisos" element={<Avisos />} />
         <Route path="reclamos" element={<Reclamos />} />
         <Route path="obras" element={<Obras />} />
         <Route path="atencion" element={<EnPreparacion titulo="Atención humana" />} />
