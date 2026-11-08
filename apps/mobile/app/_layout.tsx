@@ -13,6 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SesionProvider } from '@/sesion';
+import { TextoGrandeProvider } from '@/textoGrande';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,13 +36,15 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <SesionProvider>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        />
+        <TextoGrandeProvider>
+          <StatusBar style="dark" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          />
+        </TextoGrandeProvider>
       </SesionProvider>
     </SafeAreaProvider>
   );

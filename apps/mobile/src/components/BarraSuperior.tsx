@@ -2,6 +2,7 @@ import { colors, sizes, spacing } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Texto } from './Texto';
@@ -9,11 +10,19 @@ import { Texto } from './Texto';
 type Props = {
   titulo: string;
   conVolver?: boolean;
+  // Botón a la derecha, por ejemplo el de Mi perfil en Inicio.
+  accion?: ReactNode;
 };
+
+// Si no hay a dónde volver (por ejemplo, una pestaña abierta directo), va a Inicio.
+function volver() {
+  if (router.canGoBack()) router.back();
+  else router.navigate('/inicio');
+}
 
 // Barra vino de las pantallas del prototipo: título centrado en Poppins y botón de volver.
 // Úsala con <Pantalla encabezadoHastaArriba> para que también pinte el área de la hora.
-export function BarraSuperior({ titulo, conVolver = true }: Props) {
+export function BarraSuperior({ titulo, conVolver = true, accion }: Props) {
   const { top } = useSafeAreaInsets();
   return (
     <View style={[estilos.raiz, { paddingTop: top }]}>
@@ -35,12 +44,13 @@ export function BarraSuperior({ titulo, conVolver = true }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Volver"
             hitSlop={8}
-            onPress={() => router.back()}
+            onPress={volver}
             style={estilos.volver}
           >
             <MaterialIcons name="chevron-left" size={32} color={colors.onPrimary} />
           </Pressable>
         ) : null}
+        {accion ? <View style={estilos.accion}>{accion}</View> : null}
       </View>
     </View>
   );
@@ -50,6 +60,14 @@ const estilos = StyleSheet.create({
   raiz: { backgroundColor: colors.header },
   fila: { height: sizes.headerBar, justifyContent: 'center' },
   titulo: { marginHorizontal: sizes.headerBar },
+  accion: {
+    position: 'absolute',
+    right: spacing.sm,
+    width: sizes.buttonTertiary,
+    height: sizes.buttonTertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   volver: {
     position: 'absolute',
     left: spacing.sm,

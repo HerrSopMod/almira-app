@@ -12,6 +12,10 @@ import type {
   Vecino,
 } from './types';
 
+// "Hoy" del prototipo. La app lo usa en vez de la fecha del teléfono para
+// los plazos, los vencimientos y la fecha de los pagos simulados.
+export const HOY_EJEMPLO = '2026-11-01';
+
 export const USUARIO_EJEMPLO = {
   id: 'u-rosa',
   nombre: 'Rosa',
@@ -20,6 +24,11 @@ export const USUARIO_EJEMPLO = {
   // Código SMS simulado de la pantalla 02 del prototipo: no se envía ningún SMS.
   codigoSmsEjemplo: '482175',
 } as const;
+
+// Canales sin smartphone de la pantalla 23. Son de ejemplo: el número SMS es
+// simulado y el horario del módulo no es el de ninguna municipalidad real.
+export const SMS_NUMERO_EJEMPLO = '7245';
+export const HORARIO_MODULO_EJEMPLO = 'Lunes a sábado, 8:00 a 17:00 h';
 
 const LINCE = 'm-lince';
 const VILLA_VERDE = 'm-villa-verde';
@@ -201,7 +210,7 @@ export const pagos: Pago[] = [
     vecinoId: 'v-rosa-li',
     deudaId: 'd-predial-4c',
     monto: 186.4,
-    medio: 'billetera',
+    medio: 'yape',
     estado: 'confirmado',
     referencia: 'OP-77120',
     creadoEn: '2026-10-28',
@@ -212,7 +221,7 @@ export const pagos: Pago[] = [
     vecinoId: 'v-rosa-li',
     deudaId: 'd-arbitrios-3t',
     monto: 78,
-    medio: 'billetera',
+    medio: 'yape',
     estado: 'confirmado',
     referencia: 'OP-70318',
     creadoEn: '2026-08-28',
@@ -371,7 +380,8 @@ export const reclamos: Reclamo[] = [
     longitud: null,
     plazo: 'Quedan 8 d',
     plazoDias: 10,
-    creadoEn: '2026-10-28',
+    // Con 10 días hábiles desde el 29 oct quedan 8 al 1 nov, como en web-05.
+    creadoEn: '2026-10-29',
   },
 ];
 
@@ -380,6 +390,7 @@ export const obras: Obra[] = [
     id: 'o-pistas-merino',
     municipalidadId: LINCE,
     nombre: 'Mantenimiento de pistas',
+    nombreCorto: 'mantenimiento de pistas de la Av. Ignacio Merino',
     ubicacion: 'Av. Ignacio Merino, cdras. 17-19',
     estado: 'finalizada',
     avancePct: 100,
@@ -397,6 +408,7 @@ export const obras: Obra[] = [
     id: 'o-parque-castilla',
     municipalidadId: LINCE,
     nombre: 'Renovación del parque Castilla',
+    nombreCorto: 'parque Castilla',
     ubicacion: 'Parque Castilla, Zona 3',
     estado: 'en_ejecucion',
     avancePct: 68,
@@ -414,6 +426,7 @@ export const obras: Obra[] = [
     id: 'o-veredas-risso',
     municipalidadId: LINCE,
     nombre: 'Veredas accesibles',
+    nombreCorto: 'proyecto de veredas accesibles de la Av. Risso',
     ubicacion: 'Av. Risso, cdras. 3-7',
     estado: 'en_ejecucion',
     avancePct: 34,
@@ -431,6 +444,7 @@ export const obras: Obra[] = [
     id: 'o-luminarias-led',
     municipalidadId: LINCE,
     nombre: 'Luminarias LED',
+    nombreCorto: 'cambio a luminarias LED del Jr. Pumacahua',
     ubicacion: 'Jr. Pumacahua y alrededores',
     estado: 'en_ejecucion',
     avancePct: 0,
@@ -448,6 +462,7 @@ export const obras: Obra[] = [
     id: 'o-parque-central-vv',
     municipalidadId: VILLA_VERDE,
     nombre: 'Mejoramiento del Parque Central',
+    nombreCorto: 'Parque Central',
     ubicacion: 'Av. Los Sauces cdra. 3',
     estado: 'en_ejecucion',
     avancePct: 40,

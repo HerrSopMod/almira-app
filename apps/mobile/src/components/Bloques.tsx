@@ -1,5 +1,13 @@
-import { colors, formatearSoles, radius, sizes, spacing } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
+import {
+  colors,
+  ETIQUETA_ESTADO_DEUDA,
+  formatearSoles,
+  radius,
+  sizes,
+  spacing,
+  type EstadoDeuda,
+} from '@almira/shared';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Texto } from './Texto';
@@ -13,13 +21,14 @@ export function Separador() {
 }
 
 // Tonos de los avisos: "primario" es el de siempre; "informacion" y "exito"
-// siguen las pantallas 02 y 03 del prototipo.
-type TonoDestacado = 'primario' | 'informacion' | 'exito';
+// siguen las pantallas 02 y 03 del prototipo; "aviso" es el amarillo de la 13.
+type TonoDestacado = 'primario' | 'informacion' | 'exito' | 'aviso';
 
 const COLORES_DESTACADO: Record<TonoDestacado, { texto: string; fondo: string }> = {
   primario: { texto: colors.primary, fondo: colors.highlight },
-  informacion: { texto: colors.header, fondo: colors.backgroundPink },
+  informacion: { texto: colors.header, fondo: colors.backgroundPinkSoft },
   exito: { texto: colors.paidText, fondo: colors.paidSoft },
+  aviso: { texto: colors.pendingDebtText, fondo: colors.pendingDebt },
 };
 
 // DESIGN.md: como máximo uno por pantalla.
@@ -71,14 +80,77 @@ export function Insignia({ texto, tono }: { texto: string; tono: Tono }) {
   );
 }
 
-export function Progreso({ porcentaje }: { porcentaje: number }) {
+// Barra de avance: primaria o verde para lo resuelto (pantalla 15).
+export function Progreso({ porcentaje, tono = 'primario' }: { porcentaje: number; tono?: 'primario' | 'pagado' }) {
   return (
     <View
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: porcentaje }}
       style={estilos.progreso}
     >
-      <View style={[estilos.progresoRelleno, { width: `${porcentaje}%` }]} />
+      <View
+        style={[
+          estilos.progresoRelleno,
+          { width: `${porcentaje}%` },
+          tono === 'pagado' && { backgroundColor: colors.paid },
+        ]}
+      />
+    </View>
+  );
+}
+
+// Chips de estado de deuda de la guía de estilos: «En mora», «Por vencer» y «Pagada».
+const COLORES_ESTADO_DEUDA: Record<EstadoDeuda, { texto: string; fondo: string; borde: string }> = {
+  vencida: { texto: colors.onPrimary, fondo: colors.primary, borde: colors.primary },
+  vigente: {
+    texto: colors.pendingDebtText,
+    fondo: colors.pendingDebt,
+    borde: colors.pendingDebtBorder,
+  },
+  pagada: { texto: colors.paidText, fondo: colors.paidSoft, borde: colors.paidSoft },
+};
+
+export function ChipEstadoDeuda({ estado }: { estado: EstadoDeuda }) {
+  const { texto, fondo, borde } = COLORES_ESTADO_DEUDA[estado];
+  return (
+    <View style={[estilos.chip, { backgroundColor: fondo, borderColor: borde }]}>
+      <Texto variante="label" color={texto}>
+        {ETIQUETA_ESTADO_DEUDA[estado]}
+      </Texto>
+    </View>
+  );
+}
+
+// Chip rosado de plazo («Quedan 3 d») o verde para «Resuelto» (pantalla 15).
+export function ChipPlazo({ texto, tono = 'rosado' }: { texto: string; tono?: 'rosado' | 'pagado' }) {
+  return (
+    <View style={[estilos.chip, tono === 'pagado' ? estilos.chipPagado : estilos.chipPlazo]}>
+      <Texto variante="label" color={tono === 'pagado' ? colors.paidText : colors.header}>
+        {texto}
+      </Texto>
+    </View>
+  );
+}
+
+// Cuadro de 40 px con un ícono: rosado (por defecto), verde para lo pagado o
+// amarillo (módulo asistido de la pantalla 23).
+const COLORES_ICONO_CUADRO = {
+  rosado: { fondo: colors.backgroundPink, icono: colors.primary },
+  pagado: { fondo: colors.paidSoft, icono: colors.paidIcon },
+  amarillo: { fondo: colors.pendingDebt, icono: colors.pendingDebtText },
+} as const;
+
+export function IconoCuadro({
+  icono,
+  tono = 'rosado',
+}: {
+  icono: keyof typeof MaterialCommunityIcons.glyphMap;
+  tono?: keyof typeof COLORES_ICONO_CUADRO;
+}) {
+  const { fondo, icono: color } = COLORES_ICONO_CUADRO[tono];
+  return (
+    <View style={[estilos.iconoCuadro, { backgroundColor: fondo }]}>
+      <MaterialCommunityIcons name={icono} size={22} color={color} />
     </View>
   );
 }
@@ -145,11 +217,28 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   progreso: {
-    height: sizes.progress,
+    height: sizes.progressMobile,
     borderRadius: radius.full,
-    backgroundColor: colors.border,
+    backgroundColor: colors.backgroundPink,
     overflow: 'hidden',
   },
-  progresoRelleno: { height: '100%', borderRadius: radius.full, backgroundColor: colors.accent },
+  progresoRelleno: { height: '100%', borderRadius: radius.full, backgroundColor: colors.primary },
+  chip: {
+    alignSelf: 'flex-start',
+    height: sizes.badge,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: sizes.borderWidth,
+    justifyContent: 'center',
+  },
+  chipPlazo: { backgroundColor: colors.backgroundPink, borderColor: colors.backgroundPink },
+  chipPagado: { backgroundColor: colors.paidSoft, borderColor: colors.paidSoft },
+  iconoCuadro: {
+    width: sizes.featureIcon,
+    height: sizes.featureIcon,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+  },
   filaDato: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
 });

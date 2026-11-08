@@ -22,7 +22,7 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 - Fondo `#FFFFFF`, encabezados `#800404` y color primario `#C00000`. Los tonos vino (`#E9C1C6`, `#9A5563`, `#5B1428`) solo van en la escalera de avisos.
 - Poppins para montos, marca y títulos; Inter para etiquetas, botones y texto.
 - Las medidas de botones, tarjetas y márgenes salen de las imágenes del prototipo.
-- Montos con `formatearSoles`, alineados a la derecha.
+- Montos con `formatearSoles`. En filas y tablas van alineados a la derecha; los montos destacados de tarjetas siguen la alineación de la imagen del prototipo.
 
 ## Reglas de datos
 
