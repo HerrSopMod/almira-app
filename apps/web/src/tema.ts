@@ -1,4 +1,4 @@
-import { colors, fontFamily, radius, sizes, spacing } from '@almira/shared';
+import { colors, displayFontFamily, fontFamily, radius, sizes, spacing } from '@almira/shared';
 
 // estilos.css solo consume estas variables: los valores viven en @almira/shared.
 export function aplicarTokens() {
@@ -18,6 +18,7 @@ export function aplicarTokens() {
     '--color-critico': colors.danger,
     '--color-critico-suave': colors.dangerSoft,
     '--fuente': `${fontFamily}, system-ui, sans-serif`,
+    '--fuente-titulos': `${displayFontFamily}, ${fontFamily}, system-ui, sans-serif`,
     '--radio-md': `${radius.md}px`,
     '--radio-insignia': `${radius.badge}px`,
     '--alto-boton': `${sizes.button}px`,

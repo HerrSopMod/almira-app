@@ -9,19 +9,29 @@ type Props = {
   pie?: ReactNode;
   // Dentro de las pestañas, la barra inferior ya cubre el área segura.
   conPestanas?: boolean;
+  // El encabezado (por ejemplo, BarraSuperior) pinta el área de la hora y la batería.
+  encabezadoHastaArriba?: boolean;
+  separacion?: keyof typeof spacing;
 };
 
-export function Pantalla({ children, encabezado, pie, conPestanas }: Props) {
+export function Pantalla({
+  children,
+  encabezado,
+  pie,
+  conPestanas,
+  encabezadoHastaArriba,
+  separacion = 'xl',
+}: Props) {
   const { top, bottom } = useSafeAreaInsets();
   const margenInferior = conPestanas ? 0 : bottom;
   return (
-    <View style={[estilos.raiz, { paddingTop: top }]}>
+    <View style={[estilos.raiz, { paddingTop: encabezadoHastaArriba ? 0 : top }]}>
       {encabezado}
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           estilos.contenido,
-          { paddingBottom: spacing.lg + (pie ? 0 : margenInferior) },
+          { gap: spacing[separacion], paddingBottom: spacing.lg + (pie ? 0 : margenInferior) },
         ]}
       >
         {children}
@@ -38,7 +48,6 @@ const estilos = StyleSheet.create({
   contenido: {
     paddingHorizontal: spacing.margin,
     paddingTop: spacing.md,
-    gap: spacing.xl,
   },
   pie: {
     paddingHorizontal: spacing.margin,

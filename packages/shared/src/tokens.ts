@@ -1,85 +1,56 @@
-// Tokens de docs/design/.../civic_clarity/DESIGN.md.
-// Cuando el front matter y el texto de DESIGN.md difieren, manda el texto:
-// fondo y superficies blancos (#FFFFFF) y color principal #0B7F86.
-
-const paletaFrontMatter = {
-  surfaceDim: '#C3DFE4',
-  surfaceContainerLowest: '#FFFFFF',
-  surfaceContainerLow: '#DCF9FE',
-  surfaceContainer: '#D7F3F8',
-  surfaceContainerHigh: '#D1EDF2',
-  surfaceContainerHighest: '#CBE8ED',
-  surfaceVariant: '#CBE8ED',
-  surfaceTint: '#00696F',
-  onSurface: '#031F23',
-  onSurfaceVariant: '#3E494A',
-  inverseSurface: '#1A3438',
-  inverseOnSurface: '#D9F6FB',
-  outline: '#6E797A',
-  outlineVariant: '#BDC9C9',
-  onBackground: '#031F23',
-  onPrimary: '#FFFFFF',
-  primaryContainer: '#0B7F86',
-  onPrimaryContainer: '#E8FDFF',
-  inversePrimary: '#79D5DC',
-  primaryFixed: '#96F1F9',
-  primaryFixedDim: '#79D5DC',
-  onPrimaryFixed: '#002022',
-  onPrimaryFixedVariant: '#004F54',
-  secondary: '#006A67',
-  onSecondary: '#FFFFFF',
-  secondaryContainer: '#6EF7F1',
-  onSecondaryContainer: '#00706D',
-  secondaryFixed: '#6EF7F1',
-  secondaryFixedDim: '#4CDAD5',
-  onSecondaryFixed: '#00201F',
-  onSecondaryFixedVariant: '#00504D',
-  tertiary: '#4C5D5D',
-  onTertiary: '#FFFFFF',
-  tertiaryContainer: '#647675',
-  onTertiaryContainer: '#EAFDFC',
-  tertiaryFixed: '#D3E6E5',
-  tertiaryFixedDim: '#B8CAC9',
-  onTertiaryFixed: '#0D1E1E',
-  onTertiaryFixedVariant: '#394A4A',
-  error: '#BA1A1A',
-  onError: '#FFFFFF',
-  errorContainer: '#FFDAD6',
-  onErrorContainer: '#93000A',
-} as const;
+// Colores de la guía de estilos del prototipo de Figma
+// (docs/design/prototipo/general/00-guia-de-estilos.png y LEEME.md).
+// Los tonos vino (notice1 a notice3) solo van en la escalera de avisos.
 
 export const colors = {
-  ...paletaFrontMatter,
-
-  primary: '#0B7F86',
+  primary: '#C00000',
+  onPrimary: '#FFFFFF',
+  header: '#800404',
   background: '#FFFFFF',
   surface: '#FFFFFF',
   surfaceBright: '#FFFFFF',
+  backgroundPink: '#F7ECEC',
+  neutral: '#E8E8E8',
+  chartSecondary: '#F4A6A6',
 
-  accent: '#2FB7B2',
-  highlight: '#EAFDFB',
-  text: '#0F2A2E',
-  textSecondary: '#5B6B70',
-  border: '#D6E3E4',
+  accent: '#F4A6A6',
+  highlight: '#F7ECEC',
+  text: '#2B2B2B',
+  textSecondary: '#595959',
+  border: '#E8E8E8',
+  lines: '#808080',
 
-  success: '#2E9E6B',
-  successSoft: '#EAF6F0',
-  warning: '#C98A00',
-  warningSoft: '#FBF5E6',
-  danger: '#D64545',
-  dangerSoft: '#FAEAEA',
+  pendingDebt: '#FFFFCC',
+  paid: '#2E8B57',
+  paidSoft: '#E2F3E8',
+  // Texto sobre Pagado claro, medido en la pantalla 03 del prototipo.
+  paidText: '#14563B',
 
-  scrim: 'rgba(15, 42, 46, 0.4)',
+  success: '#2E8B57',
+  successSoft: '#E2F3E8',
+  warning: '#2B2B2B',
+  warningSoft: '#FFFFCC',
+  danger: '#C00000',
+  dangerSoft: '#F7ECEC',
+
+  notice1: '#E9C1C6',
+  notice2: '#9A5563',
+  notice3: '#5B1428',
+
+  scrim: 'rgba(43, 43, 43, 0.4)',
 } as const;
 
 export const spacing = {
   xs: 4,
   sm: 8,
+  // Separación entre bloques medida en las pantallas del prototipo.
+  block: 12,
   md: 16,
   lg: 20,
   xl: 24,
   gutter: 16,
-  margin: 20,
+  // Márgenes laterales medidos en las pantallas móviles del prototipo.
+  margin: 18,
 } as const;
 
 export const radius = {
@@ -92,10 +63,16 @@ export const radius = {
   full: 9999,
 } as const;
 
+// Medidas tomadas de las imágenes del prototipo (docs/design/prototipo/movil).
 export const sizes = {
-  button: 52,
+  button: 48,
   buttonTertiary: 48,
-  input: 52,
+  input: 46,
+  selector: 48,
+  headerBar: 56,
+  hero: 280,
+  brandIcon: 58,
+  featureIcon: 40,
   tabBar: 64,
   badge: 24,
   progress: 6,
@@ -104,6 +81,7 @@ export const sizes = {
 } as const;
 
 export const fontFamily = 'Inter';
+export const displayFontFamily = 'Poppins';
 
 export type EstiloTexto = {
   fontSize: number;
@@ -113,6 +91,7 @@ export type EstiloTexto = {
 };
 
 export const typography = {
+  brand: { fontSize: 36, fontWeight: '700', lineHeight: 44 },
   displayCurrency: { fontSize: 32, fontWeight: '700', lineHeight: 38, letterSpacing: -0.64 },
   headlineLg: { fontSize: 24, fontWeight: '700', lineHeight: 32, letterSpacing: -0.24 },
   headlineMd: { fontSize: 20, fontWeight: '600', lineHeight: 28 },
@@ -121,9 +100,20 @@ export const typography = {
   bodyLgMedium: { fontSize: 16, fontWeight: '500', lineHeight: 24 },
   bodyMd: { fontSize: 14, fontWeight: '400', lineHeight: 20 },
   bodyMdMedium: { fontSize: 14, fontWeight: '500', lineHeight: 20 },
+  label: { fontSize: 14, fontWeight: '600', lineHeight: 20 },
+  labelLg: { fontSize: 16, fontWeight: '600', lineHeight: 22 },
+  caption: { fontSize: 12, fontWeight: '400', lineHeight: 16 },
   button: { fontSize: 16, fontWeight: '600', lineHeight: 20 },
   labelSm: { fontSize: 12, fontWeight: '600', lineHeight: 16, letterSpacing: 0.24 },
   tabLabel: { fontSize: 11, fontWeight: '500', lineHeight: 14 },
 } as const satisfies Record<string, EstiloTexto>;
 
-export const tokens = { colors, spacing, radius, sizes, fontFamily, typography } as const;
+export const tokens = {
+  colors,
+  spacing,
+  radius,
+  sizes,
+  fontFamily,
+  displayFontFamily,
+  typography,
+} as const;

@@ -29,6 +29,7 @@ const EXPLICACION: Record<TipoDeuda, string> = {
     'El impuesto predial se calcula aplicando la escala progresiva acumulativa sobre el autovalúo total de tu predio registrado ante la municipalidad. Los intereses corresponden a la Tasa de Interés Moratorio legal vigente.',
   arbitrios:
     'Los arbitrios cubren los servicios de limpieza pública, parques y serenazgo que presta tu municipalidad. Los intereses corresponden a la Tasa de Interés Moratorio legal vigente.',
+  multa: 'Es una sanción que registró tu municipalidad. Si crees que es incorrecta, puedes reclamarla.',
 };
 
 export default function DetalleDeuda() {

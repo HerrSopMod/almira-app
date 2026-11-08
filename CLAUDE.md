@@ -11,16 +11,17 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 ## Reglas de producto
 
 - Almira es la marca fija. La municipalidad es un dato seleccionable: nunca escribas el nombre, teléfono o logo de una municipalidad en el código de la interfaz.
-- No inventes funciones fuera de las pantallas de `docs/design`.
+- No inventes funciones fuera de las pantallas de `docs/design/prototipo`.
 - No afirmes en la interfaz certificaciones, validaciones o integraciones que la app no tenga.
 - Textos en español de Perú, tratando al vecino de "tú".
 
 ## Reglas de diseño
 
+- La fuente de verdad del diseño es `docs/design/prototipo`: lee `LEEME.md`, copia los textos de `TEXTOS.md` y sigue las imágenes. Las pantallas de Stitch quedan solo como referencia anterior.
 - Usa los tokens de `@almira/shared`. No escribas colores ni medidas sueltas.
-- Fondo `#FFFFFF` y color principal `#0B7F86`. Si el front matter de `DESIGN.md` difiere de su texto, manda el texto.
-- Botones de 52 px y ancho completo con márgenes de 20 px: no los pongas dentro de tarjetas.
-- Máximo un bloque `Destacado` por pantalla. Los colores semánticos solo van en insignias y estados.
+- Fondo `#FFFFFF`, encabezados `#800404` y color primario `#C00000`. Los tonos vino (`#E9C1C6`, `#9A5563`, `#5B1428`) solo van en la escalera de avisos.
+- Poppins para montos, marca y títulos; Inter para etiquetas, botones y texto.
+- Las medidas de botones, tarjetas y márgenes salen de las imágenes del prototipo.
 - Montos con `formatearSoles`, alineados a la derecha.
 
 ## Reglas de datos
