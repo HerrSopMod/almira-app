@@ -79,6 +79,8 @@ export const radius = {
 export const sizes = {
   button: 48,
   buttonTertiary: 48,
+  // Botones bajos del asistente (pantalla 12).
+  buttonCompact: 36,
   input: 46,
   selector: 48,
   headerBar: 56,
@@ -98,6 +100,16 @@ export const sizes = {
   badge: 24,
   // Chips de canal de la pantalla 11.
   chip: 35,
+  // Preguntas sugeridas, campo y botón de enviar del asistente (pantalla 12).
+  suggestionChip: 32,
+  chatInput: 40,
+  // Círculo del ícono de Atención humana (pantalla 14).
+  attentionIcon: 56,
+  // Perilla del deslizador de cuotas (pantalla 13).
+  sliderThumb: 22,
+  sliderThumbBorder: 3,
+  // Zona de toque del deslizador, más alta que el riel para agarrarlo fácil.
+  sliderTouch: 44,
   // Pasos de la escalera de avisos (pantallas 09 y 10): alto mínimo y columna del número.
   noticeStep: 56,
   noticeNumber: 20,

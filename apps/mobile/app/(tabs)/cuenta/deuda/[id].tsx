@@ -50,7 +50,6 @@ export default function DetalleDeuda() {
   }
 
   const total = totalDeuda(deuda);
-  const irAlAsistente = () => router.navigate('/asistente');
 
   return (
     <Pantalla conPestanas encabezadoHastaArriba separacion="block" encabezado={encabezado}>
@@ -96,8 +95,16 @@ export default function DetalleDeuda() {
           }
         />
       ) : null}
-      <Boton tipo="secundario" titulo="Simular cuotas" onPress={irAlAsistente} />
-      <Boton tipo="linea" titulo="Preguntar al asistente" onPress={irAlAsistente} />
+      <Boton
+        tipo="secundario"
+        titulo="Simular cuotas"
+        onPress={() => router.push('/simulacion-cuotas')}
+      />
+      <Boton
+        tipo="linea"
+        titulo="Preguntar al asistente"
+        onPress={() => router.navigate('/asistente')}
+      />
       <Boton
         tipo="terciario"
         titulo="¿Crees que este cobro es incorrecto? Reclámalo"

@@ -1,152 +1,206 @@
 import {
+  bienvenidaAsistente,
   colors,
-  deudasPendientes,
-  formatearSoles,
+  PREGUNTAS_SUGERIDAS,
   radius,
+  responderAsistente,
   sizes,
   spacing,
-  sumarDeudas,
   typography,
+  USUARIO_EJEMPLO,
+  type AccionAsistente,
 } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { Destacado, FilaDato, Tarjeta } from '@/components/Bloques';
-import { Boton } from '@/components/Boton';
+import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useRef, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+  type ScrollViewInstance,
+} from 'react-native';
 import { BarraSuperior } from '@/components/BarraSuperior';
-import { Pantalla } from '@/components/Pantalla';
+import { Boton } from '@/components/Boton';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
-const CUOTAS = [2, 3, 4, 6];
-const BIENVENIDA =
-  '¡Hola! Soy tu asistente de rentas. Puedes consultar tu estado de cuenta, cronograma tributario o cómo gestionar beneficios por pronto pago. ¿En qué te oriento hoy?';
-const SIN_CONEXION =
-  'Este esqueleto usa respuestas de ejemplo. Prueba con las preguntas frecuentes.';
+type Mensaje = {
+  id: number;
+  autor: 'asistente' | 'vecino';
+  texto: string;
+  accion?: AccionAsistente;
+};
 
+const irASimulacion = () => router.push('/simulacion-cuotas');
+const irAAtencionHumana = () => router.push('/atencion-humana');
+
+// Pantalla 12 del prototipo. No hay IA: responderAsistente usa reglas fijas y la
+// conversación vive solo en esta pantalla.
 export default function Asistente() {
-  const { municipalidad, deudas } = useDatosMunicipales();
-  const total = sumarDeudas(deudasPendientes(deudas));
-
-  const [cuotas, setCuotas] = useState(3);
-  const [simulador, setSimulador] = useState(false);
+  const { deudas } = useDatosMunicipales();
+  const [mensajes, setMensajes] = useState<Mensaje[]>([
+    { id: 0, autor: 'asistente', texto: bienvenidaAsistente(USUARIO_EJEMPLO.nombre) },
+  ]);
   const [consulta, setConsulta] = useState('');
-  const [respuesta, setRespuesta] = useState(BIENVENIDA);
+  const lista = useRef<ScrollViewInstance>(null);
 
-  const enviar = () => {
-    if (consulta.trim() === '') return;
-    setRespuesta(SIN_CONEXION);
+  const preguntar = (pregunta: string) => {
+    const texto = pregunta.trim();
+    if (texto === '') return;
+    const respuesta = responderAsistente(texto, deudas);
+    setMensajes((previos) => [
+      ...previos,
+      { id: previos.length, autor: 'vecino', texto },
+      { id: previos.length + 1, autor: 'asistente', ...respuesta },
+    ]);
     setConsulta('');
   };
 
   return (
-    <Pantalla
-      conPestanas
-      encabezadoHastaArriba
-      encabezado={<BarraSuperior titulo="Asistente con IA" />}
-      pie={
+    <View style={estilos.raiz}>
+      <BarraSuperior titulo="Asistente con IA" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={estilos.flexible}
+      >
+        <ScrollView
+          ref={lista}
+          keyboardShouldPersistTaps="handled"
+          onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
+          contentContainerStyle={estilos.mensajes}
+        >
+          <Texto variante="caption" color={colors.textSecondary} alineacion="center">
+            Prototipo: respuestas fijas de ejemplo, sin IA real.
+          </Texto>
+          {mensajes.map((mensaje) =>
+            mensaje.autor === 'vecino' ? (
+              <View key={mensaje.id} style={[estilos.burbuja, estilos.vecino]}>
+                <Texto>{mensaje.texto}</Texto>
+              </View>
+            ) : (
+              <View key={mensaje.id} style={[estilos.burbuja, estilos.asistente]}>
+                <Texto>{mensaje.texto}</Texto>
+                {mensaje.accion === 'simular_cuotas' ? (
+                  <Boton compacto titulo="Simular cuotas" onPress={irASimulacion} />
+                ) : null}
+              </View>
+            ),
+          )}
+        </ScrollView>
+
+        <View style={estilos.acciones}>
+          <View style={estilos.fila}>
+            <View style={estilos.flexible}>
+              <Boton compacto titulo="Simular cuotas" onPress={irASimulacion} />
+            </View>
+            <View style={estilos.flexible}>
+              <Boton
+                compacto
+                tipo="contorno"
+                titulo="Hablar con una persona"
+                onPress={irAAtencionHumana}
+              />
+            </View>
+          </View>
+          <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
+            La IA orienta, no decide.
+          </Texto>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={estilos.sugerencias}
+          >
+            {PREGUNTAS_SUGERIDAS.map((pregunta) => (
+              <Pressable
+                key={pregunta}
+                accessibilityRole="button"
+                onPress={() => preguntar(pregunta)}
+                style={estilos.sugerencia}
+              >
+                <Texto variante="label" color={colors.primary}>
+                  {pregunta}
+                </Texto>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
         <View style={estilos.entrada}>
           <TextInput
-            accessibilityLabel="Escribe tu consulta tributaria"
-            placeholder="Escribe tu consulta tributaria..."
+            accessibilityLabel="Escribe tu duda"
+            placeholder="Escribe tu duda…"
             placeholderTextColor={colors.textSecondary}
             value={consulta}
             onChangeText={setConsulta}
-            onSubmitEditing={enviar}
+            onSubmitEditing={() => preguntar(consulta)}
+            returnKeyType="send"
             style={estilos.campo}
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Enviar consulta tributaria"
-            onPress={enviar}
+            accessibilityLabel="Enviar"
+            onPress={() => preguntar(consulta)}
             style={estilos.enviar}
           >
-            <MaterialIcons name="send" size={24} color={colors.onPrimary} />
+            <Feather name="send" size={20} color={colors.onPrimary} />
           </Pressable>
         </View>
-      }
-    >
-      <View style={estilos.grupo}>
-        <Texto variante="headlineLg">Asistente tributario</Texto>
-        <Texto color={colors.textSecondary}>Respuestas claras sobre tus arbitrios y predial.</Texto>
-      </View>
-
-      <Tarjeta>
-        <Texto>{respuesta}</Texto>
-      </Tarjeta>
-
-      <View style={estilos.grupo}>
-        <Texto variante="headlineMd">Preguntas frecuentes</Texto>
-        <Boton
-          tipo="secundario"
-          titulo="¿Cuánto debo en total?"
-          onPress={() =>
-            setRespuesta(`Tu deuda total pendiente es ${formatearSoles(total)} en ${municipalidad.nombre}.`)
-          }
-        />
-        <Boton tipo="secundario" titulo="Simular pago en cuotas" onPress={() => setSimulador(true)} />
-        <Boton
-          tipo="secundario"
-          titulo="¿Cómo reclamar un arbitrio?"
-          onPress={() =>
-            setRespuesta(
-              'Entra a Reclamos, elige Nuevo reclamo con evidencia y sigue los tres pasos: tipo, foto y GPS, y detalle.',
-            )
-          }
-        />
-      </View>
-
-      {simulador ? (
-        <>
-          <Tarjeta>
-            <Texto variante="headlineSm">Simulador de fraccionamiento</Texto>
-            <FilaDato etiqueta="Deuda a simular" valor={formatearSoles(total)} />
-            <Texto variante="bodyMdMedium">Selecciona número de cuotas:</Texto>
-            <View style={estilos.cuotas}>
-              {CUOTAS.map((opcion) => (
-                <Pressable
-                  key={opcion}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${opcion} meses`}
-                  accessibilityState={{ selected: cuotas === opcion }}
-                  onPress={() => setCuotas(opcion)}
-                  style={[estilos.cuota, cuotas === opcion && estilos.cuotaActiva]}
-                >
-                  <Texto
-                    variante="bodyLgMedium"
-                    color={cuotas === opcion ? colors.onPrimary : colors.text}
-                  >
-                    {opcion}
-                  </Texto>
-                  <Texto
-                    variante="labelSm"
-                    color={cuotas === opcion ? colors.onPrimary : colors.textSecondary}
-                  >
-                    meses
-                  </Texto>
-                </Pressable>
-              ))}
-            </View>
-            <FilaDato
-              etiqueta="Monto mensual proyectado"
-              valor={`${cuotas} cuotas de ${formatearSoles(total / cuotas)}`}
-            />
-          </Tarjeta>
-          <Destacado
-            texto={`Simulación orientativa, no es un compromiso de pago. El fraccionamiento oficial requiere solicitud formal según TUPA de la ${municipalidad.nombre}.`}
-          />
-        </>
-      ) : null}
-    </Pantalla>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  grupo: { gap: spacing.sm },
-  entrada: { flexDirection: 'row', gap: spacing.sm },
+  raiz: { flex: 1, backgroundColor: colors.background },
+  flexible: { flex: 1 },
+  mensajes: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.margin,
+    paddingVertical: spacing.md,
+  },
+  burbuja: {
+    gap: spacing.md,
+    paddingHorizontal: spacing.block,
+    paddingVertical: spacing.block,
+    borderRadius: radius.md,
+  },
+  asistente: {
+    alignSelf: 'flex-start',
+    width: sizes.bubbleWidth,
+    backgroundColor: colors.neutral,
+  },
+  vecino: {
+    alignSelf: 'flex-end',
+    maxWidth: sizes.bubbleWidth,
+    backgroundColor: colors.backgroundPink,
+  },
+  acciones: { gap: spacing.sm, paddingTop: spacing.sm, paddingBottom: spacing.block },
+  fila: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.margin },
+  sugerencias: { gap: spacing.sm, paddingHorizontal: spacing.margin },
+  sugerencia: {
+    height: sizes.suggestionChip,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.block,
+    borderRadius: radius.full,
+    backgroundColor: colors.backgroundPink,
+  },
+  entrada: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.margin,
+    paddingVertical: spacing.block,
+    borderTopWidth: sizes.borderWidth,
+    borderTopColor: colors.border,
+  },
   campo: {
     flex: 1,
-    height: sizes.input,
+    height: sizes.chatInput,
     paddingHorizontal: spacing.md,
     borderWidth: sizes.borderWidth,
     borderColor: colors.border,
@@ -156,22 +210,11 @@ const estilos = StyleSheet.create({
     fontSize: typography.bodyLg.fontSize,
   },
   enviar: {
-    width: sizes.button,
-    height: sizes.button,
+    width: sizes.chatInput,
+    height: sizes.chatInput,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,
     borderRadius: radius.md,
   },
-  cuotas: { flexDirection: 'row', gap: spacing.sm },
-  cuota: {
-    flex: 1,
-    minHeight: sizes.button,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-  },
-  cuotaActiva: { backgroundColor: colors.primary, borderColor: colors.primary },
 });

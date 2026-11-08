@@ -35,6 +35,14 @@ import {
   tipoAvisoActual,
   tituloAviso,
 } from './avisos';
+import {
+  bienvenidaAsistente,
+  deudasASimular,
+  PREGUNTAS_SUGERIDAS,
+  RESPUESTA_SIN_REGLA,
+  responderAsistente,
+  simularCuotas,
+} from './asistente';
 
 describe('tokens', () => {
   it('aplica los colores de la guía de estilos del prototipo', () => {
@@ -258,5 +266,56 @@ describe('avisos', () => {
     ).toBe(
       'Hola, Rosa. Tus arbitrios de S/ 80.50 vencen el 30 de noviembre. Pagar a tiempo te evita intereses.',
     );
+  });
+});
+
+describe('asistente', () => {
+  const deudasDeRosa = deudas.filter((deuda) => deuda.vecinoId === 'v-rosa-li');
+  const sinPendientes = deudasDeRosa.map((deuda) => ({ ...deuda, estado: 'pagada' as const }));
+
+  it('saluda con el texto del prototipo', () => {
+    expect(bienvenidaAsistente('Rosa')).toBe(
+      'Hola, Rosa. Soy el asistente de Almira. Puedo explicarte tus deudas y simular cuotas. Yo oriento: la decisión es de la municipalidad.',
+    );
+  });
+
+  it('responde las preguntas sugeridas con reglas fijas', () => {
+    expect(responderAsistente(PREGUNTAS_SUGERIDAS[0], deudasDeRosa)).toEqual({
+      texto: 'Puedo simular cuotas con los beneficios vigentes. La decisión es de la municipalidad.',
+      accion: 'simular_cuotas',
+    });
+    const multa = responderAsistente(PREGUNTAS_SUGERIDAS[1], deudasDeRosa);
+    expect(multa.texto).toContain(`Multa administrativa de ${formatearSoles(40)}`);
+    expect(multa.texto).toContain('15 de octubre de 2026');
+    expect(multa.texto).toContain('La decisión es de la municipalidad.');
+    expect(multa.accion).toBeUndefined();
+  });
+
+  it('entiende variantes sin tildes y orienta cuando no hay regla', () => {
+    expect(responderAsistente('quiero FRACCIONAR', deudasDeRosa).accion).toBe('simular_cuotas');
+    expect(responderAsistente('¿cuál es el horario?', deudasDeRosa).texto).toBe(RESPUESTA_SIN_REGLA);
+  });
+
+  it('no ofrece simular si no hay deudas pendientes', () => {
+    expect(responderAsistente('cuotas', sinPendientes).accion).toBeUndefined();
+    expect(responderAsistente('multa', sinPendientes).texto).toBe(
+      'No tienes multas pendientes en esta municipalidad.',
+    );
+  });
+
+  it('elige las deudas según el alcance de la simulación', () => {
+    expect(sumarDeudas(deudasASimular(deudasDeRosa, 'toda'))).toBe(120.5);
+    expect(sumarDeudas(deudasASimular(deudasDeRosa, 'mora'))).toBe(40);
+  });
+
+  it('reproduce la simulación del prototipo con la tasa ilustrativa', () => {
+    expect(simularCuotas(deudasASimular(deudasDeRosa, 'toda'), 6)).toEqual({
+      deuda: 120.5,
+      cuotas: 6,
+      cuotaMensual: 20.79,
+      interes: 4.25,
+      total: 124.75,
+    });
+    expect(simularCuotas(deudasASimular(deudasDeRosa, 'mora'), 4, 0).cuotaMensual).toBe(10);
   });
 });

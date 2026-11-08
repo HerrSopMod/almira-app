@@ -21,13 +21,14 @@ export function Separador() {
 }
 
 // Tonos de los avisos: "primario" es el de siempre; "informacion" y "exito"
-// siguen las pantallas 02 y 03 del prototipo.
-type TonoDestacado = 'primario' | 'informacion' | 'exito';
+// siguen las pantallas 02 y 03 del prototipo; "aviso" es el amarillo de la 13.
+type TonoDestacado = 'primario' | 'informacion' | 'exito' | 'aviso';
 
 const COLORES_DESTACADO: Record<TonoDestacado, { texto: string; fondo: string }> = {
   primario: { texto: colors.primary, fondo: colors.highlight },
   informacion: { texto: colors.header, fondo: colors.backgroundPinkSoft },
   exito: { texto: colors.paidText, fondo: colors.paidSoft },
+  aviso: { texto: colors.pendingDebtText, fondo: colors.pendingDebt },
 };
 
 // DESIGN.md: como máximo uno por pantalla.

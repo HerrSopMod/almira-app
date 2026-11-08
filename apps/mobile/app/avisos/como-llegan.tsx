@@ -1,6 +1,7 @@
 import {
   colors,
   mensajeAviso,
+  MINUTOS_ESPERA_EJEMPLO,
   obraParaAvisos,
   radius,
   sizes,
@@ -13,6 +14,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Destacado } from '@/components/Bloques';
+import { Chips } from '@/components/Chips';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
@@ -20,9 +22,9 @@ import { useDatosMunicipales } from '@/sesion';
 
 type Canal = 'whatsapp' | 'sms';
 
-const CHIPS: { canal: Canal; titulo: string }[] = [
-  { canal: 'whatsapp', titulo: 'WhatsApp' },
-  { canal: 'sms', titulo: 'SMS (sin smartphone)' },
+const CHIPS: { valor: Canal; titulo: string }[] = [
+  { valor: 'whatsapp', titulo: 'WhatsApp' },
+  { valor: 'sms', titulo: 'SMS (sin smartphone)' },
 ];
 
 const TITULO_EJEMPLO: Record<TipoRecordatorio, string> = {
@@ -53,24 +55,7 @@ export default function ComoLleganLosAvisos() {
       separacion="block"
       encabezado={<BarraSuperior titulo="Cómo llegan los avisos" />}
     >
-      <View accessibilityRole="tablist" style={estilos.chips}>
-        {CHIPS.map(({ canal: opcion, titulo }) => {
-          const activo = canal === opcion;
-          return (
-            <Pressable
-              key={opcion}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: activo }}
-              onPress={() => setCanal(opcion)}
-              style={[estilos.chip, activo && estilos.chipActivo]}
-            >
-              <Texto variante="label" color={activo ? colors.onPrimary : colors.primary}>
-                {titulo}
-              </Texto>
-            </Pressable>
-          );
-        })}
-      </View>
+      <Chips opciones={CHIPS} elegida={canal} onElegir={setCanal} />
 
       <View>
         <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
@@ -107,7 +92,7 @@ export default function ComoLleganLosAvisos() {
       </Pressable>
       <View style={[estilos.burbuja, estilos.recibida]}>
         <Texto variante="bodyMd">
-          Te derivamos a Atención al vecino. Tiempo estimado: 12 minutos.
+          Te derivamos a Atención al vecino. Tiempo estimado: {MINUTOS_ESPERA_EJEMPLO} minutos.
         </Texto>
       </View>
 
@@ -120,17 +105,6 @@ export default function ComoLleganLosAvisos() {
 }
 
 const estilos = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: {
-    height: sizes.chip,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.full,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.primary,
-    backgroundColor: colors.surface,
-  },
-  chipActivo: { backgroundColor: colors.primary },
   burbuja: {
     gap: spacing.xs,
     padding: spacing.block,
