@@ -5,13 +5,20 @@ export type Zona = (typeof ZONAS)[number];
 
 export type RolPersonal = 'administrador' | 'operador';
 export type CanalAviso = 'whatsapp' | 'sms' | 'app';
-export type TipoDeuda = 'predial' | 'arbitrios';
+export type TipoDeuda = 'predial' | 'arbitrios' | 'multa';
 export type EstadoDeuda = 'vigente' | 'vencida' | 'pagada';
 export type MedioPago = 'billetera' | 'tarjeta' | 'pagoefectivo';
 export type EstadoPago = 'pendiente' | 'confirmado' | 'rechazado';
 export type TipoRecordatorio = 'preventivo' | 'mora' | 'previo_coactiva';
 export type EstadoRecordatorio = 'programado' | 'enviado' | 'entregado' | 'fallido';
-export type TipoReclamo = 'basura' | 'bache' | 'luminaria';
+export type TipoReclamo =
+  | 'pistas_veredas'
+  | 'alumbrado'
+  | 'limpieza'
+  | 'vehiculo_mal_estacionado'
+  | 'deposito_vehicular'
+  | 'cobro_indebido'
+  | 'otro';
 export type EstadoReclamo = 'en_atencion' | 'derivado' | 'resuelto';
 export type EstadoObra = 'en_ejecucion' | 'finalizada';
 
@@ -38,6 +45,7 @@ export interface Vecino {
   municipalidadId: string;
   userId: string | null;
   dni: string;
+  codigoContribuyente: string | null;
   nombre: string;
   telefono: string | null;
   canalPreferido: CanalAviso;
@@ -101,9 +109,12 @@ export interface Reclamo {
   estado: EstadoReclamo;
   area: string | null;
   fotoRuta: string;
+  direccion: string | null;
   latitud: number | null;
   longitud: number | null;
   plazo: string | null;
+  plazoDias: number | null;
+  creadoEn: string;
 }
 
 export interface Obra {
@@ -117,4 +128,10 @@ export interface Obra {
   montoAsignado: number;
   montoEjecutado: number;
   fotos: number;
+  publicada: boolean;
+  inicio: string | null;
+  actualizadaEn: string;
+  // Parte del presupuesto que sale de tributos del distrito; el resto son transferencias.
+  porcentajeTributos: number | null;
+  hitos: string[];
 }

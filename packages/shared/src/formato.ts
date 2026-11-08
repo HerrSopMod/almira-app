@@ -57,8 +57,8 @@ export function deudasPendientes(deudas: Deuda[]): Deuda[] {
 }
 
 export const ETIQUETA_ESTADO_DEUDA: Record<EstadoDeuda, string> = {
-  vigente: 'Vigente',
-  vencida: 'Vencida',
+  vigente: 'Por vencer',
+  vencida: 'En mora',
   pagada: 'Pagada',
 };
 
@@ -70,7 +70,7 @@ export const ETIQUETA_ESTADO_RECLAMO: Record<EstadoReclamo, string> = {
 
 export const ETIQUETA_ESTADO_OBRA: Record<EstadoObra, string> = {
   en_ejecucion: 'En ejecución',
-  finalizada: 'Finalizada',
+  finalizada: 'Concluida',
 };
 
 export const ETIQUETA_ESTADO_PAGO: Record<EstadoPago, string> = {
@@ -99,13 +99,17 @@ export const ETIQUETA_MEDIO_PAGO: Record<MedioPago, string> = {
 };
 
 export const ETIQUETA_TIPO_RECORDATORIO: Record<TipoRecordatorio, string> = {
-  preventivo: 'Aviso preventivo',
+  preventivo: 'Recordatorio amable',
   mora: 'Aviso de mora',
   previo_coactiva: 'Aviso previo a cobranza coactiva',
 };
 
 export const ETIQUETA_TIPO_RECLAMO: Record<TipoReclamo, string> = {
-  basura: 'Recojo de basura',
-  bache: 'Bache en la pista',
-  luminaria: 'Luminaria apagada',
+  pistas_veredas: 'Pistas y veredas',
+  alumbrado: 'Alumbrado público',
+  limpieza: 'Limpieza pública',
+  vehiculo_mal_estacionado: 'Vehículo mal estacionado',
+  deposito_vehicular: 'Depósito vehicular',
+  cobro_indebido: 'Cobro indebido',
+  otro: 'Otro',
 };

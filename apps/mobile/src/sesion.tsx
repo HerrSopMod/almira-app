@@ -62,7 +62,7 @@ export function useDatosMunicipales() {
         ...reclamosNuevos.filter((r) => r.municipalidadId === municipalidadId),
         ...delVecino(reclamosEjemplo),
       ],
-      obras: obras.filter((o) => o.municipalidadId === municipalidadId),
+      obras: obras.filter((o) => o.municipalidadId === municipalidadId && o.publicada),
     };
   }, [municipalidadId, reclamosNuevos]);
 }

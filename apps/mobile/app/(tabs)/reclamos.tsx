@@ -37,7 +37,7 @@ export default function Reclamos() {
   const { municipalidad, vecino, reclamos } = useDatosMunicipales();
 
   const [paso, setPaso] = useState(0);
-  const [tipo, setTipo] = useState<TipoReclamo>('basura');
+  const [tipo, setTipo] = useState<TipoReclamo>('pistas_veredas');
   const [evidencia, setEvidencia] = useState(false);
   const [detalle, setDetalle] = useState('');
 
@@ -63,9 +63,12 @@ export default function Reclamos() {
       estado: 'en_atencion',
       area: null,
       fotoRuta: 'ejemplo/nuevo.jpg',
+      direccion: null,
       latitud: -12.1198,
       longitud: -77.0294,
       plazo: null,
+      plazoDias: null,
+      creadoEn: new Date().toISOString(),
     });
     reiniciar();
   };
