@@ -1,11 +1,11 @@
 import {
   avisosRecibidos,
+  CANALES_AVISO,
   colors,
   ETIQUETA_CANAL,
   fechaAviso,
   HOY_EJEMPLO,
   momentoAviso,
-  radius,
   sizes,
   spacing,
   tipoAvisoActual,
@@ -16,21 +16,36 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Fragment } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Destacado, CajaIcono, PiePrototipo, Separador, Tarjeta, Vacio } from '@/components/Bloques';
+import {
+  CajaIcono,
+  Destacado,
+  Nota,
+  PiePrototipo,
+  Rotulo,
+  Separador,
+  Tarjeta,
+  Vacio,
+  type NombreIcono,
+} from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { EscaleraAvisos } from '@/components/Escalera';
+import { Interruptor } from '@/components/Interruptor';
 import { Pantalla } from '@/components/Pantalla';
-import { Radio } from '@/components/Radio';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales, useSesion } from '@/sesion';
 
-const CANALES: CanalAviso[] = ['whatsapp', 'sms', 'app'];
+const ICONO_CANAL: Record<CanalAviso, NombreIcono> = {
+  whatsapp: 'chat-bubble-outline',
+  sms: 'sms',
+  app: 'notifications-none',
+};
 
-// Pantalla 09 del prototipo.
+// Pantalla 09 (Stitch 8). Los canales van con interruptores porque se pueden
+// elegir varios; siempre queda al menos uno prendido.
 export default function Recordatorios() {
-  const { deudas, recordatorios, canalAviso } = useDatosMunicipales();
-  const { elegirCanalAviso } = useSesion();
+  const { deudas, recordatorios, canalesAviso } = useDatosMunicipales();
+  const { alternarCanalAviso } = useSesion();
   const avisos = avisosRecibidos(recordatorios).flatMap((aviso) => {
     const deuda = deudas.find((fila) => fila.id === aviso.deudaId);
     return deuda ? [{ aviso, deuda }] : [];
@@ -40,69 +55,78 @@ export default function Recordatorios() {
     <Pantalla
       conPestanas
       encabezadoHastaArriba
-      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Recordatorios" />}
     >
-      <Seccion titulo="Mis avisos" primera />
-      {avisos.length === 0 ? (
-        <Vacio texto="Aún no tienes avisos en esta municipalidad." />
-      ) : (
-        avisos.map(({ aviso, deuda }) => {
-          const titulo = tituloAviso(aviso.tipo, deuda);
-          const detalle = `${ETIQUETA_CANAL[aviso.canal]} · ${momentoAviso(fechaAviso(aviso), HOY_EJEMPLO)}`;
-          return (
-            <Pressable
-              key={aviso.id}
-              accessibilityRole="button"
-              accessibilityLabel={`${titulo}. ${detalle}`}
-              onPress={() => router.push({ pathname: '/avisos/[id]', params: { id: aviso.id } })}
-            >
-              <Tarjeta>
-                <View style={estilos.fila}>
-                  <CajaIcono icono="chat-bubble-outline" />
-                  <View style={estilos.flexible}>
-                    <Texto variante="bodyLgMedium">{titulo}</Texto>
-                    <Texto variante="bodyMd" color={colors.textSecondary}>
-                      {detalle}
-                    </Texto>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={24} color={colors.text} />
-                </View>
-              </Tarjeta>
-            </Pressable>
-          );
-        })
-      )}
+      <Destacado icono="shield" titulo="Almira te avisa; no ejecuta cobranzas coactivas" />
 
-      <Seccion titulo="Tres pasos, de menor a mayor presión" />
-      <EscaleraAvisos actual={tipoAvisoActual(recordatorios, deudas)} />
+      <View style={estilos.seccion}>
+        <Rotulo texto="Mis avisos" />
+        {avisos.length === 0 ? (
+          <Vacio texto="Aún no tienes avisos en esta municipalidad." />
+        ) : (
+          <Tarjeta>
+            {avisos.map(({ aviso, deuda }, indice) => {
+              const titulo = tituloAviso(aviso.tipo, deuda);
+              const detalle = `${ETIQUETA_CANAL[aviso.canal]} · ${momentoAviso(fechaAviso(aviso), HOY_EJEMPLO)}`;
+              return (
+                <Fragment key={aviso.id}>
+                  {indice > 0 ? <Separador /> : null}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`${titulo}. ${detalle}`}
+                    onPress={() =>
+                      router.push({ pathname: '/avisos/[id]', params: { id: aviso.id } })
+                    }
+                    style={estilos.fila}
+                  >
+                    <CajaIcono icono="chat-bubble-outline" />
+                    <View style={estilos.flexible}>
+                      <Texto variante="bodyLgMedium">{titulo}</Texto>
+                      <Texto variante="bodyMd" color={colors.textSecondary}>
+                        {detalle}
+                      </Texto>
+                    </View>
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={sizes.icon}
+                      color={colors.textSecondary}
+                    />
+                  </Pressable>
+                </Fragment>
+              );
+            })}
+          </Tarjeta>
+        )}
+      </View>
+
+      <View style={estilos.seccion}>
+        <Rotulo texto="Tres pasos, de menor a mayor presión" />
+        <EscaleraAvisos actual={tipoAvisoActual(recordatorios, deudas)} />
+      </View>
       <Boton
-        tipo="secundario"
+        tipo="terciario"
         titulo="Ver cómo llegan por WhatsApp y SMS"
         onPress={() => router.push('/avisos/como-llegan')}
       />
 
-      <Seccion titulo="¿Por dónde te avisamos?" />
-      <View accessibilityRole="radiogroup" style={estilos.canales}>
-        {CANALES.map((canal, indice) => (
-          <Fragment key={canal}>
-            {indice > 0 ? <Separador /> : null}
-            <Pressable
-              accessibilityRole="radio"
-              accessibilityState={{ checked: canalAviso === canal }}
-              onPress={() => elegirCanalAviso(canal)}
-              style={[estilos.fila, estilos.canal]}
-            >
-              <Texto variante="bodyLgMedium" style={estilos.flexible}>
-                {ETIQUETA_CANAL[canal]}
-              </Texto>
-              <Radio marcado={canalAviso === canal} />
-            </Pressable>
-          </Fragment>
-        ))}
+      <View style={estilos.seccion}>
+        <Rotulo texto="¿Por dónde te avisamos?" />
+        <Tarjeta>
+          {CANALES_AVISO.map((canal, indice) => (
+            <Fragment key={canal}>
+              {indice > 0 ? <Separador /> : null}
+              <Interruptor
+                icono={ICONO_CANAL[canal]}
+                titulo={ETIQUETA_CANAL[canal]}
+                activo={canalesAviso.includes(canal)}
+                onCambiar={() => alternarCanalAviso(canal)}
+              />
+            </Fragment>
+          ))}
+        </Tarjeta>
       </View>
 
-      <Destacado
+      <Nota
         icono="schedule"
         texto="Te contactamos 1 vez por día y 3 por semana como máximo, de 8:00 a 20:00 h. Antes de avisar verificamos si ya pagaste."
       />
@@ -111,28 +135,8 @@ export default function Recordatorios() {
   );
 }
 
-function Seccion({ titulo, primera }: { titulo: string; primera?: boolean }) {
-  return (
-    <Texto
-      variante="headlineSm"
-     
-      accessibilityRole="header"
-      style={primera ? undefined : estilos.seccion}
-    >
-      {titulo}
-    </Texto>
-  );
-}
-
 const estilos = StyleSheet.create({
+  seccion: { gap: spacing.blockDense },
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
-  seccion: { marginTop: spacing.sm },
-  canales: {
-    paddingHorizontal: spacing.md,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-  },
-  canal: { minHeight: sizes.button },
 });

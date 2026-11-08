@@ -36,6 +36,7 @@ import {
 import { colors, fontFamily, panelSizes, sizes, spacing, typography } from './tokens';
 import { mejorVariante, panelEjemplo, superaUmbral } from './panel-ejemplo';
 import {
+  alternarCanal,
   avisosRecibidos,
   mensajeAviso,
   obraParaAvisos,
@@ -248,6 +249,13 @@ describe('datos de ejemplo', () => {
 });
 
 describe('avisos', () => {
+  it('prende y apaga canales sin dejar ninguno vacío', () => {
+    expect(alternarCanal(['whatsapp'], 'sms')).toEqual(['whatsapp', 'sms']);
+    expect(alternarCanal(['app'], 'whatsapp')).toEqual(['whatsapp', 'app']);
+    expect(alternarCanal(['whatsapp', 'sms'], 'whatsapp')).toEqual(['sms']);
+    expect(alternarCanal(['sms'], 'sms')).toEqual(['sms']);
+  });
+
   const deRosa = recordatorios.filter((aviso) => aviso.vecinoId === 'v-rosa-li');
   const deudasDeRosa = deudas.filter((deuda) => deuda.vecinoId === 'v-rosa-li');
   const arbitrios = deudas.find((deuda) => deuda.id === 'd-arbitrios-4t')!;

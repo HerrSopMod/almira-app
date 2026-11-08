@@ -7,6 +7,7 @@ import {
   predios,
   reclamos as reclamosEjemplo,
   recordatorios,
+  alternarCanal,
   AREA_TIPO_RECLAMO,
   PLAZO_DIAS_RECLAMO,
   siguienteCodigoReclamo,
@@ -48,10 +49,10 @@ type Sesion = {
   elegirMunicipalidad: (id: string) => void;
   consentimientos: Consentimientos;
   guardarConsentimientos: (consentimientos: Consentimientos) => void;
-  // Canal de aviso elegido en Recordatorios, por municipalidad. Sin elección, vale
-  // el canal preferido del vecino.
-  canalesAviso: Record<string, CanalAviso>;
-  elegirCanalAviso: (canal: CanalAviso) => void;
+  // Canales de aviso prendidos en Recordatorios, por municipalidad. Sin elección,
+  // solo el canal preferido del vecino. Siempre queda al menos uno.
+  canalesAviso: Record<string, CanalAviso[]>;
+  alternarCanalAviso: (canal: CanalAviso) => void;
   reclamosNuevos: Reclamo[];
   // Guarda en memoria un reclamo de la municipalidad elegida y devuelve su id.
   registrarReclamo: (datos: NuevoReclamo) => string | null;
@@ -79,11 +80,19 @@ function momentoSimulado(): string {
   return `${HOY_EJEMPLO}T${hora}:${minutos}:00`;
 }
 
+// Canal preferido del vecino en esa municipalidad, o WhatsApp si no está registrado.
+function canalInicial(municipalidadId: string): CanalAviso {
+  const vecino = vecinos.find(
+    (v) => v.municipalidadId === municipalidadId && v.userId === USUARIO_EJEMPLO.id,
+  );
+  return vecino?.canalPreferido ?? 'whatsapp';
+}
+
 export function SesionProvider({ children }: { children: ReactNode }) {
   const [municipalidadId, elegirMunicipalidad] = useState(municipalidades[0]!.id);
   const [metodoIngreso, setMetodoIngreso] = useState<MetodoIngreso | null>(null);
   const [nombreGoogle, setNombreGoogle] = useState<string | null>(null);
-  const [canalesAviso, setCanalesAviso] = useState<Record<string, CanalAviso>>({});
+  const [canalesAviso, setCanalesAviso] = useState<Record<string, CanalAviso[]>>({});
   const [reclamosNuevos, setReclamosNuevos] = useState<Reclamo[]>([]);
   const [pagosSimulados, setPagosSimulados] = useState<Pago[]>([]);
   const [consentimientos, guardarConsentimientos] = useState<Consentimientos>({
@@ -115,8 +124,14 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       consentimientos,
       guardarConsentimientos,
       canalesAviso,
-      elegirCanalAviso: (canal) =>
-        setCanalesAviso((previos) => ({ ...previos, [municipalidadId]: canal })),
+      alternarCanalAviso: (canal) =>
+        setCanalesAviso((previos) => ({
+          ...previos,
+          [municipalidadId]: alternarCanal(
+            previos[municipalidadId] ?? [canalInicial(municipalidadId)],
+            canal,
+          ),
+        })),
       reclamosNuevos,
       registrarReclamo: ({ tipo, descripcion, direccion }) => {
         const vecino = vecinos.find(
@@ -214,7 +229,7 @@ export function useDatosMunicipales() {
         b.creadoEn.localeCompare(a.creadoEn),
       ),
       recordatorios: delVecino(recordatorios),
-      canalAviso: canalesAviso[municipalidadId] ?? vecino?.canalPreferido ?? 'whatsapp',
+      canalesAviso: canalesAviso[municipalidadId] ?? [canalInicial(municipalidadId)],
       reclamos: [
         ...reclamosNuevos.filter((r) => r.municipalidadId === municipalidadId),
         ...delVecino(reclamosEjemplo),

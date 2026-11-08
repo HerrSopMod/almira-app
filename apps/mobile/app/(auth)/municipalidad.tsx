@@ -1,5 +1,5 @@
 import { municipalidades, spacing, type Zona } from '@almira/shared';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Nota, Rotulo, TituloPantalla } from '@/components/Bloques';
@@ -25,8 +25,11 @@ const normalizar = (texto: string) =>
     .toLowerCase();
 
 // Pantalla 02d (Stitch 4). La lista sale de los datos: nunca se escribe una
-// municipalidad en la interfaz.
+// municipalidad en la interfaz. Con ?modo=cambio se abre desde Mi perfil: solo
+// cambia la municipalidad elegida (sin tocar la sesión ni los consentimientos) y vuelve.
 export default function ElegirMunicipalidad() {
+  const { modo } = useLocalSearchParams<{ modo?: string }>();
+  const cambio = modo === 'cambio';
   const { municipalidadId, elegirMunicipalidad } = useSesion();
   const activas = municipalidades.filter((m) => m.activa);
   const conFiltros = activas.length > MAXIMO_SIN_FILTROS;
@@ -48,14 +51,22 @@ export default function ElegirMunicipalidad() {
   const continuar = () => {
     if (!elegida) return;
     elegirMunicipalidad(elegida);
-    router.push('/consentimiento');
+    if (!cambio) router.push('/consentimiento');
+    else if (router.canGoBack()) router.back();
+    else router.navigate('/inicio/perfil');
   };
 
   return (
     <Pantalla
       encabezadoHastaArriba
-      encabezado={<BarraSuperior titulo="Paso 2 de 3" />}
-      pie={<Boton titulo="Continuar" deshabilitado={!elegida} onPress={continuar} />}
+      encabezado={<BarraSuperior titulo={cambio ? 'Mi municipalidad' : 'Paso 2 de 3'} />}
+      pie={
+        <Boton
+          titulo={cambio ? 'Guardar' : 'Continuar'}
+          deshabilitado={!elegida}
+          onPress={continuar}
+        />
+      }
     >
       <TituloPantalla
         titulo="Elige tu municipalidad"
@@ -103,7 +114,7 @@ export default function ElegirMunicipalidad() {
         </View>
       </View>
 
-      <Nota texto="Podrás cambiarla desde Mi perfil." />
+      {cambio ? null : <Nota texto="Podrás cambiarla desde Mi perfil." />}
     </Pantalla>
   );
 }

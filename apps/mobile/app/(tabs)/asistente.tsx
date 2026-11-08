@@ -10,7 +10,7 @@ import {
   USUARIO_EJEMPLO,
   type AccionAsistente,
 } from '@almira/shared';
-import { Feather } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -23,9 +23,10 @@ import {
   View,
   type ScrollViewInstance,
 } from 'react-native';
+import { CajaIcono, Nota, Rotulo } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
-import { Texto } from '@/components/Texto';
+import { familiaInter, Texto, useEscalaTexto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
 type Mensaje = {
@@ -38,10 +39,11 @@ type Mensaje = {
 const irASimulacion = () => router.push('/simulacion-cuotas');
 const irAAtencionHumana = () => router.push('/atencion-humana');
 
-// Pantalla 12 del prototipo. No hay IA: responderAsistente usa reglas fijas y la
-// conversación vive solo en esta pantalla.
+// Pantalla 12 (Stitch 9). No hay IA: responderAsistente usa reglas fijas y la
+// conversación vive solo en esta pantalla. El simulador está en la pantalla 13.
 export default function Asistente() {
   const { deudas } = useDatosMunicipales();
+  const escala = useEscalaTexto();
   const [mensajes, setMensajes] = useState<Mensaje[]>([
     { id: 0, autor: 'asistente', texto: bienvenidaAsistente(USUARIO_EJEMPLO.nombre) },
   ]);
@@ -70,50 +72,21 @@ export default function Asistente() {
         <ScrollView
           ref={lista}
           keyboardShouldPersistTaps="handled"
-          onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
-          contentContainerStyle={estilos.mensajes}
+          // Al entrar se ve desde arriba; con cada respuesta baja hasta el final.
+          onContentSizeChange={() => {
+            if (mensajes.length > 1) lista.current?.scrollToEnd({ animated: true });
+          }}
+          contentContainerStyle={estilos.contenido}
         >
-          <Texto variante="caption" color={colors.textSecondary} alineacion="center">
-            Prototipo: respuestas fijas de ejemplo, sin IA real.
-          </Texto>
-          {mensajes.map((mensaje) =>
-            mensaje.autor === 'vecino' ? (
-              <View key={mensaje.id} style={[estilos.burbuja, estilos.vecino]}>
-                <Texto color={colors.onPrimary}>{mensaje.texto}</Texto>
-              </View>
-            ) : (
-              <View key={mensaje.id} style={[estilos.burbuja, estilos.asistente]}>
-                <Texto>{mensaje.texto}</Texto>
-                {mensaje.accion === 'simular_cuotas' ? (
-                  <Boton titulo="Simular cuotas" onPress={irASimulacion} />
-                ) : null}
-              </View>
-            ),
-          )}
-        </ScrollView>
-
-        <View style={estilos.acciones}>
-          <View style={estilos.fila}>
-            <View style={estilos.flexible}>
-              <Boton titulo="Simular cuotas" onPress={irASimulacion} />
-            </View>
-            <View style={estilos.flexible}>
-              <Boton
-                tipo="secundario"
-                titulo="Hablar con una persona"
-                onPress={irAAtencionHumana}
-              />
-            </View>
+          <View style={estilos.rotulo}>
+            <MaterialIcons name="support-agent" size={sizes.iconSm} color={colors.primary} />
+            <Texto variante="overline" color={colors.primary} accessibilityRole="header">
+              Asistente de Almira
+            </Texto>
           </View>
-          <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-            La IA orienta, no decide.
-          </Texto>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={estilos.sugerencias}
-          >
+
+          <View style={estilos.seccion}>
+            <Rotulo texto="Preguntas sugeridas" />
             {PREGUNTAS_SUGERIDAS.map((pregunta) => (
               <Pressable
                 key={pregunta}
@@ -121,13 +94,50 @@ export default function Asistente() {
                 onPress={() => preguntar(pregunta)}
                 style={estilos.sugerencia}
               >
-                <Texto variante="bodyMdMedium" color={colors.primary}>
-                  {pregunta}
-                </Texto>
+                <MaterialIcons name="help-outline" size={sizes.iconSm} color={colors.primary} />
+                <Texto variante="bodyLgMedium">{pregunta}</Texto>
               </Pressable>
             ))}
-          </ScrollView>
-        </View>
+          </View>
+
+          <View style={estilos.conversacion}>
+            {mensajes.map((mensaje) =>
+              mensaje.autor === 'vecino' ? (
+                <View key={mensaje.id} style={[estilos.burbuja, estilos.vecino]}>
+                  <Texto color={colors.onPrimary}>{mensaje.texto}</Texto>
+                </View>
+              ) : (
+                <View key={mensaje.id} style={estilos.filaAsistente}>
+                  <CajaIcono icono="support-agent" redonda />
+                  <View style={estilos.columnaAsistente}>
+                    <View style={[estilos.burbuja, estilos.asistente]}>
+                      <Texto>{mensaje.texto}</Texto>
+                    </View>
+                    {/* La acción va debajo de la burbuja, no dentro. */}
+                    {mensaje.accion === 'simular_cuotas' ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={irASimulacion}
+                        style={estilos.accion}
+                      >
+                        <MaterialIcons name="calculate" size={sizes.iconSm} color={colors.primary} />
+                        <Texto variante="bodyLgMedium" color={colors.primary}>
+                          Simular cuotas
+                        </Texto>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                </View>
+              ),
+            )}
+          </View>
+
+          <View style={estilos.botones}>
+            <Boton titulo="Simular cuotas" onPress={irASimulacion} />
+            <Boton tipo="secundario" titulo="Hablar con una persona" onPress={irAAtencionHumana} />
+          </View>
+          <Nota texto="El asistente orienta, no decide. Prototipo: respuestas fijas de ejemplo." />
+        </ScrollView>
 
         <View style={estilos.entrada}>
           <TextInput
@@ -138,7 +148,7 @@ export default function Asistente() {
             onChangeText={setConsulta}
             onSubmitEditing={() => preguntar(consulta)}
             returnKeyType="send"
-            style={estilos.campo}
+            style={[estilos.campo, { fontSize: typography.bodyLg.fontSize * escala }]}
           />
           <Pressable
             accessibilityRole="button"
@@ -146,7 +156,7 @@ export default function Asistente() {
             onPress={() => preguntar(consulta)}
             style={estilos.enviar}
           >
-            <Feather name="send" size={20} color={colors.onPrimary} />
+            <MaterialIcons name="send" size={sizes.icon} color={colors.onPrimary} />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -157,20 +167,36 @@ export default function Asistente() {
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: colors.background },
   flexible: { flex: 1 },
-  mensajes: {
-    gap: spacing.sm,
+  contenido: {
+    gap: spacing.block,
     paddingHorizontal: spacing.margin,
-    paddingVertical: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
   },
+  rotulo: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  seccion: { gap: spacing.sm },
+  sugerencia: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: sizes.buttonTertiary,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  conversacion: { gap: spacing.blockDense },
+  filaAsistente: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  columnaAsistente: { flex: 1, alignItems: 'flex-start', gap: spacing.xs },
   burbuja: {
-    gap: spacing.md,
-    paddingHorizontal: spacing.blockDense,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.blockDense,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
   },
   asistente: {
-    alignSelf: 'flex-start',
-    width: sizes.bubbleWidth,
+    maxWidth: '100%',
     borderTopLeftRadius: radius.sm,
     backgroundColor: colors.subtle,
   },
@@ -180,18 +206,13 @@ const estilos = StyleSheet.create({
     borderTopRightRadius: radius.sm,
     backgroundColor: colors.primary,
   },
-  acciones: { gap: spacing.sm, paddingTop: spacing.sm, paddingBottom: spacing.blockDense },
-  fila: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.margin },
-  sugerencias: { gap: spacing.sm, paddingHorizontal: spacing.margin },
-  sugerencia: {
-    height: sizes.suggestionChip,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.blockDense,
-    borderRadius: radius.full,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+  accion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    minHeight: sizes.buttonTertiary,
   },
+  botones: { gap: spacing.sm },
   entrada: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -200,21 +221,21 @@ const estilos = StyleSheet.create({
     paddingVertical: spacing.blockDense,
     borderTopWidth: sizes.borderWidth,
     borderTopColor: colors.border,
+    backgroundColor: colors.background,
   },
   campo: {
     flex: 1,
-    height: sizes.chatInput,
+    height: sizes.input,
     paddingHorizontal: spacing.md,
     borderWidth: sizes.borderWidth,
     borderColor: colors.border,
     borderRadius: radius.md,
     color: colors.text,
-    fontFamily: 'Inter_400Regular',
-    fontSize: typography.bodyLg.fontSize,
+    fontFamily: familiaInter('400'),
   },
   enviar: {
-    width: sizes.chatInput,
-    height: sizes.chatInput,
+    width: sizes.input,
+    height: sizes.input,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,

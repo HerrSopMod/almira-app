@@ -12,12 +12,20 @@ import {
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Destacado, FilaDato, PiePrototipo, Separador, Tarjeta, Vacio } from '@/components/Bloques';
+import {
+  Destacado,
+  FilaDato,
+  Nota,
+  PiePrototipo,
+  Separador,
+  Tarjeta,
+  Vacio,
+} from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
-import { Chips } from '@/components/Chips';
 import { Deslizador } from '@/components/Deslizador';
 import { Pantalla } from '@/components/Pantalla';
+import { Segmentado } from '@/components/Segmentado';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
@@ -26,7 +34,7 @@ const ALCANCES: { valor: AlcanceSimulacion; titulo: string }[] = [
   { valor: 'toda', titulo: 'Toda mi deuda' },
 ];
 
-// Pantalla 13 del prototipo. La cuota es informativa: usa la tasa ilustrativa del
+// Pantalla 13 (maqueta 13-simulacion-de-cuotas). La cuota es informativa: usa la tasa ilustrativa del
 // prototipo y no envía nada a Rentas, que es quien evalúa y decide.
 export default function SimulacionCuotas() {
   const { deudas } = useDatosMunicipales();
@@ -40,10 +48,9 @@ export default function SimulacionCuotas() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Simulación de cuotas" />}
     >
-      <Chips opciones={ALCANCES} elegida={alcance} onElegir={setAlcance} />
+      <Segmentado opciones={ALCANCES} elegida={alcance} onElegir={setAlcance} />
 
       {elegidas.length === 0 ? (
         <Vacio
@@ -55,71 +62,77 @@ export default function SimulacionCuotas() {
         />
       ) : (
         <>
-          <Tarjeta>
-            <View>
-              <Texto variante="bodyMd" color={colors.textSecondary}>
-                Tu cuota mensual sería de
-              </Texto>
+          <Destacado icono={null}>
+            <View style={estilos.cuota}>
+              <Texto color={colors.textSecondary}>Tu cuota mensual sería de</Texto>
               <Texto variante="displayCurrency" tabular>
                 {formatearSoles(simulacion.cuotaMensual)}
               </Texto>
+              <Texto variante="bodyMd" color={colors.textSecondary}>
+                durante {cuotas} meses
+              </Texto>
             </View>
-            <View>
-              <View style={estilos.fila}>
-                <Texto variante="bodyLgMedium" style={estilos.flexible}>
-                  Número de cuotas
-                </Texto>
-                <Texto variante="bodyLgMedium" tabular>
-                  {cuotas}
-                </Texto>
-              </View>
-              <Deslizador
-                etiqueta="Número de cuotas"
-                minimo={CUOTAS_MINIMAS}
-                maximo={CUOTAS_MAXIMAS}
-                valor={cuotas}
-                onCambiar={setCuotas}
-              />
-              <View style={estilos.fila}>
-                <Texto variante="bodyMd" color={colors.textSecondary} style={estilos.flexible}>
-                  {CUOTAS_MINIMAS} cuotas
-                </Texto>
-                <Texto variante="bodyMd" color={colors.textSecondary}>
-                  {CUOTAS_MAXIMAS} cuotas
-                </Texto>
-              </View>
+          </Destacado>
+
+          <View>
+            <View style={estilos.fila}>
+              <Texto variante="bodyLgMedium" style={estilos.flexible}>
+                Número de cuotas
+              </Texto>
+              <Texto variante="headlineSm" tabular>
+                {cuotas}
+              </Texto>
             </View>
+            <Deslizador
+              etiqueta="Número de cuotas"
+              minimo={CUOTAS_MINIMAS}
+              maximo={CUOTAS_MAXIMAS}
+              valor={cuotas}
+              onCambiar={setCuotas}
+            />
+            <View style={estilos.fila}>
+              <Texto variante="bodyMd" color={colors.textSecondary} style={estilos.flexible}>
+                {CUOTAS_MINIMAS} cuotas
+              </Texto>
+              <Texto variante="bodyMd" color={colors.textSecondary}>
+                {CUOTAS_MAXIMAS} cuotas
+              </Texto>
+            </View>
+          </View>
+
+          <Tarjeta>
+            <FilaDato etiqueta="Deuda a fraccionar" valor={formatearSoles(simulacion.deuda)} />
             <Separador />
-            <View style={estilos.filas}>
-              <FilaDato etiqueta="Deuda a fraccionar" valor={<Valor monto={simulacion.deuda} />} />
-              <FilaDato etiqueta="Interés estimado" valor={<Valor monto={simulacion.interes} />} />
-              <FilaDato etiqueta="Total a pagar" valor={<Valor monto={simulacion.total} />} />
-            </View>
+            <FilaDato etiqueta="Interés estimado" valor={formatearSoles(simulacion.interes)} />
+            <Separador />
+            <FilaDato etiqueta="Total a pagar" valor={formatearSoles(simulacion.total)} total />
           </Tarjeta>
 
-          <Destacado
-            texto="Simulación informativa con tasa ilustrativa de 1 % mensual. El fraccionamiento lo aprueba Rentas según la ordenanza vigente."
-          />
-          <Boton
-            titulo="Pedir evaluación a Rentas"
-            deshabilitado={pedido}
-            onPress={() => setPedido(true)}
-          />
-          {pedido ? (
-            <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-              Pedido simulado: en este prototipo no se envía nada a Rentas. Rentas evalúa y decide.
-            </Texto>
-          ) : null}
-          <Boton
-            tipo="secundario"
-            titulo="Mejor pago ahora"
-            onPress={() =>
-              router.push({
-                pathname: '/pago/confirmar',
-                params: { deudas: elegidas.map((deuda) => deuda.id).join(',') },
-              })
-            }
-          />
+          <Nota texto="Simulación informativa con tasa ilustrativa de 1 % mensual. El fraccionamiento lo aprueba Rentas según la ordenanza vigente." />
+
+          <View style={estilos.botones}>
+            <Boton
+              titulo="Pedir evaluación a Rentas"
+              deshabilitado={pedido}
+              onPress={() => setPedido(true)}
+            />
+            {pedido ? (
+              <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
+                Pedido simulado: en este prototipo no se envía nada a Rentas. Rentas evalúa y
+                decide.
+              </Texto>
+            ) : null}
+            <Boton
+              tipo="secundario"
+              titulo="Mejor pago ahora"
+              onPress={() =>
+                router.push({
+                  pathname: '/pago/confirmar',
+                  params: { deudas: elegidas.map((deuda) => deuda.id).join(',') },
+                })
+              }
+            />
+          </View>
         </>
       )}
       <PiePrototipo />
@@ -127,16 +140,9 @@ export default function SimulacionCuotas() {
   );
 }
 
-function Valor({ monto }: { monto: number }) {
-  return (
-    <Texto variante="bodyLgMedium" alineacion="right" tabular>
-      {formatearSoles(monto)}
-    </Texto>
-  );
-}
-
 const estilos = StyleSheet.create({
+  cuota: { gap: spacing.xs },
   fila: { flexDirection: 'row', alignItems: 'center' },
   flexible: { flex: 1 },
-  filas: { gap: spacing.sm },
+  botones: { gap: spacing.sm },
 });

@@ -1,6 +1,13 @@
 // Escalera de avisos y textos de los mensajes (pantallas 09 a 11 del prototipo).
 import { formatearDiaMes, formatearSoles, totalDeuda } from './formato';
-import type { Deuda, Obra, Recordatorio, TipoDeuda, TipoRecordatorio } from './types';
+import type {
+  CanalAviso,
+  Deuda,
+  Obra,
+  Recordatorio,
+  TipoDeuda,
+  TipoRecordatorio,
+} from './types';
 
 // De menor a mayor presión.
 export const TIPOS_RECORDATORIO: TipoRecordatorio[] = ['preventivo', 'mora', 'previo_coactiva'];
@@ -123,4 +130,16 @@ export function mensajeAviso({
         plural ? 'podrían' : 'podría'
       } pasar a cobranza coactiva, a cargo de la municipalidad. Aún puedes pagar o pedir orientación. Si ya reclamaste, este aviso es solo informativo.`;
   }
+}
+
+// Canales por donde llegan los avisos, en el orden de Recordatorios.
+export const CANALES_AVISO: CanalAviso[] = ['whatsapp', 'sms', 'app'];
+
+// Prende o apaga un canal. Siempre queda al menos uno activo: si es el último,
+// no se apaga. Devuelve los canales en el orden de CANALES_AVISO.
+export function alternarCanal(activos: CanalAviso[], canal: CanalAviso): CanalAviso[] {
+  const prendido = activos.includes(canal);
+  if (prendido && activos.length === 1) return activos;
+  const siguientes = prendido ? activos.filter((c) => c !== canal) : [...activos, canal];
+  return CANALES_AVISO.filter((c) => siguientes.includes(c));
 }

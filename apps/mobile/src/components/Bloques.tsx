@@ -92,10 +92,21 @@ const COLORES_INSIGNIA: Record<TonoInsignia, { fondo: string; texto: string; pun
   neutral: { fondo: colors.subtle, texto: colors.textSecondary },
 };
 
-export function Insignia({ texto, tono }: { texto: string; tono: TonoInsignia }) {
+export function Insignia({
+  texto,
+  tono,
+  centrada,
+}: {
+  texto: string;
+  tono: TonoInsignia;
+  // Por defecto se pega a la izquierda; centrada, en columnas centradas.
+  centrada?: boolean;
+}) {
   const { fondo, texto: color, punto } = COLORES_INSIGNIA[tono];
   return (
-    <View style={[estilos.insignia, { backgroundColor: fondo }]}>
+    <View
+      style={[estilos.insignia, centrada && estilos.insigniaCentrada, { backgroundColor: fondo }]}
+    >
       {punto ? <View style={[estilos.punto, { backgroundColor: punto }]} /> : null}
       <Texto variante="labelSm" color={color} numberOfLines={1}>
         {texto}
@@ -300,6 +311,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: radius.badge,
   },
+  insigniaCentrada: { alignSelf: 'center' },
   punto: { width: sizes.badgeDot, height: sizes.badgeDot, borderRadius: sizes.badgeDot / 2 },
   cajaIcono: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.subtle },
   cajaIconoExito: { backgroundColor: colors.successSoft },

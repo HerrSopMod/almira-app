@@ -143,12 +143,17 @@ export const sizes = {
   sliderThumbBorder: 3,
   sliderTouch: 44,
   evidencePhoto: 150,
+  // Miniaturas de la foto simulada: tarjetas de reclamo y envío (64) y seguimiento (72).
+  photoThumb: 64,
+  photoThumbLg: 72,
   workPhoto: 170,
   fundingBar: 12,
   legendDot: 10,
   noticeStep: 56,
   // Mapa móvil, marcador y calles del dibujo provisional.
   mapHeight: 300,
+  // Minimapa de Nuevo reclamo (pantalla 16).
+  miniMap: 120,
   mapMarker: 28,
   mapMarkerBorder: 2,
   mapStreet: 9,
