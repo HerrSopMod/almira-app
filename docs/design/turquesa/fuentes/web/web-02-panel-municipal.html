@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Almira · web-02 Panel municipal</title><link rel="stylesheet" href="../estilos.css"></head>
+<body>
+<div class="web">
+<aside class="side">
+  <div class="brandrow"><div class="logo">a</div><div><div class="b1">Almira</div><div class="b2">Municipalidad de Lince</div></div></div>
+  <div class="nav on"><span class="ms">bar_chart</span>Panel municipal</div><div class="nav"><span class="ms">payments</span>Recaudación y pagos</div><div class="nav"><span class="ms">chat</span>Avisos y respuestas</div><div class="nav"><span class="ms">report</span>Reclamos por área<span class="count">2</span></div><div class="nav"><span class="ms">construction</span>Obras publicadas</div><div class="nav"><span class="ms">support_agent</span>Atención humana<span class="count">3</span></div><div class="nav"><span class="ms">warning</span>Alertas y auditoría<span class="count">1</span></div><div class="nav"><span class="ms">shield_person</span>Datos y accesos</div>
+  <div class="who"><div class="avatar">RR</div><div><div class="body-m">Responsable municipal</div><div class="caption">Rentas</div></div></div>
+</aside>
+<main class="main">
+  <div class="between" style="align-items:flex-start">
+    <div><div class="ptitle">Panel municipal</div><div class="psub">Octubre 2026 · Revisión mensual con Almira: 5 nov</div></div>
+    <div class="rowx" style="gap:8px"><span class="badge info nodot"><span class="ms s16">event</span>Ciclo: 4.ª cuota, vence 30 nov</span><span class="badge neutral">Datos ficticios</span></div>
+  </div>
+
+  <div class="grid g4">
+    <div class="wcard kpi"><span class="kl">Recaudación</span><span class="kv2">S/&nbsp;1,120,400</span><span class="kd"><span class="up">↑ 7.7&nbsp;%</span> frente a la línea base</span></div>
+    <div class="wcard kpi"><span class="kl">Pagos a tiempo</span><span class="kv2">62&nbsp;%</span><span class="kd"><span class="up">↑ 9 puntos</span> · Meta: 70&nbsp;%</span><div class="progress"><span style="width:62%"></span></div></div>
+    <div class="wcard kpi"><span class="kl">Reclamos en plazo</span><span class="kv2">84&nbsp;%</span><span class="kd"><span class="up">↑ 11 puntos</span> · Meta: 90&nbsp;%</span><div class="progress"><span style="width:84%"></span></div></div>
+    <div class="wcard kpi"><span class="kl">Avisos</span><span class="kv2">18,420</span><span class="kd">97&nbsp;% entregados · 41&nbsp;% pagó tras el aviso</span></div>
+  </div>
+
+  <div class="grid" style="grid-template-columns: 1fr 460px">
+    <div class="wcard">
+      <div class="ct">Recaudación mensual</div><div class="cs">Millones de soles, 2026. Los picos coinciden con el vencimiento del predial.</div>
+      <div>
+        <div class="vbars">
+          <div class="col"><span class="v">1.42</span><div class="bar hi" style="height:100%"></div></div>
+          <div class="col"><span class="v">0.96</span><div class="bar" style="height:67.6%"></div></div>
+          <div class="col"><span class="v">1.01</span><div class="bar" style="height:71.1%"></div></div>
+          <div class="col"><span class="v">1.38</span><div class="bar hi" style="height:97.2%"></div></div>
+          <div class="col"><span class="v">1.04</span><div class="bar" style="height:73.2%"></div></div>
+          <div class="col"><span class="v">1.12</span><div class="bar" style="height:78.9%"></div></div>
+        </div>
+        <div class="xlab" style="margin-top:8px"><div>May</div><div>Jun</div><div>Jul</div><div>Ago</div><div>Set</div><div>Oct</div></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--chart-1); border-radius:2px"></i>Mes con vencimiento de predial</span><span><i style="background:var(--chart-2); border-radius:2px"></i>Otros meses</span></div>
+    </div>
+    <div class="wcard" style="gap:4px">
+      <div class="ct">Requiere tu decisión</div><div class="cs" style="margin:0 0 4px">Solo excepciones. La rutina la resuelve el S2 local.</div>
+      <div class="dec"><div class="ibox" style="background:var(--danger-soft); color:var(--danger-text)"><span class="ms s20">schedule</span></div><div class="grow"><div class="body-m">2 reclamos vencidos</div><div class="caption">Rentas y Depósito superaron su plazo</div></div><span class="ms chev">chevron_right</span></div>
+      <div class="dec"><div class="ibox" style="background:var(--warning-soft); color:var(--warning-text)"><span class="ms s20">construction</span></div><div class="grow"><div class="body-m">1 obra sin actualizar</div><div class="caption">Veredas accesibles: hace 18 días</div></div><span class="ms chev">chevron_right</span></div>
+      <div class="dec"><div class="ibox"><span class="ms s20">science</span></div><div class="grow"><div class="body-m">Prueba A/B lista para decidir</div><div class="caption">La variante B mejora el pago en 6 puntos</div></div><span class="ms chev">chevron_right</span></div>
+      <div class="dec"><div class="ibox"><span class="ms s20">support_agent</span></div><div class="grow"><div class="body-m">3 casos en cola humana</div><div class="caption">Espera máxima: 40 minutos</div></div><span class="ms chev">chevron_right</span></div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="wcard"><div class="ct">Reclamos por área</div><div class="cs">Últimos 30 días.</div>
+      <div><div class="hbar"><span>Obras</span><div class="track"><span style="width:100%"></span></div><span class="val">77</span></div>
+      <div class="hbar"><span>Limpieza</span><div class="track"><span style="width:31%"></span></div><span class="val">24</span></div>
+      <div class="hbar"><span>Fiscalización</span><div class="track"><span style="width:23%"></span></div><span class="val">18</span></div>
+      <div class="hbar"><span>Rentas</span><div class="track"><span style="width:12%"></span></div><span class="val">9</span></div>
+      <div class="hbar"><span>Depósito</span><div class="track"><span style="width:8%"></span></div><span class="val">6</span></div></div></div>
+    <div class="wcard"><div class="ct">Reclamos más frecuentes</div><div class="cs">Últimos 30 días, por categoría.</div>
+      <div><div class="hbar"><span>Pistas y veredas</span><div class="track"><span style="width:100%"></span></div><span class="val">46</span></div>
+      <div class="hbar"><span>Alumbrado público</span><div class="track"><span style="width:67%"></span></div><span class="val">31</span></div>
+      <div class="hbar"><span>Limpieza pública</span><div class="track"><span style="width:52%"></span></div><span class="val">24</span></div>
+      <div class="hbar"><span>Vehículo mal estac.</span><div class="track"><span style="width:39%"></span></div><span class="val">18</span></div>
+      <div class="hbar"><span>Cobro indebido</span><div class="track"><span style="width:20%"></span></div><span class="val">9</span></div></div></div>
+  </div>
+
+  <div class="wcard"><div class="ct">Cómo aprende la municipalidad</div><div class="cs">Lo que pasó este mes en el ciclo del producto.</div>
+    <div class="grid" style="grid-template-columns:repeat(5,1fr); gap:0; border:1px solid var(--border); border-radius:10px">
+      <div style="padding:12px 14px"><div class="label-sm tp">1 · RECUERDA</div><div class="body-m num" style="margin-top:4px">18,420 avisos entregados</div></div>
+      <div style="padding:12px 14px; border-left:1px solid var(--border)"><div class="label-sm tp">2 · PAGA</div><div class="body-m num" style="margin-top:4px">6,310 pagos en la app</div></div>
+      <div style="padding:12px 14px; border-left:1px solid var(--border)"><div class="label-sm tp">3 · VE LA OBRA</div><div class="body-m num" style="margin-top:4px">9,740 consultas al mapa</div></div>
+      <div style="padding:12px 14px; border-left:1px solid var(--border)"><div class="label-sm tp">4 · RECLAMA</div><div class="body-m num" style="margin-top:4px">128 reclamos con evidencia</div></div>
+      <div style="padding:12px 14px; border-left:1px solid var(--border)"><div class="label-sm tp">5 · APRENDE</div><div class="body-m" style="margin-top:4px">Reforzar alumbrado en Zona 2</div></div>
+    </div>
+  </div>
+</main>
+</div>
+
+</body></html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Almira · web-08 Alertas y auditoría</title><link rel="stylesheet" href="../estilos.css"></head>
+<body>
+<div class="web">
+<aside class="side">
+  <div class="brandrow"><div class="logo">a</div><div><div class="b1">Almira</div><div class="b2">Municipalidad de Lince</div></div></div>
+  <div class="nav"><span class="ms">bar_chart</span>Panel municipal</div><div class="nav"><span class="ms">payments</span>Recaudación y pagos</div><div class="nav"><span class="ms">chat</span>Avisos y respuestas</div><div class="nav"><span class="ms">report</span>Reclamos por área<span class="count">2</span></div><div class="nav"><span class="ms">construction</span>Obras publicadas</div><div class="nav"><span class="ms">support_agent</span>Atención humana<span class="count">3</span></div><div class="nav on"><span class="ms">warning</span>Alertas y auditoría<span class="count">1</span></div><div class="nav"><span class="ms">shield_person</span>Datos y accesos</div>
+  <div class="who"><div class="avatar">RR</div><div><div class="body-m">Responsable municipal</div><div class="caption">Rentas</div></div></div>
+</aside>
+<main class="main">
+  <div class="between" style="align-items:flex-start">
+    <div><div class="ptitle">Alertas y auditoría</div><div class="psub">Canal algedónico y control independiente (S3*)</div></div>
+    <span class="badge neutral">Datos ficticios</span>
+  </div>
+  <div class="alertbar"><span class="ms fill">error</span><div><b>Alerta activa:</b> el asistente ofreció un beneficio vencido en 3 respuestas. Supera el umbral y se escaló al comité de datos e IA sin esperar la revisión mensual.</div></div>
+
+  <div class="wcard"><div class="ct">Ruta de un incidente</div><div class="cs">Cómo sube desde la unidad hasta el S5.</div>
+    <div class="grid" style="grid-template-columns:repeat(5,1fr); gap:10px">
+      <div class="card" style="padding:12px 14px"><div class="label-sm tp">1 · DETECCIÓN</div><div class="body" style="margin-top:4px">Muestreo: 3 respuestas erróneas</div></div>
+      <div class="card" style="padding:12px 14px"><div class="label-sm tp">2 · S3*</div><div class="body" style="margin-top:4px">Valida la gravedad</div></div>
+      <div class="card" style="padding:12px 14px; border-color:var(--danger)"><div class="label-sm" style="color:var(--danger-text)">3 · CANAL ALGEDÓNICO</div><div class="body" style="margin-top:4px">Supera el umbral</div></div>
+      <div class="card" style="padding:12px 14px"><div class="label-sm tp">4 · S5</div><div class="body" style="margin-top:4px">Comité y municipalidad</div></div>
+      <div class="card" style="padding:12px 14px"><div class="label-sm tp">5 · CORRECCIÓN</div><div class="body" style="margin-top:4px">Actualizar la base de conocimiento</div></div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="align-items:start">
+    <div class="wcard"><div class="ct">Umbrales de disparo</div><div class="cs">Propuestos, por calibrar en el piloto.</div>
+      <table class="table">
+        <tr><th>Evento</th><th class="r">Umbral</th><th class="r">Hoy</th><th>Estado</th></tr>
+        <tr><td>Fuga de datos</td><td class="r">1 evento</td><td class="r strong">0</td><td><span class="badge ok">Normal</span></td></tr>
+        <tr><td>Pagos erróneos</td><td class="r">0.5&nbsp;%</td><td class="r strong">0.1&nbsp;%</td><td><span class="badge ok">Normal</span></td></tr>
+        <tr><td>Respuestas graves del asistente</td><td class="r">2 por semana</td><td class="r strong">3</td><td><span class="badge bad">Supera</span></td></tr>
+        <tr><td>Fallas masivas de envío</td><td class="r">5&nbsp;%</td><td class="r strong">1.1&nbsp;%</td><td><span class="badge ok">Normal</span></td></tr>
+      </table>
+    </div>
+    <div class="wcard"><div class="ct">Auditoría por muestreo (S3*)</div><div class="cs">Octubre 2026. Muestra revisada por personas.</div>
+      <div><div class="hbar" style="grid-template-columns:170px 1fr 56px"><span>Respuestas del asistente</span><div class="track"><span style="width:98.5%"></span></div><span class="val">98.5&nbsp;%</span></div>
+      <div class="hbar" style="grid-template-columns:170px 1fr 56px"><span>Clasificación</span><div class="track"><span style="width:96.2%"></span></div><span class="val">96.2&nbsp;%</span></div>
+      <div class="hbar" style="grid-template-columns:170px 1fr 56px"><span>Conciliación</span><div class="track"><span style="width:99.9%"></span></div><span class="val">99.9&nbsp;%</span></div>
+      <div class="hbar" style="grid-template-columns:170px 1fr 56px"><span>Mensajes A/B</span><div class="track"><span style="width:100%"></span></div><span class="val">100&nbsp;%</span></div></div>
+      <div class="divider"></div>
+      <div class="between"><div><div class="body-m">Simulador de cuotas activo</div><div class="caption">Se desactiva ante errores de cálculo</div></div><div class="switch on"></div></div>
+    </div>
+  </div>
+</main>
+</div>
+
+</body></html>
