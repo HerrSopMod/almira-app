@@ -1,36 +1,57 @@
 import {
   colors,
   deudasPendientes,
+  deudasSeleccionadas,
   formatearFechaCorta,
   formatearSoles,
-  radius,
+  HOY_EJEMPLO,
   sizes,
   spacing,
-  sumarDeudas,
+  textoVencimiento,
   totalDeuda,
+  totalSeleccionado,
   type Deuda,
 } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ChipEstadoDeuda, CajaIcono, PiePrototipo, Tarjeta } from '@/components/Bloques';
+import {
+  CajaIcono,
+  ChipEstadoDeuda,
+  FilaDato,
+  Nota,
+  PiePrototipo,
+  Separador,
+  Tarjeta,
+  TituloPantalla,
+  Vacio,
+} from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
+import { Casilla } from '@/components/Casilla';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
-// Pantalla 05 del prototipo.
-export default function MiCuenta() {
-  const { deudas, pagos } = useDatosMunicipales();
+// La casilla dibuja 22 px; su zona de toque llega a 48.
+const HOLGURA_CASILLA = (sizes.buttonTertiary - sizes.checkbox) / 2;
+
+// Pantalla 05, pestaña Pagar (Stitch 7, parte superior).
+export default function Pagar() {
+  const { municipalidad, deudas, pagos } = useDatosMunicipales();
   const pendientes = deudasPendientes(deudas);
-  // Todas las deudas pendientes empiezan marcadas; se guardan las que el vecino desmarca.
-  const [desmarcadas, setDesmarcadas] = useState<string[]>([]);
-  const elegidas = pendientes.filter((deuda) => !desmarcadas.includes(deuda.id));
+  const idsPendientes = pendientes.map((deuda) => deuda.id).join(',');
+  // Todas las deudas pendientes empiezan marcadas.
+  const [marcadas, setMarcadas] = useState<string[]>(() => pendientes.map((deuda) => deuda.id));
+  // Si cambian las pendientes (por ejemplo, tras un pago), se vuelven a marcar todas.
+  useEffect(() => setMarcadas(idsPendientes ? idsPendientes.split(',') : []), [idsPendientes]);
+
+  const elegidas = deudasSeleccionadas(deudas, marcadas);
+  const total = totalSeleccionado(deudas, marcadas);
 
   const alternar = (id: string) =>
-    setDesmarcadas((actual) =>
+    setMarcadas((actual) =>
       actual.includes(id) ? actual.filter((otra) => otra !== id) : [...actual, id],
     );
 
@@ -40,78 +61,100 @@ export default function MiCuenta() {
       params: { deudas: elegidas.map((deuda) => deuda.id).join(',') },
     });
 
+  const pie =
+    pendientes.length > 0 ? (
+      <>
+        <FilaDato
+          total
+          etiqueta={`Total seleccionado (${elegidas.length})`}
+          valor={formatearSoles(total)}
+        />
+        <Boton
+          icono="lock-outline"
+          titulo={`Pagar ${formatearSoles(total)}`}
+          deshabilitado={elegidas.length === 0}
+          onPress={pagar}
+        />
+      </>
+    ) : undefined;
+
   return (
     <Pantalla
       conPestanas
       encabezadoHastaArriba
-      separacion="md"
       encabezado={<BarraSuperior variante="raiz" titulo="Pagar" />}
+      pie={pie}
     >
-      <Texto variante="headlineSm" color={colors.primary} accessibilityRole="header">
-        Detalle de la deuda
-      </Texto>
+      <TituloPantalla titulo="Mi cuenta municipal" texto={municipalidad.nombre} />
 
-      <View style={estilos.lista}>
-        {pendientes.map((deuda) => (
-          <FilaDeuda
-            key={deuda.id}
-            deuda={deuda}
-            marcada={!desmarcadas.includes(deuda.id)}
-            onAlternar={() => alternar(deuda.id)}
-          />
-        ))}
-      </View>
-
-      <View style={estilos.total}>
-        <Texto variante="headlineSm" style={estilos.flexible}>
-          Total
-        </Texto>
-        <Texto variante="headlineSm" alineacion="right" tabular>
-          {formatearSoles(sumarDeudas(elegidas))}
-        </Texto>
-      </View>
-
-      <View style={estilos.beneficio}>
-        <Texto alineacion="center">Beneficio vigente: consulta con el asistente</Texto>
-      </View>
-
-      <View style={estilos.pago}>
-        <Boton titulo="Pagar en la app" deshabilitado={elegidas.length === 0} onPress={pagar} />
-        <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-          Al pagar, la constancia queda en la app.
-        </Texto>
-      </View>
-
-      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
-        Pagos y constancias
-      </Texto>
-      {pagos.map((pago) => {
-        const deuda = deudas.find((fila) => fila.id === pago.deudaId);
-        return (
-          <Tarjeta key={pago.id}>
-            <View style={estilos.fila}>
-              <CajaIcono icono="check" tono="exito" />
-              <View style={estilos.flexible}>
-                <Texto variante="bodyLgMedium">
-                  {deuda ? `${deuda.concepto} · ${deuda.periodo}` : pago.referencia}
-                </Texto>
-                <Texto variante="bodyMd" color={colors.textSecondary}>
-                  {formatearFechaCorta(pago.creadoEn)} · {pago.referencia}
-                </Texto>
-              </View>
-              <Texto variante="bodyLgMedium" alineacion="right" tabular>
-                {formatearSoles(pago.monto)}
-              </Texto>
-            </View>
+      <View style={estilos.grupo}>
+        <View style={estilos.fila}>
+          <Texto variante="headlineSm" accessibilityRole="header" style={estilos.flexible}>
+            Tributos pendientes
+          </Texto>
+          {pendientes.length > 0 ? (
+            <Texto variante="bodyMd" color={colors.textSecondary}>
+              {pendientes.length} {pendientes.length === 1 ? 'pendiente' : 'pendientes'}
+            </Texto>
+          ) : null}
+        </View>
+        {pendientes.length > 0 ? (
+          <Tarjeta>
+            {pendientes.map((deuda, indice) => (
+              <Fragment key={deuda.id}>
+                {indice > 0 ? <Separador /> : null}
+                <FilaDeuda
+                  deuda={deuda}
+                  marcada={marcadas.includes(deuda.id)}
+                  onAlternar={() => alternar(deuda.id)}
+                />
+              </Fragment>
+            ))}
           </Tarjeta>
-        );
-      })}
+        ) : (
+          <Vacio texto="No tienes deudas pendientes." />
+        )}
+        <Nota texto="Beneficio vigente: consulta con el asistente." />
+      </View>
+
+      {pagos.length > 0 ? (
+        <View style={estilos.grupo}>
+          <Texto variante="headlineSm" accessibilityRole="header">
+            Pagos y constancias
+          </Texto>
+          <Tarjeta>
+            {pagos.map((pago, indice) => {
+              const deuda = deudas.find((fila) => fila.id === pago.deudaId);
+              return (
+                <Fragment key={pago.id}>
+                  {indice > 0 ? <Separador /> : null}
+                  <View style={estilos.fila}>
+                    <CajaIcono icono="check" tono="exito" />
+                    <View style={estilos.flexible}>
+                      <Texto variante="bodyLgMedium">
+                        {deuda ? `${deuda.concepto} · ${deuda.periodo}` : pago.referencia}
+                      </Texto>
+                      <Texto variante="bodyMd" color={colors.textSecondary} tabular>
+                        {formatearFechaCorta(pago.creadoEn)} · {pago.referencia}
+                      </Texto>
+                    </View>
+                    <Texto variante="bodyLgMedium" alineacion="right" tabular>
+                      {formatearSoles(pago.monto)}
+                    </Texto>
+                  </View>
+                </Fragment>
+              );
+            })}
+          </Tarjeta>
+        </View>
+      ) : null}
 
       <PiePrototipo />
     </Pantalla>
   );
 }
 
+// Casilla para marcar la deuda y, al tocar el resto de la fila, su detalle.
 function FilaDeuda({
   deuda,
   marcada,
@@ -126,14 +169,11 @@ function FilaDeuda({
       <Pressable
         accessibilityRole="checkbox"
         accessibilityState={{ checked: marcada }}
-        accessibilityLabel={`Pagar ${deuda.concepto}`}
-        hitSlop={12}
+        accessibilityLabel={`Pagar ${deuda.concepto}, ${formatearSoles(totalDeuda(deuda))}`}
+        hitSlop={HOLGURA_CASILLA}
         onPress={onAlternar}
-        style={[estilos.casilla, marcada && estilos.casillaMarcada]}
       >
-        {marcada ? (
-          <MaterialIcons name="check" size={16} color={colors.onPrimary} />
-        ) : null}
+        <Casilla marcada={marcada} />
       </Pressable>
       <Pressable
         accessibilityRole="button"
@@ -142,46 +182,27 @@ function FilaDeuda({
         style={[estilos.fila, estilos.flexible]}
       >
         <View style={[estilos.flexible, estilos.textosDeuda]}>
-          <Texto>{deuda.concepto}</Texto>
+          <Texto variante="bodyLgMedium">{deuda.concepto}</Texto>
+          <View style={estilos.fila}>
+            <MaterialIcons name="event" size={sizes.iconXs} color={colors.textSecondary} />
+            <Texto variante="bodyMd" color={colors.textSecondary} tabular>
+              {textoVencimiento(deuda.vencimiento, HOY_EJEMPLO)}
+            </Texto>
+          </View>
           <ChipEstadoDeuda estado={deuda.estado} />
         </View>
         <Texto variante="bodyLgMedium" alineacion="right" tabular>
           {formatearSoles(totalDeuda(deuda))}
         </Texto>
-        <MaterialIcons name="chevron-right" size={24} color={colors.text} />
+        <MaterialIcons name="chevron-right" size={sizes.icon} color={colors.textSecondary} />
       </Pressable>
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  lista: { gap: spacing.lg },
+  grupo: { gap: spacing.blockDense },
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
   textosDeuda: { gap: spacing.xs },
-  casilla: {
-    width: sizes.checkbox,
-    height: sizes.checkbox,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.badge,
-    borderWidth: sizes.controlBorder,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  casillaMarcada: { borderColor: colors.primary, backgroundColor: colors.primary },
-  total: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: spacing.md,
-    borderTopWidth: sizes.borderWidth,
-    borderTopColor: colors.border,
-  },
-  beneficio: {
-    padding: spacing.blockDense,
-    borderRadius: radius.md,
-    backgroundColor: colors.subtle,
-  },
-  pago: { gap: spacing.blockDense },
-  seccion: { marginTop: spacing.sm },
 });
