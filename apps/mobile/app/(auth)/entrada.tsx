@@ -17,7 +17,7 @@ import { Texto } from '@/components/Texto';
 
 const FUNCIONES: { titulo: string; detalle: string; icono: NombreIcono }[] = [
   { titulo: 'Recuerda', detalle: 'Te avisamos antes de que venza.', icono: 'notifications-none' },
-  { titulo: 'Paga', detalle: 'Desde la app, con constancia al instante.', icono: 'payments' },
+  { titulo: 'Paga', detalle: 'Desde la app, con tu constancia guardada.', icono: 'payments' },
   { titulo: 'Ve la obra', detalle: 'En qué se usa lo que pagas.', icono: 'construction' },
   { titulo: 'Reclama', detalle: 'Con foto y ubicación, y sigue el plazo.', icono: 'photo-camera' },
 ];
