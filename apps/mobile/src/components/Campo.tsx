@@ -9,7 +9,7 @@ export function Campo({ etiqueta, ayuda, style, ...resto }: Props) {
   const [enfocado, setEnfocado] = useState(false);
   return (
     <View style={estilos.grupo}>
-      {etiqueta ? <Texto variante="bodyMdMedium">{etiqueta}</Texto> : null}
+      {etiqueta ? <Texto variante="label">{etiqueta}</Texto> : null}
       <TextInput
         accessibilityLabel={etiqueta}
         placeholderTextColor={colors.textSecondary}

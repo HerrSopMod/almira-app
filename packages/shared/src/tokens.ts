@@ -23,6 +23,8 @@ export const colors = {
   pendingDebt: '#FFFFCC',
   paid: '#2E8B57',
   paidSoft: '#E2F3E8',
+  // Texto sobre Pagado claro, medido en la pantalla 03 del prototipo.
+  paidText: '#14563B',
 
   success: '#2E8B57',
   successSoft: '#E2F3E8',
@@ -41,11 +43,14 @@ export const colors = {
 export const spacing = {
   xs: 4,
   sm: 8,
+  // Separación entre bloques medida en las pantallas del prototipo.
+  block: 12,
   md: 16,
   lg: 20,
   xl: 24,
   gutter: 16,
-  margin: 20,
+  // Márgenes laterales medidos en las pantallas móviles del prototipo.
+  margin: 18,
 } as const;
 
 export const radius = {
@@ -58,10 +63,16 @@ export const radius = {
   full: 9999,
 } as const;
 
+// Medidas tomadas de las imágenes del prototipo (docs/design/prototipo/movil).
 export const sizes = {
-  button: 52,
+  button: 48,
   buttonTertiary: 48,
-  input: 52,
+  input: 46,
+  selector: 48,
+  headerBar: 56,
+  hero: 280,
+  brandIcon: 58,
+  featureIcon: 40,
   tabBar: 64,
   badge: 24,
   progress: 6,
@@ -80,6 +91,7 @@ export type EstiloTexto = {
 };
 
 export const typography = {
+  brand: { fontSize: 36, fontWeight: '700', lineHeight: 44 },
   displayCurrency: { fontSize: 32, fontWeight: '700', lineHeight: 38, letterSpacing: -0.64 },
   headlineLg: { fontSize: 24, fontWeight: '700', lineHeight: 32, letterSpacing: -0.24 },
   headlineMd: { fontSize: 20, fontWeight: '600', lineHeight: 28 },
@@ -88,6 +100,9 @@ export const typography = {
   bodyLgMedium: { fontSize: 16, fontWeight: '500', lineHeight: 24 },
   bodyMd: { fontSize: 14, fontWeight: '400', lineHeight: 20 },
   bodyMdMedium: { fontSize: 14, fontWeight: '500', lineHeight: 20 },
+  label: { fontSize: 14, fontWeight: '600', lineHeight: 20 },
+  labelLg: { fontSize: 16, fontWeight: '600', lineHeight: 22 },
+  caption: { fontSize: 12, fontWeight: '400', lineHeight: 16 },
   button: { fontSize: 16, fontWeight: '600', lineHeight: 20 },
   labelSm: { fontSize: 12, fontWeight: '600', lineHeight: 16, letterSpacing: 0.24 },
   tabLabel: { fontSize: 11, fontWeight: '500', lineHeight: 14 },

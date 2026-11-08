@@ -26,6 +26,7 @@ import { Boton } from '@/components/Boton';
 import { Encabezado } from '@/components/Encabezado';
 import { Opcion } from '@/components/Opcion';
 import { Pantalla } from '@/components/Pantalla';
+import { SelectorMunicipalidad } from '@/components/SelectorMunicipalidad';
 import { Texto } from '@/components/Texto';
 import { municipalidadesDelVecino, useDatosMunicipales, useSesion } from '@/sesion';
 
@@ -33,6 +34,7 @@ export default function Inicio() {
   const { elegirMunicipalidad } = useSesion();
   const { municipalidad, deudas, recordatorios } = useDatosMunicipales();
   const [selectorAbierto, setSelectorAbierto] = useState(false);
+  const [listaAbierta, setListaAbierta] = useState(false);
 
   const pendientes = deudasPendientes(deudas);
   const total = sumarDeudas(pendientes);
@@ -79,7 +81,7 @@ export default function Inicio() {
             <Boton
               tipo="terciario"
               titulo="Ver todas las municipalidades"
-              onPress={() => router.push('/municipalidad')}
+              onPress={() => setListaAbierta(true)}
             />
           </View>
         ) : null}
@@ -153,6 +155,7 @@ export default function Inicio() {
         titulo="Consultar al asistente"
         onPress={() => router.push('/asistente')}
       />
+      <SelectorMunicipalidad visible={listaAbierta} onCerrar={() => setListaAbierta(false)} />
     </Pantalla>
   );
 }

@@ -12,26 +12,39 @@ export function Separador() {
   return <View style={estilos.separador} />;
 }
 
+// Tonos de los avisos: "primario" es el de siempre; "informacion" y "exito"
+// siguen las pantallas 02 y 03 del prototipo.
+type TonoDestacado = 'primario' | 'informacion' | 'exito';
+
+const COLORES_DESTACADO: Record<TonoDestacado, { texto: string; fondo: string }> = {
+  primario: { texto: colors.primary, fondo: colors.highlight },
+  informacion: { texto: colors.header, fondo: colors.backgroundPink },
+  exito: { texto: colors.paidText, fondo: colors.paidSoft },
+};
+
 // DESIGN.md: como máximo uno por pantalla.
 export function Destacado({
   titulo,
   texto,
   icono = 'info-outline',
+  tono = 'primario',
 }: {
   titulo?: string;
   texto: string;
   icono?: keyof typeof MaterialIcons.glyphMap;
+  tono?: TonoDestacado;
 }) {
+  const { texto: color, fondo } = COLORES_DESTACADO[tono];
   return (
-    <View style={estilos.destacado}>
-      <MaterialIcons name={icono} size={24} color={colors.primary} />
+    <View style={[estilos.destacado, { backgroundColor: fondo }]}>
+      <MaterialIcons name={icono} size={24} color={color} />
       <View style={estilos.flexible}>
         {titulo ? (
-          <Texto variante="bodyLgMedium" color={colors.primary}>
+          <Texto variante="bodyLgMedium" color={color}>
             {titulo}
           </Texto>
         ) : null}
-        <Texto variante="bodyMd" color={colors.primary}>
+        <Texto variante="bodyMd" color={color}>
           {texto}
         </Texto>
       </View>
@@ -89,6 +102,14 @@ export function FilaDato({ etiqueta, valor }: { etiqueta: string; valor: ReactNo
   );
 }
 
+export function PiePrototipo() {
+  return (
+    <Texto variante="caption" color={colors.textSecondary} alineacion="center">
+      Prototipo académico · Datos ficticios
+    </Texto>
+  );
+}
+
 export function Vacio({ texto }: { texto: string }) {
   return (
     <Tarjeta>
@@ -113,7 +134,6 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     padding: spacing.md,
-    backgroundColor: colors.highlight,
     borderRadius: radius.md,
   },
   flexible: { flex: 1 },
