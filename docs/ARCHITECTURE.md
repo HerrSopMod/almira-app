@@ -21,7 +21,10 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 | Pantalla | Ruta | Archivo |
 | --- | --- | --- |
 | Entrada (01) | `/entrada` | `app/(auth)/entrada.tsx` |
-| Ingresa a tu cuenta (02) | `/ingreso` | `app/(auth)/ingreso.tsx` |
+| Ingresa a tu cuenta (02a) | `/ingreso` | `app/(auth)/ingreso.tsx` |
+| Ingresa el código (02b) | `/codigo` | `app/(auth)/codigo.tsx` |
+| Vincula tu DNI (02c) | `/vincular-dni` | `app/(auth)/vincular-dni.tsx` |
+| Elige tu municipalidad (02d) | `/municipalidad` | `app/(auth)/municipalidad.tsx` |
 | Tus datos, tus reglas (03) | `/consentimiento` | `app/(auth)/consentimiento.tsx` |
 | Sin smartphone (23) | `/sin-smartphone` | `app/sin-smartphone.tsx` |
 | Privacidad y mis datos (22) | `/privacidad` | `app/privacidad.tsx` |
@@ -31,11 +34,11 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 | Detalle del aviso (10) | `/avisos/[id]` | `app/avisos/[id].tsx` |
 | Cómo llegan los avisos (11) | `/avisos/como-llegan` | `app/avisos/como-llegan.tsx` |
 | Atención humana (14) | `/atencion-humana` | `app/atencion-humana.tsx` |
-| Mi cuenta municipal (05) | `/cuenta` | `app/(tabs)/cuenta/index.tsx` |
+| Pagar · Mi cuenta municipal (05) | `/cuenta` | `app/(tabs)/cuenta/index.tsx` |
 | Detalle de la deuda (06) | `/cuenta/deuda/[id]` | `app/(tabs)/cuenta/deuda/[id].tsx` |
 | Confirma tu pago (07) | `/pago/confirmar` | `app/pago/confirmar.tsx` |
 | Constancia de pago (08) | `/pago/constancia` | `app/pago/constancia.tsx` |
-| Asistente con IA (12) | `/asistente` | `app/(tabs)/asistente.tsx` |
+| Asistente (12) | `/asistente` | `app/(tabs)/asistente.tsx` |
 | Simulación de cuotas (13) | `/simulacion-cuotas` | `app/simulacion-cuotas.tsx` |
 | Reclamos (15) | `/reclamos` | `app/(tabs)/reclamos/index.tsx` |
 | Seguimiento (18) | `/reclamos/[id]` | `app/(tabs)/reclamos/[id].tsx` |
@@ -44,16 +47,26 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 | Mapa de obras (19) | `/obras` | `app/(tabs)/obras/index.tsx` |
 | Detalle de la obra (20) | `/obras/[id]` | `app/(tabs)/obras/[id].tsx` |
 
-Flujo de entrada:
+Flujo de ingreso:
 
-- Entrada (se elige la municipalidad), ingresa a tu cuenta, tus datos tus reglas, inicio.
+- Con DNI: Entrada, Ingresa a tu cuenta, Ingresa el código, Elige tu municipalidad, Tus datos tus reglas, Inicio.
+- Con Google: Entrada, Ingresa a tu cuenta, Vincula tu DNI, Ingresa el código, Elige tu municipalidad, Tus datos tus reglas, Inicio. Vincula tu DNI solo se abre después de Google; si se llega de otra forma, vuelve al ingreso.
 - Desde la entrada, "No tengo cuenta ni smartphone propio" lleva a sin smartphone.
+- Al aceptar el consentimiento se cierran las pantallas de ingreso: "volver" ya no regresa a ellas.
 
-El ingreso es simulado: los campos vienen llenos con los datos de ejemplo y cualquier código de 6 dígitos sirve. No se envía ningún SMS.
+El ingreso es simulado: no se envía ningún SMS ni se guarda nada. El documento viene lleno con el DNI de ejemplo de Rosa y acepta de 8 a 12 letras o números (`documentoValido`). El código viene lleno con `482175` y sirve cualquier código de 6 dígitos (`codigoValido`). "Reenviar código" solo avisa que el reenvío es simulado y "Cambiar DNI" vuelve a la pantalla donde se escribió el documento.
+
+Google también es simulado. `iniciarConGoogle()` en `src/sesion.tsx` es el único punto donde se conectará `supabase.auth.signInWithOAuth({ provider: 'google' })`; hoy devuelve la cuenta de ejemplo de Rosa sin abrir Google. La sesión guarda en memoria cómo entró el vecino (`metodoIngreso`: `'google'` o `'dni'`).
+
+Elige tu municipalidad muestra las municipalidades activas tal como están en los datos (`municipalidades` de `datos-ejemplo.ts`). El buscador y los chips de zona solo aparecen si hay más de 5. La elegida se guarda en la sesión al tocar "Continuar".
 
 `src/sesion.tsx` guarda la municipalidad elegida en memoria y filtra todos los datos por ella.
 
-Las pestañas son Inicio, Mi cuenta, Asistente, Reclamos y Obras. El pago es simulado: al confirmar, `registrarPagoSimulado` crea pagos en memoria con estado `pendiente` (solo el servidor confirma pagos), las deudas se ven como pagadas hasta cerrar la app y se abre la constancia con un QR dibujado, que no codifica nada. Los plazos, vencimientos y fechas de pago usan `HOY_EJEMPLO` (1 nov 2026) en vez de la fecha del teléfono.
+Las pestañas son Inicio, Pagar, Reclamos, Obras y Asistente, en ese orden. Pagar conserva la ruta `/cuenta`. Inicio ya no tiene accesos: Recordatorios se abre con la campana de la barra superior y Mi perfil con el avatar.
+
+Inicio resume la deuda pendiente con `repartoDeuda` (En mora y Por vencer) y `proximoVencimiento` (el vencimiento pendiente más cercano desde `HOY_EJEMPLO`). En Pagar, todas las deudas pendientes empiezan marcadas; `deudasSeleccionadas` y `totalSeleccionado` recalculan el total y el botón al marcar o desmarcar, y el botón se deshabilita si no hay nada marcado. Estas funciones viven en `packages/shared/src/pagos.ts`.
+
+El pago es simulado: al confirmar, `registrarPagoSimulado` crea pagos en memoria con estado `pendiente` (solo el servidor confirma pagos), las deudas se ven como pagadas hasta cerrar la app y se abre la constancia con un QR dibujado, que no codifica nada. "Compartir" usa `Share` de React Native con un resumen sin datos personales (monto, fecha y número de operación) y "Descargar constancia" no genera ningún archivo. Los plazos, vencimientos y fechas de pago usan `HOY_EJEMPLO` (1 nov 2026) en vez de la fecha del teléfono.
 
 El asistente no usa IA: `responderAsistente` (`packages/shared/src/asistente.ts`) responde con textos fijos si la pregunta menciona cuotas o la multa, y con un mensaje que orienta a las preguntas sugeridas o a hablar con una persona en cualquier otro caso. La conversación vive solo en la pantalla. La simulación de cuotas usa las deudas pendientes (o solo las vencidas) y la tasa ilustrativa del prototipo (1 % mensual, cuota fija); es informativa y "Pedir evaluación a Rentas" no envía nada. Atención humana es simulada: el tiempo de espera es de ejemplo y no hay nadie conectado; solo promete compartir la consulta con el asistente si el vecino lo autorizó en el consentimiento.
 

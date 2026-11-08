@@ -1,6 +1,7 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { CajaIcono, type NombreIcono } from './Bloques';
 import { Casilla } from './Casilla';
 import { Radio } from './Radio';
 import { Texto } from './Texto';
@@ -12,11 +13,14 @@ type Props = {
   onPress: () => void;
   multiple?: boolean;
   extra?: ReactNode;
+  // Con ícono, la caja de ícono va a la izquierda y el radio o la casilla a la derecha.
+  icono?: NombreIcono;
 };
 
 // Fila elegible con radio (o casilla si se pueden marcar varias). La elegida lleva
 // borde primario de 1.5 px.
-export function Opcion({ titulo, detalle, seleccionada, onPress, multiple, extra }: Props) {
+export function Opcion({ titulo, detalle, seleccionada, onPress, multiple, extra, icono }: Props) {
+  const control = multiple ? <Casilla marcada={seleccionada} /> : <Radio marcado={seleccionada} />;
   return (
     <Pressable
       accessibilityRole={multiple ? 'checkbox' : 'radio'}
@@ -24,7 +28,7 @@ export function Opcion({ titulo, detalle, seleccionada, onPress, multiple, extra
       onPress={onPress}
       style={[estilos.opcion, seleccionada && estilos.seleccionada]}
     >
-      {multiple ? <Casilla marcada={seleccionada} /> : <Radio marcado={seleccionada} />}
+      {icono ? <CajaIcono icono={icono} /> : control}
       <View style={estilos.textos}>
         <Texto variante="bodyLgMedium">{titulo}</Texto>
         {detalle ? (
@@ -34,6 +38,7 @@ export function Opcion({ titulo, detalle, seleccionada, onPress, multiple, extra
         ) : null}
       </View>
       {extra}
+      {icono ? control : null}
     </Pressable>
   );
 }

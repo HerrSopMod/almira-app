@@ -6,3 +6,5 @@ export * from './datos-ejemplo';
 export * from './asistente';
 export * from './reclamos';
 export * from './panel-ejemplo';
+export * from './pagos';
+export * from './ingreso';

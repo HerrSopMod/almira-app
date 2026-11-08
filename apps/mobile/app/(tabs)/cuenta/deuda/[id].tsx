@@ -1,9 +1,8 @@
 import {
   colors,
+  formatearFecha,
   formatearSoles,
-  HOY_EJEMPLO,
   spacing,
-  textoVencimiento,
   totalDeuda,
   type TipoDeuda,
 } from '@almira/shared';
@@ -11,8 +10,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import {
   ChipEstadoDeuda,
+  Destacado,
   FilaDato,
-  CajaIcono,
   PiePrototipo,
   Separador,
   Tarjeta,
@@ -34,7 +33,7 @@ const EN_PALABRAS_SIMPLES: Record<TipoDeuda, string> = {
     'Es el impuesto anual por tu predio. Se calcula sobre el valor de tu predio registrado en la municipalidad.',
 };
 
-// Pantalla 06 del prototipo.
+// Pantalla 06 (Stitch 6, con los textos del prototipo).
 export default function DetalleDeuda() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { deudas } = useDatosMunicipales();
@@ -52,40 +51,30 @@ export default function DetalleDeuda() {
   const total = totalDeuda(deuda);
 
   return (
-    <Pantalla conPestanas encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
+    <Pantalla conPestanas encabezadoHastaArriba encabezado={encabezado}>
       <Tarjeta>
-        <View style={estilos.encabezadoTarjeta}>
-          <View style={estilos.fila}>
-            <ChipEstadoDeuda estado={deuda.estado} />
-            <Texto variante="bodyMd" color={colors.textSecondary}>
-              {textoVencimiento(deuda.vencimiento, HOY_EJEMPLO)}
-            </Texto>
-          </View>
-          <View>
-            <Texto variante="headlineSm">{deuda.concepto}</Texto>
-            <Texto variante="bodyMd" color={colors.textSecondary}>
-              {deuda.periodo}
-            </Texto>
-          </View>
-          <Texto variante="displayCurrency" tabular>
-            {formatearSoles(total)}
-          </Texto>
-        </View>
+        <DatoApilado etiqueta="Concepto" valor={deuda.concepto} />
         <Separador />
-        <FilaDato etiqueta="Monto" valor={<Valor monto={deuda.montoInsoluto} />} />
-        <FilaDato etiqueta="Interés" valor={<Valor monto={deuda.interesMoratorio} />} />
+        <DatoApilado etiqueta="Periodo" valor={deuda.periodo} />
+        <Separador />
+        <FilaDato etiqueta="Monto" valor={formatearSoles(deuda.montoInsoluto)} />
+        <FilaDato etiqueta="Interés" valor={formatearSoles(deuda.interesMoratorio)} />
+        <Separador />
+        <FilaDato total etiqueta="Total a pagar" valor={formatearSoles(total)} />
+        <Separador />
+        <View style={estilos.fila}>
+          <DatoApilado etiqueta="Vencimiento" valor={formatearFecha(deuda.vencimiento)} />
+          <ChipEstadoDeuda estado={deuda.estado} />
+        </View>
       </Tarjeta>
 
-      <Tarjeta>
-        <View style={estilos.fila}>
-          <CajaIcono icono="smart-toy" />
-          <Texto variante="bodyLgMedium">En palabras simples</Texto>
-        </View>
-        <View style={estilos.explicacion}>
-          <Texto color={colors.textSecondary}>{EN_PALABRAS_SIMPLES[deuda.tipo]}</Texto>
-          <Texto color={colors.textSecondary}>Beneficio vigente: consulta con el asistente.</Texto>
-        </View>
-      </Tarjeta>
+      <Destacado
+        icono="lightbulb-outline"
+        titulo="En palabras simples"
+        texto={EN_PALABRAS_SIMPLES[deuda.tipo]}
+      >
+        <Texto variante="bodyMd">Beneficio vigente: consulta con el asistente.</Texto>
+      </Destacado>
 
       {deuda.estado !== 'pagada' ? (
         <Boton
@@ -101,7 +90,7 @@ export default function DetalleDeuda() {
         onPress={() => router.push('/simulacion-cuotas')}
       />
       <Boton
-        tipo="secundario"
+        tipo="terciario"
         titulo="Preguntar al asistente"
         onPress={() => router.navigate('/asistente')}
       />
@@ -115,16 +104,19 @@ export default function DetalleDeuda() {
   );
 }
 
-function Valor({ monto }: { monto: number }) {
+// Rótulo en mayúsculas con su valor debajo (Concepto, Periodo, Vencimiento).
+function DatoApilado({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
-    <Texto variante="bodyLgMedium" alineacion="right" tabular>
-      {formatearSoles(monto)}
-    </Texto>
+    <View style={estilos.dato}>
+      <Texto variante="overline" color={colors.textSecondary}>
+        {etiqueta}
+      </Texto>
+      <Texto variante="bodyLgMedium">{valor}</Texto>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  encabezadoTarjeta: { gap: spacing.sm },
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
-  explicacion: { gap: spacing.sm },
+  dato: { flex: 1, gap: spacing.xs },
 });

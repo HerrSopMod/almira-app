@@ -59,6 +59,13 @@ import {
   TIPOS_RECLAMO,
   tituloReclamo,
 } from './reclamos';
+import {
+  deudasSeleccionadas,
+  proximoVencimiento,
+  repartoDeuda,
+  totalSeleccionado,
+} from './pagos';
+import { codigoValido, documentoValido } from './ingreso';
 
 describe('tokens', () => {
   it('aplica los colores de la guía turquesa', () => {
@@ -513,5 +520,72 @@ describe('panel: atención, alertas y accesos', () => {
   it('deja la cola por debajo del umbral de alerta', () => {
     const enCola = panel.casos.filter((caso) => caso.estado === 'en_cola').length;
     expect(enCola).toBeLessThan(panel.atencion.umbralCola);
+  });
+});
+
+describe('pagar', () => {
+  const deRosa = deudas.filter((deuda) => deuda.vecinoId === 'v-rosa-li');
+
+  it('suma solo las deudas pendientes marcadas', () => {
+    const todas = deRosa.map((deuda) => deuda.id);
+    expect(deudasSeleccionadas(deRosa, todas).map((deuda) => deuda.id)).toEqual([
+      'd-multa',
+      'd-arbitrios-4t',
+    ]);
+    expect(totalSeleccionado(deRosa, todas)).toBeCloseTo(120.5);
+    expect(totalSeleccionado(deRosa, ['d-arbitrios-4t'])).toBeCloseTo(80.5);
+    expect(totalSeleccionado(deRosa, [])).toBe(0);
+  });
+
+  it('ignora ids pagados o de otra municipalidad', () => {
+    expect(totalSeleccionado(deRosa, ['d-predial-4c', 'd-arbitrios-vv'])).toBe(0);
+  });
+
+  it('reparte la deuda de Rosa entre en mora y por vencer', () => {
+    expect(repartoDeuda(deRosa)).toEqual({
+      total: 120.5,
+      cantidad: 2,
+      enMora: 40,
+      porVencer: 80.5,
+      porcentajeEnMora: 33,
+      porcentajePorVencer: 67,
+    });
+  });
+
+  it('reparte en cero cuando no hay deuda pendiente', () => {
+    const pagadas = deRosa.filter((deuda) => deuda.estado === 'pagada');
+    expect(repartoDeuda(pagadas)).toMatchObject({
+      total: 0,
+      cantidad: 0,
+      porcentajeEnMora: 0,
+      porcentajePorVencer: 0,
+    });
+  });
+
+  it('busca el próximo vencimiento desde hoy, sin contar los ya vencidos', () => {
+    expect(proximoVencimiento(deRosa, HOY_EJEMPLO)).toBe('2026-11-30');
+    expect(proximoVencimiento(deRosa, '2026-11-30')).toBe('2026-11-30');
+    expect(proximoVencimiento(deRosa, '2026-12-01')).toBeNull();
+    expect(proximoVencimiento([], HOY_EJEMPLO)).toBeNull();
+  });
+});
+
+describe('ingreso', () => {
+  it('acepta DNI o carné de 8 a 12 letras o números', () => {
+    expect(documentoValido('40000082')).toBe(true);
+    expect(documentoValido(' 40000082 ')).toBe(true);
+    expect(documentoValido('CE0012345678')).toBe(true);
+    expect(documentoValido('4000008')).toBe(false);
+    expect(documentoValido('CE00123456789')).toBe(false);
+    expect(documentoValido('40••••82')).toBe(false);
+    expect(documentoValido('4000 0082')).toBe(false);
+  });
+
+  it('acepta cualquier código de 6 dígitos', () => {
+    expect(codigoValido(USUARIO_EJEMPLO.codigoSmsEjemplo)).toBe(true);
+    expect(codigoValido('000000')).toBe(true);
+    expect(codigoValido('48217')).toBe(false);
+    expect(codigoValido('4821755')).toBe(false);
+    expect(codigoValido('48a175')).toBe(false);
   });
 });
