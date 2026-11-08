@@ -4,8 +4,8 @@ import { useSesion } from '../estado';
 import { Icono, type NombreIcono } from '../iconos';
 
 const ESTADO_ARCO: Record<EstadoArco, { texto: string; tono: TonoChip }> = {
-  en_plazo: { texto: 'En plazo', tono: 'rosa' },
-  atendida: { texto: 'Atendida', tono: 'verde' },
+  en_plazo: { texto: 'En plazo', tono: 'info' },
+  atendida: { texto: 'Atendida', tono: 'ok' },
 };
 
 // "28 oct", sin el año.
@@ -28,7 +28,7 @@ export function DatosAccesos() {
       texto: 'Previsto: cada funcionario verá solo lo que su área necesita.',
     },
     {
-      icono: 'equis',
+      icono: 'prohibido',
       titulo: 'Sin scoring',
       texto: 'El panel no muestra rankings de vecinos ni clasifica pagadores.',
     },

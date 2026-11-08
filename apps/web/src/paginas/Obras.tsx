@@ -112,7 +112,7 @@ export function Obras() {
                   </span>
                 </td>
                 <td className="monto">{formatearSoles(obra.montoAsignado, { sinDecimales: true })}</td>
-                <td>{atrasada ? <Chip tono="amarillo">{actualizada}</Chip> : actualizada}</td>
+                <td>{atrasada ? <Chip tono="warn">{actualizada}</Chip> : actualizada}</td>
                 <td>
                   <Interruptor
                     activo={obra.publicada}

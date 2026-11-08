@@ -34,10 +34,9 @@ function urgencia(etiqueta: string): number {
 }
 
 function tonoPlazo(etiqueta: string): TonoChip {
-  if (etiqueta === 'Resuelto') return 'verde';
-  const dias = urgencia(etiqueta);
-  if (dias < 0) return 'rojo';
-  return dias <= 1 ? 'amarillo' : 'rosa';
+  if (etiqueta === 'Resuelto') return 'ok';
+  // Vencido en rojo; "Vence hoy" y "Quedan N d" en ámbar (LEEME.md → Color).
+  return urgencia(etiqueta) < 0 ? 'bad' : 'warn';
 }
 
 const plural = (n: number, singular: string, varios: string) => `${n} ${n === 1 ? singular : varios}`;

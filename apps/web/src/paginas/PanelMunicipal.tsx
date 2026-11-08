@@ -97,7 +97,7 @@ export function PanelMunicipal() {
       <Encabezado
         titulo="Panel municipal"
         subtitulo={`${panel.periodo} · Revisión mensual con Almira: ${panel.revisionMensual}`}
-        extra={<Chip tono="rosa">Ciclo: {panel.ciclo}</Chip>}
+        extra={<Chip tono="info">Ciclo: {panel.ciclo}</Chip>}
       />
 
       <div className="cifras cifras-4">

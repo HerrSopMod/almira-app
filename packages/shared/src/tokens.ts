@@ -236,50 +236,43 @@ export const typography = {
   },
 } as const satisfies Record<string, EstiloTexto>;
 
-// Medidas del panel web (LEEME.md → Panel web).
+// Medidas del panel web (LEEME.md → Panel web). Los radios, insignias, interruptor y
+// escalera son los mismos de la app (radius y sizes).
 export const panelSizes = {
-  // Barra lateral: ancho, relleno y alto de cada módulo.
+  // Barra lateral blanca: ancho, relleno y alto de cada módulo.
   sidebar: 248,
-  sidebarInset: 12,
-  sidebarBrandX: 22,
-  sidebarBrandY: 22,
+  sidebarX: 12,
+  sidebarY: 20,
+  // Relleno extra de la marca y del usuario respecto de los módulos.
+  sidebarBrandX: 10,
   navItem: 40,
-  navGap: 3,
-  navIcon: 16,
+  navGap: 4,
+  navIcon: 20,
   navBadge: 20,
   // Contenido: márgenes, separación entre tarjetas y relleno interior.
-  contentX: 26,
-  contentY: 22,
-  gap: 14,
-  cardPadding: 18,
-  // Columna de "Requiere tu decisión" junto al gráfico (web-02).
+  contentX: 28,
+  contentY: 24,
+  gap: 16,
+  cardPaddingX: 20,
+  cardPaddingY: 18,
+  // Botones de 40 px (pequeños, 32) y chips de filtro de 32.
+  button: 40,
+  buttonSm: 32,
+  chip: 32,
+  // Medidas de páginas que se rehacen en la etapa 5.
   decisionColumn: 478,
-  // Tarjeta de cifra y fila de tabla.
   kpiHeight: 113,
   tableRow: 46,
   tableRowTall: 59,
-  // Gráfico de barras verticales: alto de la barra más alta.
   barChart: 112,
-  // Barras horizontales: columna de etiqueta, de cifra, grosor y paso entre filas.
   hBarLabel: 138,
   hBarValue: 94,
   hBar: 12,
   hBarRow: 31,
-  // "Requiere tu decisión": cuadro del ícono y paso entre filas.
   decisionIcon: 40,
   decisionRow: 63,
-  // Número de la escalera de avisos (web-04).
-  ladderNumber: 24,
-  // Interruptor de "Publicada" (web-06) y del simulador (web-08).
-  toggleWidth: 42,
-  toggleHeight: 24,
-  toggleKnob: 18,
-  // Chips de estado y botones de fila.
-  chip: 24,
-  rowButton: 37,
   rowButtonWide: 184,
   progressWide: 148,
-  // Ingreso (web-01).
   loginCard: 400,
   loginHeader: 56,
   loginTop: 258,

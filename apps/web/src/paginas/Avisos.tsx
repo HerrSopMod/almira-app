@@ -80,7 +80,7 @@ export function Avisos() {
           {mejor &&
             (datos.varianteElegida ? (
               <p className="variante-elegida">
-                <Chip tono="verde">Variante {datos.varianteElegida} elegida para el próximo ciclo</Chip>
+                <Chip tono="ok">Variante {datos.varianteElegida} elegida para el próximo ciclo</Chip>
               </p>
             ) : (
               <button type="button" className="boton boton-primario boton-bajo" onClick={() => elegir(mejor.letra)}>
