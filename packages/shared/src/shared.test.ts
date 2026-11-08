@@ -14,6 +14,7 @@ import {
 import {
   DETALLE_MEDIO_PAGO,
   ETIQUETA_MEDIO_PAGO,
+  ETIQUETA_TIPO_RECLAMO,
   etiquetaPlazo,
   fechaLimitePlazo,
   formatearDiaMes,
@@ -21,6 +22,8 @@ import {
   formatearFechaCorta,
   formatearHora,
   formatearSoles,
+  haceDias,
+  iniciales,
   momentoAviso,
   nombreDistrito,
   sumarDeudas,
@@ -35,6 +38,23 @@ import {
   tipoAvisoActual,
   tituloAviso,
 } from './avisos';
+import {
+  bienvenidaAsistente,
+  deudasASimular,
+  PREGUNTAS_SUGERIDAS,
+  RESPUESTA_SIN_REGLA,
+  responderAsistente,
+  simularCuotas,
+} from './asistente';
+import {
+  AREA_TIPO_RECLAMO,
+  clasificarReclamo,
+  pasosSeguimiento,
+  plazoReclamo,
+  siguienteCodigoReclamo,
+  TIPOS_RECLAMO,
+  tituloReclamo,
+} from './reclamos';
 
 describe('tokens', () => {
   it('aplica los colores de la guía de estilos del prototipo', () => {
@@ -258,5 +278,121 @@ describe('avisos', () => {
     ).toBe(
       'Hola, Rosa. Tus arbitrios de S/ 80.50 vencen el 30 de noviembre. Pagar a tiempo te evita intereses.',
     );
+  });
+});
+
+describe('asistente', () => {
+  const deudasDeRosa = deudas.filter((deuda) => deuda.vecinoId === 'v-rosa-li');
+  const sinPendientes = deudasDeRosa.map((deuda) => ({ ...deuda, estado: 'pagada' as const }));
+
+  it('saluda con el texto del prototipo', () => {
+    expect(bienvenidaAsistente('Rosa')).toBe(
+      'Hola, Rosa. Soy el asistente de Almira. Puedo explicarte tus deudas y simular cuotas. Yo oriento: la decisión es de la municipalidad.',
+    );
+  });
+
+  it('responde las preguntas sugeridas con reglas fijas', () => {
+    expect(responderAsistente(PREGUNTAS_SUGERIDAS[0], deudasDeRosa)).toEqual({
+      texto: 'Puedo simular cuotas con los beneficios vigentes. La decisión es de la municipalidad.',
+      accion: 'simular_cuotas',
+    });
+    const multa = responderAsistente(PREGUNTAS_SUGERIDAS[1], deudasDeRosa);
+    expect(multa.texto).toContain(`Multa administrativa de ${formatearSoles(40)}`);
+    expect(multa.texto).toContain('15 de octubre de 2026');
+    expect(multa.texto).toContain('La decisión es de la municipalidad.');
+    expect(multa.accion).toBeUndefined();
+  });
+
+  it('entiende variantes sin tildes y orienta cuando no hay regla', () => {
+    expect(responderAsistente('quiero FRACCIONAR', deudasDeRosa).accion).toBe('simular_cuotas');
+    expect(responderAsistente('¿cuál es el horario?', deudasDeRosa).texto).toBe(RESPUESTA_SIN_REGLA);
+  });
+
+  it('no ofrece simular si no hay deudas pendientes', () => {
+    expect(responderAsistente('cuotas', sinPendientes).accion).toBeUndefined();
+    expect(responderAsistente('multa', sinPendientes).texto).toBe(
+      'No tienes multas pendientes en esta municipalidad.',
+    );
+  });
+
+  it('elige las deudas según el alcance de la simulación', () => {
+    expect(sumarDeudas(deudasASimular(deudasDeRosa, 'toda'))).toBe(120.5);
+    expect(sumarDeudas(deudasASimular(deudasDeRosa, 'mora'))).toBe(40);
+  });
+
+  it('reproduce la simulación del prototipo con la tasa ilustrativa', () => {
+    expect(simularCuotas(deudasASimular(deudasDeRosa, 'toda'), 6)).toEqual({
+      deuda: 120.5,
+      cuotas: 6,
+      cuotaMensual: 20.79,
+      interes: 4.25,
+      total: 124.75,
+    });
+    expect(simularCuotas(deudasASimular(deudasDeRosa, 'mora'), 4, 0).cuotaMensual).toBe(10);
+  });
+});
+
+describe('reclamos', () => {
+  const deRosa = reclamos.filter((reclamo) => reclamo.vecinoId === 'v-rosa-li');
+  const poste = reclamos.find((reclamo) => reclamo.codigo === 'R-01842')!;
+
+  it('clasifica con reglas fijas y deja "otro" si no reconoce nada', () => {
+    expect(
+      clasificarReclamo('Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.'),
+    ).toBe('pistas_veredas');
+    expect(clasificarReclamo(poste.descripcion!)).toBe('alumbrado');
+    expect(clasificarReclamo('Un auto bloquea la rampa de mi cochera')).toBe(
+      'vehiculo_mal_estacionado',
+    );
+    expect(clasificarReclamo('Me cobraron dos veces')).toBe('cobro_indebido');
+    expect(clasificarReclamo('Ruidos fuertes de noche')).toBe('otro');
+  });
+
+  it('asigna las áreas que usan los datos de ejemplo', () => {
+    for (const reclamo of reclamos) {
+      expect(AREA_TIPO_RECLAMO[reclamo.tipo]).toBe(reclamo.area);
+    }
+    expect(TIPOS_RECLAMO).toEqual(Object.keys(ETIQUETA_TIPO_RECLAMO));
+  });
+
+  it('sigue el correlativo de la municipalidad', () => {
+    expect(siguienteCodigoReclamo(reclamos)).toBe('R-01867');
+    expect(siguienteCodigoReclamo([])).toBe('R-00001');
+  });
+
+  it('arma un título corto con la primera frase', () => {
+    expect(tituloReclamo('Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.')).toBe(
+      'Hay un bache grande en la pista frente a…',
+    );
+    expect(tituloReclamo('poste sin luz. Desde ayer')).toBe('Poste sin luz');
+  });
+
+  it('calcula el plazo del prototipo: quedan 3 de 10 días hábiles', () => {
+    expect(plazoReclamo(poste, HOY_EJEMPLO)).toEqual({ etiqueta: 'Quedan 3 d', quedan: 3, total: 10 });
+    expect(plazoReclamo(deRosa.find((r) => r.estado === 'resuelto')!, HOY_EJEMPLO)).toBeNull();
+    const nuevo = { estado: 'derivado' as const, creadoEn: HOY_EJEMPLO, plazoDias: 10, plazo: null };
+    expect(plazoReclamo(nuevo, HOY_EJEMPLO)?.quedan).toBe(10);
+  });
+
+  it('marca el paso en curso del seguimiento', () => {
+    const estados = (estado: Parameters<typeof pasosSeguimiento>[0]) =>
+      pasosSeguimiento(estado).map((paso) => paso.estado);
+    expect(estados('en_atencion')).toEqual(['hecho', 'hecho', 'hecho', 'actual', 'pendiente']);
+    expect(estados('derivado')).toEqual(['hecho', 'hecho', 'actual', 'pendiente', 'pendiente']);
+    expect(estados('resuelto')).toEqual(['hecho', 'hecho', 'hecho', 'hecho', 'hecho']);
+  });
+});
+
+describe('obras y perfil', () => {
+  it('dice cuántos días pasaron desde la última actualización', () => {
+    expect(haceDias('2026-10-26', HOY_EJEMPLO)).toBe('hace 6 días');
+    expect(haceDias('2026-10-31', HOY_EJEMPLO)).toBe('hace 1 día');
+    expect(haceDias(HOY_EJEMPLO, HOY_EJEMPLO)).toBe('hoy');
+  });
+
+  it('arma las iniciales con el nombre y el apellido paterno', () => {
+    expect(iniciales('Rosa Quispe Huamán')).toBe('RQ');
+    expect(iniciales('María Ejemplo')).toBe('ME');
+    expect(iniciales('Ana María Rojas Paz')).toBe('AR');
   });
 });

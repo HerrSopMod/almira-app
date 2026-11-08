@@ -25,6 +25,11 @@ export const USUARIO_EJEMPLO = {
   codigoSmsEjemplo: '482175',
 } as const;
 
+// Canales sin smartphone de la pantalla 23. Son de ejemplo: el número SMS es
+// simulado y el horario del módulo no es el de ninguna municipalidad real.
+export const SMS_NUMERO_EJEMPLO = '7245';
+export const HORARIO_MODULO_EJEMPLO = 'Lunes a sábado, 8:00 a 17:00 h';
+
 const LINCE = 'm-lince';
 const VILLA_VERDE = 'm-villa-verde';
 const MIRAFLORES_ESTE = 'm-miraflores-este';

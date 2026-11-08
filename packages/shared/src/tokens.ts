@@ -48,6 +48,23 @@ export const colors = {
   notice3: '#5B1428',
 
   scrim: 'rgba(43, 43, 43, 0.4)',
+
+  // Borde punteado de "Agregar foto" (pantalla 16).
+  photoDashed: '#B9C6D4',
+  // Dibujos de las fotos simuladas (pantallas 17 y 18): bache de día y poste de noche.
+  drawingSky: '#C0D6EE',
+  drawingCurb: '#CFCFCF',
+  drawingRoad: '#8E99A6',
+  drawingHoleOuter: '#4A5462',
+  drawingHoleInner: '#2E3540',
+  drawingNight: '#22314A',
+  drawingNightGround: '#3A4A60',
+  drawingPole: '#7F8B9B',
+  drawingLamp: '#B9C3CD',
+  // Mapa ilustrativo de obras (pantalla 19): manzanas, parque y avenida.
+  drawingBlock: '#F5F5F5',
+  drawingPark: '#CDE8D5',
+  drawingAvenue: '#F3D3D5',
 } as const;
 
 export const spacing = {
@@ -79,6 +96,8 @@ export const radius = {
 export const sizes = {
   button: 48,
   buttonTertiary: 48,
+  // Botones bajos del asistente (pantalla 12).
+  buttonCompact: 36,
   input: 46,
   selector: 48,
   headerBar: 56,
@@ -98,17 +117,50 @@ export const sizes = {
   badge: 24,
   // Chips de canal de la pantalla 11.
   chip: 35,
+  // Preguntas sugeridas, campo y botón de enviar del asistente (pantalla 12).
+  suggestionChip: 32,
+  chatInput: 40,
+  // Círculo del ícono de Atención humana (pantalla 14).
+  attentionIcon: 56,
+  // Perilla del deslizador de cuotas (pantalla 13).
+  sliderThumb: 22,
+  sliderThumbBorder: 3,
+  // Zona de toque del deslizador, más alta que el riel para agarrarlo fácil.
+  sliderTouch: 44,
   // Pasos de la escalera de avisos (pantallas 09 y 10): alto mínimo y columna del número.
   noticeStep: 56,
   noticeNumber: 20,
   // Ancho de las burbujas de mensaje de la pantalla 11 (298 de 354 px).
   bubbleWidth: '84%',
+  // Foto simulada y caja de "Agregar foto" (pantallas 16 a 18).
+  evidencePhoto: 150,
+  // Campo "Describe el problema" (pantalla 16).
+  textArea: 84,
+  // Línea de seguimiento (pantalla 18): punto, trazo y alto de cada paso.
+  timelineDot: 22,
+  timelineLine: 2,
+  timelineStep: 48,
+  // Mapa de obras (pantalla 19): alto del dibujo, marcador y cruce de calles.
+  mapHeight: 274,
+  mapMarker: 28,
+  mapMarkerBorder: 2,
+  mapStreet: 9,
+  mapAvenue: 10,
+  // Foto de la obra y barra de financiamiento (pantalla 20).
+  workPhoto: 170,
+  fundingBar: 12,
+  legendDot: 10,
+  // Iniciales del vecino en Mi perfil (pantalla 21).
+  avatar: 40,
   progress: 6,
   // Barra de avance de la pantalla 04 (el panel web sigue usando progress).
   progressMobile: 8,
   borderWidth: 1,
   focusBorderWidth: 1.5,
 } as const;
+
+// "Texto más grande" de Mi perfil (pantalla 21) multiplica letra e interlineado.
+export const largeTextScale = 1.2;
 
 export const fontFamily = 'Inter';
 export const displayFontFamily = 'Poppins';

@@ -2,15 +2,13 @@ import {
   colors,
   deudasPendientes,
   ETIQUETA_ESTADO_RECLAMO,
-  etiquetaPlazo,
-  fechaLimitePlazo,
   formatearSoles,
   HOY_EJEMPLO,
+  plazoReclamo,
   radius,
   sizes,
   spacing,
   sumarDeudas,
-  type Reclamo,
 } from '@almira/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
@@ -38,16 +36,9 @@ const ACCESOS: Acceso[][] = [
   ],
   [
     { titulo: 'Obras', icono: 'hard-hat', destino: '/obras' },
-    { titulo: 'Mi perfil', icono: 'account-outline', destino: '/perfil' },
+    { titulo: 'Mi perfil', icono: 'account-outline', destino: '/inicio/perfil' },
   ],
 ];
-
-function plazoDe(reclamo: Reclamo): string | null {
-  if (reclamo.plazoDias) {
-    return etiquetaPlazo(fechaLimitePlazo(reclamo.creadoEn, reclamo.plazoDias), HOY_EJEMPLO);
-  }
-  return reclamo.plazo;
-}
 
 // Pantalla 04 del prototipo.
 export default function Inicio() {
@@ -59,7 +50,7 @@ export default function Inicio() {
   );
   const obra = obras.find((fila) => fila.estado === 'en_ejecucion');
   const reclamo = reclamos.find((fila) => fila.estado !== 'resuelto');
-  const plazo = reclamo ? plazoDe(reclamo) : null;
+  const plazo = reclamo ? plazoReclamo(reclamo, HOY_EJEMPLO)?.etiqueta : null;
 
   return (
     <Pantalla
@@ -75,7 +66,7 @@ export default function Inicio() {
               accessibilityRole="button"
               accessibilityLabel="Mi perfil"
               hitSlop={8}
-              onPress={() => router.push('/perfil')}
+              onPress={() => router.push('/inicio/perfil')}
             >
               <MaterialCommunityIcons name="account-outline" size={28} color={colors.onPrimary} />
             </Pressable>
@@ -130,7 +121,10 @@ export default function Inicio() {
       </View>
 
       {obra ? (
-        <Pressable accessibilityRole="button" onPress={() => router.navigate('/obras')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.navigate({ pathname: '/obras/[id]', params: { id: obra.id } })}
+        >
           <Tarjeta>
             <View style={estilos.obraTextos}>
               <Texto variante="bodyMd" color={colors.textSecondary}>
@@ -151,7 +145,12 @@ export default function Inicio() {
       ) : null}
 
       {reclamo ? (
-        <Pressable accessibilityRole="button" onPress={() => router.navigate('/reclamos')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() =>
+            router.navigate({ pathname: '/reclamos/[id]', params: { id: reclamo.id } })
+          }
+        >
           <Tarjeta>
             <View style={estilos.fila}>
               <IconoCuadro icono="camera-outline" />

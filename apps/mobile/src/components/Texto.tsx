@@ -1,5 +1,6 @@
-import { colors, typography } from '@almira/shared';
+import { colors, largeTextScale, typography } from '@almira/shared';
 import { Text, type TextProps } from 'react-native';
+import { useTextoGrande } from '@/textoGrande';
 
 const FAMILIA_POR_PESO = {
   '400': 'Inter_400Regular',
@@ -35,11 +36,14 @@ export function Texto({
   ...resto
 }: Props) {
   const { fontWeight, ...estilo } = typography[variante];
+  const escala = useTextoGrande().activo ? largeTextScale : 1;
   return (
     <Text
       style={[
         estilo,
         {
+          fontSize: estilo.fontSize * escala,
+          lineHeight: estilo.lineHeight * escala,
           color,
           fontFamily: (fuente === 'poppins' ? POPPINS_POR_PESO : FAMILIA_POR_PESO)[fontWeight],
           textAlign: alineacion,

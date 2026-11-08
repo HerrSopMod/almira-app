@@ -21,13 +21,14 @@ export function Separador() {
 }
 
 // Tonos de los avisos: "primario" es el de siempre; "informacion" y "exito"
-// siguen las pantallas 02 y 03 del prototipo.
-type TonoDestacado = 'primario' | 'informacion' | 'exito';
+// siguen las pantallas 02 y 03 del prototipo; "aviso" es el amarillo de la 13.
+type TonoDestacado = 'primario' | 'informacion' | 'exito' | 'aviso';
 
 const COLORES_DESTACADO: Record<TonoDestacado, { texto: string; fondo: string }> = {
   primario: { texto: colors.primary, fondo: colors.highlight },
   informacion: { texto: colors.header, fondo: colors.backgroundPinkSoft },
   exito: { texto: colors.paidText, fondo: colors.paidSoft },
+  aviso: { texto: colors.pendingDebtText, fondo: colors.pendingDebt },
 };
 
 // DESIGN.md: como máximo uno por pantalla.
@@ -79,14 +80,21 @@ export function Insignia({ texto, tono }: { texto: string; tono: Tono }) {
   );
 }
 
-export function Progreso({ porcentaje }: { porcentaje: number }) {
+// Barra de avance: primaria o verde para lo resuelto (pantalla 15).
+export function Progreso({ porcentaje, tono = 'primario' }: { porcentaje: number; tono?: 'primario' | 'pagado' }) {
   return (
     <View
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: porcentaje }}
       style={estilos.progreso}
     >
-      <View style={[estilos.progresoRelleno, { width: `${porcentaje}%` }]} />
+      <View
+        style={[
+          estilos.progresoRelleno,
+          { width: `${porcentaje}%` },
+          tono === 'pagado' && { backgroundColor: colors.paid },
+        ]}
+      />
     </View>
   );
 }
@@ -113,37 +121,36 @@ export function ChipEstadoDeuda({ estado }: { estado: EstadoDeuda }) {
   );
 }
 
-// Chip rosado de plazo («Quedan 3 d»).
-export function ChipPlazo({ texto }: { texto: string }) {
+// Chip rosado de plazo («Quedan 3 d») o verde para «Resuelto» (pantalla 15).
+export function ChipPlazo({ texto, tono = 'rosado' }: { texto: string; tono?: 'rosado' | 'pagado' }) {
   return (
-    <View style={[estilos.chip, estilos.chipPlazo]}>
-      <Texto variante="label" color={colors.header}>
+    <View style={[estilos.chip, tono === 'pagado' ? estilos.chipPagado : estilos.chipPlazo]}>
+      <Texto variante="label" color={tono === 'pagado' ? colors.paidText : colors.header}>
         {texto}
       </Texto>
     </View>
   );
 }
 
-// Cuadro de 40 px con un ícono: rosado (por defecto) o verde para lo pagado.
+// Cuadro de 40 px con un ícono: rosado (por defecto), verde para lo pagado o
+// amarillo (módulo asistido de la pantalla 23).
+const COLORES_ICONO_CUADRO = {
+  rosado: { fondo: colors.backgroundPink, icono: colors.primary },
+  pagado: { fondo: colors.paidSoft, icono: colors.paidIcon },
+  amarillo: { fondo: colors.pendingDebt, icono: colors.pendingDebtText },
+} as const;
+
 export function IconoCuadro({
   icono,
   tono = 'rosado',
 }: {
   icono: keyof typeof MaterialCommunityIcons.glyphMap;
-  tono?: 'rosado' | 'pagado';
+  tono?: keyof typeof COLORES_ICONO_CUADRO;
 }) {
+  const { fondo, icono: color } = COLORES_ICONO_CUADRO[tono];
   return (
-    <View
-      style={[
-        estilos.iconoCuadro,
-        { backgroundColor: tono === 'pagado' ? colors.paidSoft : colors.backgroundPink },
-      ]}
-    >
-      <MaterialCommunityIcons
-        name={icono}
-        size={22}
-        color={tono === 'pagado' ? colors.paidIcon : colors.primary}
-      />
+    <View style={[estilos.iconoCuadro, { backgroundColor: fondo }]}>
+      <MaterialCommunityIcons name={icono} size={22} color={color} />
     </View>
   );
 }
@@ -225,6 +232,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   chipPlazo: { backgroundColor: colors.backgroundPink, borderColor: colors.backgroundPink },
+  chipPagado: { backgroundColor: colors.paidSoft, borderColor: colors.paidSoft },
   iconoCuadro: {
     width: sizes.featureIcon,
     height: sizes.featureIcon,
