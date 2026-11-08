@@ -60,5 +60,5 @@ export function QrSimulado() {
 const estilos = StyleSheet.create({
   qr: { width: sizes.qr, height: sizes.qr, alignSelf: 'center' },
   fila: { flex: 1, flexDirection: 'row' },
-  lleno: { backgroundColor: colors.qr },
+  lleno: { backgroundColor: colors.text },
 });

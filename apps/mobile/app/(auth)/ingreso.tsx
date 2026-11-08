@@ -22,7 +22,7 @@ export default function Ingreso() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Ingresa a tu cuenta" />}
     >
       <Texto variante="bodyMd" color={colors.textSecondary}>
@@ -52,7 +52,6 @@ export default function Ingreso() {
         style={estilos.codigo}
       />
       <Destacado
-        tono="informacion"
         texto="Datos de ejemplo. En este prototipo no se envía ni se guarda ninguna información."
       />
       <Boton

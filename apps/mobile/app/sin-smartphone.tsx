@@ -1,8 +1,8 @@
 import { colors, HORARIO_MODULO_EJEMPLO, SMS_NUMERO_EJEMPLO, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useState, type ComponentProps } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { IconoCuadro, PiePrototipo, Separador, Tarjeta } from '@/components/Bloques';
+import { CajaIcono, PiePrototipo, Separador, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Pantalla } from '@/components/Pantalla';
@@ -22,7 +22,7 @@ export default function SinSmartphone() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Sin smartphone" />}
     >
       <Texto color={colors.textSecondary}>
@@ -31,7 +31,7 @@ export default function SinSmartphone() {
 
       <Tarjeta>
         <Canal
-          icono="message-outline"
+          icono="sms"
           titulo="Por SMS desde cualquier celular"
           detalle={`Envía DEUDA al ${SMS_NUMERO_EJEMPLO} (número simulado). Es gratis.`}
         />
@@ -39,14 +39,12 @@ export default function SinSmartphone() {
 
       <Tarjeta>
         <Canal
-          icono="account-multiple-outline"
-          tono="amarillo"
+          icono="people-outline"
           titulo="Módulo asistido en el palacio municipal"
           detalle={`${HORARIO_MODULO_EJEMPLO}. Lleva tu DNI.`}
         />
         <Separador />
         <Boton
-          compacto
           tipo="secundario"
           titulo="Reservar turno sin cola"
           deshabilitado={reservado}
@@ -61,20 +59,19 @@ export default function SinSmartphone() {
 
       <Tarjeta>
         <Canal
-          icono="hand-heart-outline"
-          tono="pagado"
+          icono="volunteer-activism"
           titulo="Un familiar puede ayudarte"
           detalle="Con tu autorización, puede consultar y pagar por ti."
         />
       </Tarjeta>
 
-      <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header" style={estilos.seccion}>
+      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
         Qué puedes hacer en el módulo
       </Texto>
       <Tarjeta>
         {EN_EL_MODULO.map((texto) => (
           <View key={texto} style={estilos.fila}>
-            <MaterialCommunityIcons name="check" size={20} color={colors.textSecondary} />
+            <MaterialIcons name="check" size={20} color={colors.textSecondary} />
             <Texto color={colors.textSecondary} style={estilos.flexible}>
               {texto}
             </Texto>
@@ -92,16 +89,16 @@ function Canal({
   titulo,
   detalle,
 }: {
-  icono: ComponentProps<typeof IconoCuadro>['icono'];
-  tono?: ComponentProps<typeof IconoCuadro>['tono'];
+  icono: ComponentProps<typeof CajaIcono>['icono'];
+  tono?: ComponentProps<typeof CajaIcono>['tono'];
   titulo: string;
   detalle: string;
 }) {
   return (
     <View style={estilos.fila}>
-      <IconoCuadro icono={icono} tono={tono} />
+      <CajaIcono icono={icono} tono={tono} />
       <View style={estilos.flexible}>
-        <Texto variante="labelLg">{titulo}</Texto>
+        <Texto variante="bodyLgMedium">{titulo}</Texto>
         <Texto variante="bodyMd" color={colors.textSecondary}>
           {detalle}
         </Texto>

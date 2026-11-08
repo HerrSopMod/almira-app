@@ -1,5 +1,5 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -29,7 +29,7 @@ export default function NuevoReclamo() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Nuevo reclamo" />}
     >
       <Pressable
@@ -39,12 +39,12 @@ export default function NuevoReclamo() {
         onPress={() => setFoto(true)}
         style={[estilos.foto, foto && estilos.fotoLista]}
       >
-        <MaterialCommunityIcons
-          name={foto ? 'check-circle-outline' : 'camera-outline'}
+        <MaterialIcons
+          name={foto ? 'check-circle-outline' : 'photo-camera'}
           size={40}
           color={foto ? colors.paidIcon : colors.primary}
         />
-        <Texto variante="labelLg" color={foto ? colors.paidText : colors.primary}>
+        <Texto variante="bodyLgMedium" color={foto ? colors.paidText : colors.primary}>
           {foto ? 'Foto de ejemplo agregada' : 'Agregar foto'}
         </Texto>
         <Texto variante="caption" color={colors.textSecondary} alineacion="center">
@@ -53,9 +53,9 @@ export default function NuevoReclamo() {
       </Pressable>
 
       <View style={estilos.ubicacion}>
-        <MaterialCommunityIcons name="map-marker-outline" size={28} color={colors.primary} />
+        <MaterialIcons name="place" size={28} color={colors.primary} />
         <View style={estilos.flexible}>
-          <Texto variante="labelLg">Ubicación del problema</Texto>
+          <Texto variante="bodyLgMedium">Ubicación del problema</Texto>
           {ajustando ? (
             <Campo
               accessibilityLabel="Dirección del problema"
@@ -71,7 +71,7 @@ export default function NuevoReclamo() {
         </View>
         {!ajustando ? (
           <Pressable accessibilityRole="button" hitSlop={8} onPress={() => setAjustando(true)}>
-            <Texto variante="labelLg" color={colors.primary}>
+            <Texto variante="bodyLgMedium" color={colors.primary}>
               Ajustar
             </Texto>
           </Pressable>
@@ -100,7 +100,6 @@ export default function NuevoReclamo() {
         Se deriva al área correspondiente.
       </Texto>
       <Destacado
-        tono="informacion"
         icono="lock-outline"
         texto="La foto y la ubicación se usan solo para atender este reclamo."
       />

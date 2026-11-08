@@ -1,5 +1,5 @@
 import { colors, municipalidades, radius, sizes, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDatosMunicipales, useSesion } from '@/sesion';
@@ -16,11 +16,11 @@ export function FilaMunicipalidad({ onPress }: { onPress: () => void }) {
       onPress={onPress}
       style={estilos.fila}
     >
-      <MaterialCommunityIcons name="bank-outline" size={22} color={colors.text} />
-      <Texto variante="label" style={estilos.flexible} numberOfLines={1}>
+      <MaterialIcons name="account-balance" size={sizes.icon} color={colors.primary} />
+      <Texto variante="bodyLgMedium" style={estilos.flexible} numberOfLines={1}>
         {municipalidad.nombre}
       </Texto>
-      <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text} />
+      <MaterialIcons name="chevron-right" size={sizes.icon} color={colors.textSecondary} />
     </Pressable>
   );
 }
@@ -47,7 +47,7 @@ export function SelectorMunicipalidad({
           style={StyleSheet.absoluteFill}
         />
         <View style={[estilos.hoja, { paddingBottom: spacing.lg + bottom }]}>
-          <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header">
+          <Texto variante="headlineSm" accessibilityRole="header">
             Tu municipalidad
           </Texto>
           <ScrollView contentContainerStyle={estilos.lista}>

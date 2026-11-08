@@ -62,7 +62,7 @@ export function MapaObras({ obras }: { obras: Obra[] }) {
               {
                 left: porcentaje(puesto.x * 100),
                 top: puesto.y * sizes.mapHeight - sizes.mapMarker / 2,
-                backgroundColor: concluida ? colors.paid : colors.primary,
+                backgroundColor: concluida ? colors.success : colors.primary,
               },
             ]}
           >
@@ -83,7 +83,7 @@ export function MapaObras({ obras }: { obras: Obra[] }) {
 }
 
 const estilos = StyleSheet.create({
-  mapa: { height: sizes.mapHeight, overflow: 'hidden', backgroundColor: colors.neutral },
+  mapa: { height: sizes.mapHeight, overflow: 'hidden', backgroundColor: colors.track },
   celda: {
     position: 'absolute',
     width: porcentaje(TERCIO),

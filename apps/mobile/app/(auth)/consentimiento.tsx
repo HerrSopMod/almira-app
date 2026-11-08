@@ -1,5 +1,5 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -29,16 +29,16 @@ export default function Consentimiento() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Tus datos, tus reglas" />}
     >
       <Tarjeta>
         <View style={estilos.responsable}>
           <View style={estilos.escudo}>
-            <MaterialCommunityIcons name="shield-check-outline" size={22} color={colors.primary} />
+            <MaterialIcons name="verified-user" size={22} color={colors.primary} />
           </View>
           <View style={estilos.flexible}>
-            <Texto variante="labelLg">{municipalidad.nombre} es responsable de tus datos</Texto>
+            <Texto variante="bodyLgMedium">{municipalidad.nombre} es responsable de tus datos</Texto>
             <Texto variante="bodyMd" color={colors.textSecondary}>
               Almira solo los trata por encargo (Ley N.° 29733).
             </Texto>
@@ -46,13 +46,12 @@ export default function Consentimiento() {
         </View>
       </Tarjeta>
 
-      <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header" style={estilos.seccion}>
+      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
         Autoriza lo que quieras usar
       </Texto>
       <InterruptoresConsentimiento valor={permisos} onCambiar={setPermisos} />
 
       <Destacado
-        tono="exito"
         icono="check"
         texto="Nunca vendemos tus datos ni te calificamos como «buen» o «mal» pagador."
       />

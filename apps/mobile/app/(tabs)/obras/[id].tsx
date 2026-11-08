@@ -9,7 +9,7 @@ import {
   sizes,
   spacing,
 } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import {
@@ -17,7 +17,7 @@ import {
   Destacado,
   FilaDato,
   PiePrototipo,
-  Progreso,
+  Avance,
   Separador,
   Tarjeta,
   Vacio,
@@ -52,7 +52,7 @@ export default function DetalleObra() {
   ];
 
   return (
-    <Pantalla conPestanas encabezadoHastaArriba separacion="block" encabezado={encabezado}>
+    <Pantalla conPestanas encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
       <FotoSimulada tipo="obra" etiqueta="Imagen ilustrativa" alto={sizes.workPhoto} />
 
       <Tarjeta>
@@ -61,18 +61,18 @@ export default function DetalleObra() {
             <Texto variante="headlineSm">{obra.nombre}</Texto>
             <Texto color={colors.textSecondary}>{obra.ubicacion}</Texto>
           </View>
-          <ChipPlazo texto={ETIQUETA_ESTADO_OBRA[obra.estado]} tono={concluida ? 'pagado' : 'rosado'} />
+          <ChipPlazo texto={ETIQUETA_ESTADO_OBRA[obra.estado]} tono={concluida ? 'resuelto' : 'plazo'} />
         </View>
         <View style={estilos.grupo}>
           <View style={estilos.fila}>
             <Texto color={colors.textSecondary} style={estilos.flexible}>
               Avance físico
             </Texto>
-            <Texto variante="labelLg" tabular>
+            <Texto variante="bodyLgMedium" tabular>
               {obra.avancePct} %
             </Texto>
           </View>
-          <Progreso porcentaje={obra.avancePct} tono={concluida ? 'pagado' : 'primario'} />
+          <Avance porcentaje={obra.avancePct} tono={concluida ? 'concluida' : 'acento'} />
           <Texto variante="bodyMd" color={colors.textSecondary}>
             {concluida ? 'Entregada' : 'Entrega prevista'}: {obra.meta} · Actualizada{' '}
             {haceDias(obra.actualizadaEn, HOY_EJEMPLO)}
@@ -83,7 +83,7 @@ export default function DetalleObra() {
       <Tarjeta>
         {tributos !== null ? (
           <>
-            <Texto variante="labelLg">De dónde sale el dinero</Texto>
+            <Texto variante="bodyLgMedium">De dónde sale el dinero</Texto>
             <View style={estilos.grupo}>
               <View style={estilos.barra}>
                 <View style={{ flex: tributos, backgroundColor: colors.primary }} />
@@ -105,11 +105,11 @@ export default function DetalleObra() {
 
       {hitos.length > 0 ? (
         <Tarjeta>
-          <Texto variante="labelLg">Hitos</Texto>
+          <Texto variante="bodyLgMedium">Hitos</Texto>
           <View style={estilos.grupo}>
             {hitos.map((hito) => (
               <View key={hito} style={estilos.fila}>
-                <MaterialCommunityIcons name="check" size={20} color={colors.textSecondary} />
+                <MaterialIcons name="check" size={20} color={colors.textSecondary} />
                 <Texto color={colors.textSecondary} style={estilos.flexible}>
                   {hito}
                 </Texto>
@@ -120,7 +120,6 @@ export default function DetalleObra() {
       ) : null}
 
       <Destacado
-        tono="informacion"
         texto="La obra la ejecuta la municipalidad. Almira publica el avance que ella registra."
       />
       <Boton
@@ -146,7 +145,7 @@ function Leyenda({ color, texto }: { color: string; texto: string }) {
 
 function Valor({ monto }: { monto: number }) {
   return (
-    <Texto variante="labelLg" alineacion="right" tabular>
+    <Texto variante="bodyLgMedium" alineacion="right" tabular>
       {formatearSoles(monto)}
     </Texto>
   );

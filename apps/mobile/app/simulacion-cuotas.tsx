@@ -40,7 +40,7 @@ export default function SimulacionCuotas() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Simulación de cuotas" />}
     >
       <Chips opciones={ALCANCES} elegida={alcance} onElegir={setAlcance} />
@@ -60,16 +60,16 @@ export default function SimulacionCuotas() {
               <Texto variante="bodyMd" color={colors.textSecondary}>
                 Tu cuota mensual sería de
               </Texto>
-              <Texto variante="displayCurrency" fuente="poppins" tabular>
+              <Texto variante="displayCurrency" tabular>
                 {formatearSoles(simulacion.cuotaMensual)}
               </Texto>
             </View>
             <View>
               <View style={estilos.fila}>
-                <Texto variante="labelLg" style={estilos.flexible}>
+                <Texto variante="bodyLgMedium" style={estilos.flexible}>
                   Número de cuotas
                 </Texto>
-                <Texto variante="labelLg" tabular>
+                <Texto variante="bodyLgMedium" tabular>
                   {cuotas}
                 </Texto>
               </View>
@@ -98,7 +98,6 @@ export default function SimulacionCuotas() {
           </Tarjeta>
 
           <Destacado
-            tono="aviso"
             texto="Simulación informativa con tasa ilustrativa de 1 % mensual. El fraccionamiento lo aprueba Rentas según la ordenanza vigente."
           />
           <Boton
@@ -130,7 +129,7 @@ export default function SimulacionCuotas() {
 
 function Valor({ monto }: { monto: number }) {
   return (
-    <Texto variante="labelLg" alineacion="right" tabular>
+    <Texto variante="bodyLgMedium" alineacion="right" tabular>
       {formatearSoles(monto)}
     </Texto>
   );

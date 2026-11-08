@@ -13,7 +13,7 @@ import {
   ChipPlazo,
   Destacado,
   PiePrototipo,
-  Progreso,
+  Avance,
   Tarjeta,
   Vacio,
 } from '@/components/Bloques';
@@ -31,8 +31,8 @@ export default function Reclamos() {
     <Pantalla
       conPestanas
       encabezadoHastaArriba
-      separacion="block"
-      encabezado={<BarraSuperior titulo="Reclamos" />}
+      separacion="blockDense"
+      encabezado={<BarraSuperior variante="raiz" titulo="Reclamos" />}
     >
       <Boton
         icono="photo-camera"
@@ -46,7 +46,6 @@ export default function Reclamos() {
         reclamos.map((reclamo) => <FilaReclamo key={reclamo.id} reclamo={reclamo} />)
       )}
       <Destacado
-        tono="informacion"
         texto="Cada reclamo tiene un área responsable y un plazo. Si se vence, la municipalidad recibe una alerta."
       />
       <PiePrototipo />
@@ -77,7 +76,7 @@ function FilaReclamo({ reclamo }: { reclamo: Reclamo }) {
               {reclamo.codigo}
             </Texto>
             {resuelto ? (
-              <ChipPlazo texto="Resuelto" tono="pagado" />
+              <ChipPlazo texto="Resuelto" tono="resuelto" />
             ) : plazo ? (
               <ChipPlazo texto={plazo.etiqueta} />
             ) : null}
@@ -90,7 +89,7 @@ function FilaReclamo({ reclamo }: { reclamo: Reclamo }) {
             </Texto>
           </View>
           {avance !== null ? (
-            <Progreso porcentaje={avance} tono={resuelto ? 'pagado' : 'primario'} />
+            <Avance porcentaje={avance} tono={resuelto ? 'concluida' : 'acento'} />
           ) : null}
           <Texto color={colors.textSecondary}>{ETIQUETA_ESTADO_RECLAMO[reclamo.estado]}</Texto>
         </View>

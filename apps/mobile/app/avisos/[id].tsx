@@ -47,7 +47,7 @@ export default function DetalleAviso() {
   });
 
   return (
-    <Pantalla encabezadoHastaArriba separacion="block" encabezado={encabezado}>
+    <Pantalla encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
       <PasoAviso tipo={aviso.tipo} />
 
       <Tarjeta>
@@ -62,17 +62,17 @@ export default function DetalleAviso() {
       <Tarjeta>
         <View style={estilos.filas}>
           <Fila etiqueta="Deuda">
-            <Texto variante="labelLg" alineacion="right">
+            <Texto variante="bodyLgMedium" alineacion="right">
               {deuda.concepto}
             </Texto>
           </Fila>
           <Fila etiqueta="Monto">
-            <Texto variante="labelLg" alineacion="right" tabular>
+            <Texto variante="bodyLgMedium" alineacion="right" tabular>
               {formatearSoles(totalDeuda(deuda))}
             </Texto>
           </Fila>
           <Fila etiqueta="Vence">
-            <Texto variante="labelLg" alineacion="right">
+            <Texto variante="bodyLgMedium" alineacion="right">
               {formatearFechaCorta(deuda.vencimiento)}
             </Texto>
           </Fila>
@@ -84,7 +84,7 @@ export default function DetalleAviso() {
 
       <Boton titulo="Ir a Mi cuenta" onPress={() => router.navigate('/cuenta')} />
       <Boton
-        tipo="linea"
+        tipo="secundario"
         titulo="No entiendo este aviso"
         onPress={() => router.navigate('/asistente')}
       />

@@ -140,6 +140,8 @@ export const sizes = {
   switchKnob: 20,
   checkbox: 22,
   radio: 22,
+  // Borde de la casilla, del radio y de los puntos pendientes de la línea de tiempo.
+  controlBorder: 2,
   // Anillo del radio marcado y del paso actual de la línea de tiempo.
   ring: 6,
   // Línea de tiempo: punto, trazo y alto mínimo de cada paso.

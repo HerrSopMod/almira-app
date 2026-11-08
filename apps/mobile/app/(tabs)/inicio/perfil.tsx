@@ -26,19 +26,19 @@ export default function Perfil() {
     <Pantalla
       conPestanas
       encabezadoHastaArriba
-      separacion="block"
+      separacion="blockDense"
       encabezado={<BarraSuperior titulo="Mi perfil" />}
     >
       {vecino ? (
         <Tarjeta>
           <View style={estilos.fila}>
             <View style={estilos.avatar}>
-              <Texto variante="labelLg" fuente="poppins" color={colors.onPrimary}>
+              <Texto variante="bodyLgMedium" color={colors.onPrimary}>
                 {iniciales(vecino.nombre)}
               </Texto>
             </View>
             <View style={estilos.flexible}>
-              <Texto variante="labelLg">{vecino.nombre}</Texto>
+              <Texto variante="bodyLgMedium">{vecino.nombre}</Texto>
               {vecino.codigoContribuyente ? (
                 <Texto variante="bodyMd" color={colors.textSecondary}>
                   Código de contribuyente: {vecino.codigoContribuyente}
@@ -55,7 +55,7 @@ export default function Perfil() {
             <Texto variante="bodyMd" color={colors.textSecondary}>
               Mi predio
             </Texto>
-            <Texto variante="labelLg">{predio.direccion}</Texto>
+            <Texto variante="bodyLgMedium">{predio.direccion}</Texto>
           </View>
         </Tarjeta>
       ))}
@@ -64,22 +64,22 @@ export default function Perfil() {
         opciones={[
           {
             titulo: 'Avisos y canales',
-            icono: 'bell-outline',
+            icono: 'notifications-none',
             onPress: () => router.push('/inicio/recordatorios'),
           },
           {
             titulo: 'Privacidad y mis datos',
-            icono: 'shield-check-outline',
+            icono: 'verified-user',
             onPress: () => router.push('/privacidad'),
           },
           {
             titulo: 'Atención presencial',
-            icono: 'account-multiple-outline',
+            icono: 'people-outline',
             onPress: () => router.push('/sin-smartphone'),
           },
           {
             titulo: 'Mis constancias',
-            icono: 'file-document-outline',
+            icono: 'description',
             onPress: () => router.navigate('/cuenta'),
           },
         ]}
@@ -94,7 +94,7 @@ export default function Perfil() {
         />
       </Tarjeta>
 
-      <Boton tipo="linea" titulo="Cerrar sesión" onPress={cerrarSesion} />
+      <Boton tipo="secundario" titulo="Cerrar sesión" onPress={cerrarSesion} />
       <PiePrototipo />
     </Pantalla>
   );

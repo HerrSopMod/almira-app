@@ -1,7 +1,8 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Casilla } from './Casilla';
+import { Radio } from './Radio';
 import { Texto } from './Texto';
 
 type Props = {
@@ -13,14 +14,9 @@ type Props = {
   extra?: ReactNode;
 };
 
+// Fila elegible con radio (o casilla si se pueden marcar varias). La elegida lleva
+// borde primario de 1.5 px.
 export function Opcion({ titulo, detalle, seleccionada, onPress, multiple, extra }: Props) {
-  const icono = multiple
-    ? seleccionada
-      ? 'check-box'
-      : 'check-box-outline-blank'
-    : seleccionada
-      ? 'radio-button-checked'
-      : 'radio-button-unchecked';
   return (
     <Pressable
       accessibilityRole={multiple ? 'checkbox' : 'radio'}
@@ -28,11 +24,7 @@ export function Opcion({ titulo, detalle, seleccionada, onPress, multiple, extra
       onPress={onPress}
       style={[estilos.opcion, seleccionada && estilos.seleccionada]}
     >
-      <MaterialIcons
-        name={icono}
-        size={24}
-        color={seleccionada ? colors.primary : colors.textSecondary}
-      />
+      {multiple ? <Casilla marcada={seleccionada} /> : <Radio marcado={seleccionada} />}
       <View style={estilos.textos}>
         <Texto variante="bodyLgMedium">{titulo}</Texto>
         {detalle ? (
@@ -50,7 +42,7 @@ const estilos = StyleSheet.create({
   opcion: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.blockDense,
     minHeight: sizes.button,
     padding: spacing.md,
     borderWidth: sizes.borderWidth,

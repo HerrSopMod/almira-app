@@ -10,13 +10,14 @@ import {
   type TipoRecordatorio,
 } from '@almira/shared';
 import { StyleSheet, View } from 'react-native';
+import { Insignia } from './Bloques';
 import { Texto } from './Texto';
 
-// Los tonos vino de la guía de estilos solo se usan aquí.
+// Color de cada paso (LEEME.md → Color): 1 turquesa, 2 ámbar y 3 rojo.
 const COLORES_PASO: Record<TipoRecordatorio, { fondo: string; texto: string }> = {
-  preventivo: { fondo: colors.notice1, texto: colors.notice3 },
-  mora: { fondo: colors.notice2, texto: colors.onPrimary },
-  previo_coactiva: { fondo: colors.notice3, texto: colors.onPrimary },
+  preventivo: { fondo: colors.highlight, texto: colors.primaryPressed },
+  mora: { fondo: colors.warningSoft, texto: colors.warningText },
+  previo_coactiva: { fondo: colors.dangerSoft, texto: colors.dangerText },
 };
 
 type PropsPaso = {
@@ -25,7 +26,8 @@ type PropsPaso = {
   estasAqui?: boolean;
 };
 
-// Un paso de la escalera de avisos. En el detalle del aviso (pantalla 10) va solo y sin subtítulo.
+// Un paso de la escalera de avisos. En el detalle del aviso (pantalla 10) va solo.
+// El paso actual lleva borde primario de 1.5 px y el rótulo "Estás aquí".
 export function PasoAviso({ tipo, conDetalle, estasAqui }: PropsPaso) {
   const { fondo, texto } = COLORES_PASO[tipo];
   const nivel = NIVEL_TIPO_RECORDATORIO[tipo];
@@ -35,28 +37,22 @@ export function PasoAviso({ tipo, conDetalle, estasAqui }: PropsPaso) {
       accessibilityLabel={`Paso ${nivel}: ${ETIQUETA_TIPO_RECORDATORIO[tipo]}${
         conDetalle ? `. ${DETALLE_TIPO_RECORDATORIO[tipo]}` : ''
       }${estasAqui ? '. Estás aquí' : ''}`}
-      style={[estilos.paso, { backgroundColor: fondo }]}
+      style={[estilos.paso, estasAqui && estilos.pasoActual]}
     >
-      <Texto variante="headlineLg" fuente="poppins" color={texto} style={estilos.numero}>
-        {nivel}
-      </Texto>
-      <View style={estilos.textos}>
-        <Texto variante="labelLg" color={texto}>
-          {ETIQUETA_TIPO_RECORDATORIO[tipo]}
+      <View style={[estilos.numero, { backgroundColor: fondo }]}>
+        <Texto variante="bodyMd" peso="700" color={texto}>
+          {nivel}
         </Texto>
+      </View>
+      <View style={estilos.textos}>
+        <Texto variante="bodyLgMedium">{ETIQUETA_TIPO_RECORDATORIO[tipo]}</Texto>
         {conDetalle ? (
-          <Texto variante="bodyMd" color={texto}>
+          <Texto variante="bodyMd" color={colors.textSecondary}>
             {DETALLE_TIPO_RECORDATORIO[tipo]}
           </Texto>
         ) : null}
       </View>
-      {estasAqui ? (
-        <View style={estilos.insignia}>
-          <Texto variante="label" color={colors.header}>
-            Estás aquí
-          </Texto>
-        </View>
-      ) : null}
+      {estasAqui ? <Insignia texto="Estás aquí" tono="info" /> : null}
     </View>
   );
 }
@@ -77,19 +73,20 @@ const estilos = StyleSheet.create({
   paso: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: sizes.noticeStep,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    gap: spacing.blockDense,
+    paddingHorizontal: spacing.blockDense,
+    paddingVertical: spacing.blockDense,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.border,
     borderRadius: radius.md,
   },
-  numero: { width: sizes.ladderNumber },
-  textos: { flex: 1 },
-  insignia: {
-    height: sizes.badge,
-    paddingHorizontal: spacing.blockDense,
+  pasoActual: { borderWidth: sizes.focusBorderWidth, borderColor: colors.primary },
+  numero: {
+    width: sizes.ladderNumber,
+    height: sizes.ladderNumber,
+    alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.full,
-    backgroundColor: colors.backgroundPink,
+    borderRadius: radius.navItem,
   },
+  textos: { flex: 1 },
 });

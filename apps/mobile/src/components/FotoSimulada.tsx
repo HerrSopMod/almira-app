@@ -1,5 +1,5 @@
 import { colors, radius, sizes, spacing, type TipoReclamo } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, View, type DimensionValue } from 'react-native';
 import { Texto } from './Texto';
 
@@ -23,7 +23,7 @@ export function FotoSimulada({ tipo, etiqueta = 'Foto simulada', alto = sizes.ev
       {tipo === 'pistas_veredas' ? <Bache /> : tipo === 'alumbrado' ? <Poste /> : null}
       {tipo !== 'pistas_veredas' && tipo !== 'alumbrado' ? (
         <View style={estilos.generico}>
-          <MaterialCommunityIcons name={ICONO_TIPO[tipo]} size={56} color={colors.textSecondary} />
+          <MaterialIcons name={ICONO_TIPO[tipo]} size={56} color={colors.textSecondary} />
         </View>
       ) : null}
       <View style={estilos.etiqueta}>
@@ -35,15 +35,15 @@ export function FotoSimulada({ tipo, etiqueta = 'Foto simulada', alto = sizes.ev
   );
 }
 
-const ICONO_TIPO: Record<TipoReclamo | 'obra', keyof typeof MaterialCommunityIcons.glyphMap> = {
-  obra: 'hard-hat',
-  pistas_veredas: 'road-variant',
+const ICONO_TIPO: Record<TipoReclamo | 'obra', keyof typeof MaterialIcons.glyphMap> = {
+  obra: 'construction',
+  pistas_veredas: 'edit-road',
   alumbrado: 'lightbulb-outline',
-  limpieza: 'trash-can-outline',
-  vehiculo_mal_estacionado: 'car',
-  deposito_vehicular: 'tow-truck',
+  limpieza: 'delete-outline',
+  vehiculo_mal_estacionado: 'directions-car',
+  deposito_vehicular: 'local-shipping',
   cobro_indebido: 'receipt',
-  otro: 'image-outline',
+  otro: 'image',
 };
 
 // Proporciones del dibujo respecto del alto de la foto, medidas en la pantalla 17.
@@ -157,7 +157,7 @@ const estilos = StyleSheet.create({
   marco: {
     borderRadius: radius.md,
     overflow: 'hidden',
-    backgroundColor: colors.neutral,
+    backgroundColor: colors.track,
   },
   generico: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   etiqueta: {

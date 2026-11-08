@@ -69,7 +69,7 @@ const estilos = StyleSheet.create({
   riel: {
     height: sizes.progress,
     borderRadius: radius.full,
-    backgroundColor: colors.backgroundPink,
+    backgroundColor: colors.track,
     overflow: 'hidden',
     pointerEvents: 'none',
   },

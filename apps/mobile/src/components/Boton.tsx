@@ -1,59 +1,54 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Texto } from './Texto';
+
+export type TipoBoton = 'primario' | 'secundario' | 'terciario' | 'google' | 'peligro';
 
 type Props = {
   titulo: string;
   onPress: () => void;
-  // "contorno": borde y texto primarios, como "Hablar con una persona" (pantalla 12).
-  tipo?: 'primario' | 'secundario' | 'linea' | 'contorno' | 'terciario';
+  tipo?: TipoBoton;
   icono?: keyof typeof MaterialIcons.glyphMap;
   deshabilitado?: boolean;
-  // Botón bajo de 36 px (pantalla 12).
-  compacto?: boolean;
 };
 
-// Ocupa todo el ancho disponible: los márgenes de 20 px los pone Pantalla.
-export function Boton({
-  titulo,
-  onPress,
-  tipo = 'primario',
-  icono,
-  deshabilitado,
-  compacto,
-}: Props) {
-  const colorTexto = deshabilitado
-    ? colors.textSecondary
-    : tipo === 'primario'
-      ? colors.onPrimary
-      : tipo === 'linea'
-        ? colors.text
-        : colors.primary;
+const COLOR_TEXTO: Record<TipoBoton, string> = {
+  primario: colors.onPrimary,
+  secundario: colors.primary,
+  terciario: colors.primary,
+  google: colors.text,
+  peligro: colors.dangerText,
+};
+
+// LEEME.md → Botones. Ocupan todo el ancho: los márgenes de 20 px los pone Pantalla.
+// Si van varios, se apilan con 8 px: primario, secundario y terciario. Nunca dentro de tarjetas.
+export function Boton({ titulo, onPress, tipo = 'primario', icono, deshabilitado }: Props) {
+  const colorTexto =
+    deshabilitado && tipo !== 'primario' ? colors.primaryDisabled : COLOR_TEXTO[tipo];
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!deshabilitado }}
       disabled={deshabilitado}
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         estilos.base,
-        tipo === 'primario' && estilos.primario,
-        tipo === 'secundario' && estilos.secundario,
-        tipo === 'linea' && estilos.linea,
-        tipo === 'contorno' && estilos.contorno,
-        tipo === 'terciario' && estilos.terciario,
-        compacto && estilos.compacto,
-        deshabilitado && estilos.deshabilitado,
+        estilos[tipo],
+        pressed && tipo === 'primario' && estilos.primarioPresionado,
+        deshabilitado && (tipo === 'primario' ? estilos.primarioDeshabilitado : estilos.deshabilitado),
       ]}
     >
       <View style={estilos.contenido}>
-        {icono ? <MaterialIcons name={icono} size={20} color={colorTexto} /> : null}
+        {tipo === 'google' ? (
+          // Logo de Google: viene en @expo/vector-icons, sin paquetes nuevos.
+          <FontAwesome name="google" size={sizes.iconSm} color={colorTexto} />
+        ) : icono ? (
+          <MaterialIcons name={icono} size={sizes.iconSm} color={colorTexto} />
+        ) : null}
         <Texto
-          variante={compacto ? 'label' : tipo === 'terciario' ? 'bodyLgMedium' : 'button'}
+          variante={tipo === 'terciario' || tipo === 'google' ? 'bodyLgMedium' : 'button'}
           color={colorTexto}
-          numberOfLines={compacto ? 1 : undefined}
-          adjustsFontSizeToFit={compacto}
         >
           {titulo}
         </Texto>
@@ -65,27 +60,32 @@ export function Boton({
 const estilos = StyleSheet.create({
   base: {
     alignSelf: 'stretch',
-    height: sizes.button,
+    minHeight: sizes.button,
+    paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primario: { backgroundColor: colors.primary },
-  // Las pantallas 06 y 08 usan el rosado más claro para el botón secundario.
-  secundario: { backgroundColor: colors.backgroundPinkSoft },
-  linea: {
-    backgroundColor: colors.surface,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.border,
-  },
-  contorno: {
+  primarioPresionado: { backgroundColor: colors.primaryPressed },
+  primarioDeshabilitado: { backgroundColor: colors.primaryDisabled },
+  secundario: {
     backgroundColor: colors.surface,
     borderWidth: sizes.focusBorderWidth,
     borderColor: colors.primary,
   },
-  terciario: { height: sizes.buttonTertiary },
-  compacto: { height: sizes.buttonCompact, paddingHorizontal: spacing.sm },
-  // Gris de apoyo con texto secundario, como "Enviar reclamo" sin foto (pantalla 16).
-  deshabilitado: { backgroundColor: colors.neutral, borderWidth: 0 },
-  contenido: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  terciario: { minHeight: sizes.buttonTertiary },
+  google: {
+    backgroundColor: colors.surface,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.border,
+  },
+  // "Cerrar sesión": como el secundario, con borde gris y texto de peligro.
+  peligro: {
+    backgroundColor: colors.surface,
+    borderWidth: sizes.focusBorderWidth,
+    borderColor: colors.border,
+  },
+  deshabilitado: { borderColor: colors.primaryDisabled },
+  contenido: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 });

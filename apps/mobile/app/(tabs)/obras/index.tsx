@@ -10,7 +10,7 @@ import {
 } from '@almira/shared';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ChipPlazo, PiePrototipo, Progreso, Tarjeta, Vacio } from '@/components/Bloques';
+import { ChipPlazo, PiePrototipo, Avance, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { MapaObras } from '@/components/MapaObras';
 import { Pantalla } from '@/components/Pantalla';
@@ -26,8 +26,8 @@ export default function MapaDeObras() {
     <Pantalla
       conPestanas
       encabezadoHastaArriba
-      separacion="block"
-      encabezado={<BarraSuperior titulo="Mapa de obras" />}
+      separacion="blockDense"
+      encabezado={<BarraSuperior variante="raiz" titulo="Obras" />}
     >
       <View style={estilos.cabecera}>
         <MapaObras obras={obras} />
@@ -35,7 +35,7 @@ export default function MapaDeObras() {
           <View style={estilos.fila}>
             <Texto
               variante="headlineMd"
-              fuente="poppins"
+             
               accessibilityRole="header"
               style={estilos.flexible}
             >
@@ -81,12 +81,12 @@ function FilaObra({ obra }: { obra: Obra }) {
       <Tarjeta>
         <View style={estilos.filaArriba}>
           <View style={estilos.flexible}>
-            <Texto variante="labelLg">{obra.nombre}</Texto>
+            <Texto variante="bodyLgMedium">{obra.nombre}</Texto>
             <Texto color={colors.textSecondary}>{obra.ubicacion}</Texto>
           </View>
-          <ChipPlazo texto={ETIQUETA_ESTADO_OBRA[obra.estado]} tono={concluida ? 'pagado' : 'rosado'} />
+          <ChipPlazo texto={ETIQUETA_ESTADO_OBRA[obra.estado]} tono={concluida ? 'resuelto' : 'plazo'} />
         </View>
-        <Progreso porcentaje={obra.avancePct} tono={concluida ? 'pagado' : 'primario'} />
+        <Avance porcentaje={obra.avancePct} tono={concluida ? 'concluida' : 'acento'} />
         <View style={estilos.fila}>
           <Texto color={colors.textSecondary} style={estilos.flexible}>
             {obra.avancePct} % de avance

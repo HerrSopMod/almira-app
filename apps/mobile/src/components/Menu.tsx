@@ -1,17 +1,17 @@
-import { colors, spacing } from '@almira/shared';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors, sizes, spacing } from '@almira/shared';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Fragment } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import { IconoCuadro, Separador, Tarjeta } from './Bloques';
+import { CajaIcono, Separador, Tarjeta, type NombreIcono } from './Bloques';
 import { Texto } from './Texto';
 
 export type OpcionMenu = {
   titulo: string;
-  icono: keyof typeof MaterialCommunityIcons.glyphMap;
+  icono: NombreIcono;
   onPress: () => void;
 };
 
-// Tarjeta con filas de ícono, título y flecha (pantallas 21 y 22).
+// Una tarjeta con filas de ícono, título y flecha (pantallas 21 y 22).
 export function Menu({ opciones }: { opciones: OpcionMenu[] }) {
   return (
     <Tarjeta>
@@ -19,11 +19,11 @@ export function Menu({ opciones }: { opciones: OpcionMenu[] }) {
         <Fragment key={titulo}>
           {indice > 0 ? <Separador /> : null}
           <Pressable accessibilityRole="button" onPress={onPress} style={estilos.fila}>
-            <IconoCuadro icono={icono} />
-            <Texto variante="labelLg" style={estilos.flexible}>
+            <CajaIcono icono={icono} />
+            <Texto variante="bodyLgMedium" style={estilos.flexible}>
               {titulo}
             </Texto>
-            <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text} />
+            <MaterialIcons name="chevron-right" size={sizes.icon} color={colors.textSecondary} />
           </Pressable>
         </Fragment>
       ))}
@@ -32,6 +32,6 @@ export function Menu({ opciones }: { opciones: OpcionMenu[] }) {
 }
 
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
 });

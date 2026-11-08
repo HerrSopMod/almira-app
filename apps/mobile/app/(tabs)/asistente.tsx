@@ -62,7 +62,7 @@ export default function Asistente() {
 
   return (
     <View style={estilos.raiz}>
-      <BarraSuperior titulo="Asistente con IA" />
+      <BarraSuperior variante="raiz" titulo="Asistente" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={estilos.flexible}
@@ -85,7 +85,7 @@ export default function Asistente() {
               <View key={mensaje.id} style={[estilos.burbuja, estilos.asistente]}>
                 <Texto>{mensaje.texto}</Texto>
                 {mensaje.accion === 'simular_cuotas' ? (
-                  <Boton compacto titulo="Simular cuotas" onPress={irASimulacion} />
+                  <Boton titulo="Simular cuotas" onPress={irASimulacion} />
                 ) : null}
               </View>
             ),
@@ -95,12 +95,11 @@ export default function Asistente() {
         <View style={estilos.acciones}>
           <View style={estilos.fila}>
             <View style={estilos.flexible}>
-              <Boton compacto titulo="Simular cuotas" onPress={irASimulacion} />
+              <Boton titulo="Simular cuotas" onPress={irASimulacion} />
             </View>
             <View style={estilos.flexible}>
               <Boton
-                compacto
-                tipo="contorno"
+                tipo="secundario"
                 titulo="Hablar con una persona"
                 onPress={irAAtencionHumana}
               />
@@ -122,7 +121,7 @@ export default function Asistente() {
                 onPress={() => preguntar(pregunta)}
                 style={estilos.sugerencia}
               >
-                <Texto variante="label" color={colors.primary}>
+                <Texto variante="bodyMdMedium" color={colors.primary}>
                   {pregunta}
                 </Texto>
               </Pressable>
