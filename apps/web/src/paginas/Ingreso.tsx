@@ -72,8 +72,8 @@ export function Ingreso() {
             Ingresar
           </button>
           <p className="ingreso-nota">
-            Datos de ejemplo. Ingreso simulado: entra con cualquier usuario y contraseña. Cada
-            funcionario ve solo lo que su área necesita.
+            Datos de ejemplo. Ingreso simulado: entra con cualquier usuario y contraseña. Previsto: cada
+            funcionario verá solo lo que su área necesita.
           </p>
         </div>
       </form>

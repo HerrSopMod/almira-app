@@ -25,7 +25,7 @@ export function DatosAccesos() {
     {
       icono: 'personas',
       titulo: 'Acceso por rol',
-      texto: 'Cada funcionario ve solo lo que su área necesita.',
+      texto: 'Previsto: cada funcionario verá solo lo que su área necesita.',
     },
     {
       icono: 'equis',
