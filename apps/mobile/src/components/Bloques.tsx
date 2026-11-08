@@ -80,14 +80,21 @@ export function Insignia({ texto, tono }: { texto: string; tono: Tono }) {
   );
 }
 
-export function Progreso({ porcentaje }: { porcentaje: number }) {
+// Barra de avance: primaria o verde para lo resuelto (pantalla 15).
+export function Progreso({ porcentaje, tono = 'primario' }: { porcentaje: number; tono?: 'primario' | 'pagado' }) {
   return (
     <View
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: porcentaje }}
       style={estilos.progreso}
     >
-      <View style={[estilos.progresoRelleno, { width: `${porcentaje}%` }]} />
+      <View
+        style={[
+          estilos.progresoRelleno,
+          { width: `${porcentaje}%` },
+          tono === 'pagado' && { backgroundColor: colors.paid },
+        ]}
+      />
     </View>
   );
 }
@@ -114,11 +121,11 @@ export function ChipEstadoDeuda({ estado }: { estado: EstadoDeuda }) {
   );
 }
 
-// Chip rosado de plazo («Quedan 3 d»).
-export function ChipPlazo({ texto }: { texto: string }) {
+// Chip rosado de plazo («Quedan 3 d») o verde para «Resuelto» (pantalla 15).
+export function ChipPlazo({ texto, tono = 'rosado' }: { texto: string; tono?: 'rosado' | 'pagado' }) {
   return (
-    <View style={[estilos.chip, estilos.chipPlazo]}>
-      <Texto variante="label" color={colors.header}>
+    <View style={[estilos.chip, tono === 'pagado' ? estilos.chipPagado : estilos.chipPlazo]}>
+      <Texto variante="label" color={tono === 'pagado' ? colors.paidText : colors.header}>
         {texto}
       </Texto>
     </View>
@@ -226,6 +233,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   chipPlazo: { backgroundColor: colors.backgroundPink, borderColor: colors.backgroundPink },
+  chipPagado: { backgroundColor: colors.paidSoft, borderColor: colors.paidSoft },
   iconoCuadro: {
     width: sizes.featureIcon,
     height: sizes.featureIcon,

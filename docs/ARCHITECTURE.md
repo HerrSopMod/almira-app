@@ -37,7 +37,10 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 | Mi perfil (21, en construcción) | `/perfil` | `app/perfil.tsx` |
 | Asistente con IA (12) | `/asistente` | `app/(tabs)/asistente.tsx` |
 | Simulación de cuotas (13) | `/simulacion-cuotas` | `app/simulacion-cuotas.tsx` |
-| Reclamos | `/reclamos` | `app/(tabs)/reclamos.tsx` |
+| Reclamos (15) | `/reclamos` | `app/(tabs)/reclamos/index.tsx` |
+| Seguimiento (18) | `/reclamos/[id]` | `app/(tabs)/reclamos/[id].tsx` |
+| Nuevo reclamo (16) | `/reclamo/nuevo` | `app/reclamo/nuevo.tsx` |
+| Envío al área (17) | `/reclamo/envio` | `app/reclamo/envio.tsx` |
 | Obras | `/obras` | `app/(tabs)/obras.tsx` |
 
 Flujo de entrada:
@@ -52,6 +55,8 @@ El ingreso es simulado: los campos vienen llenos con los datos de ejemplo y cual
 Las pestañas son Inicio, Mi cuenta, Asistente, Reclamos y Obras. El pago es simulado: al confirmar, `registrarPagoSimulado` crea pagos en memoria con estado `pendiente` (solo el servidor confirma pagos), las deudas se ven como pagadas hasta cerrar la app y se abre la constancia con un QR dibujado, que no codifica nada. Los plazos, vencimientos y fechas de pago usan `HOY_EJEMPLO` (1 nov 2026) en vez de la fecha del teléfono.
 
 El asistente no usa IA: `responderAsistente` (`packages/shared/src/asistente.ts`) responde con textos fijos si la pregunta menciona cuotas o la multa, y con un mensaje que orienta a las preguntas sugeridas o a hablar con una persona en cualquier otro caso. La conversación vive solo en la pantalla. La simulación de cuotas usa las deudas pendientes (o solo las vencidas) y la tasa ilustrativa del prototipo (1 % mensual, cuota fija); es informativa y "Pedir evaluación a Rentas" no envía nada. Atención humana es simulada: el tiempo de espera es de ejemplo y no hay nadie conectado; solo promete compartir la consulta con el asistente si el vecino lo autorizó en el consentimiento.
+
+Reclamos: la foto y la ubicación son simuladas (no se usa la cámara ni el GPS). "Agregar foto" solo marca que hay una foto de ejemplo y las pantallas 17 y 18 muestran un dibujo fijo según la categoría (`FotoSimulada`). La ubicación parte de la dirección del predio y el vecino puede ajustarla a mano. `clasificarReclamo` (`packages/shared/src/reclamos.ts`) elige la categoría con palabras clave y `AREA_TIPO_RECLAMO` da el área; no hay IA. El plazo de ejemplo es de 10 días hábiles para todas las categorías. Al confirmar, `registrarReclamo` guarda el reclamo en memoria con el siguiente código de la municipalidad, estado `derivado` y fecha `HOY_EJEMPLO`, y abre su seguimiento. El estado lo cambia la municipalidad.
 
 Recordatorios vive dentro de la pestaña Inicio; el detalle del aviso y "Cómo llegan los avisos" se abren encima de las pestañas. Los títulos y mensajes de los avisos salen de `packages/shared/src/avisos.ts` con los datos de la deuda y el `nombreCorto` de la obra (si la obra no lo tiene, el mensaje no la menciona). El canal elegido en "¿Por dónde te avisamos?" se guarda en memoria por municipalidad y empieza con el canal preferido del vecino. Los mensajes de la pantalla 11 son ejemplos: no se envía nada.
 

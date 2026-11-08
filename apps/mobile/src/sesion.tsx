@@ -7,6 +7,10 @@ import {
   predios,
   reclamos as reclamosEjemplo,
   recordatorios,
+  AREA_TIPO_RECLAMO,
+  PLAZO_DIAS_RECLAMO,
+  siguienteCodigoReclamo,
+  tituloReclamo,
   totalDeuda,
   USUARIO_EJEMPLO,
   vecinos,
@@ -15,6 +19,7 @@ import {
   type MedioPago,
   type Pago,
   type Reclamo,
+  type TipoReclamo,
 } from '@almira/shared';
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
@@ -36,10 +41,17 @@ type Sesion = {
   canalesAviso: Record<string, CanalAviso>;
   elegirCanalAviso: (canal: CanalAviso) => void;
   reclamosNuevos: Reclamo[];
-  agregarReclamo: (reclamo: Reclamo) => void;
+  // Guarda en memoria un reclamo de la municipalidad elegida y devuelve su id.
+  registrarReclamo: (datos: NuevoReclamo) => string | null;
   pagosSimulados: Pago[];
   // Devuelve el código de operación que comparten los pagos creados.
   registrarPagoSimulado: (deudasAPagar: Deuda[], medio: MedioPago) => string;
+};
+
+export type NuevoReclamo = {
+  tipo: TipoReclamo;
+  descripcion: string;
+  direccion: string;
 };
 
 const ContextoSesion = createContext<Sesion | null>(null);
@@ -75,7 +87,38 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       elegirCanalAviso: (canal) =>
         setCanalesAviso((previos) => ({ ...previos, [municipalidadId]: canal })),
       reclamosNuevos,
-      agregarReclamo: (reclamo) => setReclamosNuevos((previos) => [reclamo, ...previos]),
+      registrarReclamo: ({ tipo, descripcion, direccion }) => {
+        const vecino = vecinos.find(
+          (v) => v.municipalidadId === municipalidadId && v.userId === USUARIO_EJEMPLO.id,
+        );
+        if (!vecino) return null;
+        const codigo = siguienteCodigoReclamo(
+          [...reclamosEjemplo, ...reclamosNuevos].filter(
+            (r) => r.municipalidadId === municipalidadId,
+          ),
+        );
+        // La foto y la ubicación son simuladas: no se sube ningún archivo ni se lee el GPS.
+        const reclamo: Reclamo = {
+          id: `nuevo-${municipalidadId}-${codigo}`,
+          municipalidadId,
+          vecinoId: vecino.id,
+          codigo,
+          tipo,
+          titulo: tituloReclamo(descripcion),
+          descripcion,
+          estado: 'derivado',
+          area: AREA_TIPO_RECLAMO[tipo],
+          fotoRuta: `${municipalidadId}/simulada-${codigo}.jpg`,
+          direccion,
+          latitud: null,
+          longitud: null,
+          plazo: null,
+          plazoDias: PLAZO_DIAS_RECLAMO,
+          creadoEn: HOY_EJEMPLO,
+        };
+        setReclamosNuevos((previos) => [reclamo, ...previos]);
+        return reclamo.id;
+      },
       pagosSimulados,
       registrarPagoSimulado: (deudasAPagar, medio) => {
         const operaciones = new Set(pagosSimulados.map((pago) => pago.referencia));

@@ -2,15 +2,13 @@ import {
   colors,
   deudasPendientes,
   ETIQUETA_ESTADO_RECLAMO,
-  etiquetaPlazo,
-  fechaLimitePlazo,
   formatearSoles,
   HOY_EJEMPLO,
+  plazoReclamo,
   radius,
   sizes,
   spacing,
   sumarDeudas,
-  type Reclamo,
 } from '@almira/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
@@ -42,13 +40,6 @@ const ACCESOS: Acceso[][] = [
   ],
 ];
 
-function plazoDe(reclamo: Reclamo): string | null {
-  if (reclamo.plazoDias) {
-    return etiquetaPlazo(fechaLimitePlazo(reclamo.creadoEn, reclamo.plazoDias), HOY_EJEMPLO);
-  }
-  return reclamo.plazo;
-}
-
 // Pantalla 04 del prototipo.
 export default function Inicio() {
   const { deudas, obras, reclamos } = useDatosMunicipales();
@@ -59,7 +50,7 @@ export default function Inicio() {
   );
   const obra = obras.find((fila) => fila.estado === 'en_ejecucion');
   const reclamo = reclamos.find((fila) => fila.estado !== 'resuelto');
-  const plazo = reclamo ? plazoDe(reclamo) : null;
+  const plazo = reclamo ? plazoReclamo(reclamo, HOY_EJEMPLO)?.etiqueta : null;
 
   return (
     <Pantalla
@@ -151,7 +142,12 @@ export default function Inicio() {
       ) : null}
 
       {reclamo ? (
-        <Pressable accessibilityRole="button" onPress={() => router.navigate('/reclamos')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() =>
+            router.navigate({ pathname: '/reclamos/[id]', params: { id: reclamo.id } })
+          }
+        >
           <Tarjeta>
             <View style={estilos.fila}>
               <IconoCuadro icono="camera-outline" />

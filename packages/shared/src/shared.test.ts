@@ -14,6 +14,7 @@ import {
 import {
   DETALLE_MEDIO_PAGO,
   ETIQUETA_MEDIO_PAGO,
+  ETIQUETA_TIPO_RECLAMO,
   etiquetaPlazo,
   fechaLimitePlazo,
   formatearDiaMes,
@@ -43,6 +44,15 @@ import {
   responderAsistente,
   simularCuotas,
 } from './asistente';
+import {
+  AREA_TIPO_RECLAMO,
+  clasificarReclamo,
+  pasosSeguimiento,
+  plazoReclamo,
+  siguienteCodigoReclamo,
+  TIPOS_RECLAMO,
+  tituloReclamo,
+} from './reclamos';
 
 describe('tokens', () => {
   it('aplica los colores de la guía de estilos del prototipo', () => {
@@ -317,5 +327,56 @@ describe('asistente', () => {
       total: 124.75,
     });
     expect(simularCuotas(deudasASimular(deudasDeRosa, 'mora'), 4, 0).cuotaMensual).toBe(10);
+  });
+});
+
+describe('reclamos', () => {
+  const deRosa = reclamos.filter((reclamo) => reclamo.vecinoId === 'v-rosa-li');
+  const poste = reclamos.find((reclamo) => reclamo.codigo === 'R-01842')!;
+
+  it('clasifica con reglas fijas y deja "otro" si no reconoce nada', () => {
+    expect(
+      clasificarReclamo('Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.'),
+    ).toBe('pistas_veredas');
+    expect(clasificarReclamo(poste.descripcion!)).toBe('alumbrado');
+    expect(clasificarReclamo('Un auto bloquea la rampa de mi cochera')).toBe(
+      'vehiculo_mal_estacionado',
+    );
+    expect(clasificarReclamo('Me cobraron dos veces')).toBe('cobro_indebido');
+    expect(clasificarReclamo('Ruidos fuertes de noche')).toBe('otro');
+  });
+
+  it('asigna las áreas que usan los datos de ejemplo', () => {
+    for (const reclamo of reclamos) {
+      expect(AREA_TIPO_RECLAMO[reclamo.tipo]).toBe(reclamo.area);
+    }
+    expect(TIPOS_RECLAMO).toEqual(Object.keys(ETIQUETA_TIPO_RECLAMO));
+  });
+
+  it('sigue el correlativo de la municipalidad', () => {
+    expect(siguienteCodigoReclamo(reclamos)).toBe('R-01867');
+    expect(siguienteCodigoReclamo([])).toBe('R-00001');
+  });
+
+  it('arma un título corto con la primera frase', () => {
+    expect(tituloReclamo('Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.')).toBe(
+      'Hay un bache grande en la pista frente a…',
+    );
+    expect(tituloReclamo('poste sin luz. Desde ayer')).toBe('Poste sin luz');
+  });
+
+  it('calcula el plazo del prototipo: quedan 3 de 10 días hábiles', () => {
+    expect(plazoReclamo(poste, HOY_EJEMPLO)).toEqual({ etiqueta: 'Quedan 3 d', quedan: 3, total: 10 });
+    expect(plazoReclamo(deRosa.find((r) => r.estado === 'resuelto')!, HOY_EJEMPLO)).toBeNull();
+    const nuevo = { estado: 'derivado' as const, creadoEn: HOY_EJEMPLO, plazoDias: 10, plazo: null };
+    expect(plazoReclamo(nuevo, HOY_EJEMPLO)?.quedan).toBe(10);
+  });
+
+  it('marca el paso en curso del seguimiento', () => {
+    const estados = (estado: Parameters<typeof pasosSeguimiento>[0]) =>
+      pasosSeguimiento(estado).map((paso) => paso.estado);
+    expect(estados('en_atencion')).toEqual(['hecho', 'hecho', 'hecho', 'actual', 'pendiente']);
+    expect(estados('derivado')).toEqual(['hecho', 'hecho', 'actual', 'pendiente', 'pendiente']);
+    expect(estados('resuelto')).toEqual(['hecho', 'hecho', 'hecho', 'hecho', 'hecho']);
   });
 });

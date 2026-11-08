@@ -23,8 +23,13 @@ export function Boton({
   deshabilitado,
   compacto,
 }: Props) {
-  const colorTexto =
-    tipo === 'primario' ? colors.onPrimary : tipo === 'linea' ? colors.text : colors.primary;
+  const colorTexto = deshabilitado
+    ? colors.textSecondary
+    : tipo === 'primario'
+      ? colors.onPrimary
+      : tipo === 'linea'
+        ? colors.text
+        : colors.primary;
   return (
     <Pressable
       accessibilityRole="button"
@@ -80,6 +85,7 @@ const estilos = StyleSheet.create({
   },
   terciario: { height: sizes.buttonTertiary },
   compacto: { height: sizes.buttonCompact, paddingHorizontal: spacing.sm },
-  deshabilitado: { opacity: 0.5 },
+  // Gris de apoyo con texto secundario, como "Enviar reclamo" sin foto (pantalla 16).
+  deshabilitado: { backgroundColor: colors.neutral, borderWidth: 0 },
   contenido: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });

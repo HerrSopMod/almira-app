@@ -48,6 +48,19 @@ export const colors = {
   notice3: '#5B1428',
 
   scrim: 'rgba(43, 43, 43, 0.4)',
+
+  // Borde punteado de "Agregar foto" (pantalla 16).
+  photoDashed: '#B9C6D4',
+  // Dibujos de las fotos simuladas (pantallas 17 y 18): bache de día y poste de noche.
+  drawingSky: '#C0D6EE',
+  drawingCurb: '#CFCFCF',
+  drawingRoad: '#8E99A6',
+  drawingHoleOuter: '#4A5462',
+  drawingHoleInner: '#2E3540',
+  drawingNight: '#22314A',
+  drawingNightGround: '#3A4A60',
+  drawingPole: '#7F8B9B',
+  drawingLamp: '#B9C3CD',
 } as const;
 
 export const spacing = {
@@ -115,6 +128,14 @@ export const sizes = {
   noticeNumber: 20,
   // Ancho de las burbujas de mensaje de la pantalla 11 (298 de 354 px).
   bubbleWidth: '84%',
+  // Foto simulada y caja de "Agregar foto" (pantallas 16 a 18).
+  evidencePhoto: 150,
+  // Campo "Describe el problema" (pantalla 16).
+  textArea: 84,
+  // Línea de seguimiento (pantalla 18): punto, trazo y alto de cada paso.
+  timelineDot: 22,
+  timelineLine: 2,
+  timelineStep: 48,
   progress: 6,
   // Barra de avance de la pantalla 04 (el panel web sigue usando progress).
   progressMobile: 8,
