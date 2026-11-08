@@ -4,9 +4,30 @@ import { formatearFecha, formatearSoles, sumarDeudas, deudasPendientes } from '.
 import { colors, sizes, spacing } from './tokens';
 
 describe('tokens', () => {
-  it('aplica los valores del texto de DESIGN.md', () => {
+  it('aplica los colores de la guía de estilos del prototipo', () => {
+    expect(colors.header).toBe('#800404');
+    expect(colors.primary).toBe('#C00000');
+    expect(colors.chartSecondary).toBe('#F4A6A6');
+    expect(colors.backgroundPink).toBe('#F7ECEC');
+    expect(colors.pendingDebt).toBe('#FFFFCC');
+    expect(colors.neutral).toBe('#E8E8E8');
     expect(colors.background).toBe('#FFFFFF');
-    expect(colors.primary).toBe('#0B7F86');
+    expect(colors.surface).toBe('#FFFFFF');
+    expect(colors.text).toBe('#2B2B2B');
+    expect(colors.textSecondary).toBe('#595959');
+    expect(colors.lines).toBe('#808080');
+    expect(colors.paid).toBe('#2E8B57');
+    expect(colors.paidSoft).toBe('#E2F3E8');
+    expect(colors.notice3).toBe('#5B1428');
+    expect(colors.notice2).toBe('#9A5563');
+    expect(colors.notice1).toBe('#E9C1C6');
+  });
+
+  it('usa el gris de apoyo para los bordes claros del prototipo', () => {
+    expect(colors.border).toBe('#E8E8E8');
+  });
+
+  it('mantiene las medidas actuales hasta medirlas en el prototipo', () => {
     expect(sizes.button).toBe(52);
     expect(spacing.margin).toBe(20);
   });
