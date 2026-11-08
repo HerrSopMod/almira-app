@@ -1,8 +1,14 @@
-import { colors, HORARIO_MODULO_EJEMPLO, SMS_NUMERO_EJEMPLO, spacing } from '@almira/shared';
+import {
+  colors,
+  HORARIO_MODULO_EJEMPLO,
+  sizes,
+  SMS_NUMERO_EJEMPLO,
+  spacing,
+} from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState, type ComponentProps } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { CajaIcono, PiePrototipo, Separador, Tarjeta } from '@/components/Bloques';
+import { CajaIcono, PiePrototipo, Rotulo, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Pantalla } from '@/components/Pantalla';
@@ -14,17 +20,13 @@ const EN_EL_MODULO = [
   'Recibir tu constancia impresa',
 ];
 
-// Pantalla 23 del prototipo. El número SMS y el horario son de ejemplo, y la
+// Pantalla 23 (maqueta 23-sin-smartphone). El número SMS y el horario son de ejemplo, y la
 // reserva de turno es simulada.
 export default function SinSmartphone() {
   const [reservado, setReservado] = useState(false);
 
   return (
-    <Pantalla
-      encabezadoHastaArriba
-      separacion="blockDense"
-      encabezado={<BarraSuperior titulo="Sin smartphone" />}
-    >
+    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Sin smartphone" />}>
       <Texto color={colors.textSecondary}>
         La información es la misma en todos los canales. Elige el que te quede mejor.
       </Texto>
@@ -39,45 +41,41 @@ export default function SinSmartphone() {
 
       <Tarjeta>
         <Canal
-          icono="people-outline"
+          icono="storefront"
           titulo="Módulo asistido en el palacio municipal"
           detalle={`${HORARIO_MODULO_EJEMPLO}. Lleva tu DNI.`}
         />
-        <Separador />
-        <Boton
-          tipo="secundario"
-          titulo="Reservar turno sin cola"
-          deshabilitado={reservado}
-          onPress={() => setReservado(true)}
-        />
-        {reservado ? (
-          <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-            Reserva simulada: en este prototipo no se reserva ningún turno.
-          </Texto>
-        ) : null}
       </Tarjeta>
+      {/* El botón va fuera de la tarjeta (LEEME.md → Botones). */}
+      <Boton
+        icono="event-available"
+        titulo="Reservar turno sin cola"
+        deshabilitado={reservado}
+        onPress={() => setReservado(true)}
+      />
+      {reservado ? (
+        <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
+          Reserva simulada: en este prototipo no se reserva ningún turno.
+        </Texto>
+      ) : null}
 
       <Tarjeta>
         <Canal
-          icono="volunteer-activism"
+          icono="family-restroom"
           titulo="Un familiar puede ayudarte"
           detalle="Con tu autorización, puede consultar y pagar por ti."
         />
       </Tarjeta>
 
-      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
-        Qué puedes hacer en el módulo
-      </Texto>
-      <Tarjeta>
+      <View style={estilos.seccion}>
+        <Rotulo texto="Qué puedes hacer en el módulo" />
         {EN_EL_MODULO.map((texto) => (
           <View key={texto} style={estilos.fila}>
-            <MaterialIcons name="check" size={20} color={colors.textSecondary} />
-            <Texto color={colors.textSecondary} style={estilos.flexible}>
-              {texto}
-            </Texto>
+            <MaterialIcons name="check-circle-outline" size={sizes.icon} color={colors.primary} />
+            <Texto style={estilos.flexible}>{texto}</Texto>
           </View>
         ))}
-      </Tarjeta>
+      </View>
       <PiePrototipo />
     </Pantalla>
   );
@@ -108,7 +106,7 @@ function Canal({
 }
 
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   flexible: { flex: 1 },
-  seccion: { marginTop: spacing.sm },
+  seccion: { gap: spacing.blockDense },
 });
