@@ -20,37 +20,36 @@ const COLORES_PASO: Record<TipoRecordatorio, { fondo: string; texto: string }> =
   previo_coactiva: { fondo: colors.dangerSoft, texto: colors.dangerText },
 };
 
-type PropsPaso = {
-  tipo: TipoRecordatorio;
-  conDetalle?: boolean;
-  estasAqui?: boolean;
-};
-
-// Un paso de la escalera de avisos. En el detalle del aviso (pantalla 10) va solo.
-// El paso actual lleva borde primario de 1.5 px y el rótulo "Estás aquí".
-export function PasoAviso({ tipo, conDetalle, estasAqui }: PropsPaso) {
+// Número de 28 px en el color de su paso. En el detalle del aviso (pantalla 10)
+// va solo, junto al título.
+export function NumeroPaso({ tipo }: { tipo: TipoRecordatorio }) {
   const { fondo, texto } = COLORES_PASO[tipo];
-  const nivel = NIVEL_TIPO_RECORDATORIO[tipo];
+  return (
+    <View style={[estilos.numero, { backgroundColor: fondo }]}>
+      <Texto variante="bodyMd" peso="700" color={texto}>
+        {NIVEL_TIPO_RECORDATORIO[tipo]}
+      </Texto>
+    </View>
+  );
+}
+
+// Un paso de la escalera de avisos. El actual lleva borde primario de 1.5 px y el
+// rótulo "Estás aquí".
+function PasoAviso({ tipo, estasAqui }: { tipo: TipoRecordatorio; estasAqui: boolean }) {
   return (
     <View
       accessible
-      accessibilityLabel={`Paso ${nivel}: ${ETIQUETA_TIPO_RECORDATORIO[tipo]}${
-        conDetalle ? `. ${DETALLE_TIPO_RECORDATORIO[tipo]}` : ''
+      accessibilityLabel={`Paso ${NIVEL_TIPO_RECORDATORIO[tipo]}: ${ETIQUETA_TIPO_RECORDATORIO[tipo]}. ${
+        DETALLE_TIPO_RECORDATORIO[tipo]
       }${estasAqui ? '. Estás aquí' : ''}`}
       style={[estilos.paso, estasAqui && estilos.pasoActual]}
     >
-      <View style={[estilos.numero, { backgroundColor: fondo }]}>
-        <Texto variante="bodyMd" peso="700" color={texto}>
-          {nivel}
-        </Texto>
-      </View>
+      <NumeroPaso tipo={tipo} />
       <View style={estilos.textos}>
         <Texto variante="bodyLgMedium">{ETIQUETA_TIPO_RECORDATORIO[tipo]}</Texto>
-        {conDetalle ? (
-          <Texto variante="bodyMd" color={colors.textSecondary}>
-            {DETALLE_TIPO_RECORDATORIO[tipo]}
-          </Texto>
-        ) : null}
+        <Texto variante="bodyMd" color={colors.textSecondary}>
+          {DETALLE_TIPO_RECORDATORIO[tipo]}
+        </Texto>
       </View>
       {estasAqui ? <Insignia texto="Estás aquí" tono="info" /> : null}
     </View>
@@ -62,7 +61,7 @@ export function EscaleraAvisos({ actual }: { actual: TipoRecordatorio | null }) 
   return (
     <View style={estilos.escalera}>
       {[...TIPOS_RECORDATORIO].reverse().map((tipo) => (
-        <PasoAviso key={tipo} tipo={tipo} conDetalle estasAqui={tipo === actual} />
+        <PasoAviso key={tipo} tipo={tipo} estasAqui={tipo === actual} />
       ))}
     </View>
   );
