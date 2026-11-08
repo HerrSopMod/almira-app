@@ -25,13 +25,16 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 | Tus datos, tus reglas (03) | `/consentimiento` | `app/(auth)/consentimiento.tsx` |
 | Sin smartphone (23, en construcción) | `/sin-smartphone` | `app/sin-smartphone.tsx` |
 | Privacidad y mis datos (22, en construcción) | `/privacidad` | `app/privacidad.tsx` |
-| Inicio (04) | `/inicio` | `app/(tabs)/inicio.tsx` |
+| Inicio (04) | `/inicio` | `app/(tabs)/inicio/index.tsx` |
+| Recordatorios (09) | `/inicio/recordatorios` | `app/(tabs)/inicio/recordatorios.tsx` |
+| Detalle del aviso (10) | `/avisos/[id]` | `app/avisos/[id].tsx` |
+| Cómo llegan los avisos (11) | `/avisos/como-llegan` | `app/avisos/como-llegan.tsx` |
+| Atención humana (14, en construcción) | `/atencion-humana` | `app/atencion-humana.tsx` |
 | Mi cuenta municipal (05) | `/cuenta` | `app/(tabs)/cuenta/index.tsx` |
 | Detalle de la deuda (06) | `/cuenta/deuda/[id]` | `app/(tabs)/cuenta/deuda/[id].tsx` |
 | Confirma tu pago (07) | `/pago/confirmar` | `app/pago/confirmar.tsx` |
 | Constancia de pago (08) | `/pago/constancia` | `app/pago/constancia.tsx` |
 | Mi perfil (21, en construcción) | `/perfil` | `app/perfil.tsx` |
-| Recordatorios | `/recordatorios` | `app/recordatorios.tsx` |
 | Asistente | `/asistente` | `app/(tabs)/asistente.tsx` |
 | Reclamos | `/reclamos` | `app/(tabs)/reclamos.tsx` |
 | Obras | `/obras` | `app/(tabs)/obras.tsx` |
@@ -46,6 +49,8 @@ El ingreso es simulado: los campos vienen llenos con los datos de ejemplo y cual
 `src/sesion.tsx` guarda la municipalidad elegida en memoria y filtra todos los datos por ella.
 
 Las pestañas son Inicio, Mi cuenta, Asistente, Reclamos y Obras. El pago es simulado: al confirmar, `registrarPagoSimulado` crea pagos en memoria con estado `pendiente` (solo el servidor confirma pagos), las deudas se ven como pagadas hasta cerrar la app y se abre la constancia con un QR dibujado, que no codifica nada. Los plazos, vencimientos y fechas de pago usan `HOY_EJEMPLO` (1 nov 2026) en vez de la fecha del teléfono.
+
+Recordatorios vive dentro de la pestaña Inicio; el detalle del aviso y "Cómo llegan los avisos" se abren encima de las pestañas. Los títulos y mensajes de los avisos salen de `packages/shared/src/avisos.ts` con los datos de la deuda y el `nombreCorto` de la obra (si la obra no lo tiene, el mensaje no la menciona). El canal elegido en "¿Por dónde te avisamos?" se guarda en memoria por municipalidad y empieza con el canal preferido del vecino. Los mensajes de la pantalla 11 son ejemplos: no se envía nada.
 
 ## Modelo de datos
 

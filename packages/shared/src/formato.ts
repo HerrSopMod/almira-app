@@ -46,6 +46,12 @@ export function formatearFechaCorta(fechaIso: string): string {
   return `${Number(dia)} ${nombreMes.slice(0, 3)} ${anio}`;
 }
 
+// "30 de noviembre", como en los mensajes de aviso.
+export function formatearDiaMes(fechaIso: string): string {
+  const [, mes, dia] = fechaIso.slice(0, 10).split('-');
+  return `${Number(dia)} de ${MESES[Number(mes) - 1]}`;
+}
+
 // "2026-11-01T09:41:00" -> "9:41 h". Lee la hora escrita en la fecha, sin convertir zonas.
 export function formatearHora(fechaIso: string): string {
   const [hora = '0', minutos = '00'] = fechaIso.slice(11, 16).split(':');
@@ -69,6 +75,19 @@ const UN_DIA = 24 * 60 * 60 * 1000;
 function esHabil(dia: number): boolean {
   const semana = new Date(dia).getUTCDay();
   return semana !== 0 && semana !== 6;
+}
+
+// Cuándo llegó un aviso: "Hoy, 9:41 h", "Ayer, 10:15 h", "24 oct, 9:02 h" o,
+// si es de otro año, "24 oct 2025, 9:02 h".
+export function momentoAviso(fechaIso: string, hoyIso: string): string {
+  const dias = Math.round((aDia(hoyIso) - aDia(fechaIso)) / UN_DIA);
+  let dia: string;
+  if (dias === 0) dia = 'Hoy';
+  else if (dias === 1) dia = 'Ayer';
+  else if (fechaIso.slice(0, 4) === hoyIso.slice(0, 4)) {
+    dia = formatearFechaCorta(fechaIso).replace(/ \d{4}$/, '');
+  } else dia = formatearFechaCorta(fechaIso);
+  return `${dia}, ${formatearHora(fechaIso)}`;
 }
 
 // Último día del plazo de un reclamo, en días hábiles (lunes a viernes, sin
@@ -101,7 +120,7 @@ export function nombreDistrito(municipalidad: Pick<Municipalidad, 'nombre'>): st
   return municipalidad.nombre.replace(/^Municipalidad(\s+(Distrital|Provincial))?\s+de\s+/i, '');
 }
 
-export function totalDeuda(deuda: Deuda): number {
+export function totalDeuda(deuda: Pick<Deuda, 'montoInsoluto' | 'interesMoratorio'>): number {
   return deuda.montoInsoluto + deuda.interesMoratorio;
 }
 

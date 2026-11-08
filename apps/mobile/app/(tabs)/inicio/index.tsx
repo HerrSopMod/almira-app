@@ -30,7 +30,7 @@ type Acceso = {
 const ACCESOS: Acceso[][] = [
   [
     { titulo: 'Mi cuenta', icono: 'wallet-outline', destino: '/cuenta' },
-    { titulo: 'Avisos', icono: 'bell-outline', destino: '/recordatorios' },
+    { titulo: 'Avisos', icono: 'bell-outline', destino: '/inicio/recordatorios' },
   ],
   [
     { titulo: 'Asistente', icono: 'robot-outline', destino: '/asistente' },
@@ -101,7 +101,7 @@ export default function Inicio() {
       {arbitrioPorVencer ? (
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push('/recordatorios')}
+          onPress={() => router.push('/inicio/recordatorios')}
           style={estilos.aviso}
         >
           <MaterialCommunityIcons name="bell-outline" size={20} color={colors.header} />

@@ -55,6 +55,8 @@ export const spacing = {
   sm: 8,
   // Separación entre bloques medida en las pantallas del prototipo.
   block: 12,
+  // Separación entre los pasos de la escalera de avisos (pantalla 09).
+  ladder: 6,
   md: 16,
   lg: 20,
   xl: 24,
@@ -94,6 +96,13 @@ export const sizes = {
   successCircle: 60,
   qr: 150,
   badge: 24,
+  // Chips de canal de la pantalla 11.
+  chip: 35,
+  // Pasos de la escalera de avisos (pantallas 09 y 10): alto mínimo y columna del número.
+  noticeStep: 56,
+  noticeNumber: 20,
+  // Ancho de las burbujas de mensaje de la pantalla 11 (298 de 354 px).
+  bubbleWidth: '84%',
   progress: 6,
   // Barra de avance de la pantalla 04 (el panel web sigue usando progress).
   progressMobile: 8,

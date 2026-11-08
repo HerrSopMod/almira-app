@@ -16,16 +16,25 @@ import {
   ETIQUETA_MEDIO_PAGO,
   etiquetaPlazo,
   fechaLimitePlazo,
+  formatearDiaMes,
   formatearFecha,
   formatearFechaCorta,
   formatearHora,
   formatearSoles,
+  momentoAviso,
   nombreDistrito,
   sumarDeudas,
   deudasPendientes,
   textoVencimiento,
 } from './formato';
 import { colors, sizes, spacing } from './tokens';
+import {
+  avisosRecibidos,
+  mensajeAviso,
+  obraParaAvisos,
+  tipoAvisoActual,
+  tituloAviso,
+} from './avisos';
 
 describe('tokens', () => {
   it('aplica los colores de la guía de estilos del prototipo', () => {
@@ -182,5 +191,72 @@ describe('datos de ejemplo', () => {
     expect(
       reclamos.every((reclamo) => reclamo.fotoRuta.split('/')[0] === reclamo.municipalidadId),
     ).toBe(true);
+  });
+});
+
+describe('avisos', () => {
+  const deRosa = recordatorios.filter((aviso) => aviso.vecinoId === 'v-rosa-li');
+  const deudasDeRosa = deudas.filter((deuda) => deuda.vecinoId === 'v-rosa-li');
+  const arbitrios = deudas.find((deuda) => deuda.id === 'd-arbitrios-4t')!;
+  const multa = deudas.find((deuda) => deuda.id === 'd-multa')!;
+  const obra = obraParaAvisos(obras.filter((fila) => fila.municipalidadId === 'm-lince'));
+
+  it('escribe el día y la hora de cada aviso como el prototipo', () => {
+    expect(formatearDiaMes('2026-11-30')).toBe('30 de noviembre');
+    expect(momentoAviso('2026-10-31T10:15:00-05:00', HOY_EJEMPLO)).toBe('Ayer, 10:15 h');
+    expect(momentoAviso('2026-10-24T09:02:00-05:00', HOY_EJEMPLO)).toBe('24 oct, 9:02 h');
+    expect(momentoAviso('2026-11-01T08:00:00-05:00', HOY_EJEMPLO)).toBe('Hoy, 8:00 h');
+    expect(momentoAviso('2025-12-24T09:02:00-05:00', HOY_EJEMPLO)).toBe('24 dic 2025, 9:02 h');
+  });
+
+  it('lista los avisos recibidos del más nuevo al más antiguo, con sus títulos', () => {
+    const lista = avisosRecibidos(deRosa).map((aviso) => {
+      const deuda = deudas.find((fila) => fila.id === aviso.deudaId)!;
+      return tituloAviso(aviso.tipo, deuda);
+    });
+    expect(lista).toEqual(['Tu arbitrio vence pronto', 'Tu multa está en mora']);
+  });
+
+  it('ubica a la vecina en el aviso más alto de una deuda pendiente', () => {
+    expect(tipoAvisoActual(deRosa, deudasDeRosa)).toBe('mora');
+    const multaPagada = deudasDeRosa.map((deuda) =>
+      deuda.id === 'd-multa' ? { ...deuda, estado: 'pagada' as const } : deuda,
+    );
+    expect(tipoAvisoActual(deRosa, multaPagada)).toBe('preventivo');
+    expect(tipoAvisoActual([], deudasDeRosa)).toBeNull();
+  });
+
+  it('menciona la obra por su nombre corto', () => {
+    expect(obra?.nombreCorto).toBe('parque Castilla');
+  });
+
+  it('arma los mensajes con los textos del prototipo', () => {
+    expect(mensajeAviso({ tipo: 'preventivo', deuda: arbitrios, nombre: 'Rosa', obra })).toBe(
+      'Hola, Rosa. Tus arbitrios de S/ 80.50 vencen el 30 de noviembre. Pagar a tiempo te evita intereses, y tu aporte financia obras como el parque Castilla.',
+    );
+    expect(
+      mensajeAviso({ tipo: 'preventivo', deuda: arbitrios, nombre: 'Rosa', obra, version: 'ejemplo' }),
+    ).toBe(
+      'Hola, Rosa. Tus arbitrios de S/ 80.50 vencen el 30 de noviembre. Pagar a tiempo te evita intereses. Tu aporte financia obras como el parque Castilla.',
+    );
+    expect(mensajeAviso({ tipo: 'mora', deuda: multa, nombre: 'Rosa' })).toBe(
+      'Rosa, tu multa administrativa de S/ 40.00 venció el 15 de octubre. Puedes pagar en la app o simular cuotas. ¿Dudas? Responde a este mensaje.',
+    );
+    expect(mensajeAviso({ tipo: 'previo_coactiva', deuda: multa, nombre: 'Rosa' })).toBe(
+      'Rosa, tu multa podría pasar a cobranza coactiva, a cargo de la municipalidad. Aún puedes pagar o pedir orientación. Si ya reclamaste, este aviso es solo informativo.',
+    );
+  });
+
+  it('omite la frase de la obra si no tiene nombre corto', () => {
+    expect(
+      mensajeAviso({
+        tipo: 'preventivo',
+        deuda: arbitrios,
+        nombre: 'Rosa',
+        obra: { nombreCorto: null },
+      }),
+    ).toBe(
+      'Hola, Rosa. Tus arbitrios de S/ 80.50 vencen el 30 de noviembre. Pagar a tiempo te evita intereses.',
+    );
   });
 });

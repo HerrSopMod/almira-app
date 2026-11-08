@@ -121,6 +121,9 @@ export interface Obra {
   id: string;
   municipalidadId: string;
   nombre: string;
+  // Nombre para los mensajes de aviso: va después de "obras como el" (por ejemplo,
+  // "parque Castilla"). Si es null, el mensaje no menciona la obra.
+  nombreCorto: string | null;
   ubicacion: string;
   estado: EstadoObra;
   avancePct: number;
