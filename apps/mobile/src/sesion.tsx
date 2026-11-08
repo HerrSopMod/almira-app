@@ -30,8 +30,20 @@ export type Consentimientos = {
   avisosSms: boolean;
 };
 
+// Cómo entró el vecino en la pantalla 02a.
+export type MetodoIngreso = 'google' | 'dni';
+
+// Lo que devuelve la cuenta de Google al ingresar.
+export type CuentaGoogle = { userId: string; nombre: string };
+
 // Estado en memoria con datos de ejemplo; todavía no hay conexión a Supabase.
 type Sesion = {
+  // null hasta que el vecino elige cómo ingresar.
+  metodoIngreso: MetodoIngreso | null;
+  // Nombre de la cuenta de Google, para saludar en Vincula tu DNI.
+  nombreGoogle: string | null;
+  iniciarConGoogle: () => Promise<CuentaGoogle>;
+  iniciarConDni: () => void;
   municipalidadId: string;
   elegirMunicipalidad: (id: string) => void;
   consentimientos: Consentimientos;
@@ -69,6 +81,8 @@ function momentoSimulado(): string {
 
 export function SesionProvider({ children }: { children: ReactNode }) {
   const [municipalidadId, elegirMunicipalidad] = useState(municipalidades[0]!.id);
+  const [metodoIngreso, setMetodoIngreso] = useState<MetodoIngreso | null>(null);
+  const [nombreGoogle, setNombreGoogle] = useState<string | null>(null);
   const [canalesAviso, setCanalesAviso] = useState<Record<string, CanalAviso>>({});
   const [reclamosNuevos, setReclamosNuevos] = useState<Reclamo[]>([]);
   const [pagosSimulados, setPagosSimulados] = useState<Pago[]>([]);
@@ -79,6 +93,23 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   });
   const valor = useMemo<Sesion>(
     () => ({
+      metodoIngreso,
+      nombreGoogle,
+      // Único punto donde se conectará supabase.auth.signInWithOAuth({ provider: 'google' }).
+      // Mientras no haya Supabase, devuelve la cuenta de ejemplo de Rosa sin abrir Google.
+      iniciarConGoogle: async () => {
+        const cuenta: CuentaGoogle = {
+          userId: USUARIO_EJEMPLO.id,
+          nombre: USUARIO_EJEMPLO.nombre,
+        };
+        setMetodoIngreso('google');
+        setNombreGoogle(cuenta.nombre);
+        return cuenta;
+      },
+      iniciarConDni: () => {
+        setMetodoIngreso('dni');
+        setNombreGoogle(null);
+      },
       municipalidadId,
       elegirMunicipalidad,
       consentimientos,
@@ -140,7 +171,15 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         return referencia;
       },
     }),
-    [municipalidadId, canalesAviso, reclamosNuevos, consentimientos, pagosSimulados],
+    [
+      metodoIngreso,
+      nombreGoogle,
+      municipalidadId,
+      canalesAviso,
+      reclamosNuevos,
+      consentimientos,
+      pagosSimulados,
+    ],
   );
   return <ContextoSesion.Provider value={valor}>{children}</ContextoSesion.Provider>;
 }
