@@ -1,43 +1,43 @@
-// Colores de la guía de estilos del prototipo de Figma
-// (docs/design/prototipo/general/00-guia-de-estilos.png y LEEME.md).
-// Los tonos vino (notice1 a notice3) solo van en la escalera de avisos.
+// Paleta turquesa de Stitch (docs/design/stitch_*/civic_clarity/DESIGN.md):
+// fondo blanco (#FFFFFF) y color principal #0B7F86. Las medidas y la tipografía
+// siguen el prototipo de Figma. Los tonos notice1 a notice3 solo van en la escalera de avisos.
 
 export const colors = {
-  primary: '#C00000',
+  primary: '#0B7F86',
   onPrimary: '#FFFFFF',
-  header: '#800404',
+  header: '#0A6D72',
   background: '#FFFFFF',
   surface: '#FFFFFF',
   surfaceBright: '#FFFFFF',
-  backgroundPink: '#F7ECEC',
-  neutral: '#E8E8E8',
-  chartSecondary: '#F4A6A6',
+  backgroundPink: '#E3F6F5',
+  neutral: '#D6E3E4',
+  chartSecondary: '#79D5DC',
 
-  accent: '#F4A6A6',
-  highlight: '#F7ECEC',
-  text: '#2B2B2B',
-  textSecondary: '#595959',
-  border: '#E8E8E8',
-  lines: '#808080',
+  accent: '#2CC5C0',
+  highlight: '#E3F6F5',
+  text: '#0F2A2E',
+  textSecondary: '#5B6B70',
+  border: '#D6E3E4',
+  lines: '#6E797A',
 
   pendingDebt: '#FFFFCC',
-  paid: '#2E8B57',
-  paidSoft: '#E2F3E8',
+  paid: '#2E9E6B',
+  paidSoft: '#EAF6F0',
   // Texto sobre Pagado claro, medido en la pantalla 03 del prototipo.
   paidText: '#14563B',
 
-  success: '#2E8B57',
-  successSoft: '#E2F3E8',
-  warning: '#2B2B2B',
-  warningSoft: '#FFFFCC',
-  danger: '#C00000',
-  dangerSoft: '#F7ECEC',
+  success: '#2E9E6B',
+  successSoft: '#EAF6F0',
+  warning: '#C98A00',
+  warningSoft: '#FBF5E6',
+  danger: '#D64545',
+  dangerSoft: '#FAEAEA',
 
-  notice1: '#E9C1C6',
-  notice2: '#9A5563',
-  notice3: '#5B1428',
+  notice1: '#C3DFE4',
+  notice2: '#2A7A80',
+  notice3: '#004F54',
 
-  scrim: 'rgba(43, 43, 43, 0.4)',
+  scrim: 'rgba(15, 42, 46, 0.4)',
 } as const;
 
 export const spacing = {

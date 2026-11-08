@@ -21,26 +21,26 @@ import { colors, sizes, spacing } from './tokens';
 
 describe('tokens', () => {
   it('aplica los colores de la guía de estilos del prototipo', () => {
-    expect(colors.header).toBe('#800404');
-    expect(colors.primary).toBe('#C00000');
-    expect(colors.chartSecondary).toBe('#F4A6A6');
-    expect(colors.backgroundPink).toBe('#F7ECEC');
+    expect(colors.header).toBe('#0A6D72');
+    expect(colors.primary).toBe('#0B7F86');
+    expect(colors.chartSecondary).toBe('#79D5DC');
+    expect(colors.backgroundPink).toBe('#E3F6F5');
     expect(colors.pendingDebt).toBe('#FFFFCC');
-    expect(colors.neutral).toBe('#E8E8E8');
+    expect(colors.neutral).toBe('#D6E3E4');
     expect(colors.background).toBe('#FFFFFF');
     expect(colors.surface).toBe('#FFFFFF');
-    expect(colors.text).toBe('#2B2B2B');
-    expect(colors.textSecondary).toBe('#595959');
-    expect(colors.lines).toBe('#808080');
-    expect(colors.paid).toBe('#2E8B57');
-    expect(colors.paidSoft).toBe('#E2F3E8');
-    expect(colors.notice3).toBe('#5B1428');
-    expect(colors.notice2).toBe('#9A5563');
-    expect(colors.notice1).toBe('#E9C1C6');
+    expect(colors.text).toBe('#0F2A2E');
+    expect(colors.textSecondary).toBe('#5B6B70');
+    expect(colors.lines).toBe('#6E797A');
+    expect(colors.paid).toBe('#2E9E6B');
+    expect(colors.paidSoft).toBe('#EAF6F0');
+    expect(colors.notice3).toBe('#004F54');
+    expect(colors.notice2).toBe('#2A7A80');
+    expect(colors.notice1).toBe('#C3DFE4');
   });
 
   it('usa el gris de apoyo para los bordes claros del prototipo', () => {
-    expect(colors.border).toBe('#E8E8E8');
+    expect(colors.border).toBe('#D6E3E4');
   });
 
   it('usa las medidas de las imágenes del prototipo', () => {

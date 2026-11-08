@@ -19,7 +19,7 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 
 - La fuente de verdad del diseño es `docs/design/prototipo`: lee `LEEME.md`, copia los textos de `TEXTOS.md` y sigue las imágenes. Las pantallas de Stitch quedan solo como referencia anterior.
 - Usa los tokens de `@almira/shared`. No escribas colores ni medidas sueltas.
-- Fondo `#FFFFFF`, encabezados `#800404` y color primario `#C00000`. Los tonos vino (`#E9C1C6`, `#9A5563`, `#5B1428`) solo van en la escalera de avisos.
+- Colores solo de la paleta turquesa de Stitch: fondo `#FFFFFF`, encabezados `#0A6D72` y color primario `#0B7F86`. Los tonos `#C3DFE4`, `#2A7A80`, `#004F54` solo van en la escalera de avisos. Las pantallas, textos y funciones siguen el prototipo.
 - Poppins para montos, marca y títulos; Inter para etiquetas, botones y texto.
 - Las medidas de botones, tarjetas y márgenes salen de las imágenes del prototipo.
 - Montos con `formatearSoles`, alineados a la derecha.
