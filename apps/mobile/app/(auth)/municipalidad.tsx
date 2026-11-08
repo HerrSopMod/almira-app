@@ -17,7 +17,7 @@ const MAXIMO_SIN_FILTROS = 5;
 
 type FiltroZona = Zona | 'todas';
 
-// Sin tildes ni mayúsculas, para que "lince" encuentre "Lince".
+// Sin tildes ni mayúsculas: "jesus" encuentra "Jesús".
 const normalizar = (texto: string) =>
   texto
     .normalize('NFD')
