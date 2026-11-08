@@ -4,6 +4,7 @@ import {
   colors,
   ETIQUETA_TIPO_RECLAMO,
   PLAZO_DIAS_RECLAMO,
+  sizes,
   spacing,
   TIPOS_RECLAMO,
   type TipoReclamo,
@@ -12,18 +13,18 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { FilaDato, CajaIcono, Separador, Tarjeta, Vacio } from '@/components/Bloques';
+import { Destacado, FilaDato, Separador, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Chips } from '@/components/Chips';
-import { FotoSimulada } from '@/components/FotoSimulada';
+import { MiniaturaFoto } from '@/components/FotoSimulada';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useSesion } from '@/sesion';
 
 const CATEGORIAS = TIPOS_RECLAMO.map((valor) => ({ valor, titulo: ETIQUETA_TIPO_RECLAMO[valor] }));
 
-// Pantalla 17 del prototipo. La categoría sale de reglas fijas sobre la
+// Pantalla 17 (maqueta 17-envio-al-area). La categoría sale de reglas fijas sobre la
 // descripción (clasificarReclamo) y el área, de la categoría. El vecino puede corregirla.
 export default function EnvioAlArea() {
   const { descripcion = '', direccion = '' } = useLocalSearchParams<{
@@ -33,7 +34,7 @@ export default function EnvioAlArea() {
   const { registrarReclamo } = useSesion();
   const [tipo, setTipo] = useState<TipoReclamo>(() => clasificarReclamo(descripcion));
   const area = AREA_TIPO_RECLAMO[tipo];
-  const encabezado = <BarraSuperior titulo="Envío al área" />;
+  const encabezado = <BarraSuperior titulo="Envío al área" paso="Paso 2 de 2" />;
 
   if (descripcion === '' || direccion === '') {
     return (
@@ -52,42 +53,40 @@ export default function EnvioAlArea() {
   };
 
   return (
-    <Pantalla encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
+    <Pantalla encabezadoHastaArriba encabezado={encabezado}>
+      <Destacado
+        icono="category"
+        titulo="Lo clasificamos así"
+        texto="Clasificación automática. Puedes corregirla."
+      />
+
       <Tarjeta>
-        <View style={estilos.fila}>
-          <CajaIcono icono="smart-toy" />
-          <View style={estilos.flexible}>
-            <Texto variante="bodyLgMedium">Lo clasificamos así</Texto>
-            <Texto variante="bodyMd" color={colors.textSecondary}>
-              Clasificación automática. Puedes corregirla.
-            </Texto>
-          </View>
-        </View>
-        <View style={estilos.filas}>
-          <FilaDato etiqueta="Categoría" valor={<Valor texto={ETIQUETA_TIPO_RECLAMO[tipo]} />} />
-          <FilaDato etiqueta="Área responsable" valor={<Valor texto={area} />} />
-          <FilaDato
-            etiqueta="Plazo de atención"
-            valor={<Valor texto={`${PLAZO_DIAS_RECLAMO} días hábiles`} />}
-          />
-        </View>
+        <FilaDato etiqueta="Categoría" valor={ETIQUETA_TIPO_RECLAMO[tipo]} />
+        <Separador />
+        <FilaDato etiqueta="Área responsable" valor={area} />
+        <Separador />
+        <FilaDato etiqueta="Plazo de atención" valor={`${PLAZO_DIAS_RECLAMO} días hábiles`} />
       </Tarjeta>
 
-      <Texto variante="headlineSm" accessibilityRole="header" style={estilos.seccion}>
-        ¿Es otra categoría?
-      </Texto>
-      <Chips opciones={CATEGORIAS} elegida={tipo} onElegir={setTipo} />
-
-      <FotoSimulada tipo={tipo} />
+      <View style={estilos.grupo}>
+        <Texto variante="headlineSm" accessibilityRole="header">
+          ¿Es otra categoría?
+        </Texto>
+        <Chips opciones={CATEGORIAS} elegida={tipo} onElegir={setTipo} />
+      </View>
 
       <Tarjeta>
-        <Texto color={colors.textSecondary}>{descripcion}</Texto>
-        <Separador />
-        <View style={estilos.fila}>
-          <MaterialIcons name="place" size={20} color={colors.textSecondary} />
-          <Texto variante="bodyMd" color={colors.textSecondary} style={estilos.flexible}>
-            {direccion}
-          </Texto>
+        <View style={estilos.resumen}>
+          <MiniaturaFoto tipo={tipo} />
+          <View style={estilos.textos}>
+            <Texto>{descripcion}</Texto>
+            <View style={estilos.fila}>
+              <MaterialIcons name="place" size={sizes.iconSm} color={colors.textSecondary} />
+              <Texto variante="bodyMd" color={colors.textSecondary} style={estilos.flexible}>
+                {direccion}
+              </Texto>
+            </View>
+          </View>
         </View>
       </Tarjeta>
 
@@ -96,17 +95,10 @@ export default function EnvioAlArea() {
   );
 }
 
-function Valor({ texto }: { texto: string }) {
-  return (
-    <Texto variante="bodyLgMedium" alineacion="right">
-      {texto}
-    </Texto>
-  );
-}
-
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
+  grupo: { gap: spacing.blockDense },
+  resumen: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
+  textos: { flex: 1, gap: spacing.sm },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   flexible: { flex: 1 },
-  filas: { gap: spacing.sm },
-  seccion: { marginTop: spacing.sm },
 });

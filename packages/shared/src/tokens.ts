@@ -152,6 +152,8 @@ export const sizes = {
   noticeStep: 56,
   // Mapa móvil, marcador y calles del dibujo provisional.
   mapHeight: 300,
+  // Minimapa de Nuevo reclamo (pantalla 16).
+  miniMap: 120,
   mapMarker: 28,
   mapMarkerBorder: 2,
   mapStreet: 9,

@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Destacado } from '@/components/Bloques';
+import { Nota, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Campo } from '@/components/Campo';
@@ -15,8 +15,11 @@ import { useDatosMunicipales } from '@/sesion';
 const DESCRIPCION_EJEMPLO =
   'Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.';
 
-// Pantalla 16 del prototipo. La foto y la ubicación son simuladas: no se usa la
-// cámara ni el GPS. La ubicación parte de la dirección del predio y se puede ajustar.
+const MAXIMO_DESCRIPCION = 500;
+
+// Pantalla 16 (maqueta 16-nuevo-reclamo). La foto y la ubicación son simuladas: no
+// se usa la cámara ni el GPS. La ubicación parte de la dirección del predio y se
+// puede ajustar. El recuadro "Mapa" es provisional hasta que llegue el mapa real.
 export default function NuevoReclamo() {
   const { predios } = useDatosMunicipales();
   const [foto, setFoto] = useState(false);
@@ -29,65 +32,96 @@ export default function NuevoReclamo() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      separacion="blockDense"
-      encabezado={<BarraSuperior titulo="Nuevo reclamo" />}
+      encabezado={<BarraSuperior titulo="Nuevo reclamo" iconoVolver="cerrar" paso="Paso 1 de 2" />}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={foto ? 'Foto de ejemplo agregada' : 'Agregar foto'}
-        disabled={foto}
-        onPress={() => setFoto(true)}
-        style={[estilos.foto, foto && estilos.fotoLista]}
-      >
-        <MaterialIcons
-          name={foto ? 'check-circle-outline' : 'photo-camera'}
-          size={40}
-          color={foto ? colors.successText : colors.primary}
-        />
-        <Texto variante="bodyLgMedium" color={foto ? colors.successText : colors.primary}>
-          {foto ? 'Foto de ejemplo agregada' : 'Agregar foto'}
-        </Texto>
-        <Texto variante="caption" color={colors.textSecondary} alineacion="center">
-          Simulada: en este prototipo no se usa la cámara.
-        </Texto>
-      </Pressable>
-
-      <View style={estilos.ubicacion}>
-        <MaterialIcons name="place" size={28} color={colors.primary} />
-        <View style={estilos.flexible}>
-          <Texto variante="bodyLgMedium">Ubicación del problema</Texto>
-          {ajustando ? (
-            <Campo
-              accessibilityLabel="Dirección del problema"
-              placeholder="Escribe la dirección"
-              value={direccion}
-              onChangeText={setDireccion}
-            />
-          ) : (
-            <Texto variante="bodyMd" color={colors.textSecondary}>
-              {direccion} · GPS simulado
-            </Texto>
-          )}
-        </View>
-        {!ajustando ? (
-          <Pressable accessibilityRole="button" hitSlop={8} onPress={() => setAjustando(true)}>
-            <Texto variante="bodyLgMedium" color={colors.primary}>
-              Ajustar
-            </Texto>
-          </Pressable>
-        ) : null}
+      <View style={estilos.grupo}>
+        <Texto variante="bodyLgMedium">Foto del problema</Texto>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={foto ? 'Foto de ejemplo agregada' : 'Agregar foto'}
+          disabled={foto}
+          onPress={() => setFoto(true)}
+          style={[estilos.foto, foto && estilos.fotoLista]}
+        >
+          <MaterialIcons
+            name={foto ? 'check-circle-outline' : 'add-a-photo'}
+            size={sizes.iconBox}
+            color={colors.primary}
+          />
+          <Texto variante="bodyLgMedium" color={colors.primary}>
+            {foto ? 'Foto de ejemplo agregada' : 'Agregar foto'}
+          </Texto>
+          <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
+            Simulada: en este prototipo no se usa la cámara.
+          </Texto>
+        </Pressable>
       </View>
 
-      <Campo
-        etiqueta="Describe el problema"
-        multiline
-        value={descripcion}
-        onChangeText={setDescripcion}
-        style={estilos.descripcion}
+      <View style={estilos.grupo}>
+        <Texto variante="bodyLgMedium">Ubicación del problema</Texto>
+        <Tarjeta style={estilos.ubicacion}>
+          {/* Recuadro provisional: el mapa real llega en la etapa 4 (MAPA.md). */}
+          <View accessible accessibilityLabel="Mapa provisional" style={estilos.mapa}>
+            <MaterialIcons name="map" size={sizes.icon} color={colors.textSecondary} />
+            <Texto variante="bodyMdMedium" color={colors.textSecondary}>
+              Mapa
+            </Texto>
+          </View>
+          <View style={estilos.direccion}>
+            {ajustando ? (
+              <View style={estilos.flexible}>
+                <Campo
+                  accessibilityLabel="Dirección del problema"
+                  placeholder="Escribe la dirección"
+                  value={direccion}
+                  onChangeText={setDireccion}
+                />
+              </View>
+            ) : (
+              <>
+                <View style={estilos.flexible}>
+                  <Texto variante="bodyLgMedium">{direccion}</Texto>
+                  <Texto variante="bodyMd" color={colors.textSecondary}>
+                    GPS simulado
+                  </Texto>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Ajustar ubicación"
+                  onPress={() => setAjustando(true)}
+                  style={estilos.ajustar}
+                >
+                  <Texto variante="bodyLgMedium" peso="600" color={colors.primary}>
+                    Ajustar
+                  </Texto>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </Tarjeta>
+      </View>
+
+      <View style={estilos.grupo}>
+        <Campo
+          etiqueta="Describe el problema"
+          multiline
+          maxLength={MAXIMO_DESCRIPCION}
+          value={descripcion}
+          onChangeText={setDescripcion}
+          style={estilos.descripcion}
+        />
+        <Texto variante="bodyMd" color={colors.textSecondary} alineacion="right" tabular>
+          {descripcion.length} / {MAXIMO_DESCRIPCION}
+        </Texto>
+      </View>
+
+      <Nota
+        icono="lock-outline"
+        texto="La foto y la ubicación se usan solo para atender este reclamo."
       />
 
       <Boton
-        titulo="Enviar reclamo"
+        titulo="Continuar"
         deshabilitado={!listo}
         onPress={() =>
           router.push({
@@ -96,18 +130,12 @@ export default function NuevoReclamo() {
           })
         }
       />
-      <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-        Se deriva al área correspondiente.
-      </Texto>
-      <Destacado
-        icono="lock-outline"
-        texto="La foto y la ubicación se usan solo para atender este reclamo."
-      />
     </Pantalla>
   );
 }
 
 const estilos = StyleSheet.create({
+  grupo: { gap: spacing.sm },
   foto: {
     height: sizes.evidencePhoto,
     alignItems: 'center',
@@ -120,19 +148,24 @@ const estilos = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surface,
   },
-  fotoLista: { borderStyle: 'solid', borderColor: colors.successSoft, backgroundColor: colors.successSoft },
-  ubicacion: {
+  fotoLista: { borderStyle: 'solid' },
+  ubicacion: { padding: 0, gap: 0, overflow: 'hidden' },
+  mapa: {
+    height: sizes.miniMap,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.subtle,
+    borderBottomWidth: sizes.borderWidth,
+    borderBottomColor: colors.border,
+  },
+  direccion: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.blockDense,
     padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.subtle,
   },
-  flexible: { flex: 1, gap: spacing.xs },
-  descripcion: {
-    height: sizes.textArea,
-    paddingTop: spacing.blockDense,
-    textAlignVertical: 'top',
-  },
+  flexible: { flex: 1 },
+  ajustar: { minHeight: sizes.buttonTertiary, justifyContent: 'center' },
+  descripcion: { height: sizes.textArea },
 });
