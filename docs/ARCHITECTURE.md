@@ -23,10 +23,11 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 | Entrada (01) | `/entrada` | `app/(auth)/entrada.tsx` |
 | Ingresa a tu cuenta (02) | `/ingreso` | `app/(auth)/ingreso.tsx` |
 | Tus datos, tus reglas (03) | `/consentimiento` | `app/(auth)/consentimiento.tsx` |
-| Sin smartphone (23, en construcción) | `/sin-smartphone` | `app/sin-smartphone.tsx` |
-| Privacidad y mis datos (22, en construcción) | `/privacidad` | `app/privacidad.tsx` |
+| Sin smartphone (23) | `/sin-smartphone` | `app/sin-smartphone.tsx` |
+| Privacidad y mis datos (22) | `/privacidad` | `app/privacidad.tsx` |
 | Inicio (04) | `/inicio` | `app/(tabs)/inicio/index.tsx` |
 | Recordatorios (09) | `/inicio/recordatorios` | `app/(tabs)/inicio/recordatorios.tsx` |
+| Mi perfil (21) | `/inicio/perfil` | `app/(tabs)/inicio/perfil.tsx` |
 | Detalle del aviso (10) | `/avisos/[id]` | `app/avisos/[id].tsx` |
 | Cómo llegan los avisos (11) | `/avisos/como-llegan` | `app/avisos/como-llegan.tsx` |
 | Atención humana (14) | `/atencion-humana` | `app/atencion-humana.tsx` |
@@ -34,14 +35,14 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 | Detalle de la deuda (06) | `/cuenta/deuda/[id]` | `app/(tabs)/cuenta/deuda/[id].tsx` |
 | Confirma tu pago (07) | `/pago/confirmar` | `app/pago/confirmar.tsx` |
 | Constancia de pago (08) | `/pago/constancia` | `app/pago/constancia.tsx` |
-| Mi perfil (21, en construcción) | `/perfil` | `app/perfil.tsx` |
 | Asistente con IA (12) | `/asistente` | `app/(tabs)/asistente.tsx` |
 | Simulación de cuotas (13) | `/simulacion-cuotas` | `app/simulacion-cuotas.tsx` |
 | Reclamos (15) | `/reclamos` | `app/(tabs)/reclamos/index.tsx` |
 | Seguimiento (18) | `/reclamos/[id]` | `app/(tabs)/reclamos/[id].tsx` |
 | Nuevo reclamo (16) | `/reclamo/nuevo` | `app/reclamo/nuevo.tsx` |
 | Envío al área (17) | `/reclamo/envio` | `app/reclamo/envio.tsx` |
-| Obras | `/obras` | `app/(tabs)/obras.tsx` |
+| Mapa de obras (19) | `/obras` | `app/(tabs)/obras/index.tsx` |
+| Detalle de la obra (20) | `/obras/[id]` | `app/(tabs)/obras/[id].tsx` |
 
 Flujo de entrada:
 
@@ -57,6 +58,10 @@ Las pestañas son Inicio, Mi cuenta, Asistente, Reclamos y Obras. El pago es sim
 El asistente no usa IA: `responderAsistente` (`packages/shared/src/asistente.ts`) responde con textos fijos si la pregunta menciona cuotas o la multa, y con un mensaje que orienta a las preguntas sugeridas o a hablar con una persona en cualquier otro caso. La conversación vive solo en la pantalla. La simulación de cuotas usa las deudas pendientes (o solo las vencidas) y la tasa ilustrativa del prototipo (1 % mensual, cuota fija); es informativa y "Pedir evaluación a Rentas" no envía nada. Atención humana es simulada: el tiempo de espera es de ejemplo y no hay nadie conectado; solo promete compartir la consulta con el asistente si el vecino lo autorizó en el consentimiento.
 
 Reclamos: la foto y la ubicación son simuladas (no se usa la cámara ni el GPS). "Agregar foto" solo marca que hay una foto de ejemplo y las pantallas 17 y 18 muestran un dibujo fijo según la categoría (`FotoSimulada`). La ubicación parte de la dirección del predio y el vecino puede ajustarla a mano. `clasificarReclamo` (`packages/shared/src/reclamos.ts`) elige la categoría con palabras clave y `AREA_TIPO_RECLAMO` da el área; no hay IA. El plazo de ejemplo es de 10 días hábiles para todas las categorías. Al confirmar, `registrarReclamo` guarda el reclamo en memoria con el siguiente código de la municipalidad, estado `derivado` y fecha `HOY_EJEMPLO`, y abre su seguimiento. El estado lo cambia la municipalidad.
+
+Obras: el mapa es un dibujo fijo (`MapaObras`), no un mapa real; los marcadores se ubican en puestos fijos según el orden de las obras, porque las obras no tienen coordenadas. El detalle muestra una imagen ilustrativa porque no hay fotos publicadas.
+
+Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGrande.tsx`) agranda en memoria todos los textos de `Texto`. Cerrar sesión vuelve a la entrada. Privacidad y mis datos muestra y cambia los permisos que guardó el consentimiento; las solicitudes ARCO son simuladas. Sin smartphone usa un número SMS y un horario de ejemplo (`SMS_NUMERO_EJEMPLO`, `HORARIO_MODULO_EJEMPLO`) y la reserva de turno es simulada.
 
 Recordatorios vive dentro de la pestaña Inicio; el detalle del aviso y "Cómo llegan los avisos" se abren encima de las pestañas. Los títulos y mensajes de los avisos salen de `packages/shared/src/avisos.ts` con los datos de la deuda y el `nombreCorto` de la obra (si la obra no lo tiene, el mensaje no la menciona). El canal elegido en "¿Por dónde te avisamos?" se guarda en memoria por municipalidad y empieza con el canal preferido del vecino. Los mensajes de la pantalla 11 son ejemplos: no se envía nada.
 

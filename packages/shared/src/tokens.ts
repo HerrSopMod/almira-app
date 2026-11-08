@@ -61,6 +61,10 @@ export const colors = {
   drawingNightGround: '#3A4A60',
   drawingPole: '#7F8B9B',
   drawingLamp: '#B9C3CD',
+  // Mapa ilustrativo de obras (pantalla 19): manzanas, parque y avenida.
+  drawingBlock: '#F5F5F5',
+  drawingPark: '#CDE8D5',
+  drawingAvenue: '#F3D3D5',
 } as const;
 
 export const spacing = {
@@ -136,12 +140,27 @@ export const sizes = {
   timelineDot: 22,
   timelineLine: 2,
   timelineStep: 48,
+  // Mapa de obras (pantalla 19): alto del dibujo, marcador y cruce de calles.
+  mapHeight: 274,
+  mapMarker: 28,
+  mapMarkerBorder: 2,
+  mapStreet: 9,
+  mapAvenue: 10,
+  // Foto de la obra y barra de financiamiento (pantalla 20).
+  workPhoto: 170,
+  fundingBar: 12,
+  legendDot: 10,
+  // Iniciales del vecino en Mi perfil (pantalla 21).
+  avatar: 40,
   progress: 6,
   // Barra de avance de la pantalla 04 (el panel web sigue usando progress).
   progressMobile: 8,
   borderWidth: 1,
   focusBorderWidth: 1.5,
 } as const;
+
+// "Texto más grande" de Mi perfil (pantalla 21) multiplica letra e interlineado.
+export const largeTextScale = 1.2;
 
 export const fontFamily = 'Inter';
 export const displayFontFamily = 'Poppins';

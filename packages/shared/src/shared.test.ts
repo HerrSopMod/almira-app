@@ -22,6 +22,8 @@ import {
   formatearFechaCorta,
   formatearHora,
   formatearSoles,
+  haceDias,
+  iniciales,
   momentoAviso,
   nombreDistrito,
   sumarDeudas,
@@ -378,5 +380,19 @@ describe('reclamos', () => {
     expect(estados('en_atencion')).toEqual(['hecho', 'hecho', 'hecho', 'actual', 'pendiente']);
     expect(estados('derivado')).toEqual(['hecho', 'hecho', 'actual', 'pendiente', 'pendiente']);
     expect(estados('resuelto')).toEqual(['hecho', 'hecho', 'hecho', 'hecho', 'hecho']);
+  });
+});
+
+describe('obras y perfil', () => {
+  it('dice cuántos días pasaron desde la última actualización', () => {
+    expect(haceDias('2026-10-26', HOY_EJEMPLO)).toBe('hace 6 días');
+    expect(haceDias('2026-10-31', HOY_EJEMPLO)).toBe('hace 1 día');
+    expect(haceDias(HOY_EJEMPLO, HOY_EJEMPLO)).toBe('hoy');
+  });
+
+  it('arma las iniciales con el nombre y el apellido paterno', () => {
+    expect(iniciales('Rosa Quispe Huamán')).toBe('RQ');
+    expect(iniciales('María Ejemplo')).toBe('ME');
+    expect(iniciales('Ana María Rojas Paz')).toBe('AR');
   });
 });

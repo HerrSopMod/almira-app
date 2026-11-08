@@ -132,26 +132,25 @@ export function ChipPlazo({ texto, tono = 'rosado' }: { texto: string; tono?: 'r
   );
 }
 
-// Cuadro de 40 px con un ícono: rosado (por defecto) o verde para lo pagado.
+// Cuadro de 40 px con un ícono: rosado (por defecto), verde para lo pagado o
+// amarillo (módulo asistido de la pantalla 23).
+const COLORES_ICONO_CUADRO = {
+  rosado: { fondo: colors.backgroundPink, icono: colors.primary },
+  pagado: { fondo: colors.paidSoft, icono: colors.paidIcon },
+  amarillo: { fondo: colors.pendingDebt, icono: colors.pendingDebtText },
+} as const;
+
 export function IconoCuadro({
   icono,
   tono = 'rosado',
 }: {
   icono: keyof typeof MaterialCommunityIcons.glyphMap;
-  tono?: 'rosado' | 'pagado';
+  tono?: keyof typeof COLORES_ICONO_CUADRO;
 }) {
+  const { fondo, icono: color } = COLORES_ICONO_CUADRO[tono];
   return (
-    <View
-      style={[
-        estilos.iconoCuadro,
-        { backgroundColor: tono === 'pagado' ? colors.paidSoft : colors.backgroundPink },
-      ]}
-    >
-      <MaterialCommunityIcons
-        name={icono}
-        size={22}
-        color={tono === 'pagado' ? colors.paidIcon : colors.primary}
-      />
+    <View style={[estilos.iconoCuadro, { backgroundColor: fondo }]}>
+      <MaterialCommunityIcons name={icono} size={22} color={color} />
     </View>
   );
 }

@@ -115,6 +115,22 @@ export function etiquetaPlazo(fechaLimiteIso: string, hoyIso: string): string {
   return `Quedan ${quedan} d`;
 }
 
+// "Actualizada hace 6 días": "hoy", "hace 1 día" o "hace N días".
+export function haceDias(fechaIso: string, hoyIso: string): string {
+  const dias = Math.max(0, Math.round((aDia(hoyIso) - aDia(fechaIso)) / UN_DIA));
+  if (dias === 0) return 'hoy';
+  return dias === 1 ? 'hace 1 día' : `hace ${dias} días`;
+}
+
+// "Rosa Quispe Huamán" -> "RQ": primer nombre y apellido paterno (el penúltimo
+// de tres o más palabras; si hay dos, la última).
+export function iniciales(nombre: string): string {
+  const palabras = nombre.trim().split(/\s+/).filter(Boolean);
+  if (palabras.length === 0) return '';
+  const apellido = palabras.length >= 3 ? palabras[palabras.length - 2] : palabras[1];
+  return `${palabras[0]![0]}${apellido?.[0] ?? ''}`.toUpperCase();
+}
+
 // "Municipalidad de Lince" -> "Lince". Si el nombre no sigue ese formato, se usa entero.
 export function nombreDistrito(municipalidad: Pick<Municipalidad, 'nombre'>): string {
   return municipalidad.nombre.replace(/^Municipalidad(\s+(Distrital|Provincial))?\s+de\s+/i, '');

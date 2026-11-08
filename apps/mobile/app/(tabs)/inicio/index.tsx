@@ -36,7 +36,7 @@ const ACCESOS: Acceso[][] = [
   ],
   [
     { titulo: 'Obras', icono: 'hard-hat', destino: '/obras' },
-    { titulo: 'Mi perfil', icono: 'account-outline', destino: '/perfil' },
+    { titulo: 'Mi perfil', icono: 'account-outline', destino: '/inicio/perfil' },
   ],
 ];
 
@@ -66,7 +66,7 @@ export default function Inicio() {
               accessibilityRole="button"
               accessibilityLabel="Mi perfil"
               hitSlop={8}
-              onPress={() => router.push('/perfil')}
+              onPress={() => router.push('/inicio/perfil')}
             >
               <MaterialCommunityIcons name="account-outline" size={28} color={colors.onPrimary} />
             </Pressable>
@@ -121,7 +121,10 @@ export default function Inicio() {
       </View>
 
       {obra ? (
-        <Pressable accessibilityRole="button" onPress={() => router.navigate('/obras')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.navigate({ pathname: '/obras/[id]', params: { id: obra.id } })}
+        >
           <Tarjeta>
             <View style={estilos.obraTextos}>
               <Texto variante="bodyMd" color={colors.textSecondary}>

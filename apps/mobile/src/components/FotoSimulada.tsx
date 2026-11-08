@@ -3,16 +3,22 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StyleSheet, View, type DimensionValue } from 'react-native';
 import { Texto } from './Texto';
 
-// Dibujo fijo en lugar de la foto del reclamo (pantallas 17 y 18): no se usa la
-// cámara. Pistas y veredas muestra un bache; alumbrado, un poste de noche; el
-// resto, el ícono de su categoría.
-export function FotoSimulada({ tipo }: { tipo: TipoReclamo }) {
+type Props = {
+  tipo: TipoReclamo | 'obra';
+  etiqueta?: string;
+  alto?: number;
+};
+
+// Dibujo fijo en lugar de una foto (pantallas 17, 18 y 20): no se usa la cámara
+// ni hay fotos publicadas. Pistas y veredas muestra un bache; alumbrado, un poste
+// de noche; el resto, un ícono.
+export function FotoSimulada({ tipo, etiqueta = 'Foto simulada', alto = sizes.evidencePhoto }: Props) {
   return (
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel="Foto simulada: dibujo de ejemplo"
-      style={estilos.marco}
+      accessibilityLabel={`${etiqueta}: dibujo de ejemplo`}
+      style={[estilos.marco, { height: alto }]}
     >
       {tipo === 'pistas_veredas' ? <Bache /> : tipo === 'alumbrado' ? <Poste /> : null}
       {tipo !== 'pistas_veredas' && tipo !== 'alumbrado' ? (
@@ -22,14 +28,15 @@ export function FotoSimulada({ tipo }: { tipo: TipoReclamo }) {
       ) : null}
       <View style={estilos.etiqueta}>
         <Texto variante="caption" color={colors.textSecondary}>
-          Foto simulada
+          {etiqueta}
         </Texto>
       </View>
     </View>
   );
 }
 
-const ICONO_TIPO: Record<TipoReclamo, keyof typeof MaterialCommunityIcons.glyphMap> = {
+const ICONO_TIPO: Record<TipoReclamo | 'obra', keyof typeof MaterialCommunityIcons.glyphMap> = {
+  obra: 'hard-hat',
   pistas_veredas: 'road-variant',
   alumbrado: 'lightbulb-outline',
   limpieza: 'trash-can-outline',
@@ -148,7 +155,6 @@ function Poste() {
 
 const estilos = StyleSheet.create({
   marco: {
-    height: sizes.evidencePhoto,
     borderRadius: radius.md,
     overflow: 'hidden',
     backgroundColor: colors.neutral,

@@ -1,12 +1,12 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Destacado, Separador, Tarjeta } from '@/components/Bloques';
+import { Destacado, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
-import { Interruptor } from '@/components/Interruptor';
+import { InterruptoresConsentimiento } from '@/components/InterruptoresConsentimiento';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales, useSesion } from '@/sesion';
@@ -16,6 +16,8 @@ export default function Consentimiento() {
   const { municipalidad } = useDatosMunicipales();
   const { consentimientos, guardarConsentimientos } = useSesion();
   const [permisos, setPermisos] = useState(consentimientos);
+  // Si los cambia en Privacidad y mis datos (desde "Leer la política"), se reflejan aquí.
+  useEffect(() => setPermisos(consentimientos), [consentimientos]);
 
   const entrar = () => {
     guardarConsentimientos(permisos);
@@ -47,28 +49,7 @@ export default function Consentimiento() {
       <Texto variante="headlineSm" fuente="poppins" accessibilityRole="header" style={estilos.seccion}>
         Autoriza lo que quieras usar
       </Texto>
-      <Tarjeta>
-        <Interruptor
-          titulo="Asistente con IA"
-          detalle="Guarda tus consultas para orientarte mejor."
-          activo={permisos.asistenteIa}
-          onCambiar={(asistenteIa) => setPermisos((p) => ({ ...p, asistenteIa }))}
-        />
-        <Separador />
-        <Interruptor
-          titulo="Avisos por WhatsApp"
-          detalle="Máximo 1 por día y 3 por semana."
-          activo={permisos.avisosWhatsapp}
-          onCambiar={(avisosWhatsapp) => setPermisos((p) => ({ ...p, avisosWhatsapp }))}
-        />
-        <Separador />
-        <Interruptor
-          titulo="Avisos por SMS"
-          detalle="Canal alterno si WhatsApp falla."
-          activo={permisos.avisosSms}
-          onCambiar={(avisosSms) => setPermisos((p) => ({ ...p, avisosSms }))}
-        />
-      </Tarjeta>
+      <InterruptoresConsentimiento valor={permisos} onCambiar={setPermisos} />
 
       <Destacado
         tono="exito"
