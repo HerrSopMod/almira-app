@@ -10,6 +10,7 @@ import {
   totalDeuda,
   USUARIO_EJEMPLO,
   vecinos,
+  type CanalAviso,
   type Deuda,
   type MedioPago,
   type Pago,
@@ -30,6 +31,10 @@ type Sesion = {
   elegirMunicipalidad: (id: string) => void;
   consentimientos: Consentimientos;
   guardarConsentimientos: (consentimientos: Consentimientos) => void;
+  // Canal de aviso elegido en Recordatorios, por municipalidad. Sin elección, vale
+  // el canal preferido del vecino.
+  canalesAviso: Record<string, CanalAviso>;
+  elegirCanalAviso: (canal: CanalAviso) => void;
   reclamosNuevos: Reclamo[];
   agregarReclamo: (reclamo: Reclamo) => void;
   pagosSimulados: Pago[];
@@ -52,6 +57,7 @@ function momentoSimulado(): string {
 
 export function SesionProvider({ children }: { children: ReactNode }) {
   const [municipalidadId, elegirMunicipalidad] = useState(municipalidades[0]!.id);
+  const [canalesAviso, setCanalesAviso] = useState<Record<string, CanalAviso>>({});
   const [reclamosNuevos, setReclamosNuevos] = useState<Reclamo[]>([]);
   const [pagosSimulados, setPagosSimulados] = useState<Pago[]>([]);
   const [consentimientos, guardarConsentimientos] = useState<Consentimientos>({
@@ -65,6 +71,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       elegirMunicipalidad,
       consentimientos,
       guardarConsentimientos,
+      canalesAviso,
+      elegirCanalAviso: (canal) =>
+        setCanalesAviso((previos) => ({ ...previos, [municipalidadId]: canal })),
       reclamosNuevos,
       agregarReclamo: (reclamo) => setReclamosNuevos((previos) => [reclamo, ...previos]),
       pagosSimulados,
@@ -88,7 +97,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         return referencia;
       },
     }),
-    [municipalidadId, reclamosNuevos, consentimientos, pagosSimulados],
+    [municipalidadId, canalesAviso, reclamosNuevos, consentimientos, pagosSimulados],
   );
   return <ContextoSesion.Provider value={valor}>{children}</ContextoSesion.Provider>;
 }
@@ -101,7 +110,7 @@ export function useSesion() {
 
 // Todo lo que el vecino ve pertenece a la municipalidad elegida.
 export function useDatosMunicipales() {
-  const { municipalidadId, reclamosNuevos, pagosSimulados } = useSesion();
+  const { municipalidadId, canalesAviso, reclamosNuevos, pagosSimulados } = useSesion();
   return useMemo(() => {
     const municipalidad = municipalidades.find((m) => m.id === municipalidadId)!;
     const vecino = vecinos.find(
@@ -123,13 +132,14 @@ export function useDatosMunicipales() {
         b.creadoEn.localeCompare(a.creadoEn),
       ),
       recordatorios: delVecino(recordatorios),
+      canalAviso: canalesAviso[municipalidadId] ?? vecino?.canalPreferido ?? 'whatsapp',
       reclamos: [
         ...reclamosNuevos.filter((r) => r.municipalidadId === municipalidadId),
         ...delVecino(reclamosEjemplo),
       ],
       obras: obras.filter((o) => o.municipalidadId === municipalidadId && o.publicada),
     };
-  }, [municipalidadId, reclamosNuevos, pagosSimulados]);
+  }, [municipalidadId, canalesAviso, reclamosNuevos, pagosSimulados]);
 }
 
 export function municipalidadesDelVecino() {

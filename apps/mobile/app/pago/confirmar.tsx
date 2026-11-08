@@ -4,7 +4,6 @@ import {
   DETALLE_MEDIO_PAGO,
   ETIQUETA_MEDIO_PAGO,
   formatearSoles,
-  sizes,
   spacing,
   sumarDeudas,
   totalDeuda,
@@ -18,6 +17,7 @@ import { Destacado, FilaDato, IconoCuadro, Separador, Tarjeta, Vacio } from '@/c
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Pantalla } from '@/components/Pantalla';
+import { Radio } from '@/components/Radio';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales, useSesion } from '@/sesion';
 
@@ -106,9 +106,7 @@ export default function ConfirmarPago() {
                     {DETALLE_MEDIO_PAGO[opcion]}
                   </Texto>
                 </View>
-                <View style={[estilos.radio, medio === opcion && estilos.radioMarcado]}>
-                  {medio === opcion ? <View style={estilos.radioPunto} /> : null}
-                </View>
+                <Radio marcado={medio === opcion} />
               </Pressable>
             </Fragment>
           ))}
@@ -131,20 +129,4 @@ const estilos = StyleSheet.create({
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.block },
   flexible: { flex: 1 },
   seccion: { marginTop: spacing.sm },
-  radio: {
-    width: sizes.radio,
-    height: sizes.radio,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: sizes.radio / 2,
-    borderWidth: sizes.focusBorderWidth,
-    borderColor: colors.radioOff,
-  },
-  radioMarcado: { borderColor: colors.primary },
-  radioPunto: {
-    width: sizes.radio / 2,
-    height: sizes.radio / 2,
-    borderRadius: sizes.radio / 4,
-    backgroundColor: colors.primary,
-  },
 });
