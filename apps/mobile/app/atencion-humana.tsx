@@ -94,7 +94,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: sizes.iconBoxLg / 2,
-    backgroundColor: colors.backgroundPink,
+    backgroundColor: colors.subtle,
   },
   lista: { gap: spacing.sm },
   item: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },

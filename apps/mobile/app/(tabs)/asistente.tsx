@@ -79,7 +79,7 @@ export default function Asistente() {
           {mensajes.map((mensaje) =>
             mensaje.autor === 'vecino' ? (
               <View key={mensaje.id} style={[estilos.burbuja, estilos.vecino]}>
-                <Texto>{mensaje.texto}</Texto>
+                <Texto color={colors.onPrimary}>{mensaje.texto}</Texto>
               </View>
             ) : (
               <View key={mensaje.id} style={[estilos.burbuja, estilos.asistente]}>
@@ -171,12 +171,14 @@ const estilos = StyleSheet.create({
   asistente: {
     alignSelf: 'flex-start',
     width: sizes.bubbleWidth,
-    backgroundColor: colors.neutral,
+    borderTopLeftRadius: radius.sm,
+    backgroundColor: colors.subtle,
   },
   vecino: {
     alignSelf: 'flex-end',
     maxWidth: sizes.bubbleWidth,
-    backgroundColor: colors.backgroundPink,
+    borderTopRightRadius: radius.sm,
+    backgroundColor: colors.primary,
   },
   acciones: { gap: spacing.sm, paddingTop: spacing.sm, paddingBottom: spacing.blockDense },
   fila: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.margin },
@@ -186,7 +188,9 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.blockDense,
     borderRadius: radius.full,
-    backgroundColor: colors.backgroundPink,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   entrada: {
     flexDirection: 'row',

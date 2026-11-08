@@ -69,7 +69,7 @@ export default function Inicio() {
         <Texto variante="displayCurrency" color={colors.primary} tabular>
           {formatearSoles(total)}
         </Texto>
-        <Texto variante="bodyLgMedium" color={colors.header}>
+        <Texto variante="bodyLgMedium" color={colors.primary}>
           Ver detalle y pagar ›
         </Texto>
       </Pressable>
@@ -80,8 +80,8 @@ export default function Inicio() {
           onPress={() => router.push('/inicio/recordatorios')}
           style={estilos.aviso}
         >
-          <MaterialIcons name="notifications-none" size={20} color={colors.header} />
-          <Texto variante="bodyLgMedium" color={colors.header} style={estilos.flexible}>
+          <MaterialIcons name="notifications-none" size={sizes.iconSm} color={colors.primary} />
+          <Texto variante="bodyLgMedium" style={estilos.flexible}>
             Aviso: tu arbitrio vence pronto
           </Texto>
         </Pressable>
@@ -161,10 +161,8 @@ const estilos = StyleSheet.create({
   deuda: {
     gap: spacing.xs,
     padding: spacing.md,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.pendingDebtBorder,
-    borderRadius: radius.lg,
-    backgroundColor: colors.pendingDebt,
+    borderRadius: radius.md,
+    backgroundColor: colors.highlight,
   },
   aviso: {
     flexDirection: 'row',
@@ -173,9 +171,9 @@ const estilos = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.blockDense,
     borderWidth: sizes.borderWidth,
-    borderColor: colors.primary,
+    borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.backgroundPink,
+    backgroundColor: colors.surface,
   },
   accesos: { gap: spacing.blockDense },
   filaAccesos: { flexDirection: 'row', gap: spacing.blockDense },

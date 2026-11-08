@@ -86,12 +86,12 @@ export default function DetalleObra() {
             <Texto variante="bodyLgMedium">De dónde sale el dinero</Texto>
             <View style={estilos.grupo}>
               <View style={estilos.barra}>
-                <View style={{ flex: tributos, backgroundColor: colors.primary }} />
-                <View style={{ flex: 100 - tributos, backgroundColor: colors.chartSecondary }} />
+                <View style={{ flex: tributos, backgroundColor: colors.chart1 }} />
+                <View style={{ flex: 100 - tributos, backgroundColor: colors.chart2 }} />
               </View>
               <View style={estilos.leyenda}>
-                <Leyenda color={colors.primary} texto={`Tributos del distrito ${tributos} %`} />
-                <Leyenda color={colors.chartSecondary} texto={`Transferencias ${100 - tributos} %`} />
+                <Leyenda color={colors.chart1} texto={`Tributos del distrito ${tributos} %`} />
+                <Leyenda color={colors.chart2} texto={`Transferencias ${100 - tributos} %`} />
               </View>
             </View>
             <Separador />

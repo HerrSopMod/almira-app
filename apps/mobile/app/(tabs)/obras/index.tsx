@@ -47,7 +47,7 @@ export default function MapaDeObras() {
           </View>
           <View style={estilos.leyenda}>
             <Leyenda color={colors.primary} texto="En ejecución" />
-            <Leyenda color={colors.paid} texto="Concluida" />
+            <Leyenda color={colors.success} texto="Concluida" />
           </View>
         </View>
       </View>

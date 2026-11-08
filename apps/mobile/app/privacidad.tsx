@@ -71,7 +71,7 @@ export default function Privacidad() {
       <Tarjeta>
         {NO_HACE.map((texto) => (
           <View key={texto} style={estilos.filaArriba}>
-            <MaterialIcons name="close" size={20} color={colors.header} />
+            <MaterialIcons name="close" size={20} color={colors.textSecondary} />
             <Texto color={colors.textSecondary} style={estilos.flexible}>
               {texto}
             </Texto>

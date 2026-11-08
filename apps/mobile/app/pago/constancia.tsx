@@ -47,7 +47,7 @@ export default function Constancia() {
     >
       <View style={estilos.resumen}>
         <View style={estilos.circulo}>
-          <MaterialIcons name="check" size={32} color={colors.paidIcon} />
+          <MaterialIcons name="check" size={32} color={colors.successText} />
         </View>
         <Texto variante="headlineMd" alineacion="center" accessibilityRole="header">
           Pago registrado
@@ -106,7 +106,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.full,
-    backgroundColor: colors.paidSoft,
+    backgroundColor: colors.successSoft,
     marginBottom: spacing.sm,
   },
 });

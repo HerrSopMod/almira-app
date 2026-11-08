@@ -42,9 +42,9 @@ export default function NuevoReclamo() {
         <MaterialIcons
           name={foto ? 'check-circle-outline' : 'photo-camera'}
           size={40}
-          color={foto ? colors.paidIcon : colors.primary}
+          color={foto ? colors.successText : colors.primary}
         />
-        <Texto variante="bodyLgMedium" color={foto ? colors.paidText : colors.primary}>
+        <Texto variante="bodyLgMedium" color={foto ? colors.successText : colors.primary}>
           {foto ? 'Foto de ejemplo agregada' : 'Agregar foto'}
         </Texto>
         <Texto variante="caption" color={colors.textSecondary} alineacion="center">
@@ -116,18 +116,18 @@ const estilos = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderWidth: sizes.borderWidth,
     borderStyle: 'dashed',
-    borderColor: colors.photoDashed,
+    borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.backgroundPinkSoft,
+    backgroundColor: colors.surface,
   },
-  fotoLista: { borderStyle: 'solid', borderColor: colors.paidSoft, backgroundColor: colors.paidSoft },
+  fotoLista: { borderStyle: 'solid', borderColor: colors.successSoft, backgroundColor: colors.successSoft },
   ubicacion: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.backgroundPink,
+    backgroundColor: colors.subtle,
   },
   flexible: { flex: 1, gap: spacing.xs },
   descripcion: {

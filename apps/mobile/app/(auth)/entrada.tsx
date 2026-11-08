@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PiePrototipo } from '@/components/Bloques';
 import { Boton } from '@/components/Boton';
 import { FilaMunicipalidad, SelectorMunicipalidad } from '@/components/SelectorMunicipalidad';
+import { Logo } from '@/components/Logo';
 import { Texto } from '@/components/Texto';
 
 const FUNCIONES = [
@@ -24,22 +25,15 @@ export default function Entrada() {
 
   return (
     <View style={estilos.raiz}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.lg + bottom }}>
         <View style={[estilos.portada, { paddingTop: top, minHeight: sizes.hero + top }]}>
-          <View style={estilos.icono}>
-            <MaterialIcons name="account-balance" size={32} color={colors.primary} />
-          </View>
+          <Logo grande />
           <View>
-            <Texto
-              variante="brand"
-             
-              color={colors.onPrimary}
-              accessibilityRole="header"
-            >
+            <Texto variante="brand" accessibilityRole="header">
               Almira
             </Texto>
-            <Texto color={colors.onPrimary}>Paga con claridad. Reclama con evidencia.</Texto>
+            <Texto color={colors.textSecondary}>Paga con claridad. Reclama con evidencia.</Texto>
           </View>
         </View>
 
@@ -87,15 +81,6 @@ const estilos = StyleSheet.create({
     gap: spacing.blockDense,
     paddingHorizontal: spacing.margin,
     paddingBottom: spacing.lg,
-    backgroundColor: colors.header,
-  },
-  icono: {
-    width: sizes.logoLg,
-    height: sizes.logoLg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
   },
   contenido: {
     gap: spacing.blockDense,
@@ -118,8 +103,8 @@ const estilos = StyleSheet.create({
     height: sizes.iconBox,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.backgroundPink,
+    borderRadius: radius.iconBox,
+    backgroundColor: colors.subtle,
   },
   grupo: { gap: spacing.sm },
 });

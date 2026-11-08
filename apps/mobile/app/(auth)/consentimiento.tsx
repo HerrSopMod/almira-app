@@ -73,7 +73,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,
-    backgroundColor: colors.backgroundPink,
+    backgroundColor: colors.subtle,
   },
   flexible: { flex: 1 },
   seccion: { marginTop: spacing.sm },
