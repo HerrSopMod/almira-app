@@ -2,8 +2,10 @@ import { PERSONAL_PANEL_EJEMPLO } from '@almira/shared';
 import { NavLink, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { pendientes, usePanel, useSesion } from './estado';
 import { Icono, type NombreIcono } from './iconos';
+import { Alertas } from './paginas/Alertas';
+import { AtencionHumana } from './paginas/AtencionHumana';
 import { Avisos } from './paginas/Avisos';
-import { EnPreparacion } from './paginas/EnPreparacion';
+import { DatosAccesos } from './paginas/DatosAccesos';
 import { Ingreso } from './paginas/Ingreso';
 import { Obras } from './paginas/Obras';
 import { PanelMunicipal } from './paginas/PanelMunicipal';
@@ -75,9 +77,9 @@ export function App() {
         <Route path="avisos" element={<Avisos />} />
         <Route path="reclamos" element={<Reclamos />} />
         <Route path="obras" element={<Obras />} />
-        <Route path="atencion" element={<EnPreparacion titulo="Atención humana" />} />
-        <Route path="alertas" element={<EnPreparacion titulo="Alertas y auditoría" />} />
-        <Route path="datos" element={<EnPreparacion titulo="Datos y accesos" />} />
+        <Route path="atencion" element={<AtencionHumana />} />
+        <Route path="alertas" element={<Alertas />} />
+        <Route path="datos" element={<DatosAccesos />} />
         <Route path="*" element={<Navigate to="/panel" replace />} />
       </Route>
     </Routes>

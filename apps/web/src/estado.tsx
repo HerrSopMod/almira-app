@@ -28,6 +28,8 @@ type DatosSesion = {
   casos: CasoAtencion[];
   // Variante de la prueba A/B elegida para el próximo ciclo (web-04).
   varianteElegida: string | null;
+  // Interruptor del simulador de cuotas en Alertas y auditoría (web-08).
+  simuladorActivo: boolean;
 };
 
 type ContextoPanel = {
@@ -44,7 +46,13 @@ export const municipalidadesConPanel = municipalidades.filter(
   (municipalidad) => municipalidad.activa && panelEjemplo(municipalidad.id),
 );
 
-const SIN_DATOS: DatosSesion = { reclamos: [], obras: [], casos: [], varianteElegida: null };
+const SIN_DATOS: DatosSesion = {
+  reclamos: [],
+  obras: [],
+  casos: [],
+  varianteElegida: null,
+  simuladorActivo: true,
+};
 
 export function ProveedorPanel({ children }: { children: ReactNode }) {
   const [sesion, setSesion] = useState<Sesion | null>(null);
@@ -60,6 +68,7 @@ export function ProveedorPanel({ children }: { children: ReactNode }) {
       obras: obrasEjemplo.filter((o) => o.municipalidadId === municipalidadId),
       casos: panel.casos.map((caso) => ({ ...caso })),
       varianteElegida: null,
+      simuladorActivo: true,
     });
     setSesion({ municipalidad, panel, usuario });
   };

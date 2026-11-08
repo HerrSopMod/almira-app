@@ -34,7 +34,7 @@ import {
   textoVencimiento,
 } from './formato';
 import { colors, panelSizes, sizes, spacing } from './tokens';
-import { mejorVariante, panelEjemplo } from './panel-ejemplo';
+import { mejorVariante, panelEjemplo, superaUmbral } from './panel-ejemplo';
 import {
   avisosRecibidos,
   mensajeAviso,
@@ -471,5 +471,25 @@ describe('panel: recaudación, avisos y reclamos', () => {
     expect(etiqueta('R-01842')).toBe('Quedan 3 d');
     expect(etiqueta('R-01866')).toBe('Quedan 8 d');
     expect(etiqueta('R-01790')).toBeUndefined();
+  });
+});
+
+describe('panel: atención, alertas y accesos', () => {
+  const panel = panelEjemplo('m-lince')!;
+
+  it('dispara una alerta por cada umbral superado', () => {
+    const superados = panel.umbrales.filter(superaUmbral).map((umbral) => umbral.evento);
+    expect(superados).toEqual(['Respuestas graves de la IA']);
+    expect(panel.alertasActivas).toHaveLength(superados.length);
+  });
+
+  it('enlaza el registro de accesos con reclamos y casos de ejemplo', () => {
+    expect(reclamos.some((reclamo) => reclamo.codigo === 'R-01851')).toBe(true);
+    expect(panel.casos.some((caso) => caso.codigo === 'H-205')).toBe(true);
+  });
+
+  it('deja la cola por debajo del umbral de alerta', () => {
+    const enCola = panel.casos.filter((caso) => caso.estado === 'en_cola').length;
+    expect(enCola).toBeLessThan(panel.atencion.umbralCola);
   });
 });

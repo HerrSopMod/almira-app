@@ -164,9 +164,18 @@ export function Tabla({ columnas, children }: { columnas: Columna[]; children: R
   );
 }
 
-export function AvisoInfo({ children, icono = 'info' }: { children: ReactNode; icono?: 'info' | 'alerta' }) {
+export function AvisoInfo({
+  children,
+  icono = 'info',
+  fuerte = false,
+}: {
+  children: ReactNode;
+  icono?: 'info' | 'alerta';
+  // Fondo rosado más intenso, para alertas activas (web-08).
+  fuerte?: boolean;
+}) {
   return (
-    <p className="aviso-info">
+    <p className={`aviso-info ${fuerte ? 'fuerte' : ''}`}>
       <Icono nombre={icono} />
       <span>{children}</span>
     </p>
@@ -217,4 +226,9 @@ export function Interruptor({
       <span />
     </button>
   );
+}
+
+// Recordatorio de que la página solo muestra datos de ejemplo.
+export function NotaEjemplo({ children }: { children: ReactNode }) {
+  return <p className="nota-ejemplo">{children}</p>;
 }

@@ -61,6 +61,35 @@ export interface Control {
   detalle: string;
 }
 
+export interface PasoTexto {
+  titulo: string;
+  texto: string;
+}
+
+export type UnidadUmbral = 'evento' | '%' | 'por semana';
+
+// Umbral de disparo (web-08): la alerta salta cuando "hoy" llega al umbral.
+export interface Umbral {
+  evento: string;
+  umbral: number;
+  hoy: number;
+  unidad: UnidadUmbral;
+}
+
+export interface Acceso {
+  hora: string;
+  rol: string;
+  accion: string;
+}
+
+export type EstadoArco = 'en_plazo' | 'atendida';
+
+export interface SolicitudArco {
+  tipo: string;
+  recibida: string;
+  estado: EstadoArco;
+}
+
 export interface PanelEjemplo {
   periodo: string;
   revisionMensual: string;
@@ -94,7 +123,19 @@ export interface PanelEjemplo {
   };
   pruebaAB: { titulo: string; politica: string; nota: string; variantes: VariantePrueba[] };
   casos: CasoAtencion[];
+  atencion: {
+    umbralCola: number;
+    derivadosPct: number;
+    conversaciones: number;
+    atencionesModulo: number;
+    variacionModulo: number;
+  };
   alertasActivas: string[];
+  rutaIncidente: PasoTexto[];
+  umbrales: Umbral[];
+  auditoria: { nombre: string; porcentaje: number }[];
+  registroAccesos: Acceso[];
+  solicitudesArco: SolicitudArco[];
 }
 
 const LINCE: PanelEjemplo = {
@@ -224,8 +265,45 @@ const LINCE: PanelEjemplo = {
       estado: 'atendido',
     },
   ],
+  atencion: {
+    umbralCola: 10,
+    derivadosPct: 7.4,
+    conversaciones: 3120,
+    atencionesModulo: 412,
+    variacionModulo: -18,
+  },
   alertasActivas: [
     'el asistente ofreció un beneficio vencido en 3 respuestas. Supera el umbral y se escaló al comité de datos e IA sin esperar la revisión mensual.',
+  ],
+  rutaIncidente: [
+    { titulo: 'Detección', texto: 'Muestreo: 3 respuestas erróneas' },
+    { titulo: 'S3*', texto: 'Valida la gravedad' },
+    { titulo: 'Canal algedónico', texto: 'Supera el umbral' },
+    { titulo: 'S5', texto: 'Comité y municipalidad' },
+    { titulo: 'Corrección', texto: 'Actualizar la base de conocimiento' },
+  ],
+  umbrales: [
+    { evento: 'Fuga de datos', umbral: 1, hoy: 0, unidad: 'evento' },
+    { evento: 'Pagos erróneos', umbral: 0.5, hoy: 0.1, unidad: '%' },
+    { evento: 'Respuestas graves de la IA', umbral: 2, hoy: 3, unidad: 'por semana' },
+    { evento: 'Fallas masivas de envío', umbral: 5, hoy: 1.1, unidad: '%' },
+  ],
+  auditoria: [
+    { nombre: 'Respuestas IA', porcentaje: 98.5 },
+    { nombre: 'Clasificación', porcentaje: 96.2 },
+    { nombre: 'Conciliación', porcentaje: 99.9 },
+    { nombre: 'Mensajes A/B', porcentaje: 100 },
+  ],
+  registroAccesos: [
+    { hora: '09:32', rol: 'Rentas', accion: 'Consultó el reclamo R-01851' },
+    { hora: '09:18', rol: 'Obras', accion: 'Actualizó el avance de una obra' },
+    { hora: '08:57', rol: 'Auditor S3*', accion: 'Revisó muestra de respuestas de IA' },
+    { hora: '08:40', rol: 'Atención', accion: 'Tomó el caso H-205' },
+  ],
+  solicitudesArco: [
+    { tipo: 'Acceso', recibida: '2026-10-28', estado: 'en_plazo' },
+    { tipo: 'Rectificación', recibida: '2026-10-24', estado: 'en_plazo' },
+    { tipo: 'Oposición a WhatsApp', recibida: '2026-10-15', estado: 'atendida' },
   ],
 };
 
@@ -245,4 +323,8 @@ export function mejorVariante(
   const [mejor, segunda] = [...variantes].sort((a, b) => b.pagoPct - a.pagoPct);
   if (!mejor || !segunda) return null;
   return { letra: mejor.letra, puntos: mejor.pagoPct - segunda.pagoPct };
+}
+
+export function superaUmbral(umbral: Umbral): boolean {
+  return umbral.hoy >= umbral.umbral;
 }

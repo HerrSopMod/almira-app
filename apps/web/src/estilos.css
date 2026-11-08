@@ -917,6 +917,43 @@ td {
   grid-column: 1 / -1;
 }
 
+/* Alertas y auditoría (web-08) */
+
+.aviso-info.fuerte {
+  align-items: center;
+  background: var(--c-background-pink);
+  color: var(--c-header);
+}
+
+.ajuste {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-md);
+  padding-top: var(--s-md);
+  border-top: var(--z-border-width) solid var(--c-border);
+}
+
+/* Datos y accesos (web-09) */
+
+.principio {
+  gap: var(--s-block);
+}
+
+.principio h2 {
+  font: var(--t-card-title);
+}
+
+.principio p {
+  color: var(--c-text-secondary);
+  font: var(--t-body);
+}
+
+.nota-ejemplo {
+  color: var(--c-text-secondary);
+  font: var(--t-small);
+}
+
 /* En pantallas angostas las columnas se apilan. CSS no admite variables en
    @media, por eso el corte va escrito aquí. */
 @media (max-width: 1100px) {
