@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Destacado, FilaDato, Tarjeta } from '@/components/Bloques';
 import { Boton } from '@/components/Boton';
-import { Encabezado } from '@/components/Encabezado';
+import { BarraSuperior } from '@/components/BarraSuperior';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
@@ -42,7 +42,8 @@ export default function Asistente() {
   return (
     <Pantalla
       conPestanas
-      encabezado={<Encabezado titulo="Asistente" conAvisos />}
+      encabezadoHastaArriba
+      encabezado={<BarraSuperior titulo="Asistente con IA" />}
       pie={
         <View style={estilos.entrada}>
           <TextInput

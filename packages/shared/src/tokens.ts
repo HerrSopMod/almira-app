@@ -21,10 +21,20 @@ export const colors = {
   lines: '#808080',
 
   pendingDebt: '#FFFFCC',
+  // Medidos en las pantallas 04 y 05: borde amarillo y texto del chip «Por vencer».
+  pendingDebtBorder: '#E6DF8A',
+  pendingDebtText: '#6B5200',
   paid: '#2E8B57',
   paidSoft: '#E2F3E8',
   // Texto sobre Pagado claro, medido en la pantalla 03 del prototipo.
   paidText: '#14563B',
+  // Check sobre Pagado claro, medido en las pantallas 05 y 08.
+  paidIcon: '#1E6B45',
+  // Botón secundario y caja de información de las pantallas 06 a 08.
+  backgroundPinkSoft: '#FAF5F5',
+  // Radio sin marcar (pantalla 07) y QR simulado (pantalla 08).
+  radioOff: '#B9C6D4',
+  qr: '#12263F',
 
   success: '#2E8B57',
   successSoft: '#E2F3E8',
@@ -74,8 +84,19 @@ export const sizes = {
   brandIcon: 58,
   featureIcon: 40,
   tabBar: 64,
+  // Fondo rosado del ícono de Asistente en la barra inferior.
+  tabPillWidth: 40,
+  tabPillHeight: 32,
+  // Accesos de la pantalla 04.
+  shortcut: 76,
+  checkbox: 22,
+  radio: 22,
+  successCircle: 60,
+  qr: 150,
   badge: 24,
   progress: 6,
+  // Barra de avance de la pantalla 04 (el panel web sigue usando progress).
+  progressMobile: 8,
   borderWidth: 1,
   focusBorderWidth: 1.5,
 } as const;
@@ -105,7 +126,7 @@ export const typography = {
   caption: { fontSize: 12, fontWeight: '400', lineHeight: 16 },
   button: { fontSize: 16, fontWeight: '600', lineHeight: 20 },
   labelSm: { fontSize: 12, fontWeight: '600', lineHeight: 16, letterSpacing: 0.24 },
-  tabLabel: { fontSize: 11, fontWeight: '500', lineHeight: 14 },
+  tabLabel: { fontSize: 12, fontWeight: '500', lineHeight: 16 },
 } as const satisfies Record<string, EstiloTexto>;
 
 export const tokens = {

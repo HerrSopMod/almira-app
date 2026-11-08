@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   deudas,
+  HOY_EJEMPLO,
   municipalidades,
   obras,
   pagos,
@@ -11,11 +12,18 @@ import {
   vecinos,
 } from './datos-ejemplo';
 import {
+  DETALLE_MEDIO_PAGO,
+  ETIQUETA_MEDIO_PAGO,
+  etiquetaPlazo,
+  fechaLimitePlazo,
   formatearFecha,
+  formatearFechaCorta,
+  formatearHora,
   formatearSoles,
   nombreDistrito,
   sumarDeudas,
   deudasPendientes,
+  textoVencimiento,
 } from './formato';
 import { colors, sizes, spacing } from './tokens';
 
@@ -58,6 +66,44 @@ describe('formato', () => {
 
   it('escribe la fecha en español', () => {
     expect(formatearFecha('2025-02-28')).toBe('28 de febrero de 2025');
+  });
+
+  it('escribe la fecha corta con el mes en minúsculas, como el prototipo', () => {
+    expect(formatearFechaCorta('2026-10-28')).toBe('28 oct 2026');
+    expect(formatearFechaCorta('2026-11-01T09:41:00-05:00')).toBe('1 nov 2026');
+  });
+
+  it('escribe la hora con minutos de dos cifras', () => {
+    expect(formatearHora('2026-11-01T09:41:00')).toBe('9:41 h');
+    expect(formatearHora('2026-11-01T14:05:00')).toBe('14:05 h');
+  });
+
+  it('dice "Venció" solo si la fecha ya pasó', () => {
+    expect(textoVencimiento('2026-11-30', HOY_EJEMPLO)).toBe('Vence 30 nov 2026');
+    expect(textoVencimiento('2026-11-01', HOY_EJEMPLO)).toBe('Vence 1 nov 2026');
+    expect(textoVencimiento('2026-10-15', HOY_EJEMPLO)).toBe('Venció 15 oct 2026');
+  });
+
+  it('cuenta los plazos en días hábiles y nunca muestra días negativos', () => {
+    // R-01842 del prototipo: creado el jueves 22 oct con 10 días hábiles.
+    const limite = fechaLimitePlazo('2026-10-22', 10);
+    expect(limite).toBe('2026-11-04');
+    expect(etiquetaPlazo(limite, HOY_EJEMPLO)).toBe('Quedan 3 d');
+    expect(etiquetaPlazo(limite, '2026-11-04')).toBe('Vence hoy');
+    expect(etiquetaPlazo(limite, '2026-11-05')).toBe('Vencido');
+    expect(etiquetaPlazo(limite, '2026-12-20')).toBe('Vencido');
+    // Si se crea en fin de semana, el plazo empieza el lunes.
+    expect(fechaLimitePlazo('2026-10-31', 1)).toBe('2026-11-02');
+  });
+
+  it('nombra los medios de pago del prototipo', () => {
+    expect(Object.values(ETIQUETA_MEDIO_PAGO)).toEqual([
+      'Yape',
+      'Plin',
+      'Tarjeta de débito o crédito',
+      'Banca móvil o agente',
+    ]);
+    expect(DETALLE_MEDIO_PAGO.banca_movil).toBe('Con código de pago');
   });
 
   it('obtiene el distrito del nombre de la municipalidad', () => {

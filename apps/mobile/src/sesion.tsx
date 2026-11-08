@@ -1,12 +1,18 @@
 import {
   deudas,
+  HOY_EJEMPLO,
   municipalidades,
   obras,
+  pagos,
   predios,
   reclamos as reclamosEjemplo,
   recordatorios,
+  totalDeuda,
   USUARIO_EJEMPLO,
   vecinos,
+  type Deuda,
+  type MedioPago,
+  type Pago,
   type Reclamo,
 } from '@almira/shared';
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
@@ -26,28 +32,63 @@ type Sesion = {
   guardarConsentimientos: (consentimientos: Consentimientos) => void;
   reclamosNuevos: Reclamo[];
   agregarReclamo: (reclamo: Reclamo) => void;
+  pagosSimulados: Pago[];
+  // Devuelve el código de operación que comparten los pagos creados.
+  registrarPagoSimulado: (deudasAPagar: Deuda[], medio: MedioPago) => string;
 };
 
 const ContextoSesion = createContext<Sesion | null>(null);
 
+// La primera operación simulada coincide con la constancia del prototipo (OP-90412).
+const PRIMERA_OPERACION = 90412;
+
+// Fecha del "hoy" de ejemplo con la hora local del teléfono.
+function momentoSimulado(): string {
+  const ahora = new Date();
+  const hora = String(ahora.getHours()).padStart(2, '0');
+  const minutos = String(ahora.getMinutes()).padStart(2, '0');
+  return `${HOY_EJEMPLO}T${hora}:${minutos}:00`;
+}
+
 export function SesionProvider({ children }: { children: ReactNode }) {
   const [municipalidadId, elegirMunicipalidad] = useState(municipalidades[0]!.id);
   const [reclamosNuevos, setReclamosNuevos] = useState<Reclamo[]>([]);
+  const [pagosSimulados, setPagosSimulados] = useState<Pago[]>([]);
   const [consentimientos, guardarConsentimientos] = useState<Consentimientos>({
     asistenteIa: true,
     avisosWhatsapp: true,
     avisosSms: true,
   });
-  const valor = useMemo(
+  const valor = useMemo<Sesion>(
     () => ({
       municipalidadId,
       elegirMunicipalidad,
       consentimientos,
       guardarConsentimientos,
       reclamosNuevos,
-      agregarReclamo: (reclamo: Reclamo) => setReclamosNuevos((previos) => [reclamo, ...previos]),
+      agregarReclamo: (reclamo) => setReclamosNuevos((previos) => [reclamo, ...previos]),
+      pagosSimulados,
+      registrarPagoSimulado: (deudasAPagar, medio) => {
+        const operaciones = new Set(pagosSimulados.map((pago) => pago.referencia));
+        const referencia = `OP-${PRIMERA_OPERACION + operaciones.size}`;
+        const creadoEn = momentoSimulado();
+        // Pago simulado: queda "pendiente" porque solo el servidor confirma pagos.
+        const nuevos: Pago[] = deudasAPagar.map((deuda) => ({
+          id: `simulado-${referencia}-${deuda.id}`,
+          municipalidadId: deuda.municipalidadId,
+          vecinoId: deuda.vecinoId,
+          deudaId: deuda.id,
+          monto: totalDeuda(deuda),
+          medio,
+          estado: 'pendiente',
+          referencia,
+          creadoEn,
+        }));
+        setPagosSimulados((previos) => [...nuevos, ...previos]);
+        return referencia;
+      },
     }),
-    [municipalidadId, reclamosNuevos, consentimientos],
+    [municipalidadId, reclamosNuevos, consentimientos, pagosSimulados],
   );
   return <ContextoSesion.Provider value={valor}>{children}</ContextoSesion.Provider>;
 }
@@ -60,7 +101,7 @@ export function useSesion() {
 
 // Todo lo que el vecino ve pertenece a la municipalidad elegida.
 export function useDatosMunicipales() {
-  const { municipalidadId, reclamosNuevos } = useSesion();
+  const { municipalidadId, reclamosNuevos, pagosSimulados } = useSesion();
   return useMemo(() => {
     const municipalidad = municipalidades.find((m) => m.id === municipalidadId)!;
     const vecino = vecinos.find(
@@ -68,11 +109,19 @@ export function useDatosMunicipales() {
     );
     const delVecino = <T extends { vecinoId: string }>(filas: T[]) =>
       filas.filter((fila) => fila.vecinoId === vecino?.id);
+    const simulados = delVecino(pagosSimulados);
+    // Las deudas pagadas en esta sesión se ven como pagadas hasta cerrar la app.
+    const pagadasEnSesion = new Set(simulados.map((pago) => pago.deudaId));
     return {
       municipalidad,
       vecino,
       predios: delVecino(predios),
-      deudas: delVecino(deudas),
+      deudas: delVecino(deudas).map((deuda) =>
+        pagadasEnSesion.has(deuda.id) ? { ...deuda, estado: 'pagada' as const } : deuda,
+      ),
+      pagos: [...simulados, ...delVecino(pagos)].sort((a, b) =>
+        b.creadoEn.localeCompare(a.creadoEn),
+      ),
       recordatorios: delVecino(recordatorios),
       reclamos: [
         ...reclamosNuevos.filter((r) => r.municipalidadId === municipalidadId),
@@ -80,7 +129,7 @@ export function useDatosMunicipales() {
       ],
       obras: obras.filter((o) => o.municipalidadId === municipalidadId && o.publicada),
     };
-  }, [municipalidadId, reclamosNuevos]);
+  }, [municipalidadId, reclamosNuevos, pagosSimulados]);
 }
 
 export function municipalidadesDelVecino() {

@@ -1,5 +1,13 @@
-import { colors, formatearSoles, radius, sizes, spacing } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
+import {
+  colors,
+  ETIQUETA_ESTADO_DEUDA,
+  formatearSoles,
+  radius,
+  sizes,
+  spacing,
+  type EstadoDeuda,
+} from '@almira/shared';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Texto } from './Texto';
@@ -18,7 +26,7 @@ type TonoDestacado = 'primario' | 'informacion' | 'exito';
 
 const COLORES_DESTACADO: Record<TonoDestacado, { texto: string; fondo: string }> = {
   primario: { texto: colors.primary, fondo: colors.highlight },
-  informacion: { texto: colors.header, fondo: colors.backgroundPink },
+  informacion: { texto: colors.header, fondo: colors.backgroundPinkSoft },
   exito: { texto: colors.paidText, fondo: colors.paidSoft },
 };
 
@@ -79,6 +87,63 @@ export function Progreso({ porcentaje }: { porcentaje: number }) {
       style={estilos.progreso}
     >
       <View style={[estilos.progresoRelleno, { width: `${porcentaje}%` }]} />
+    </View>
+  );
+}
+
+// Chips de estado de deuda de la guía de estilos: «En mora», «Por vencer» y «Pagada».
+const COLORES_ESTADO_DEUDA: Record<EstadoDeuda, { texto: string; fondo: string; borde: string }> = {
+  vencida: { texto: colors.onPrimary, fondo: colors.primary, borde: colors.primary },
+  vigente: {
+    texto: colors.pendingDebtText,
+    fondo: colors.pendingDebt,
+    borde: colors.pendingDebtBorder,
+  },
+  pagada: { texto: colors.paidText, fondo: colors.paidSoft, borde: colors.paidSoft },
+};
+
+export function ChipEstadoDeuda({ estado }: { estado: EstadoDeuda }) {
+  const { texto, fondo, borde } = COLORES_ESTADO_DEUDA[estado];
+  return (
+    <View style={[estilos.chip, { backgroundColor: fondo, borderColor: borde }]}>
+      <Texto variante="label" color={texto}>
+        {ETIQUETA_ESTADO_DEUDA[estado]}
+      </Texto>
+    </View>
+  );
+}
+
+// Chip rosado de plazo («Quedan 3 d»).
+export function ChipPlazo({ texto }: { texto: string }) {
+  return (
+    <View style={[estilos.chip, estilos.chipPlazo]}>
+      <Texto variante="label" color={colors.header}>
+        {texto}
+      </Texto>
+    </View>
+  );
+}
+
+// Cuadro de 40 px con un ícono: rosado (por defecto) o verde para lo pagado.
+export function IconoCuadro({
+  icono,
+  tono = 'rosado',
+}: {
+  icono: keyof typeof MaterialCommunityIcons.glyphMap;
+  tono?: 'rosado' | 'pagado';
+}) {
+  return (
+    <View
+      style={[
+        estilos.iconoCuadro,
+        { backgroundColor: tono === 'pagado' ? colors.paidSoft : colors.backgroundPink },
+      ]}
+    >
+      <MaterialCommunityIcons
+        name={icono}
+        size={22}
+        color={tono === 'pagado' ? colors.paidIcon : colors.primary}
+      />
     </View>
   );
 }
@@ -145,11 +210,27 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   progreso: {
-    height: sizes.progress,
+    height: sizes.progressMobile,
     borderRadius: radius.full,
-    backgroundColor: colors.border,
+    backgroundColor: colors.backgroundPink,
     overflow: 'hidden',
   },
-  progresoRelleno: { height: '100%', borderRadius: radius.full, backgroundColor: colors.accent },
+  progresoRelleno: { height: '100%', borderRadius: radius.full, backgroundColor: colors.primary },
+  chip: {
+    alignSelf: 'flex-start',
+    height: sizes.badge,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: sizes.borderWidth,
+    justifyContent: 'center',
+  },
+  chipPlazo: { backgroundColor: colors.backgroundPink, borderColor: colors.backgroundPink },
+  iconoCuadro: {
+    width: sizes.featureIcon,
+    height: sizes.featureIcon,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+  },
   filaDato: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
 });
