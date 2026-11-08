@@ -1,5 +1,6 @@
 import { colors, sizes, spacing } from '@almira/shared';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { CajaIcono, type NombreIcono } from './Bloques';
 import { Texto } from './Texto';
 
 type Props = {
@@ -9,12 +10,21 @@ type Props = {
   // fila responde al toque. Sin título, pasa accessibilityLabel.
   titulo?: string;
   detalle?: string;
+  // Caja de ícono a la izquierda del título.
+  icono?: NombreIcono;
   accessibilityLabel?: string;
 };
 
 // Interruptor de 44 × 26 (LEEME.md). Se dibuja aquí porque el Switch del sistema
 // no deja fijar su medida.
-export function Interruptor({ activo, onCambiar, titulo, detalle, accessibilityLabel }: Props) {
+export function Interruptor({
+  activo,
+  onCambiar,
+  titulo,
+  detalle,
+  icono,
+  accessibilityLabel,
+}: Props) {
   const control = (
     <View style={[estilos.riel, activo && estilos.rielActivo]}>
       <View style={[estilos.perilla, activo && estilos.perillaActiva]} />
@@ -29,6 +39,7 @@ export function Interruptor({ activo, onCambiar, titulo, detalle, accessibilityL
       onPress={() => onCambiar(!activo)}
       style={titulo ? estilos.fila : estilos.solo}
     >
+      {titulo && icono ? <CajaIcono icono={icono} /> : null}
       {titulo ? (
         <View style={estilos.textos}>
           <Texto variante="bodyLgMedium">{titulo}</Texto>

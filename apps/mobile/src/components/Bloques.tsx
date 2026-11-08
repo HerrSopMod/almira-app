@@ -41,12 +41,13 @@ export function Destacado({
 }: {
   titulo?: string;
   texto?: string;
-  icono?: NombreIcono;
+  // null cuando el contenido trae su propio diseño, como la deuda de Inicio.
+  icono?: NombreIcono | null;
   children?: ReactNode;
 }) {
   return (
     <View style={estilos.destacado}>
-      <MaterialIcons name={icono} size={sizes.icon} color={colors.primary} />
+      {icono ? <MaterialIcons name={icono} size={sizes.icon} color={colors.primary} /> : null}
       <View style={[estilos.flexible, estilos.textosDestacado]}>
         {titulo ? (
           <Texto variante="titleSm" color={colors.primaryPressed}>
@@ -223,6 +224,27 @@ export function FilaDato({
   );
 }
 
+// Título de pantalla (24 px) con un texto de apoyo opcional, debajo de la barra superior.
+export function TituloPantalla({ titulo, texto }: { titulo: string; texto?: string }) {
+  return (
+    <View style={estilos.titulo}>
+      <Texto variante="headlineLg" accessibilityRole="header">
+        {titulo}
+      </Texto>
+      {texto ? <Texto color={colors.textSecondary}>{texto}</Texto> : null}
+    </View>
+  );
+}
+
+// Encabezado de sección en mayúsculas ("AUTORIZA LO QUE QUIERAS USAR").
+export function Rotulo({ texto }: { texto: string }) {
+  return (
+    <Texto variante="overline" color={colors.textSecondary} accessibilityRole="header">
+      {texto}
+    </Texto>
+  );
+}
+
 export function PiePrototipo() {
   return (
     <Texto variante="caption" color={colors.textSecondary} alineacion="center">
@@ -260,6 +282,7 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.highlight,
   },
   textosDestacado: { gap: spacing.xs },
+  titulo: { gap: spacing.sm },
   flexible: { flex: 1 },
   nota: { flexDirection: 'row', gap: spacing.sm },
   notaConBorde: {

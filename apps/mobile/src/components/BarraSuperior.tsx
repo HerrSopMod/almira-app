@@ -20,6 +20,10 @@ type Props =
       variante?: 'detalle';
       titulo: string;
       conVolver?: boolean;
+      // "cerrar" dibuja una X en lugar de la flecha (por ejemplo, en la constancia).
+      iconoVolver?: 'volver' | 'cerrar';
+      // Reemplaza a "volver" cuando la flecha o la X llevan a otro lugar.
+      onVolver?: () => void;
       // Acción opcional a la derecha.
       accion?: ReactNode;
       // "Paso N de M", en lugar de la acción.
@@ -83,19 +87,22 @@ function FilaRaiz({ titulo }: { titulo: string }) {
 function FilaDetalle({
   titulo,
   conVolver = true,
+  iconoVolver = 'volver',
+  onVolver = volver,
   accion,
   paso,
 }: Extract<Props, { variante?: 'detalle' }>) {
+  const cerrar = iconoVolver === 'cerrar';
   return (
     <View style={[estilos.fila, !conVolver && estilos.filaSinVolver]}>
       {conVolver ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Volver"
-          onPress={volver}
+          accessibilityLabel={cerrar ? 'Cerrar' : 'Volver'}
+          onPress={onVolver}
           style={estilos.botonIcono}
         >
-          <MaterialIcons name="arrow-back" size={sizes.icon} color={colors.text} />
+          <MaterialIcons name={cerrar ? 'close' : 'arrow-back'} size={sizes.icon} color={colors.text} />
         </Pressable>
       ) : null}
       <Texto
