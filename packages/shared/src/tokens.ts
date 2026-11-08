@@ -1,33 +1,7 @@
 // Tokens del estilo turquesa (docs/design/turquesa/LEEME.md).
 // Los nombres siguen las tablas de esa guía.
 
-// Tokens del prototipo rojo que siguen en uso mientras dura la migración.
-// Se quitan al terminar la etapa 1.
-const legadoRojo = {
-  header: '#800404',
-  backgroundPink: '#F7ECEC',
-  backgroundPinkSoft: '#FAF5F5',
-  neutral: '#E8E8E8',
-  chartSecondary: '#F4A6A6',
-  lines: '#808080',
-  pendingDebt: '#FFFFCC',
-  pendingDebtBorder: '#E6DF8A',
-  pendingDebtText: '#6B5200',
-  paid: '#2E8B57',
-  paidSoft: '#E2F3E8',
-  paidText: '#14563B',
-  paidIcon: '#1E6B45',
-  radioOff: '#B9C6D4',
-  qr: '#12263F',
-  shadow: 'rgba(43, 43, 43, 0.12)',
-  photoDashed: '#B9C6D4',
-  notice1: '#E9C1C6',
-  notice2: '#9A5563',
-  notice3: '#5B1428',
-} as const;
-
 export const colors = {
-  ...legadoRojo,
   primary: '#0B7F86',
   primaryPressed: '#00646A',
   primaryDisabled: '#A9D2D4',
@@ -178,10 +152,6 @@ export const sizes = {
   mapMarkerBorder: 2,
   mapStreet: 9,
   mapAvenue: 10,
-  // Temporales del prototipo rojo: se quitan al terminar la etapa 1.
-  tabPillWidth: 40,
-  tabPillHeight: 32,
-  buttonCompact: 36,
 } as const;
 
 // "Texto más grande" de Mi perfil (pantalla 21) multiplica letra e interlineado.
@@ -199,10 +169,6 @@ export type EstiloTexto = {
 };
 
 export const typography = {
-  // Temporales hasta migrar sus usos a bodyMdMedium y bodyLgMedium.
-  label: { fontSize: 14, fontWeight: '600', lineHeight: 20 },
-  labelLg: { fontSize: 16, fontWeight: '600', lineHeight: 22 },
-
   displayCurrency: { fontSize: 32, fontWeight: '700', lineHeight: 38, letterSpacing: -0.64 },
   brand: { fontSize: 36, fontWeight: '700', lineHeight: 44, letterSpacing: -0.72 },
   headlineLg: { fontSize: 24, fontWeight: '700', lineHeight: 32, letterSpacing: -0.24 },
