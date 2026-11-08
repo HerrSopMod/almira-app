@@ -1,110 +1,88 @@
-import { colors, radius, sizes, spacing } from '@almira/shared';
-import { MaterialIcons } from '@expo/vector-icons';
+import { colors, sizes, spacing } from '@almira/shared';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { Fragment } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PiePrototipo } from '@/components/Bloques';
+import {
+  CajaIcono,
+  PiePrototipo,
+  Separador,
+  Tarjeta,
+  type NombreIcono,
+} from '@/components/Bloques';
 import { Boton } from '@/components/Boton';
-import { FilaMunicipalidad, SelectorMunicipalidad } from '@/components/SelectorMunicipalidad';
 import { Logo } from '@/components/Logo';
 import { Texto } from '@/components/Texto';
 
-const FUNCIONES = [
-  { titulo: 'Recuerda', icono: 'notifications-none' },
-  { titulo: 'Paga', icono: 'payments' },
-  { titulo: 'Ve la obra', icono: 'construction' },
-  { titulo: 'Reclama', icono: 'photo-camera' },
-] as const;
+const FUNCIONES: { titulo: string; detalle: string; icono: NombreIcono }[] = [
+  { titulo: 'Recuerda', detalle: 'Te avisamos antes de que venza.', icono: 'notifications-none' },
+  { titulo: 'Paga', detalle: 'Desde la app, con constancia al instante.', icono: 'payments' },
+  { titulo: 'Ve la obra', detalle: 'En qué se usa lo que pagas.', icono: 'construction' },
+  { titulo: 'Reclama', detalle: 'Con foto y ubicación, y sigue el plazo.', icono: 'photo-camera' },
+];
 
-// Pantalla 01 del prototipo.
+// Pantalla 01 (maqueta 01-entrada). La municipalidad se elige después, en la pantalla 02d.
 export default function Entrada() {
   const { top, bottom } = useSafeAreaInsets();
-  const [selectorAbierto, setSelectorAbierto] = useState(false);
 
   return (
     <View style={estilos.raiz}>
       <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.lg + bottom }}>
-        <View style={[estilos.portada, { paddingTop: top, minHeight: sizes.hero + top }]}>
+      <ScrollView
+        contentContainerStyle={[
+          estilos.contenido,
+          { paddingTop: top + sizes.entryTop, paddingBottom: spacing.lg + bottom },
+        ]}
+      >
+        <View style={estilos.portada}>
           <Logo grande />
-          <View>
-            <Texto variante="brand" accessibilityRole="header">
-              Almira
-            </Texto>
-            <Texto color={colors.textSecondary}>Paga con claridad. Reclama con evidencia.</Texto>
-          </View>
+          <Texto variante="brand" alineacion="center" accessibilityRole="header">
+            Almira
+          </Texto>
+          <Texto color={colors.textSecondary} alineacion="center">
+            {'Paga con claridad.\nReclama con evidencia.'}
+          </Texto>
         </View>
 
-        <View style={estilos.contenido}>
-          <View style={estilos.funciones}>
-            {FUNCIONES.map(({ titulo, icono }) => (
-              <View key={titulo} style={estilos.funcion}>
-                <View style={estilos.funcionIcono}>
-                  <MaterialIcons name={icono} size={22} color={colors.primary} />
+        <Tarjeta style={estilos.funciones}>
+          {FUNCIONES.map(({ titulo, detalle, icono }, indice) => (
+            <Fragment key={titulo}>
+              {indice > 0 ? <Separador /> : null}
+              <View style={estilos.funcion}>
+                <CajaIcono icono={icono} />
+                <View style={estilos.flexible}>
+                  <Texto variante="bodyLgMedium">{titulo}</Texto>
+                  <Texto variante="bodyMd" color={colors.textSecondary}>
+                    {detalle}
+                  </Texto>
                 </View>
-                <Texto variante="bodyMdMedium" alineacion="center" numberOfLines={1}>
-                  {titulo}
-                </Texto>
               </View>
-            ))}
-          </View>
+            </Fragment>
+          ))}
+        </Tarjeta>
 
-          <View style={estilos.grupo}>
-            <Texto variante="bodyMdMedium">Tu municipalidad</Texto>
-            <FilaMunicipalidad onPress={() => setSelectorAbierto(true)} />
-          </View>
-
+        <View style={estilos.botones}>
           <Boton titulo="Empezar" onPress={() => router.push('/ingreso')} />
           <Boton
-            tipo="secundario"
+            tipo="terciario"
             titulo="No tengo cuenta ni smartphone propio"
             onPress={() => router.push('/sin-smartphone')}
           />
           <PiePrototipo />
         </View>
       </ScrollView>
-
-      <SelectorMunicipalidad
-        visible={selectorAbierto}
-        onCerrar={() => setSelectorAbierto(false)}
-      />
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: colors.background },
-  portada: {
-    justifyContent: 'flex-end',
-    gap: spacing.blockDense,
-    paddingHorizontal: spacing.margin,
-    paddingBottom: spacing.lg,
-  },
-  contenido: {
-    gap: spacing.blockDense,
-    paddingHorizontal: spacing.margin,
-    paddingTop: spacing.margin,
-  },
-  funciones: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },
-  funcion: {
-    flex: 1,
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.blockDense,
-    paddingHorizontal: spacing.xs,
-    borderWidth: sizes.borderWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-  },
-  funcionIcono: {
-    width: sizes.iconBox,
-    height: sizes.iconBox,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.iconBox,
-    backgroundColor: colors.subtle,
-  },
-  grupo: { gap: spacing.sm },
+  contenido: { flexGrow: 1, paddingHorizontal: spacing.margin },
+  portada: { alignItems: 'center', gap: spacing.sm },
+  funciones: { marginTop: spacing.xxxl },
+  funcion: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  flexible: { flex: 1 },
+  // Los botones bajan hasta el pie cuando sobra alto.
+  botones: { marginTop: 'auto', paddingTop: spacing.xxl, gap: spacing.sm },
 });

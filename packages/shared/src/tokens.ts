@@ -68,6 +68,9 @@ export const spacing = {
   md: 16,
   lg: 20,
   xl: 24,
+  // Entrada: sobre los botones y sobre la tarjeta de funciones.
+  xxl: 32,
+  xxxl: 40,
   // Márgenes laterales de toda pantalla móvil.
   margin: 20,
 } as const;
@@ -131,8 +134,8 @@ export const sizes = {
   borderWidth: 1,
   focusBorderWidth: 1.5,
   // Medidas de pantallas que se rehacen en las etapas 2 a 4.
-  selector: 48,
-  hero: 280,
+  // Entrada: espacio sobre el logo, debajo del área segura.
+  entryTop: 56,
   shortcut: 76,
   successCircle: 60,
   qr: 168,
