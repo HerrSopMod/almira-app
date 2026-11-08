@@ -1,23 +1,27 @@
 import {
   colors,
+  ETIQUETA_TIPO_RECLAMO,
   formatearFechaCorta,
   HOY_EJEMPLO,
+  momentoAviso,
   pasosSeguimiento,
   plazoReclamo,
+  sizes,
   spacing,
+  type PasoSeguimiento,
 } from '@almira/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { ChipPlazo, PiePrototipo, Avance, Tarjeta, Vacio } from '@/components/Bloques';
+import { Avance, ChipPlazo, PiePrototipo, Rotulo, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
-import { FotoSimulada } from '@/components/FotoSimulada';
+import { MiniaturaFoto } from '@/components/FotoSimulada';
 import { LineaTiempo } from '@/components/LineaTiempo';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
-// Pantalla 18 del prototipo. El estado del reclamo lo cambia la municipalidad.
+// Pantalla 18 (maqueta 18-seguimiento). El estado del reclamo lo cambia la municipalidad.
 export default function Seguimiento() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { reclamos } = useDatosMunicipales();
@@ -38,59 +42,69 @@ export default function Seguimiento() {
     .filter(Boolean)
     .join(' · ');
 
+  const detallePaso = (titulo: string, estado: PasoSeguimiento['estado']) => {
+    if (estado === 'actual') return 'Estás aquí';
+    if (estado !== 'hecho') return null;
+    if (titulo === 'Recibido') {
+      // Los reclamos de ejemplo solo traen la fecha; los nuevos, también la hora.
+      return reclamo.creadoEn.includes('T')
+        ? momentoAviso(reclamo.creadoEn, HOY_EJEMPLO)
+        : formatearFechaCorta(reclamo.creadoEn);
+    }
+    if (titulo === 'Clasificado') return ETIQUETA_TIPO_RECLAMO[reclamo.tipo];
+    if (titulo === 'Derivado al área' && reclamo.area) return `Área: ${reclamo.area}`;
+    return null;
+  };
+
   return (
-    <Pantalla conPestanas encabezadoHastaArriba separacion="blockDense" encabezado={encabezado}>
-      <View style={estilos.fila}>
-        <Texto variante="bodyLgMedium" style={estilos.flexible}>
-          {reclamo.codigo}
+    <Pantalla conPestanas encabezadoHastaArriba encabezado={encabezado}>
+      <View style={estilos.cabecera}>
+        <View style={estilos.fila}>
+          <Texto variante="labelSm" color={colors.textSecondary} tabular style={estilos.flexible}>
+            {reclamo.codigo}
+          </Texto>
+          {resuelto ? (
+            <ChipPlazo texto="Resuelto" tono="resuelto" />
+          ) : plazo ? (
+            <ChipPlazo texto={plazo.etiqueta} />
+          ) : null}
+        </View>
+        <Texto variante="headlineLg" accessibilityRole="header">
+          {reclamo.titulo}
         </Texto>
-        {resuelto ? (
-          <ChipPlazo texto="Resuelto" tono="resuelto" />
-        ) : plazo ? (
-          <ChipPlazo texto={plazo.etiqueta} />
-        ) : null}
+        <Texto color={colors.textSecondary}>{lugarYFecha}</Texto>
       </View>
 
-      <FotoSimulada tipo={reclamo.tipo} />
-
       <Tarjeta>
-        <View style={estilos.textos}>
-          <Texto variante="headlineSm">{reclamo.titulo}</Texto>
-          <Texto variante="bodyMd" color={colors.textSecondary}>
-            {lugarYFecha}
-          </Texto>
-          {reclamo.descripcion ? (
-            <Texto color={colors.textSecondary} style={estilos.descripcion}>
-              {reclamo.descripcion}
-            </Texto>
-          ) : null}
+        <View style={estilos.resumen}>
+          <MiniaturaFoto tipo={reclamo.tipo} lado={sizes.photoThumbLg} />
+          <Texto style={estilos.flexible}>{reclamo.descripcion ?? reclamo.titulo}</Texto>
         </View>
       </Tarjeta>
 
       {plazo?.total && plazo.quedan !== null ? (
-        <Tarjeta>
+        <View style={estilos.plazo}>
           <View style={estilos.fila}>
             <Texto variante="bodyLgMedium" style={estilos.flexible}>
               Plazo de {reclamo.area ?? 'la municipalidad'}
             </Texto>
-            <Texto variante="bodyMd" color={colors.textSecondary}>
+            <Texto variante="bodyLgMedium" tabular>
               {plazo.quedan} de {plazo.total} días
             </Texto>
           </View>
           <Avance porcentaje={((plazo.total - plazo.quedan) / plazo.total) * 100} />
-        </Tarjeta>
+        </View>
       ) : null}
 
-      <Tarjeta>
-        <Texto variante="bodyLgMedium">Seguimiento</Texto>
+      <View style={estilos.plazo}>
+        <Rotulo texto="Seguimiento" />
         <LineaTiempo
           pasos={pasosSeguimiento(reclamo.estado).map((paso) => ({
             ...paso,
-            detalle:
-              paso.titulo === 'Derivado al área' && reclamo.area ? `Área: ${reclamo.area}` : null,
+            detalle: detallePaso(paso.titulo, paso.estado),
           }))}
         />
-      </Tarjeta>
+      </View>
 
       <Boton
         tipo="secundario"
@@ -103,8 +117,9 @@ export default function Seguimiento() {
 }
 
 const estilos = StyleSheet.create({
+  cabecera: { gap: spacing.sm },
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   flexible: { flex: 1 },
-  textos: { gap: spacing.xs },
-  descripcion: { marginTop: spacing.xs },
+  resumen: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  plazo: { gap: spacing.blockDense },
 });
