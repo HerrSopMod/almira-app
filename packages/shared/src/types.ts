@@ -7,7 +7,7 @@ export type RolPersonal = 'administrador' | 'operador';
 export type CanalAviso = 'whatsapp' | 'sms' | 'app';
 export type TipoDeuda = 'predial' | 'arbitrios' | 'multa';
 export type EstadoDeuda = 'vigente' | 'vencida' | 'pagada';
-export type MedioPago = 'billetera' | 'tarjeta' | 'pagoefectivo';
+export type MedioPago = 'yape' | 'plin' | 'tarjeta' | 'banca_movil';
 export type EstadoPago = 'pendiente' | 'confirmado' | 'rechazado';
 export type TipoRecordatorio = 'preventivo' | 'mora' | 'previo_coactiva';
 export type EstadoRecordatorio = 'programado' | 'enviado' | 'entregado' | 'fallido';
@@ -121,6 +121,9 @@ export interface Obra {
   id: string;
   municipalidadId: string;
   nombre: string;
+  // Nombre para los mensajes de aviso: va después de "obras como el" (por ejemplo,
+  // "parque Castilla"). Si es null, el mensaje no menciona la obra.
+  nombreCorto: string | null;
   ubicacion: string;
   estado: EstadoObra;
   avancePct: number;

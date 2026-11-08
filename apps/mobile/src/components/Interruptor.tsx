@@ -1,38 +1,90 @@
-import { colors, spacing } from '@almira/shared';
-import { StyleSheet, Switch, View } from 'react-native';
+import { colors, sizes, spacing } from '@almira/shared';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { CajaIcono, type NombreIcono } from './Bloques';
 import { Texto } from './Texto';
 
 type Props = {
-  titulo: string;
-  detalle: string;
   activo: boolean;
   onCambiar: (activo: boolean) => void;
+  // Con título, se dibuja la fila completa (título, detalle e interruptor) y toda la
+  // fila responde al toque. Sin título, pasa accessibilityLabel.
+  titulo?: string;
+  detalle?: string;
+  // Caja de ícono a la izquierda del título.
+  icono?: NombreIcono;
+  accessibilityLabel?: string;
 };
 
-// Fila con título, detalle e interruptor (pantalla 03 del prototipo).
-export function Interruptor({ titulo, detalle, activo, onCambiar }: Props) {
-  return (
-    <View style={estilos.fila}>
-      <View style={estilos.textos}>
-        <Texto variante="labelLg">{titulo}</Texto>
-        <Texto variante="bodyMd" color={colors.textSecondary}>
-          {detalle}
-        </Texto>
-      </View>
-      <Switch
-        accessibilityLabel={titulo}
-        accessibilityHint={detalle}
-        value={activo}
-        onValueChange={onCambiar}
-        trackColor={{ true: colors.primary, false: colors.lines }}
-        thumbColor={colors.onPrimary}
-        ios_backgroundColor={colors.lines}
-      />
+// Interruptor de 44 × 26 (LEEME.md). Se dibuja aquí porque el Switch del sistema
+// no deja fijar su medida.
+export function Interruptor({
+  activo,
+  onCambiar,
+  titulo,
+  detalle,
+  icono,
+  accessibilityLabel,
+}: Props) {
+  const control = (
+    <View style={[estilos.riel, activo && estilos.rielActivo]}>
+      <View style={[estilos.perilla, activo && estilos.perillaActiva]} />
     </View>
+  );
+  return (
+    <Pressable
+      accessibilityRole="switch"
+      accessibilityLabel={titulo ?? accessibilityLabel}
+      accessibilityHint={detalle}
+      accessibilityState={{ checked: activo }}
+      onPress={() => onCambiar(!activo)}
+      style={titulo ? estilos.fila : estilos.solo}
+    >
+      {titulo && icono ? <CajaIcono icono={icono} /> : null}
+      {titulo ? (
+        <View style={estilos.textos}>
+          <Texto variante="bodyLgMedium">{titulo}</Texto>
+          {detalle ? (
+            <Texto variante="bodyMd" color={colors.textSecondary}>
+              {detalle}
+            </Texto>
+          ) : null}
+        </View>
+      ) : null}
+      {control}
+    </Pressable>
   );
 }
 
+// Separación entre la perilla y el borde del riel.
+const HOLGURA = (sizes.switchHeight - sizes.switchKnob) / 2;
+
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  fila: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    minHeight: sizes.buttonTertiary,
+  },
+  solo: {
+    minWidth: sizes.buttonTertiary,
+    minHeight: sizes.buttonTertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   textos: { flex: 1, gap: spacing.xs },
+  riel: {
+    width: sizes.switchWidth,
+    height: sizes.switchHeight,
+    borderRadius: sizes.switchHeight / 2,
+    padding: HOLGURA,
+    backgroundColor: colors.border,
+  },
+  rielActivo: { backgroundColor: colors.primary },
+  perilla: {
+    width: sizes.switchKnob,
+    height: sizes.switchKnob,
+    borderRadius: sizes.switchKnob / 2,
+    backgroundColor: colors.surface,
+  },
+  perillaActiva: { marginLeft: sizes.switchWidth - sizes.switchKnob - HOLGURA * 2 },
 });

@@ -2,17 +2,21 @@ import { colors, radius, sizes, typography } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { familiaInter, useEscalaTexto } from '@/components/Texto';
 
+// Pestañas de LEEME.md → Barra inferior, en este orden. "Pagar" conserva la ruta cuenta.
+// MaterialIcons no trae versión de contorno de estos íconos: la activa solo cambia de color.
 const PESTANAS = [
   { name: 'inicio', title: 'Inicio', icono: 'home' },
-  { name: 'pagar', title: 'Pagar', icono: 'payments' },
-  { name: 'reclamos', title: 'Reclamos', icono: 'report-problem' },
+  { name: 'cuenta', title: 'Pagar', icono: 'payments' },
+  { name: 'reclamos', title: 'Reclamos', icono: 'report' },
   { name: 'obras', title: 'Obras', icono: 'construction' },
   { name: 'asistente', title: 'Asistente', icono: 'support-agent' },
-] as const;
+] as const satisfies readonly { name: string; title: string; icono: keyof typeof MaterialIcons.glyphMap }[];
 
 export default function LayoutPestanas() {
   const { bottom } = useSafeAreaInsets();
+  const escala = useEscalaTexto();
   return (
     <Tabs
       screenOptions={{
@@ -20,13 +24,14 @@ export default function LayoutPestanas() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarLabelStyle: {
-          fontFamily: 'Inter_500Medium',
-          fontSize: typography.tabLabel.fontSize,
+          fontFamily: familiaInter(typography.tabLabel.fontWeight),
+          fontSize: typography.tabLabel.fontSize * escala,
+          lineHeight: typography.tabLabel.lineHeight * escala,
         },
         tabBarStyle: {
           height: sizes.tabBar + bottom,
-          backgroundColor: colors.background,
-          borderTopWidth: 1,
+          backgroundColor: colors.surface,
+          borderTopWidth: sizes.borderWidth,
           borderTopColor: colors.border,
           borderTopLeftRadius: radius.lg,
           borderTopRightRadius: radius.lg,
@@ -42,7 +47,7 @@ export default function LayoutPestanas() {
           options={{
             title,
             tabBarIcon: ({ color }) => (
-              <MaterialIcons name={icono} size={24} color={color as string} />
+              <MaterialIcons name={icono} size={sizes.icon} color={color as string} />
             ),
           }}
         />

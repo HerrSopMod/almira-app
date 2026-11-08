@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Almira · web-06 Obras publicadas (con mapa real)</title><link rel="stylesheet" href="../estilos.css"></head>
+<body>
+<div class="web">
+<aside class="side">
+  <div class="brandrow"><div class="logo">a</div><div><div class="b1">Almira</div><div class="b2">Municipalidad de Lince</div></div></div>
+  <div class="nav"><span class="ms">bar_chart</span>Panel municipal</div><div class="nav"><span class="ms">payments</span>Recaudación y pagos</div><div class="nav"><span class="ms">chat</span>Avisos y respuestas</div><div class="nav"><span class="ms">report</span>Reclamos por área<span class="count">2</span></div><div class="nav on"><span class="ms">construction</span>Obras publicadas</div><div class="nav"><span class="ms">support_agent</span>Atención humana<span class="count">3</span></div><div class="nav"><span class="ms">warning</span>Alertas y auditoría<span class="count">1</span></div><div class="nav"><span class="ms">shield_person</span>Datos y accesos</div>
+  <div class="who"><div class="avatar">RR</div><div><div class="body-m">Responsable municipal</div><div class="caption">Rentas</div></div></div>
+</aside>
+<main class="main">
+  <div class="between" style="align-items:flex-start">
+    <div><div class="ptitle">Obras publicadas</div><div class="psub">Lo que ve el vecino en el mapa de la app</div></div>
+    <div class="rowx" style="gap:8px"><span class="badge neutral">Datos ficticios</span><span class="wbtn primary"><span class="ms s20">add</span>Nueva obra</span></div>
+  </div>
+  <div class="wcard" style="padding:6px 8px">
+      <table class="table">
+        <tr><th>Obra</th><th style="width:170px">Avance</th><th class="r">Presupuesto</th><th>Actualizada</th><th>Publicada</th><th></th></tr>
+        <tr><td><div class="strong">Mantenimiento de pistas</div><div class="caption">Av. Ignacio Merino, cdras. 17-19</div></td><td><div class="rowx" style="gap:8px"><div class="progress grow"><span style="width:100%; background:var(--success)"></span></div><span class="num strong">100&nbsp;%</span></div></td><td class="r">S/&nbsp;680,000</td><td>hace 3 días</td><td><div class="switch on"></div></td><td></td></tr>
+        <tr class="sel"><td><div class="strong">Renovación del parque Castilla</div><div class="caption">Parque Castilla, Zona 3</div></td><td><div class="rowx" style="gap:8px"><div class="progress grow"><span style="width:68%"></span></div><span class="num strong">68&nbsp;%</span></div></td><td class="r">S/&nbsp;920,000</td><td>hace 6 días</td><td><div class="switch on"></div></td><td><span class="wbtn secondary sm">+5&nbsp;% de avance</span></td></tr>
+        <tr><td><div class="strong">Veredas accesibles</div><div class="caption">Av. Risso, cdras. 3-7</div></td><td><div class="rowx" style="gap:8px"><div class="progress grow"><span style="width:34%"></span></div><span class="num strong">34&nbsp;%</span></div></td><td class="r">S/&nbsp;410,000</td><td><span class="badge warn">hace 18 días</span></td><td><div class="switch on"></div></td><td><span class="wbtn secondary sm">+5&nbsp;% de avance</span></td></tr>
+        <tr><td><div class="strong">Luminarias LED</div><div class="caption">Jr. Pumacahua y alrededores</div></td><td><div class="rowx" style="gap:8px"><div class="progress grow"><span style="width:0%"></span></div><span class="num strong">0&nbsp;%</span></div></td><td class="r">S/&nbsp;265,000</td><td>hace 2 días</td><td><div class="switch"></div></td><td><span class="wbtn secondary sm">+5&nbsp;% de avance</span></td></tr>
+      </table>
+    </div>
+  <div class="grid" style="grid-template-columns: 420px 1fr; align-items:start">
+    <div class="wcard" style="gap:10px">
+      <div class="ct">Vista del vecino</div><div class="cs">Solo aparecen las obras publicadas.</div>
+      <div class="map" style="height:320px; width:380px">
+        <svg viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice">
+          <rect width="380" height="320" fill="#F2EFE9"/>
+          <g fill="#E8E3DA"><rect x="8" y="8" width="80" height="58" rx="2"/><rect x="102" y="8" width="74" height="58" rx="2"/><rect x="200" y="8" width="80" height="58" rx="2"/><rect x="296" y="8" width="80" height="58" rx="2"/><rect x="8" y="86" width="80" height="64" rx="2"/><rect x="296" y="86" width="80" height="64" rx="2"/><rect x="8" y="170" width="80" height="62" rx="2"/><rect x="296" y="170" width="80" height="62" rx="2"/><rect x="8" y="252" width="80" height="64" rx="2"/><rect x="102" y="252" width="74" height="64" rx="2"/><rect x="200" y="252" width="80" height="64" rx="2"/><rect x="296" y="252" width="80" height="64" rx="2"/></g>
+          <rect x="102" y="86" width="178" height="146" rx="4" fill="#CDEBC5"/><ellipse cx="205" cy="162" rx="28" ry="15" fill="#AAD3DF"/>
+          <g stroke="#FFFFFF" stroke-width="10"><line x1="0" y1="76" x2="380" y2="76"/><line x1="95" y1="0" x2="95" y2="320"/><line x1="288" y1="0" x2="288" y2="320"/></g>
+          <line x1="0" y1="242" x2="380" y2="242" stroke="#FCD8A8" stroke-width="12"/>
+          <g font-size="8" fill="#6E6A63" font-family="Inter"><text x="210" y="239">Av. Risso</text><text x="190" y="73">Jr. Pumacahua</text><text x="112" y="100" fill="#4F7A4A" font-weight="500">Parque Castilla</text></g>
+        </svg>
+        <div class="pin done" style="left:288px; top:126px"><div class="head">100</div><div class="tail"></div></div>
+        <div class="pin sel" style="left:165px; top:142px"><div class="head">68</div><div class="tail"></div></div>
+        <div class="pin" style="left:130px; top:238px"><div class="head">34</div><div class="tail"></div></div>
+        <div class="zoom"><div><span class="ms s20">add</span></div><div><span class="ms s20">remove</span></div></div>
+        <div class="attrib">© colaboradores de OpenStreetMap</div>
+      </div>
+      <div class="legend"><span><i style="background:var(--primary)"></i>En ejecución</span><span><i style="background:var(--success)"></i>Concluida</span></div>
+    </div>
+    <div class="wcard"><div class="ct">Cómo se publica</div>
+      <div class="note"><span class="ms">visibility</span><span>Solo las obras con «Publicada» activo aparecen en el mapa y la lista de la app.</span></div>
+      <div class="note"><span class="ms">location_on</span><span>Cada obra tiene una ubicación (latitud y longitud) que define su punto en el mapa.</span></div>
+      <div class="note"><span class="ms">update</span><span>La municipalidad decide qué obras publica y con qué detalle. La frecuencia mínima de actualización se acuerda con Almira: 15 días.</span></div>
+    </div>
+  </div>
+</main>
+</div>
+
+</body></html>

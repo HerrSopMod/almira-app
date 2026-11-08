@@ -1,21 +1,32 @@
 import { colors, radius, sizes, spacing, typography } from '@almira/shared';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
-import { Texto } from './Texto';
+import { familiaInter, Texto, useEscalaTexto } from './Texto';
 
 type Props = TextInputProps & { etiqueta?: string; ayuda?: string };
 
-export function Campo({ etiqueta, ayuda, style, ...resto }: Props) {
+// Campo de 52 px con la etiqueta arriba (LEEME.md → Campo). Con foco, borde primario.
+export function Campo({ etiqueta, ayuda, style, multiline, ...resto }: Props) {
   const [enfocado, setEnfocado] = useState(false);
+  const escala = useEscalaTexto();
   return (
     <View style={estilos.grupo}>
-      {etiqueta ? <Texto variante="label">{etiqueta}</Texto> : null}
+      {etiqueta ? <Texto variante="bodyMdMedium">{etiqueta}</Texto> : null}
       <TextInput
         accessibilityLabel={etiqueta}
         placeholderTextColor={colors.textSecondary}
         onFocus={() => setEnfocado(true)}
         onBlur={() => setEnfocado(false)}
-        style={[estilos.campo, enfocado && estilos.enfocado, style]}
+        multiline={multiline}
+        textAlignVertical={multiline ? 'top' : 'center'}
+        style={[
+          estilos.campo,
+          multiline && estilos.multilinea,
+          { fontSize: typography.bodyLg.fontSize * escala },
+          multiline && { lineHeight: typography.bodyLg.lineHeight * escala },
+          enfocado && estilos.enfocado,
+          style,
+        ]}
         {...resto}
       />
       {ayuda ? (
@@ -30,15 +41,15 @@ export function Campo({ etiqueta, ayuda, style, ...resto }: Props) {
 const estilos = StyleSheet.create({
   grupo: { gap: spacing.sm },
   campo: {
-    height: sizes.input,
+    minHeight: sizes.input,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     borderWidth: sizes.borderWidth,
     borderColor: colors.border,
     borderRadius: radius.md,
     color: colors.text,
-    fontFamily: 'Inter_400Regular',
-    fontSize: typography.bodyLg.fontSize,
+    fontFamily: familiaInter('400'),
   },
+  multilinea: { minHeight: sizes.textArea, paddingVertical: spacing.blockDense },
   enfocado: { borderWidth: sizes.focusBorderWidth, borderColor: colors.primary },
 });

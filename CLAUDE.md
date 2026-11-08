@@ -11,18 +11,19 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 ## Reglas de producto
 
 - Almira es la marca fija. La municipalidad es un dato seleccionable: nunca escribas el nombre, teléfono o logo de una municipalidad en el código de la interfaz.
-- No inventes funciones fuera de las pantallas de `docs/design/prototipo`.
+- No inventes funciones fuera de las pantallas de `docs/design/turquesa` y `docs/design/prototipo`.
 - No afirmes en la interfaz certificaciones, validaciones o integraciones que la app no tenga.
 - Textos en español de Perú, tratando al vecino de "tú".
 
 ## Reglas de diseño
 
-- La fuente de verdad del diseño es `docs/design/prototipo`: lee `LEEME.md`, copia los textos de `TEXTOS.md` y sigue las imágenes. Las pantallas de Stitch quedan solo como referencia anterior.
+- El aspecto lo manda `docs/design/turquesa`: lee `LEEME.md` y sigue la imagen que indica `PANTALLAS.md` para cada pantalla. Los textos y recorridos salen de `docs/design/prototipo/TEXTOS.md`, con los cambios de `PANTALLAS.md`. De Stitch se toma el estilo, nunca sus textos.
 - Usa los tokens de `@almira/shared`. No escribas colores ni medidas sueltas.
-- Colores solo de la paleta turquesa de Stitch: fondo `#FFFFFF`, encabezados `#0A6D72` y color primario `#0B7F86`. Los tonos `#C3DFE4`, `#2A7A80`, `#004F54` solo van en la escalera de avisos. Las pantallas, textos y funciones siguen el prototipo.
-- Poppins para montos, marca y títulos; Inter para etiquetas, botones y texto.
-- Las medidas de botones, tarjetas y márgenes salen de las imágenes del prototipo.
-- Montos con `formatearSoles`, alineados a la derecha.
+- Fondo `#FFFFFF`, color principal `#0B7F86` y texto `#0F2A2E`. Solo Inter, con cifras tabulares en montos.
+- Botones de 52 px y ancho completo, con márgenes de 20 px. No los pongas dentro de tarjetas.
+- Máximo un bloque `Destacado` por pantalla. Los colores de estado solo van en insignias y estados.
+- Montos con `formatearSoles`, alineados a la derecha en filas y tablas.
+- El mapa de obras es OpenStreetMap con Leaflet (`MAPA.md`) y siempre muestra la atribución.
 
 ## Reglas de datos
 
