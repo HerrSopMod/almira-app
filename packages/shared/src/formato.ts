@@ -27,11 +27,42 @@ const MESES = [
   'diciembre',
 ] as const;
 
+const conComas = (enteros: string) => enteros.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+export type OpcionesSoles = {
+  // Montos redondos del panel web: "S/ 1,120,400".
+  sinDecimales?: boolean;
+  // Montos en miles del panel web: "S/ 312 mil".
+  enMiles?: boolean;
+};
+
 // Sin Intl: Hermes no trae todos los locales en todas las plataformas.
-export function formatearSoles(monto: number): string {
+export function formatearSoles(monto: number, opciones: OpcionesSoles = {}): string {
+  const signo = monto < 0 ? '-' : '';
+  if (opciones.enMiles) {
+    return `${signo}S/ ${conComas(Math.round(Math.abs(monto) / 1000).toString())} mil`;
+  }
+  if (opciones.sinDecimales) {
+    return `${signo}S/ ${conComas(Math.round(Math.abs(monto)).toString())}`;
+  }
   const [enteros = '0', decimales = '00'] = Math.abs(monto).toFixed(2).split('.');
-  const conMiles = enteros.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return `${monto < 0 ? '-' : ''}S/ ${conMiles}.${decimales}`;
+  return `${signo}S/ ${conComas(enteros)}.${decimales}`;
+}
+
+// Cifras del panel: "18,420", "1.42" o "7.4". Los decimales se dejan como vienen.
+export function formatearNumero(valor: number): string {
+  const [enteros = '0', decimales] = Math.abs(valor).toString().split('.');
+  return `${valor < 0 ? '−' : ''}${conComas(enteros)}${decimales ? `.${decimales}` : ''}`;
+}
+
+// "62 %", con espacio duro como el prototipo.
+export function formatearPorcentaje(valor: number): string {
+  return `${formatearNumero(valor)} %`;
+}
+
+// "+7.7 %" o "−18 %": variación con signo.
+export function formatearVariacion(valor: number): string {
+  return `${valor > 0 ? '+' : ''}${formatearPorcentaje(valor)}`;
 }
 
 export function formatearFecha(fechaIso: string): string {

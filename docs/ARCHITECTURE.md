@@ -65,6 +65,30 @@ Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGran
 
 Recordatorios vive dentro de la pestaña Inicio; el detalle del aviso y "Cómo llegan los avisos" se abren encima de las pestañas. Los títulos y mensajes de los avisos salen de `packages/shared/src/avisos.ts` con los datos de la deuda y el `nombreCorto` de la obra (si la obra no lo tiene, el mensaje no la menciona). El canal elegido en "¿Por dónde te avisamos?" se guarda en memoria por municipalidad y empieza con el canal preferido del vecino. Los mensajes de la pantalla 11 son ejemplos: no se envía nada.
 
+## Panel web
+
+| Página | Ruta | Archivo |
+| --- | --- | --- |
+| Ingreso (web-01) | `/ingreso` | `src/paginas/Ingreso.tsx` |
+| Panel municipal (web-02) | `/panel` | `src/paginas/PanelMunicipal.tsx` |
+| Recaudación y pagos (web-03) | `/recaudacion` | `src/paginas/Recaudacion.tsx` |
+| Avisos y respuestas (web-04) | `/avisos` | `src/paginas/Avisos.tsx` |
+| Reclamos por área (web-05) | `/reclamos` | `src/paginas/Reclamos.tsx` |
+| Obras publicadas (web-06) | `/obras` | `src/paginas/Obras.tsx` |
+| Atención humana (web-07) | `/atencion` | `src/paginas/AtencionHumana.tsx` |
+| Alertas y auditoría (web-08) | `/alertas` | `src/paginas/Alertas.tsx` |
+| Datos y accesos (web-09) | `/datos` | `src/paginas/DatosAccesos.tsx` |
+
+El ingreso es simulado: no hay autenticación real y cualquier usuario y contraseña entran. Solo se ofrecen las municipalidades que tienen cifras de ejemplo para el panel (hoy, solo Lince); si hubiera más, aparece un selector. El pie de la barra lateral muestra el rol de ejemplo (`PERSONAL_PANEL_EJEMPLO`).
+
+Las cifras agregadas (recaudación, pagos a tiempo, gráficos, casos de atención humana, alertas) son de ejemplo, iguales a las del prototipo, y viven en `packages/shared/src/panel-ejemplo.ts`, separadas de los datos de vecinos. Los reclamos y las obras salen de `datos-ejemplo.ts`, filtrados por la municipalidad.
+
+`src/estado.tsx` guarda la sesión y una copia en memoria de los reclamos, obras y casos de la municipalidad. Las cifras de la barra lateral y "Requiere tu decisión" se calculan con esa copia. Nada se guarda: al recargar, el panel vuelve al ingreso y a los datos de ejemplo.
+
+Recaudación y Avisos solo muestran cifras agregadas, sin nombres ni rankings de vecinos. Las acciones cambian solo la copia en memoria y lo avisan en pantalla: "Usar variante B" marca la variante elegida sin cambiar ningún envío; "Responder y cerrar" deja el reclamo resuelto sin guardar nada ni avisar al vecino; "Corregir área" cambia el área; en Obras se puede publicar o despublicar, sumar 5 % de avance (la obra queda actualizada hoy) y agregar una obra nueva, que entra sin publicar. En Atención humana, "Tomar" pasa el caso a "En atención"; en Alertas, el interruptor del simulador de cuotas solo cambia en el panel. La app del vecino no se entera de ninguno de estos cambios. Los casos, alertas, umbrales, auditorías, registro de accesos y solicitudes ARCO son de ejemplo, y esas páginas lo dicen al pie. La clasificación del reclamo se muestra sin porcentaje de confianza, porque sale de reglas fijas. La zona de cada reclamo de ejemplo está en `zonaReclamo` del panel, porque la tabla `reclamos` no tiene zona.
+
+`src/estilos.css` solo usa variables CSS que `src/tema.ts` crea con los tokens de `@almira/shared` (`panelSizes` y `panelTypography` para las medidas y textos del panel). Los gráficos son HTML y CSS, sin librerías.
+
 ## Modelo de datos
 
 Cada tabla de datos lleva `municipalidad_id`.

@@ -21,7 +21,10 @@ import {
   formatearFecha,
   formatearFechaCorta,
   formatearHora,
+  formatearNumero,
+  formatearPorcentaje,
   formatearSoles,
+  formatearVariacion,
   haceDias,
   iniciales,
   momentoAviso,
@@ -30,7 +33,8 @@ import {
   deudasPendientes,
   textoVencimiento,
 } from './formato';
-import { colors, sizes, spacing } from './tokens';
+import { colors, panelSizes, sizes, spacing } from './tokens';
+import { mejorVariante, panelEjemplo, superaUmbral } from './panel-ejemplo';
 import {
   avisosRecibidos,
   mensajeAviso,
@@ -394,5 +398,98 @@ describe('obras y perfil', () => {
     expect(iniciales('Rosa Quispe Huamán')).toBe('RQ');
     expect(iniciales('María Ejemplo')).toBe('ME');
     expect(iniciales('Ana María Rojas Paz')).toBe('AR');
+  });
+});
+
+describe('panel municipal', () => {
+  const panel = panelEjemplo('m-lince')!;
+
+  it('escribe los montos y cifras del panel como el prototipo', () => {
+    expect(formatearSoles(1120400, { sinDecimales: true })).toBe('S/ 1,120,400');
+    expect(formatearSoles(312000, { enMiles: true })).toBe('S/ 312 mil');
+    expect(formatearNumero(18420)).toBe('18,420');
+    expect(formatearNumero(1.42)).toBe('1.42');
+    expect(formatearPorcentaje(62)).toBe('62 %');
+    expect(formatearVariacion(7.7)).toBe('+7.7 %');
+    expect(formatearVariacion(-18)).toBe('−18 %');
+  });
+
+  it('trae las cifras de Lince del prototipo y ninguna de otras municipalidades', () => {
+    expect(panel.recaudacion.mes).toBe(1120400);
+    expect(panel.pagosATiempo).toEqual({ porcentaje: 62, puntos: 9, meta: 70 });
+    expect(panel.recaudacionMensual.map((mes) => mes.millones)).toEqual([
+      1.42, 0.96, 1.01, 1.38, 1.04, 1.12,
+    ]);
+    expect(panelEjemplo('m-villa-verde')).toBeUndefined();
+  });
+
+  it('ordena los reclamos por área de mayor a menor', () => {
+    const cantidades = panel.reclamosPorArea.map((fila) => fila.cantidad);
+    expect(cantidades).toEqual([...cantidades].sort((a, b) => b - a));
+  });
+
+  it('calcula la ventaja de la mejor variante de la prueba A/B', () => {
+    expect(mejorVariante(panel.pruebaAB.variantes)).toEqual({ letra: 'B', puntos: 6 });
+  });
+
+  it('deja tres casos en cola humana con 40 minutos de espera máxima', () => {
+    const enCola = panel.casos.filter((caso) => caso.estado === 'en_cola');
+    expect(enCola).toHaveLength(3);
+    expect(Math.max(...enCola.map((caso) => caso.esperaMinutos ?? 0))).toBe(40);
+  });
+
+  it('usa las medidas del panel web del prototipo', () => {
+    expect(panelSizes.sidebar).toBe(248);
+    expect(panelSizes.navItem).toBe(40);
+  });
+});
+
+describe('panel: recaudación, avisos y reclamos', () => {
+  const panel = panelEjemplo('m-lince')!;
+
+  it('cuadra los avisos por canal y por escalera con el total del mes', () => {
+    const porCanal = panel.canales.reduce((suma, canal) => suma + canal.cantidad, 0);
+    const porEscalera = panel.escalera.reduce((suma, paso) => suma + paso.enviados, 0);
+    expect(porCanal).toBe(panel.avisos.total);
+    expect(porEscalera).toBe(panel.avisos.total);
+  });
+
+  it('cuadra la recaudación por zona, en miles, con la del mes', () => {
+    const miles = panel.recaudacionPorZona.reduce((suma, zona) => suma + zona.soles, 0) / 1000;
+    expect(miles).toBe(Math.round(panel.recaudacion.mes / 1000));
+  });
+
+  it('da zona a cada reclamo de ejemplo de la municipalidad', () => {
+    const propios = reclamos.filter((reclamo) => reclamo.municipalidadId === 'm-lince');
+    expect(propios.every((reclamo) => panel.zonaReclamo[reclamo.codigo])).toBe(true);
+  });
+
+  it('calcula los plazos de web-05 desde el hoy del prototipo', () => {
+    const etiqueta = (codigo: string) =>
+      plazoReclamo(reclamos.find((r) => r.codigo === codigo)!, HOY_EJEMPLO)?.etiqueta;
+    expect(etiqueta('R-01851')).toBe('Vencido 2 d');
+    expect(etiqueta('R-01842')).toBe('Quedan 3 d');
+    expect(etiqueta('R-01866')).toBe('Quedan 8 d');
+    expect(etiqueta('R-01790')).toBeUndefined();
+  });
+});
+
+describe('panel: atención, alertas y accesos', () => {
+  const panel = panelEjemplo('m-lince')!;
+
+  it('dispara una alerta por cada umbral superado', () => {
+    const superados = panel.umbrales.filter(superaUmbral).map((umbral) => umbral.evento);
+    expect(superados).toEqual(['Respuestas graves de la IA']);
+    expect(panel.alertasActivas).toHaveLength(superados.length);
+  });
+
+  it('enlaza el registro de accesos con reclamos y casos de ejemplo', () => {
+    expect(reclamos.some((reclamo) => reclamo.codigo === 'R-01851')).toBe(true);
+    expect(panel.casos.some((caso) => caso.codigo === 'H-205')).toBe(true);
+  });
+
+  it('deja la cola por debajo del umbral de alerta', () => {
+    const enCola = panel.casos.filter((caso) => caso.estado === 'en_cola').length;
+    expect(enCola).toBeLessThan(panel.atencion.umbralCola);
   });
 });
