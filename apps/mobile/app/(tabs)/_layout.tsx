@@ -20,7 +20,7 @@ export default function LayoutPestanas() {
   const { bottom } = useSafeAreaInsets();
   const escala = useEscalaTexto();
   const { sesion, cargando } = useAuth();
-  if (supabaseConfigurado && !cargando && !sesion) return <Redirect href="/entrada" />;
+  if (supabaseConfigurado && !cargando && !sesion) return <Redirect href="/ingreso" />;
   return (
     <Tabs
       screenOptions={{

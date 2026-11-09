@@ -1,83 +1,220 @@
-import { colors, documentoValido, sizes, spacing } from '@almira/shared';
+import { colors, radius, sizes, spacing } from '@almira/shared';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/auth';
-import { Nota, PiePrototipo, TituloPantalla } from '@/components/Bloques';
-import { BarraSuperior } from '@/components/BarraSuperior';
+import { Nota } from '@/components/Bloques';
 import { Boton } from '@/components/Boton';
-import { CampoDocumento } from '@/components/CampoDocumento';
-import { Pantalla } from '@/components/Pantalla';
+import { Campo } from '@/components/Campo';
+import { Logo } from '@/components/Logo';
 import { Texto } from '@/components/Texto';
-import { DOCUMENTO_EJEMPLO, useSesion } from '@/sesion';
+import { useSesion } from '@/sesion';
 import { supabaseConfigurado } from '@/supabase';
 
-// Pantalla 02a (Stitch 1). Con Google sigue a Vincula tu DNI; con DNI, al código.
-// Google es real solo si Supabase está configurado; el SMS y el DNI siguen simulados.
+const CLAVE_MINIMA = 8;
+const correoValido = (valor: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor.trim());
+
+// Primera pantalla: Google arriba y, debajo, ingreso clásico con correo y contraseña.
+// Sin Supabase configurado, Google sigue la simulación anterior.
 export default function Ingreso() {
-  const { iniciarConGoogle, iniciarConDni } = useSesion();
-  const [documento, setDocumento] = useState(DOCUMENTO_EJEMPLO);
-  const [falloGoogle, setFalloGoogle] = useState(false);
+  const { iniciarConGoogle: googleSimulado } = useSesion();
+  const { sesion, iniciarConGoogle, iniciarConCorreo, crearCuenta } = useAuth();
+  const { top, bottom } = useSafeAreaInsets();
+  const [registro, setRegistro] = useState(false);
+  const [correo, setCorreo] = useState('');
+  const [clave, setClave] = useState('');
+  const [verClave, setVerClave] = useState(false);
+  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [ocupado, setOcupado] = useState(false);
 
-  const { sesion, iniciarConGoogle: googleReal } = useAuth();
-
-  // Con Supabase conectado, Google es real y al volver con sesión sigue a Vincula tu DNI.
+  // Entrada animada: la hoja blanca sube y aparece.
+  const aparece = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    if (supabaseConfigurado && sesion) router.replace('/vincular-dni');
+    Animated.timing(aparece, {
+      toValue: 1,
+      duration: 450,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [aparece]);
+
+  useEffect(() => {
+    if (supabaseConfigurado && sesion) router.replace('/inicio');
   }, [sesion]);
 
-  const conGoogle = async () => {
-    setFalloGoogle(false);
+  const ejecutar = async (accion: () => Promise<string | null>) => {
+    setMensaje(null);
+    setOcupado(true);
     try {
-      if (supabaseConfigurado) {
-        setFalloGoogle((await googleReal()) !== null);
-        return;
-      }
-      await iniciarConGoogle();
-      router.push('/vincular-dni');
-    } catch {
-      setFalloGoogle(true);
+      setMensaje(await accion());
+    } finally {
+      setOcupado(false);
     }
   };
 
-  const conDni = () => {
-    iniciarConDni();
-    router.push('/codigo');
-  };
+  const conGoogle = () =>
+    ejecutar(async () => {
+      if (supabaseConfigurado) return iniciarConGoogle();
+      await googleSimulado();
+      router.replace('/inicio');
+      return null;
+    });
+
+  const listo = correoValido(correo) && clave.length >= CLAVE_MINIMA;
+  const enviar = () =>
+    ejecutar(() => (registro ? crearCuenta(correo, clave) : iniciarConCorreo(correo, clave)));
 
   return (
-    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 1 de 3" />}>
-      <TituloPantalla
-        titulo="Ingresa a tu cuenta"
-        texto="Usa los datos con los que figuras en el padrón municipal."
-      />
-      <Boton tipo="google" titulo="Continuar con Google" onPress={conGoogle} />
-      {falloGoogle ? (
-        <Nota texto="No pudimos ingresar con Google. Inténtalo de nuevo o usa tu DNI." />
-      ) : null}
-
-      <View style={estilos.divisor}>
-        <View style={estilos.linea} />
-        <Texto variante="bodyMd" color={colors.textSecondary}>
-          o con tu DNI
+    <KeyboardAvoidingView
+      style={estilos.raiz}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <StatusBar style="light" />
+      <View style={[estilos.cabecera, { paddingTop: top + spacing.xl }]}>
+        <Logo grande />
+        <Texto variante="brand" color={colors.onPrimary} accessibilityRole="header">
+          Almira
         </Texto>
-        <View style={estilos.linea} />
+        <Texto variante="bodyLg" color={colors.onPrimary} alineacion="center">
+          Paga con claridad. Reclama con evidencia.
+        </Texto>
       </View>
 
-      <CampoDocumento valor={documento} onCambiar={setDocumento} />
-      <Boton
-        icono="sms"
-        titulo="Recibir código por SMS"
-        deshabilitado={!documentoValido(documento)}
-        onPress={conDni}
-      />
-      <Nota texto="Datos de ejemplo. En este prototipo no se envía ni se guarda ninguna información." />
-      <PiePrototipo />
-    </Pantalla>
+      <Animated.View
+        style={[
+          estilos.hoja,
+          {
+            opacity: aparece,
+            transform: [
+              { translateY: aparece.interpolate({ inputRange: [0, 1], outputRange: [32, 0] }) },
+            ],
+          },
+        ]}
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[estilos.contenido, { paddingBottom: spacing.lg + bottom }]}
+        >
+          <Texto variante="headlineLg" accessibilityRole="header">
+            {registro ? 'Crea tu cuenta' : 'Ingresa a tu cuenta'}
+          </Texto>
+
+          <Boton
+            tipo="google"
+            titulo="Continuar con Google"
+            onPress={conGoogle}
+            deshabilitado={ocupado}
+          />
+
+          <View style={estilos.divisor}>
+            <View style={estilos.linea} />
+            <Texto variante="bodyMd" color={colors.textSecondary}>
+              o con tu correo
+            </Texto>
+            <View style={estilos.linea} />
+          </View>
+
+          <Campo
+            etiqueta="Correo"
+            placeholder="nombre@correo.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect={false}
+            value={correo}
+            onChangeText={setCorreo}
+          />
+          <View>
+            <Campo
+              etiqueta="Contraseña"
+              placeholder={`Mínimo ${CLAVE_MINIMA} caracteres`}
+              secureTextEntry={!verClave}
+              autoCapitalize="none"
+              autoComplete={registro ? 'new-password' : 'current-password'}
+              value={clave}
+              onChangeText={setClave}
+              onSubmitEditing={listo ? enviar : undefined}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              onPress={() => setVerClave((v) => !v)}
+              hitSlop={8}
+              style={estilos.ojo}
+            >
+              <MaterialIcons
+                name={verClave ? 'visibility-off' : 'visibility'}
+                size={sizes.iconSm}
+                color={colors.textSecondary}
+              />
+            </Pressable>
+          </View>
+
+          {mensaje ? <Nota texto={mensaje} /> : null}
+
+          <Boton
+            titulo={registro ? 'Crear cuenta' : 'Ingresar'}
+            deshabilitado={!listo || ocupado}
+            onPress={enviar}
+          />
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setRegistro((v) => !v);
+              setMensaje(null);
+            }}
+            style={estilos.cambiar}
+          >
+            <Texto variante="bodyLgMedium" color={colors.primary} alineacion="center">
+              {registro ? '¿Ya tienes cuenta? Ingresa' : '¿No tienes cuenta? Créala'}
+            </Texto>
+          </Pressable>
+
+          <Texto variante="caption" color={colors.textSecondary} alineacion="center">
+            Al continuar, aceptas los términos de servicio y la política de privacidad.
+          </Texto>
+        </ScrollView>
+      </Animated.View>
+    </KeyboardAvoidingView>
   );
 }
 
 const estilos = StyleSheet.create({
+  raiz: { flex: 1, backgroundColor: colors.primary },
+  cabecera: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.margin,
+    paddingBottom: spacing.xl,
+  },
+  hoja: {
+    flex: 1,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+  },
+  contenido: { padding: spacing.margin, gap: spacing.md },
   divisor: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   linea: { flex: 1, height: sizes.borderWidth, backgroundColor: colors.border },
+  ojo: {
+    position: 'absolute',
+    right: spacing.md,
+    bottom: 0,
+    height: sizes.input,
+    justifyContent: 'center',
+  },
+  cambiar: { minHeight: sizes.buttonTertiary, justifyContent: 'center' },
 });

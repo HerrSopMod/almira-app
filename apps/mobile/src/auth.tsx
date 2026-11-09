@@ -11,6 +11,8 @@ type Autenticacion = {
   sesion: Session | null;
   cargando: boolean;
   iniciarConGoogle: () => Promise<string | null>;
+  iniciarConCorreo: (correo: string, clave: string) => Promise<string | null>;
+  crearCuenta: (correo: string, clave: string) => Promise<string | null>;
   cerrarSesion: () => Promise<void>;
 };
 
@@ -55,6 +57,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refresh_token: refreshToken,
         });
         return errorSesion ? 'No pudimos iniciar con Google. Inténtalo de nuevo.' : null;
+      },
+      iniciarConCorreo: async (correo, clave) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { error } = await supabase.auth.signInWithPassword({ email: correo.trim(), password: clave });
+        return error ? 'Correo o contraseña incorrectos.' : null;
+      },
+      // Si el proyecto exige confirmar el correo, no habrá sesión hasta que lo confirme.
+      crearCuenta: async (correo, clave) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { data, error } = await supabase.auth.signUp({ email: correo.trim(), password: clave });
+        if (error) return 'No pudimos crear la cuenta. Revisa el correo y usa al menos 8 caracteres.';
+        return data.session ? null : 'Te enviamos un correo para confirmar tu cuenta. Confírmalo y vuelve a ingresar.';
       },
       cerrarSesion: async () => {
         if (supabaseConfigurado) await supabase.auth.signOut();
