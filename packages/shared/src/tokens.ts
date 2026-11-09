@@ -248,6 +248,9 @@ export const panelSizes = {
   loginCard: 400,
   loginHeader: 56,
   loginTop: 258,
+  // Mapa "Vista del vecino" de Obras publicadas (web-06).
+  neighborMapWidth: 380,
+  neighborMapHeight: 320,
 } as const;
 
 // Textos del panel web, todos en Inter.
