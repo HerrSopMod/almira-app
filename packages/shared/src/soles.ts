@@ -1,4 +1,5 @@
-// Sin imports: la Edge Function enviar-recordatorios (Deno) también importa este archivo.
+// Sin imports. Hay una copia en supabase/functions/_shared/soles.ts para las Edge
+// Functions: si cambias este archivo, cambia también esa copia.
 
 export const conComas = (enteros: string) => enteros.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 

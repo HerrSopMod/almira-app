@@ -162,7 +162,7 @@ Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven par
 - WhatsApp y la app no tienen proveedor conectado: sus recordatorios se quedan en `programado`, no se marcan como enviados.
 - Un recordatorio sin teléfono peruano válido pasa a `fallido`.
 - Los logs no incluyen teléfonos ni mensajes.
-- El monto del SMS usa `formatearSoles`, importado por ruta relativa de `packages/shared/src/soles.ts`, que no tiene imports para que Deno lo cargue directo.
+- El monto del SMS usa `formatearSoles` de `supabase/functions/_shared/soles.ts`, una copia de `packages/shared/src/soles.ts` que debe coincidir con él (las Edge Functions no importan desde `packages/`).
 - Falta el cron que invoque la función.
 
 El ingreso con celular usa Phone Auth de Supabase (Authentication → Providers → Phone, con Twilio): `signInWithOtp` y `verifyOtp` en `src/auth.tsx`.

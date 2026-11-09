@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import solesFunciones from '../../../supabase/functions/_shared/soles.ts?raw';
+import solesCompartido from './soles.ts?raw';
 import {
   CENTRO_MAPA_LIMA,
   coloresMapa,
@@ -734,5 +736,12 @@ describe('mapa de obras', () => {
     expect(leerMensajeDelMapa({ tipo: 'obra', id: 3 })).toBeNull();
     expect(leerMensajeDelMapa('no es json')).toBeNull();
     expect(leerMensajeDelMapa(null)).toBeNull();
+  });
+});
+
+describe('copia de soles.ts en las Edge Functions', () => {
+  it('coincide con packages/shared/src/soles.ts, salvo el comentario inicial', () => {
+    const sinComentario = (texto: string) => texto.replace(/^(\/\/[^\n]*\n)+/, '');
+    expect(sinComentario(solesFunciones)).toBe(sinComentario(solesCompartido));
   });
 });

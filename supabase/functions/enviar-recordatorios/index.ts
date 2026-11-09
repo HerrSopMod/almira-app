@@ -10,7 +10,7 @@
 // recordatorios se quedan "programado" en vez de marcarse como enviados sin salir nada.
 // Nunca se escriben teléfonos ni mensajes en los logs.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { formatearSoles } from '../../../packages/shared/src/soles.ts';
+import { formatearSoles } from '../_shared/soles.ts';
 
 type Fila = {
   id: string;
