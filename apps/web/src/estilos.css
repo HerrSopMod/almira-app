@@ -241,6 +241,7 @@ button {
 }
 
 .ingreso-pie {
+  padding-top: var(--s-xs);
   color: var(--c-text-secondary);
   font: var(--t-small);
   text-align: center;
