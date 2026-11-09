@@ -1,7 +1,7 @@
 import { formatearNumero, formatearPorcentaje, superaUmbral, type Umbral } from '@almira/shared';
 import { useState } from 'react';
 import {
-  AvisoInfo,
+  AlertaActiva,
   BarrasHorizontales,
   Chip,
   Encabezado,
@@ -42,9 +42,9 @@ export function Alertas() {
       />
 
       {panel.alertasActivas.map((alerta) => (
-        <AvisoInfo key={alerta} icono="alerta" fuerte>
+        <AlertaActiva key={alerta}>
           <strong>Alerta activa:</strong> {alerta}
-        </AvisoInfo>
+        </AlertaActiva>
       ))}
 
       <Tarjeta titulo="Ruta de un incidente" subtitulo="Cómo sube desde la unidad hasta el S5.">

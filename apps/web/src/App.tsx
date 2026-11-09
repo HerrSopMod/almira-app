@@ -1,4 +1,4 @@
-import { iniciales, PERSONAL_PANEL_EJEMPLO } from '@almira/shared';
+import { PERSONAL_PANEL_EJEMPLO } from '@almira/shared';
 import { NavLink, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { pendientes, usePanel, useSesion } from './estado';
 import { Icono, type NombreIcono } from './iconos';
@@ -56,11 +56,11 @@ function Marco() {
         </nav>
         <div className="lateral-pie">
           <span className="avatar" aria-hidden="true">
-            {iniciales(PERSONAL_PANEL_EJEMPLO.cargo)}
+            {PERSONAL_PANEL_EJEMPLO.iniciales}
           </span>
           <div>
             <strong>{PERSONAL_PANEL_EJEMPLO.cargo}</strong>
-            <span>{PERSONAL_PANEL_EJEMPLO.area} · Acceso por rol</span>
+            <span>{PERSONAL_PANEL_EJEMPLO.area}</span>
           </div>
         </div>
       </aside>

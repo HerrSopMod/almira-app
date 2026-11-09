@@ -286,6 +286,9 @@ export const panelSizes = {
   // celdas del ciclo, descripción del reclamo y alerta activa (14).
   innerGap: 10,
   cellX: 14,
+  // Ícono dentro de textos (origen de un caso) y separación entre título y fecha del reclamo.
+  inlineIcon: 18,
+  tightGap: 2,
 } as const;
 
 // Textos del panel web, todos en Inter.

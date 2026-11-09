@@ -162,7 +162,6 @@ export function PanelMunicipal() {
         </Tarjeta>
         <Tarjeta titulo="Reclamos más frecuentes" subtitulo="Últimos 30 días, por categoría.">
           <BarrasHorizontales
-            tono="secundario"
             filas={panel.reclamosFrecuentes.map((f) => ({ nombre: f.nombre, valor: f.cantidad }))}
           />
         </Tarjeta>
