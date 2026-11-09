@@ -2,6 +2,7 @@ import {
   deudas,
   HOY_EJEMPLO,
   municipalidades,
+  buscarVecinoPorCodigo,
   obras,
   pagos,
   predios,
@@ -30,6 +31,7 @@ import {
   nombreDeSesion,
   useAuth,
   type DatosIngreso,
+  type Vinculo,
   type MetodoIngreso,
 } from './auth';
 import { supabaseConfigurado } from './supabase';
@@ -63,6 +65,13 @@ type Sesion = {
   consentimientoAceptado: boolean;
   aceptarConsentimientos: (consentimientos: Consentimientos) => void;
   cerrarSesion: () => Promise<void>;
+  // Códigos de contribuyente vinculados (pantalla 02c). Hace falta al menos uno para seguir.
+  vinculos: Vinculo[];
+  // Devuelve un mensaje de error, o null si quedó vinculado.
+  vincularCodigo: (codigo: string, dni: string) => Promise<string | null>;
+  // Celular confirmado con código SMS (pantalla 02e), requisito de los avisos por WhatsApp.
+  celularConfirmado: boolean;
+  confirmarCelular: () => void;
   municipalidadId: string;
   elegirMunicipalidad: (id: string) => void;
   consentimientos: Consentimientos;
@@ -123,6 +132,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   const [consentimientosElegidos, setConsentimientosElegidos] = useState<Consentimientos | null>(
     null,
   );
+  const [vinculosSesion, setVinculosSesion] = useState<Vinculo[]>([]);
+  const [vinculosCuenta, setVinculosCuenta] = useState<Vinculo[]>([]);
+  const [celularAhora, setCelularAhora] = useState(false);
   const [canalesAviso, setCanalesAviso] = useState<Record<string, CanalAviso[]>>({});
   const [reclamosNuevos, setReclamosNuevos] = useState<Reclamo[]>([]);
   const [pagosSimulados, setPagosSimulados] = useState<Pago[]>([]);
@@ -133,7 +145,16 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     setAceptadoAhora(false);
     setMunicipalidadElegida(null);
     setConsentimientosElegidos(null);
+    setVinculosSesion([]);
+    setCelularAhora(false);
   }, [usuarioId]);
+
+  // Con Supabase, los códigos ya vinculados vuelven desde el servidor.
+  const { listarVinculos } = auth;
+  useEffect(() => {
+    if (!usuarioId) return setVinculosCuenta([]);
+    void listarVinculos().then(setVinculosCuenta);
+  }, [usuarioId, listarVinculos]);
 
   const metodoIngreso = cuenta ? metodoDeSesion(cuenta) : metodoSimulado;
   const nombreCuenta = cuenta
@@ -145,7 +166,17 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   const municipalidadId = municipalidadValida(municipalidadElegida ?? guardado?.municipalidadId);
   const consentimientos =
     consentimientosElegidos ?? guardado?.consentimientos ?? CONSENTIMIENTOS_INICIALES;
-  const { guardarDatosIngreso, cerrarSesion: cerrarSesionAuth } = auth;
+  const { guardarDatosIngreso, cerrarSesion: cerrarSesionAuth, vincularContribuyente } = auth;
+  const vinculos = useMemo(
+    () =>
+      [...vinculosCuenta, ...vinculosSesion].filter(
+        (v, i, todos) =>
+          todos.findIndex((o) => o.municipalidadId === v.municipalidadId && o.codigo === v.codigo) === i,
+      ),
+    [vinculosCuenta, vinculosSesion],
+  );
+  // El celular del ingreso por SMS ya viene confirmado.
+  const celularConfirmado = celularAhora || metodoIngreso === 'celular' || guardado?.celularConfirmado === true;
 
   const valor = useMemo<Sesion>(() => {
     const guardar = (cambios: Partial<DatosIngreso>) =>
@@ -153,6 +184,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         municipalidadId,
         consentimientos,
         consentimientoAceptadoEn: guardado?.consentimientoAceptadoEn ?? new Date().toISOString(),
+        celularConfirmado,
         ...cambios,
       });
     return {
@@ -168,10 +200,26 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       cerrarSesion: async () => {
         await cerrarSesionAuth();
         setMetodoSimulado(null);
+        setVinculosSesion([]);
+        setCelularAhora(false);
         setAceptadoAhora(false);
         setMunicipalidadElegida(null);
         setConsentimientosElegidos(null);
       },
+      vinculos,
+      vincularCodigo: async (codigo, dni) => {
+        const nuevo = { municipalidadId, codigo: codigo.trim().toUpperCase() };
+        if (supabaseConfigurado) {
+          const error = await vincularContribuyente(municipalidadId, codigo, dni);
+          if (error) return error;
+        } else if (!buscarVecinoPorCodigo(vecinos, predios, municipalidadId, codigo, dni)) {
+          return 'No encontramos ese código con ese DNI en el padrón.';
+        }
+        setVinculosSesion((previos) => [...previos, nuevo]);
+        return null;
+      },
+      celularConfirmado,
+      confirmarCelular: () => setCelularAhora(true),
       municipalidadId,
       elegirMunicipalidad: (id) => {
         setMunicipalidadElegida(id);
@@ -254,6 +302,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   }, [
     metodoIngreso,
     nombreCuenta,
+    vinculos,
+    vincularContribuyente,
+    celularConfirmado,
     consentimientoAceptado,
     guardado,
     guardarDatosIngreso,

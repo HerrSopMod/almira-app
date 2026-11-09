@@ -54,7 +54,7 @@ export default function ElegirMunicipalidad() {
   const continuar = () => {
     if (!elegida) return;
     elegirMunicipalidad(elegida);
-    if (!cambio) router.push('/consentimiento');
+    if (!cambio) router.push('/vincular-codigos');
     else if (router.canGoBack()) router.back();
     else router.navigate('/inicio/perfil');
   };
@@ -62,7 +62,7 @@ export default function ElegirMunicipalidad() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      encabezado={<BarraSuperior titulo={cambio ? 'Mi municipalidad' : 'Paso 2 de 3'} />}
+      encabezado={<BarraSuperior titulo={cambio ? 'Mi municipalidad' : 'Paso 2 de 5'} />}
       pie={
         <Boton
           titulo={cambio ? 'Guardar' : 'Continuar'}

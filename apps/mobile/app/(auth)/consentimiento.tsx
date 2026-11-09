@@ -12,18 +12,28 @@ import { useDatosMunicipales, useSesion } from '@/sesion';
 // entra a Inicio. Con Supabase, lo aceptado se guarda en la cuenta; sin Supabase, en memoria.
 export default function Consentimiento() {
   const { municipalidad } = useDatosMunicipales();
-  const { metodoIngreso, consentimientos, consentimientoAceptado, aceptarConsentimientos } =
-    useSesion();
-  const [permisos, setPermisos] = useState(consentimientos);
+  const {
+    metodoIngreso,
+    consentimientos,
+    consentimientoAceptado,
+    aceptarConsentimientos,
+    celularConfirmado,
+    vinculos,
+  } = useSesion();
+  // Sin celular confirmado no se puede avisar por WhatsApp ni SMS.
+  const sinCelular = (c: typeof consentimientos) =>
+    celularConfirmado ? c : { ...c, avisosWhatsapp: false, avisosSms: false };
+  const [permisos, setPermisos] = useState(sinCelular(consentimientos));
   const [entrando, setEntrando] = useState(false);
   // Si los cambia en Privacidad y mis datos (desde "Leer la política"), se reflejan aquí.
-  useEffect(() => setPermisos(consentimientos), [consentimientos]);
+  useEffect(() => setPermisos(sinCelular(consentimientos)), [consentimientos, celularConfirmado]);
   // Inicio se abre recién cuando la sesión ya registra el consentimiento.
   useEffect(() => {
     if (entrando && consentimientoAceptado) router.replace('/inicio');
   }, [entrando, consentimientoAceptado]);
 
   if (!metodoIngreso) return <Redirect href="/ingreso" />;
+  if (vinculos.length === 0 && !consentimientoAceptado) return <Redirect href="/vincular-codigos" />;
 
   const entrar = () => {
     cerrarPantallasDeIngreso();
@@ -32,7 +42,7 @@ export default function Consentimiento() {
   };
 
   return (
-    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 3 de 3" />}>
+    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 5 de 5" />}>
       <TituloPantalla
         titulo="Tus datos, tus reglas"
         texto="Elige qué quieres usar. Puedes cambiarlo cuando quieras en Mi perfil."
@@ -44,6 +54,12 @@ export default function Consentimiento() {
       />
       <Rotulo texto="Autoriza lo que quieras usar" />
       <InterruptoresConsentimiento valor={permisos} onCambiar={setPermisos} />
+      {celularConfirmado ? null : (
+        <Nota
+          icono="sms"
+          texto="Sin celular confirmado no podemos avisarte por WhatsApp ni SMS. Puedes confirmarlo después en Mi perfil."
+        />
+      )}
       <Nota
         icono="block"
         texto="Nunca vendemos tus datos ni te calificamos como «buen» o «mal» pagador."

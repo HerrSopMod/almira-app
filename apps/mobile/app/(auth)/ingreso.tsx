@@ -102,7 +102,7 @@ export default function Ingreso() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      encabezado={<BarraSuperior titulo="Paso 1 de 3" conVolver={false} />}
+      encabezado={<BarraSuperior titulo="Paso 1 de 5" conVolver={false} />}
     >
       <TituloPantalla
         titulo={registro && metodo === 'correo' ? 'Crea tu cuenta' : 'Ingresa a tu cuenta'}
