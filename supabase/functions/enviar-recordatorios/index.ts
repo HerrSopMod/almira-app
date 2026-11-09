@@ -1,34 +1,27 @@
-// Edge Function: envía por SMS (Twilio) los recordatorios programados que ya vencieron.
+// Edge Function: envía por SMS y WhatsApp (Twilio) los recordatorios programados que ya vencieron.
 // Solo la llama un cron con el secreto RECORDATORIOS_SECRETO; usa service_role
 // porque ninguna política permite escribir recordatorios desde el cliente.
 //
 // Secretos necesarios (supabase secrets set ...):
-//   RECORDATORIOS_SECRETO, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y
-//   TWILIO_MESSAGING_SERVICE_SID (o TWILIO_FROM con un número de Twilio).
+//   RECORDATORIOS_SECRETO, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
+//   TWILIO_MESSAGING_SERVICE_SID (o TWILIO_FROM) para SMS y TWILIO_WHATSAPP_FROM para WhatsApp.
 //
-// Solo procesa el canal "sms". WhatsApp y la app no tienen proveedor conectado: esos
+// Procesa los canales "sms" y "whatsapp". El canal "app" no tiene proveedor conectado: esos
 // recordatorios se quedan "programado" en vez de marcarse como enviados sin salir nada.
 // Nunca se escriben teléfonos ni mensajes en los logs.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { enviarMensaje, normalizarTelefono } from '../_shared/twilio.ts';
 
 type Fila = {
   id: string;
   tipo: 'preventivo' | 'mora' | 'previo_coactiva';
+  canal: 'sms' | 'whatsapp';
   vecinos: { telefono: string | null } | null;
   deudas: { concepto: string; total: number; vencimiento: string } | null;
   municipalidades: { nombre: string } | null;
 };
 
 const LIMITE_POR_EJECUCION = 100;
-
-// Número peruano: 9 dígitos que empiezan con 9, o ya en formato +51.
-function normalizarTelefono(telefono: string | null): string | null {
-  if (!telefono) return null;
-  const digitos = telefono.replace(/\D/g, '');
-  if (/^9\d{8}$/.test(digitos)) return `+51${digitos}`;
-  if (/^519\d{8}$/.test(digitos)) return `+${digitos}`;
-  return null;
-}
 
 const soles = (monto: number) => `S/ ${monto.toFixed(2)}`;
 
@@ -41,29 +34,6 @@ function mensaje(fila: Fila): string {
     return `Almira: tu ${detalle} vence el ${deuda.vencimiento}. Págalo desde la app. ${municipalidad}.`;
   }
   return `Almira: tu ${detalle} está vencido desde el ${deuda.vencimiento}. Págalo desde la app para evitar más intereses. ${municipalidad}.`;
-}
-
-async function enviarSms(para: string, texto: string): Promise<boolean> {
-  const sid = Deno.env.get('TWILIO_ACCOUNT_SID');
-  const token = Deno.env.get('TWILIO_AUTH_TOKEN');
-  const servicio = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID');
-  const desde = Deno.env.get('TWILIO_FROM');
-  if (!sid || !token || (!servicio && !desde)) return false;
-
-  const cuerpo = new URLSearchParams({ To: para, Body: texto });
-  if (servicio) cuerpo.set('MessagingServiceSid', servicio);
-  else cuerpo.set('From', desde!);
-
-  const respuesta = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${btoa(`${sid}:${token}`)}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: cuerpo,
-  });
-  if (!respuesta.ok) console.error(`Twilio respondió ${respuesta.status}`);
-  return respuesta.ok;
 }
 
 function responder(cuerpo: unknown, status = 200) {
@@ -89,10 +59,10 @@ Deno.serve(async (solicitud) => {
   const { data, error } = await supabase
     .from('recordatorios')
     .select(
-      'id, tipo, vecinos(telefono), deudas(concepto, total, vencimiento), municipalidades(nombre)',
+      'id, tipo, canal, vecinos(telefono), deudas(concepto, total, vencimiento), municipalidades(nombre)',
     )
     .eq('estado', 'programado')
-    .eq('canal', 'sms')
+    .in('canal', ['sms', 'whatsapp'])
     .lte('programado_para', new Date().toISOString())
     .order('programado_para')
     .limit(LIMITE_POR_EJECUCION);
@@ -107,7 +77,7 @@ Deno.serve(async (solicitud) => {
 
   for (const fila of (data ?? []) as unknown as Fila[]) {
     const telefono = normalizarTelefono(fila.vecinos?.telefono ?? null);
-    const exito = telefono ? await enviarSms(telefono, mensaje(fila)).catch(() => false) : false;
+    const exito = telefono ? await enviarMensaje(fila.canal, telefono, mensaje(fila)).catch(() => false) : false;
     // El filtro por estado evita pisar otra ejecución simultánea.
     const { error: errorEstado } = await supabase
       .from('recordatorios')

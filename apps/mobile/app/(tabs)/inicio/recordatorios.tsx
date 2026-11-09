@@ -33,6 +33,7 @@ import { EscaleraAvisos } from '@/components/Escalera';
 import { Interruptor } from '@/components/Interruptor';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
+import { VincularWhatsapp } from '@/components/VincularWhatsapp';
 import { useDatosMunicipales, useSesion } from '@/sesion';
 
 const ICONO_CANAL: Record<CanalAviso, NombreIcono> = {
@@ -125,6 +126,8 @@ export default function Recordatorios() {
           ))}
         </Tarjeta>
       </View>
+
+      <VincularWhatsapp />
 
       <Nota
         icono="schedule"

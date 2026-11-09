@@ -135,10 +135,13 @@ Al agregar una tabla: incluye `municipalidad_id`, activa RLS y revoca los permis
 
 `supabase/functions/enviar-recordatorios` procesa los recordatorios con estado `programado`, canal `sms` y fecha vencida, y los envía con Twilio. Requiere `Authorization: Bearer <RECORDATORIOS_SECRETO>` y falla cerrada si el secreto no existe. Los secretos de Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` y `TWILIO_MESSAGING_SERVICE_SID` o `TWILIO_FROM`) se cargan con `supabase secrets set`, nunca en el repositorio.
 
-- WhatsApp y la app no tienen proveedor conectado: sus recordatorios se quedan en `programado`, no se marcan como enviados.
+- Canales `sms` y `whatsapp` salen por Twilio (`supabase/functions/_shared/twilio.ts`). WhatsApp usa el sandbox de Twilio (`TWILIO_WHATSAPP_FROM`): cada persona debe enviar antes el código "join …" al número del sandbox. En producción hace falta un número de empresa verificado por Meta y plantillas aprobadas.
+- La app no tiene proveedor conectado: sus recordatorios se quedan en `programado`, no se marcan como enviados.
 - Un recordatorio sin teléfono peruano válido pasa a `fallido`.
 - Los logs no incluyen teléfonos ni mensajes.
 - Falta el cron que invoque la función.
+
+**Vincular WhatsApp:** en Recordatorios, el vecino con sesión real confirma su celular con un código SMS (`updateUser` + `verifyOtp` tipo `phone_change`, sin crear otra sesión). La función `vincular-whatsapp` guarda el celular en sus filas de `vecinos`, pone el canal preferido en WhatsApp y le escribe un mensaje de confirmación.
 
 El ingreso con celular usa Phone Auth de Supabase (Authentication → Providers → Phone, con Twilio): `signInWithOtp` y `verifyOtp` en `src/auth.tsx`.
 

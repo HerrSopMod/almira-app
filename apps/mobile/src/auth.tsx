@@ -7,6 +7,8 @@ import { supabase, supabaseConfigurado } from './supabase';
 
 WebBrowser.maybeCompleteAuthSession();
 
+export type ResultadoVinculo = { ok: boolean; mensaje: string };
+
 type Autenticacion = {
   sesion: Session | null;
   cargando: boolean;
@@ -15,6 +17,8 @@ type Autenticacion = {
   crearCuenta: (correo: string, clave: string) => Promise<string | null>;
   enviarCodigoSms: (celular: string) => Promise<string | null>;
   verificarCodigoSms: (celular: string, codigo: string) => Promise<string | null>;
+  pedirCodigoVinculo: (celular: string) => Promise<string | null>;
+  confirmarVinculo: (celular: string, codigo: string) => Promise<ResultadoVinculo>;
   cerrarSesion: () => Promise<void>;
 };
 
@@ -82,6 +86,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
         const { error } = await supabase.auth.verifyOtp({ phone: `+51${celular}`, token: codigo, type: 'sms' });
         return error ? 'El código no es correcto o ya venció.' : null;
+      },
+      // Vincular WhatsApp: se confirma el celular de la cuenta ya ingresada con un código SMS
+      // (no se crea otra sesión) y la función del servidor lo guarda y escribe por WhatsApp.
+      pedirCodigoVinculo: async (celular) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { error } = await supabase.auth.updateUser({ phone: `+51${celular}` });
+        return error ? 'No pudimos enviar el código. Revisa tu número e inténtalo de nuevo.' : null;
+      },
+      confirmarVinculo: async (celular, codigo) => {
+        const { error } = await supabase.auth.verifyOtp({
+          phone: `+51${celular}`,
+          token: codigo,
+          type: 'phone_change',
+        });
+        if (error) return { ok: false, mensaje: 'El código no es correcto o ya venció.' };
+        const { data, error: errorFuncion } = await supabase.functions.invoke('vincular-whatsapp');
+        if (errorFuncion) {
+          return { ok: false, mensaje: 'Confirmamos tu celular, pero no pudimos vincularlo a tu cuenta.' };
+        }
+        return data?.enviado
+          ? { ok: true, mensaje: 'Listo. Te escribimos por WhatsApp para confirmar.' }
+          : {
+              ok: true,
+              mensaje:
+                'Vinculamos tu celular, pero todavía no pudimos escribirte por WhatsApp. Lo intentaremos con tus próximos avisos.',
+            };
       },
       cerrarSesion: async () => {
         if (supabaseConfigurado) await supabase.auth.signOut();
