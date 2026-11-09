@@ -70,9 +70,9 @@ El pago es simulado: al confirmar, `registrarPagoSimulado` crea pagos en memoria
 
 El asistente se llama "Asistente" y no usa IA (la pantalla lo dice en su nota: "Prototipo: respuestas fijas de ejemplo"): `responderAsistente` (`packages/shared/src/asistente.ts`) responde con textos fijos si la pregunta menciona cuotas o la multa, y con un mensaje que orienta a las preguntas sugeridas o a hablar con una persona en cualquier otro caso. La conversación vive solo en la pantalla. La simulación de cuotas usa las deudas pendientes (o solo las vencidas) y la tasa ilustrativa del prototipo (1 % mensual, cuota fija); es informativa y "Pedir evaluación a Rentas" no envía nada. Atención humana es simulada: el tiempo de espera es de ejemplo y no hay nadie conectado; solo promete compartir la consulta con el asistente si el vecino lo autorizó en el consentimiento.
 
-Reclamos: la foto y la ubicación son simuladas (no se usa la cámara ni el GPS). "Agregar foto" solo marca que hay una foto de ejemplo y las pantallas 15, 17 y 18 muestran un dibujo fijo según la categoría en miniatura (`MiniaturaFoto` de `FotoSimulada.tsx`). Nuevo reclamo muestra un recuadro "Mapa" provisional hasta que llegue el mapa real (`docs/design/turquesa/MAPA.md`). La ayuda de Reclamos lleva a Atención humana; no se muestra ningún teléfono. La ubicación parte de la dirección del predio y el vecino puede ajustarla a mano. `clasificarReclamo` (`packages/shared/src/reclamos.ts`) elige la categoría con palabras clave y `AREA_TIPO_RECLAMO` da el área; no hay IA. El plazo de ejemplo es de 10 días hábiles para todas las categorías. Al confirmar, `registrarReclamo` guarda el reclamo en memoria con el siguiente código de la municipalidad, estado `derivado` y fecha `HOY_EJEMPLO`, y abre su seguimiento. El estado lo cambia la municipalidad.
+Reclamos: la foto y la ubicación son simuladas (no se usa la cámara ni el GPS). "Agregar foto" solo marca que hay una foto de ejemplo y las pantallas 15, 17 y 18 muestran un dibujo fijo según la categoría en miniatura (`MiniaturaFoto` de `FotoSimulada.tsx`). Nuevo reclamo muestra un minimapa real, fijo y sin gestos, con un marcador en la ubicación simulada del predio (`UBICACIONES_PREDIO_EJEMPLO`); si el vecino cambia la dirección, el mapa queda en el distrito sin marcador y el reclamo se guarda sin coordenadas. La ayuda de Reclamos lleva a Atención humana; no se muestra ningún teléfono. La ubicación parte de la dirección del predio y el vecino puede ajustarla a mano. `clasificarReclamo` (`packages/shared/src/reclamos.ts`) elige la categoría con palabras clave y `AREA_TIPO_RECLAMO` da el área; no hay IA. El plazo de ejemplo es de 10 días hábiles para todas las categorías. Al confirmar, `registrarReclamo` guarda el reclamo en memoria con el siguiente código de la municipalidad, estado `derivado` y fecha `HOY_EJEMPLO`, y abre su seguimiento. El estado lo cambia la municipalidad.
 
-Obras: el mapa es un dibujo fijo (`MapaObras`), no un mapa real; los marcadores se ubican en puestos fijos según el orden de las obras, porque las obras no tienen coordenadas. El detalle muestra una imagen ilustrativa porque no hay fotos publicadas.
+Obras: el mapa es real (ver «Mapa de obras» más abajo). La pantalla 19 filtra con los chips Todas, En ejecución y Concluidas; al tocar un marcador se resalta su tarjeta y la lista baja hasta ella. Con `/obras?obra=<id>` la obra llega seleccionada y centrada: así vuelven el ícono de mapa y "Ver en el mapa" del detalle (20), que solo aparecen si la obra tiene ubicación. El botón de recentrar vuelve al encuadre de las obras; no usa el GPS. El detalle muestra una imagen ilustrativa porque no hay fotos publicadas.
 
 Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGrande.tsx`) agranda en memoria todos los textos de `Texto`. Cerrar sesión vuelve a la entrada. Privacidad y mis datos muestra y cambia los permisos que guardó el consentimiento; las solicitudes ARCO son simuladas. Sin smartphone usa un número SMS y un horario de ejemplo (`SMS_NUMERO_EJEMPLO`, `HORARIO_MODULO_EJEMPLO`) y la reserva de turno es simulada.
 
@@ -98,9 +98,9 @@ Las cifras agregadas (recaudación, pagos a tiempo, gráficos, casos de atenció
 
 `src/estado.tsx` guarda la sesión y una copia en memoria de los reclamos, obras y casos de la municipalidad. Las cifras de la barra lateral y "Requiere tu decisión" se calculan con esa copia. Nada se guarda: al recargar, el panel vuelve al ingreso y a los datos de ejemplo.
 
-Recaudación y Avisos solo muestran cifras agregadas, sin nombres ni rankings de vecinos. Las acciones cambian solo la copia en memoria y lo avisan en pantalla: "Usar variante B" marca la variante elegida sin cambiar ningún envío; "Responder y cerrar" deja el reclamo resuelto sin guardar nada ni avisar al vecino; "Corregir área" cambia el área; en Obras se puede publicar o despublicar, sumar 5 % de avance (la obra queda actualizada hoy) y agregar una obra nueva, que entra sin publicar. En Atención humana, "Tomar" pasa el caso a "En atención"; en Alertas, el interruptor del simulador de cuotas solo cambia en el panel. La app del vecino no se entera de ninguno de estos cambios. Los casos, alertas, umbrales, auditorías, registro de accesos y solicitudes ARCO son de ejemplo, y esas páginas lo dicen al pie. La clasificación del reclamo se muestra sin porcentaje de confianza, porque sale de reglas fijas. La zona de cada reclamo de ejemplo está en `zonaReclamo` del panel, porque la tabla `reclamos` no tiene zona.
+Recaudación y Avisos solo muestran cifras agregadas, sin nombres ni rankings de vecinos. Las acciones cambian solo la copia en memoria y lo avisan en pantalla: "Usar variante B" marca la variante elegida sin cambiar ningún envío; "Responder y cerrar" deja el reclamo resuelto sin guardar nada ni avisar al vecino; "Corregir área" cambia el área; en Obras se puede publicar o despublicar, sumar 5 % de avance (la obra queda actualizada hoy) y agregar una obra nueva, que entra sin publicar y sin ubicación. La tarjeta "Vista del vecino" muestra en el mapa las obras publicadas con ubicación, con la misma copia en memoria: al cambiar «Publicada», el marcador aparece o desaparece al instante. En Atención humana, "Tomar" pasa el caso a "En atención"; en Alertas, el interruptor del simulador de cuotas solo cambia en el panel. La app del vecino no se entera de ninguno de estos cambios. Los casos, alertas, umbrales, auditorías, registro de accesos y solicitudes ARCO son de ejemplo, y esas páginas lo dicen al pie. La clasificación del reclamo se muestra sin porcentaje de confianza, porque sale de reglas fijas. La zona de cada reclamo de ejemplo está en `zonaReclamo` del panel, porque la tabla `reclamos` no tiene zona.
 
-`src/estilos.css` solo usa variables CSS que `src/tema.ts` crea con los tokens de `@almira/shared` (`panelSizes` y `panelTypography` para las medidas y textos del panel). Los gráficos son HTML y CSS, sin librerías.
+`src/estilos.css` solo usa variables CSS que `src/tema.ts` crea con los tokens de `@almira/shared` (`panelSizes` y `panelTypography` para las medidas y textos del panel). Los gráficos son HTML y CSS, sin librerías. El mapa usa `leaflet` 1.9.4 y `react-leaflet` 5 (`src/MapaObras.tsx`).
 
 ## Modelo de datos
 
@@ -109,6 +109,7 @@ Cada tabla de datos lleva `municipalidad_id`.
 - `vecinos` tiene una fila por persona y municipalidad: quien tributa en dos distritos tiene dos filas. `user_id` queda vacío hasta que vincula su DNI.
 - Las llaves foráneas compuestas `(municipalidad_id, id)` impiden que una deuda, un pago o un reclamo apunte a un vecino de otra municipalidad, incluso con `service_role`.
 - `reclamos.foto_ruta` es obligatoria y debe estar en la carpeta de su municipalidad.
+- `obras.latitud` y `obras.longitud` son nulas (`20261115000001_obras_ubicacion.sql`): una obra sin coordenadas sale en la lista, pero no en el mapa.
 
 ## Seguridad
 
@@ -125,11 +126,25 @@ Las funciones de `supabase/migrations/20261031000002_rls.sql` viven en el esquem
 | `reclamos` | Lee y crea los propios | Lee y cambia `estado`, `area` y `plazo` | Elimina |
 | `obras` | Lee todas | Crea y actualiza las suyas | Elimina |
 
+**Pendiente:** obras usa grant de tabla completa para authenticated; pasar a permisos por columna según CLAUDE.md. Por eso el personal de la municipalidad también puede escribir `latitud` y `longitud` de sus obras; los vecinos no, porque la política exige ser personal.
+
 `anon` no tiene acceso a ninguna tabla. Un pago solo se confirma desde el servidor, nunca desde el cliente.
 
 El bucket privado `evidencias` usa la ruta `{municipalidad_id}/{user_id}/{archivo}`. El vecino sube a su carpeta, el personal lee las de su municipalidad y nadie reemplaza ni borra evidencias desde el cliente.
 
 Al agregar una tabla: incluye `municipalidad_id`, activa RLS y revoca los permisos de `anon` y `authenticated`, porque Supabase los concede por defecto en tablas nuevas.
+
+## Mapa de obras
+
+El mapa es OpenStreetMap dibujado con Leaflet, sin API key (`docs/design/turquesa/MAPA.md`).
+
+- `packages/shared/src/mapa.ts` tiene las teselas (`MAPA_TILES`), la atribución (`MAPA_ATRIBUCION`, con enlace a openstreetmap.org/copyright), `obrasConUbicacion` (solo obras publicadas con coordenadas), `encuadreMapa` (centro del distrito si no hay puntos; si hay, límites con margen) y `htmlMapaObras`, que arma un HTML completo con Leaflet 1.9.4 desde unpkg con SRI. Los colores entran como parámetro desde los tokens (`coloresMapa(colors)`) y los datos de las obras van escapados dentro del script.
+- El HTML avisa con `postMessage`: `{ tipo: 'obra', id }` al tocar un marcador, `{ tipo: 'listo' }` al cargar la primera tesela y `{ tipo: 'error' }` si las teselas fallan (errores seguidos, sin conexión o 15 s sin cargar). Escucha `{ tipo: 'seleccionar', id }` en el iframe; en el WebView se llama `window.almiraMapa.seleccionar(id)` con `injectJavaScript`.
+- App: `src/components/MapaObras.tsx` usa `react-native-webview` con `baseUrl` para que las teselas lleven Referer, como exige OpenStreetMap; los enlaces se abren en el navegador. `MapaObras.web.tsx` (Expo web) usa un iframe con `srcDoc` y solo acepta mensajes de ese iframe y de tipo conocido (`leerMensajeDelMapa`). Mientras carga se ve un fondo `subtle` con un indicador; si llega el error, el mapa se cambia por la nota "No se pudo cargar el mapa…" y la lista de obras sigue.
+- El centro de cada distrito vive en `CENTROS_MAPA_EJEMPLO` (`centroMapaDe`); la base no tiene esa columna. Una municipalidad sin centro usa el de Lima.
+- La atribución siempre se ve, sin el prefijo de Leaflet.
+
+Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo son aproximadas y deben verificarse en openstreetmap.org antes de presentar. El GPS del reclamo sigue simulado; usar `expo-location` sería un paso aparte.
 
 ## Recordatorios
 
