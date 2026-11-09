@@ -228,7 +228,7 @@ export const panelSizes = {
   buttonSm: 32,
   chip: 32,
   // Medidas de páginas que se rehacen en la etapa 5.
-  decisionColumn: 478,
+  decisionColumn: 460,
   kpiHeight: 113,
   tableRow: 46,
   tableRowTall: 59,

@@ -3,7 +3,6 @@ import {
   formatearNumero,
   formatearPorcentaje,
   formatearSoles,
-  formatearVariacion,
   haceDias,
   mejorVariante,
 } from '@almira/shared';
@@ -11,15 +10,24 @@ import { Link } from 'react-router-dom';
 import {
   BarrasHorizontales,
   BarrasMensuales,
+  CajaIcono,
   Chip,
   Cifra,
   Encabezado,
+  sube,
   Tarjeta,
 } from '../componentes';
 import { diasSinActualizar, pendientes, useSesion } from '../estado';
 import { Icono, type NombreIcono } from '../iconos';
 
-type Decision = { icono: NombreIcono; titulo: string; detalle: string; ruta: string };
+// Los reclamos vencidos van en rojo y las obras atrasadas en ámbar, como en web-02.
+type Decision = {
+  icono: NombreIcono;
+  tono?: 'bad' | 'warn';
+  titulo: string;
+  detalle: string;
+  ruta: string;
+};
 
 const plural = (n: number, singular: string, varios: string) => (n === 1 ? singular : varios);
 
@@ -41,6 +49,7 @@ export function PanelMunicipal() {
     const areas = [...new Set(reclamosVencidos.map((r) => r.area ?? 'Sin área'))];
     decisiones.push({
       icono: 'reloj',
+      tono: 'bad',
       titulo: `${n} ${plural(n, 'reclamo vencido', 'reclamos vencidos')}`,
       detalle: `${enumerar(areas)} ${plural(areas.length, 'superó', 'superaron')} su plazo`,
       ruta: '/reclamos',
@@ -55,6 +64,7 @@ export function PanelMunicipal() {
     const otras = n > 1 ? ` y ${n - 1} más` : '';
     decisiones.push({
       icono: 'casco',
+      tono: 'warn',
       titulo: `${n} ${plural(n, 'obra sin actualizar', 'obras sin actualizar')}`,
       detalle: `${primeraAtrasada.nombre}: ${haceDias(primeraAtrasada.actualizadaEn, HOY_EJEMPLO)}${otras}`,
       ruta: '/obras',
@@ -97,24 +107,33 @@ export function PanelMunicipal() {
       <Encabezado
         titulo="Panel municipal"
         subtitulo={`${panel.periodo} · Revisión mensual con Almira: ${panel.revisionMensual}`}
-        extra={<Chip tono="info">Ciclo: {panel.ciclo}</Chip>}
+        extra={
+          <Chip tono="info" icono="calendario">
+            Ciclo: {panel.ciclo}
+          </Chip>
+        }
       />
 
       <div className="cifras cifras-4">
         <Cifra
           etiqueta="Recaudación"
           valor={formatearSoles(panel.recaudacion.mes, { sinDecimales: true })}
-          detalle={`${formatearVariacion(panel.recaudacion.variacionLineaBase)} frente a la línea base`}
+          tendencia={sube(formatearPorcentaje(panel.recaudacion.variacionLineaBase))}
+          detalle="frente a la línea base"
         />
         <Cifra
           etiqueta="Pagos a tiempo"
           valor={formatearPorcentaje(panel.pagosATiempo.porcentaje)}
-          detalle={`+${panel.pagosATiempo.puntos} puntos · Meta: ${formatearPorcentaje(panel.pagosATiempo.meta)}`}
+          tendencia={sube(`${panel.pagosATiempo.puntos} puntos`)}
+          detalle={`· Meta: ${formatearPorcentaje(panel.pagosATiempo.meta)}`}
+          avance={panel.pagosATiempo.porcentaje}
         />
         <Cifra
           etiqueta="Reclamos en plazo"
           valor={formatearPorcentaje(panel.reclamosEnPlazo.porcentaje)}
-          detalle={`+${panel.reclamosEnPlazo.puntos} puntos · Meta: ${formatearPorcentaje(panel.reclamosEnPlazo.meta)}`}
+          tendencia={sube(`${panel.reclamosEnPlazo.puntos} puntos`)}
+          detalle={`· Meta: ${formatearPorcentaje(panel.reclamosEnPlazo.meta)}`}
+          avance={panel.reclamosEnPlazo.porcentaje}
         />
         <Cifra
           etiqueta="Avisos"
@@ -130,20 +149,22 @@ export function PanelMunicipal() {
         >
           <BarrasMensuales meses={panel.recaudacionMensual} />
         </Tarjeta>
-        <Tarjeta titulo="Requiere tu decisión" subtitulo="Solo excepciones. La rutina la resuelve el S2 local.">
+        <Tarjeta
+          titulo="Requiere tu decisión"
+          subtitulo="Solo excepciones. La rutina la resuelve el S2 local."
+          className="tarjeta-decision"
+        >
           {decisiones.length > 0 ? (
             <ul className="decisiones">
               {decisiones.map((decision) => (
                 <li key={decision.titulo}>
                   <Link to={decision.ruta}>
-                    <span className="icono-cuadro">
-                      <Icono nombre={decision.icono} />
-                    </span>
+                    <CajaIcono icono={decision.icono} tono={decision.tono} />
                     <span className="decision-texto">
                       <strong>{decision.titulo}</strong>
                       <span>{decision.detalle}</span>
                     </span>
-                    <Icono nombre="flecha" />
+                    <Icono nombre="flecha" tamano="lg" />
                   </Link>
                 </li>
               ))}
@@ -169,9 +190,11 @@ export function PanelMunicipal() {
 
       <Tarjeta titulo="Cómo aprende la municipalidad" subtitulo="Lo que pasó este mes en el ciclo del producto.">
         <ol className="ciclo">
-          {ciclo.map((paso) => (
+          {ciclo.map((paso, indice) => (
             <li key={paso.titulo}>
-              <strong>{paso.titulo}</strong>
+              <strong>
+                {indice + 1} · {paso.titulo}
+              </strong>
               <span>{paso.texto}</span>
             </li>
           ))}

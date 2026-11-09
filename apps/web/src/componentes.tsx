@@ -50,6 +50,9 @@ export function Encabezado({
   );
 }
 
+// Tendencia favorable de un indicador: "↑ 7.7 %" o "↑ 9 puntos".
+export const sube = (texto: string) => `↑ ${texto}`;
+
 // Indicador: etiqueta, cifra grande y detalle. La tendencia ("↑ 7.7 %") va en
 // verde delante del detalle y el avance, si lo hay, en una barra debajo.
 export function Cifra({
@@ -179,7 +182,8 @@ export function BarrasMensuales({ meses }: { meses: MesRecaudacion[] }) {
               <strong>{formatearNumero(mes.millones)}</strong>
               <span
                 className={`barras-v-barra ${mes.vencimientoPredial ? 'primario' : 'secundario'}`}
-                style={{ height: `${(mes.millones / tope) * 100}%` }}
+                // La barra más alta deja arriba el espacio de su cifra.
+                style={{ height: `calc((100% - var(--p-bar-chart-top)) * ${mes.millones / tope})` }}
                 aria-hidden="true"
               />
             </li>
