@@ -72,6 +72,8 @@ export const spacing = {
 } as const;
 
 export const radius = {
+  // Muestra de color de la leyenda de los gráficos del panel.
+  legend: 2,
   // Esquina de las barras de gráficos y de la burbuja junto a quien la envía.
   sm: 4,
   badge: 6,
@@ -245,6 +247,45 @@ export const panelSizes = {
   // Mapa "Vista del vecino" de Obras publicadas (web-06).
   neighborMapWidth: 380,
   neighborMapHeight: 320,
+  // Marca y usuario de la barra lateral: relleno arriba y abajo de la marca, y sobre el usuario.
+  sidebarBrandTop: 2,
+  sidebarBrandBottom: 18,
+  sidebarFooterTop: 14,
+  // Columna del detalle del reclamo (web-05) y de la columna de avance de obras (web-06).
+  detailColumn: 400,
+  progressColumn: 170,
+  // Tablas: celdas, encabezado y relleno de la tarjeta que solo lleva una tabla.
+  tableCellX: 12,
+  tableCellY: 12,
+  tableHeadY: 10,
+  tableCardX: 8,
+  tableCardY: 6,
+  // Barras verticales: alto total, espacio para la cifra, separación y ancho máximo.
+  barChartHeight: 170,
+  barChartTop: 22,
+  barGap: 14,
+  barMaxWidth: 72,
+  // Barras horizontales: riel, alto de fila, ancho del nombre y de la cifra.
+  hBarTrack: 10,
+  hBarRowSm: 30,
+  hBarRowMd: 36,
+  hBarRowLg: 38,
+  hBarLabelSm: 120,
+  hBarLabelMd: 140,
+  hBarLabelLg: 160,
+  hBarLabelXl: 170,
+  hBarValueSm: 48,
+  hBarValueMd: 56,
+  hBarValueLg: 70,
+  hBarValueXl: 80,
+  // Ingreso (web-01): relleno y separación de la tarjeta, y separación de cada campo.
+  loginCardPadding: 28,
+  loginCardGap: 18,
+  fieldGap: 6,
+  // Separaciones internas: ícono y texto de notas, escalones y pasos del incidente (10);
+  // celdas del ciclo, descripción del reclamo y alerta activa (14).
+  innerGap: 10,
+  cellX: 14,
 } as const;
 
 // Textos del panel web, todos en Inter.
@@ -271,6 +312,17 @@ export const panelTypography = {
     letterSpacing: 0.66,
     textTransform: 'uppercase',
   },
+  // "Almira" en el ingreso, títulos de 18 px (ingreso y detalle del reclamo) y filas de 14 px 500.
+  loginBrand: { fontSize: 22, fontWeight: '700', lineHeight: 28, letterSpacing: -0.22 },
+  heading: { fontSize: 18, fontWeight: '600', lineHeight: 24 },
+  rowTitle: { fontSize: 14, fontWeight: '500', lineHeight: 20 },
+  // Título de los principios de Datos y accesos (web-09).
+  principleTitle: { fontSize: 16, fontWeight: '500', lineHeight: 24 },
+  // Rótulos "1 · RECUERDA" del ciclo y de la ruta del incidente.
+  label: { fontSize: 12, fontWeight: '600', lineHeight: 16, letterSpacing: 0.24 },
+  // Campo y botón del ingreso, con las medidas de la app.
+  input: { fontSize: 16, fontWeight: '400', lineHeight: 24 },
+  buttonLg: { fontSize: 16, fontWeight: '600', lineHeight: 20 },
 } as const satisfies Record<string, EstiloTexto>;
 
 export const tokens = {
