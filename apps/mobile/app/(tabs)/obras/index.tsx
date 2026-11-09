@@ -45,8 +45,12 @@ export default function MapaDeObras() {
   const posiciones = useRef<Record<string, number>>({});
   const distrito = nombreDistrito(municipalidad);
 
+  // Como en la maqueta 19: primero las obras en ejecución y después las concluidas.
   const visibles = useMemo(
-    () => (filtro === 'todas' ? obras : obras.filter((obra) => obra.estado === filtro)),
+    () =>
+      (filtro === 'todas' ? obras : obras.filter((obra) => obra.estado === filtro))
+        .slice()
+        .sort((a, b) => Number(a.estado !== 'en_ejecucion') - Number(b.estado !== 'en_ejecucion')),
     [obras, filtro],
   );
 

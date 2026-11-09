@@ -2,7 +2,7 @@
 
 Almira permite a vecinos de distintas municipalidades de Lima pagar tributos y reclamar con evidencia. Almira es la marca fija; la municipalidad es un dato que el vecino elige.
 
-**Estado actual:** esqueleto con datos de ejemplo. Las apps todavía no se conectan a Supabase: no hay autenticación real, pasarela de pago, captura de fotos ni envío real de avisos.
+**Estado actual:** prototipo con datos de ejemplo. La app de vecinos autentica con Supabase Auth (Google, correo y celular con código SMS) si tiene las variables de entorno; si no, simula el ingreso. Los datos que se ven siguen siendo de ejemplo: no se leen tablas de Supabase, no hay pasarela de pago, la foto del reclamo no se sube y solo los recordatorios por SMS tienen envío real (Edge Function con Twilio). El panel web no tiene autenticación real.
 
 ## Estructura
 
@@ -49,18 +49,26 @@ Las apps importan `@almira/shared` directamente desde su código TypeScript, sin
 
 Flujo de ingreso:
 
-- Con DNI: Entrada, Ingresa a tu cuenta, Ingresa el código, Elige tu municipalidad, Tus datos tus reglas, Inicio.
-- Con Google: Entrada, Ingresa a tu cuenta, Vincula tu DNI, Ingresa el código, Elige tu municipalidad, Tus datos tus reglas, Inicio. Vincula tu DNI solo se abre después de Google; si se llega de otra forma, vuelve al ingreso.
-- Desde la entrada, "No tengo cuenta ni smartphone propio" lleva a sin smartphone.
+- La app abre en Ingresa a tu cuenta (`app/index.tsx` redirige a `/ingreso`).
+- Con Google o correo: Ingresa a tu cuenta, Vincula tu DNI, Ingresa el código, Elige tu municipalidad, Tus datos tus reglas, Inicio.
+- Con celular: Ingresa a tu cuenta (ahí se pide y verifica el código SMS), Elige tu municipalidad, Tus datos tus reglas, Inicio.
+- Nadie llega a Inicio sin aceptar el consentimiento (Ley N.° 29733). `app/_layout.tsx` pone las pestañas y las demás pantallas de la app dentro de `Stack.Protected` con `consentimientoAceptado`; si se abre una de ellas sin haberlo aceptado, vuelve al ingreso. El ingreso, Privacidad y mis datos y Sin smartphone quedan abiertos.
+- Vincula tu DNI, Ingresa el código y Elige tu municipalidad vuelven al ingreso si el vecino no se autenticó.
 - Al aceptar el consentimiento se cierran las pantallas de ingreso: "volver" ya no regresa a ellas.
+- En el ingreso, "No tengo cuenta ni smartphone propio" lleva a Sin smartphone, que se abre sin sesión; su flecha vuelve al ingreso. También se abre desde Atención humana y Mi perfil.
+- Entrada (01) sigue en `app/(auth)/entrada.tsx`, pero ya no se abre al iniciar.
 
-El ingreso es simulado: no se envía ningún SMS ni se guarda nada. El documento viene lleno con el DNI de ejemplo de Rosa y acepta de 8 a 12 letras o números (`documentoValido`). El código viene lleno con `482175` y sirve cualquier código de 6 dígitos (`codigoValido`). "Reenviar código" solo avisa que el reenvío es simulado y "Cambiar DNI" vuelve a la pantalla donde se escribió el documento.
+`src/auth.tsx` usa Supabase Auth: `signInWithOAuth` con Google (en el teléfono, con `expo-web-browser`), `signInWithPassword` y `signUp` con correo, `signInWithOtp` y `verifyOtp` con celular (+51), y `signOut` al cerrar sesión. La sesión se guarda con AsyncStorage. Al aparecer la sesión, el ingreso sigue el recorrido de `irTrasIngreso` (`src/recorrido.ts`), que elige el paso según el proveedor de la cuenta (`google`, `email` o `phone`).
 
-Google también es simulado. `iniciarConGoogle()` en `src/sesion.tsx` es el único punto donde se conectará `supabase.auth.signInWithOAuth({ provider: 'google' })`; hoy devuelve la cuenta de ejemplo de Rosa sin abrir Google. La sesión guarda en memoria cómo entró el vecino (`metodoIngreso`: `'google'` o `'dni'`).
+Al aceptar el consentimiento, `src/sesion.tsx` guarda en `user_metadata.almira` de la cuenta la municipalidad elegida, los permisos y la fecha (`DatosIngreso`), sin teléfono ni DNI. Si la cuenta ya lo tiene, el siguiente ingreso pasa directo a Inicio. Los cambios de municipalidad (desde Mi perfil) y de permisos (desde Privacidad y mis datos) actualizan esos datos. Si entra otra cuenta, no hereda lo elegido por la anterior.
+
+La vinculación del DNI y el SMS al celular del padrón (pantallas 02c y 02b) siguen simulados: no se consulta ningún padrón ni se envía ese SMS. El documento viene lleno con el DNI de ejemplo de Rosa y acepta de 8 a 12 letras o números (`documentoValido`). El código viene lleno con `482175` y sirve cualquier código de 6 dígitos (`codigoValido`). "Reenviar código" solo avisa que el reenvío es simulado y "Cambiar DNI" vuelve a Vincula tu DNI.
+
+Sin `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY` (`apps/mobile/.env.local`, ver `.env.example`), la app sigue funcionando con los datos de ejemplo: Google, correo y celular se simulan (no se abre Google ni se envía nada; el código de celular viene lleno con `482175`), siguen el mismo recorrido y todo vive en memoria hasta cerrar la app. La pantalla lo dice en la nota "Datos de ejemplo…".
 
 Elige tu municipalidad muestra las municipalidades activas tal como están en los datos (`municipalidades` de `datos-ejemplo.ts`). El buscador y los chips de zona solo aparecen si hay más de 5. La elegida se guarda en la sesión al tocar "Continuar". Desde Mi perfil, "Mi municipalidad" la abre con `modo=cambio`: sin "Paso 2 de 3" ni la nota, con el botón "Guardar", y vuelve al perfil. Solo cambia la municipalidad elegida; no cierra la sesión ni borra los consentimientos, reclamos o pagos en memoria.
 
-`src/sesion.tsx` guarda la municipalidad elegida en memoria y filtra todos los datos por ella.
+`src/sesion.tsx` guarda la municipalidad elegida (también en la cuenta, si hay Supabase) y filtra todos los datos por ella.
 
 Las pestañas son Inicio, Pagar, Reclamos, Obras y Asistente, en ese orden. Pagar conserva la ruta `/cuenta`. Inicio ya no tiene accesos: Recordatorios se abre con la campana de la barra superior y Mi perfil con el avatar.
 
@@ -74,7 +82,7 @@ Reclamos: Nuevo reclamo (16) toma la foto con la cámara (`expo-image-picker`) y
 
 Obras: el mapa es real (ver «Mapa de obras» más abajo). La pantalla 19 filtra con los chips Todas, En ejecución y Concluidas; al tocar un marcador se resalta su tarjeta y la lista baja hasta ella. Con `/obras?obra=<id>` la obra llega seleccionada y centrada: así vuelven el ícono de mapa y "Ver en el mapa" del detalle (20), que solo aparecen si la obra tiene ubicación. El botón de recentrar vuelve al encuadre de las obras; no usa el GPS. El detalle muestra una imagen ilustrativa porque no hay fotos publicadas.
 
-Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGrande.tsx`) agranda en memoria todos los textos de `Texto`. Cerrar sesión cierra la sesión de Supabase, si está configurado, y vuelve al ingreso. Privacidad y mis datos muestra y cambia los permisos que guardó el consentimiento; las solicitudes ARCO son simuladas. Sin smartphone usa un número SMS y un horario de ejemplo (`SMS_NUMERO_EJEMPLO`, `HORARIO_MODULO_EJEMPLO`) y la reserva de turno es simulada.
+Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGrande.tsx`) agranda en memoria todos los textos de `Texto`. Cerrar sesión vuelve al ingreso, cierra la sesión de Supabase (`signOut`), si está configurado, y olvida en memoria el método de ingreso y el consentimiento. Privacidad y mis datos muestra y cambia los permisos que guardó el consentimiento; las solicitudes ARCO son simuladas. Sin smartphone usa un número SMS y un horario de ejemplo (`SMS_NUMERO_EJEMPLO`, `HORARIO_MODULO_EJEMPLO`) y la reserva de turno es simulada.
 
 Recordatorios vive dentro de la pestaña Inicio; el detalle del aviso y "Cómo llegan los avisos" se abren encima de las pestañas. Los títulos y mensajes de los avisos salen de `packages/shared/src/avisos.ts` con los datos de la deuda y el `nombreCorto` de la obra (si la obra no lo tiene, el mensaje no la menciona). En "¿Por dónde te avisamos?" los canales van con interruptores y se pueden prender varios. Se guardan en memoria por municipalidad, empiezan con el canal preferido del vecino y siempre queda al menos uno (`alternarCanal` en `packages/shared/src/avisos.ts`). En la base sigue habiendo un solo `canal_preferido`; la lista de canales todavía no se guarda. Los mensajes de la pantalla 11 son ejemplos: no se envía nada.
 
@@ -146,7 +154,7 @@ El mapa es OpenStreetMap dibujado con Leaflet, sin API key (`docs/design/turques
 - El centro de cada distrito vive en `CENTROS_MAPA_EJEMPLO` (`centroMapaDe`); la base no tiene esa columna. Una municipalidad sin centro usa el de Lima.
 - La atribución siempre se ve, sin el prefijo de Leaflet.
 
-Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo son aproximadas y deben verificarse en openstreetmap.org antes de presentar. El minimapa del reclamo usa el GPS solo para mostrar el punto; ese punto todavía no se guarda.
+Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo se verificaron en OpenStreetMap (ver `MAPA.md`); en las obras por cuadras marcan el medio del tramo. El minimapa del reclamo usa el GPS solo para mostrar el punto; ese punto todavía no se guarda.
 
 ## Recordatorios y SMS
 
@@ -155,6 +163,7 @@ Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven par
 - WhatsApp y la app no tienen proveedor conectado: sus recordatorios se quedan en `programado`, no se marcan como enviados.
 - Un recordatorio sin teléfono peruano válido pasa a `fallido`.
 - Los logs no incluyen teléfonos ni mensajes.
+- El monto del SMS usa `formatearSoles` de `supabase/functions/_shared/soles.ts`, una copia de `packages/shared/src/soles.ts` que debe coincidir con él (las Edge Functions no importan desde `packages/`).
 - Falta el cron que invoque la función.
 
 El ingreso con celular usa Phone Auth de Supabase (Authentication → Providers → Phone, con Twilio): `signInWithOtp` y `verifyOtp` en `src/auth.tsx`.

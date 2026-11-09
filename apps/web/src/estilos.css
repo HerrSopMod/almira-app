@@ -348,6 +348,18 @@ button {
   min-width: 0;
 }
 
+.lateral-marca .logo {
+  width: var(--p-logo);
+  height: var(--p-logo);
+  border-radius: var(--r-nav-item);
+}
+
+.lateral-pie .avatar {
+  width: var(--p-avatar);
+  height: var(--p-avatar);
+  font: var(--t-small-strong);
+}
+
 .lateral-marca strong {
   font: var(--t-brand);
 }
@@ -422,7 +434,7 @@ button {
   flex-direction: column;
   gap: var(--p-gap);
   min-width: 0;
-  padding: var(--p-content-y) var(--p-content-x) var(--s-xxl);
+  padding: var(--p-content-y) var(--p-content-x);
 }
 
 /* Encabezado de página */
@@ -442,6 +454,10 @@ button {
 .subtitulo {
   color: var(--c-text-secondary);
   font: var(--t-subtitle);
+}
+
+.encabezado .subtitulo {
+  font: var(--t-page-subtitle);
 }
 
 .encabezado-extra {
@@ -523,7 +539,7 @@ button {
 .cifra {
   display: flex;
   flex-direction: column;
-  gap: var(--s-block-dense);
+  gap: var(--p-card-gap);
   min-width: 0;
   padding: var(--p-card-padding-y) var(--p-card-padding-x);
   border: var(--z-border-width) solid var(--c-border);
@@ -531,9 +547,19 @@ button {
   background: var(--c-surface);
 }
 
+.cifra {
+  gap: var(--p-kpi-gap);
+  padding-top: var(--p-kpi-padding-y);
+  padding-bottom: var(--p-kpi-padding-y);
+}
+
+.cifra .progreso {
+  height: var(--p-kpi-progress);
+}
+
 .cifra-etiqueta {
   color: var(--c-text-secondary);
-  font: var(--t-body-medium);
+  font: var(--t-kpi-label);
 }
 
 .cifra-valor {
@@ -552,10 +578,13 @@ button {
   font-weight: 600;
 }
 
-.tarjeta-encabezado {
+/* Título y subtítulo en la misma línea; si no caben, el subtítulo pasa abajo. */
+.tarjeta-encabezado,
+.encabezado-titulo {
   display: flex;
-  flex-direction: column;
-  gap: var(--s-xs);
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--s-sm);
 }
 
 .tarjeta-encabezado h2 {
@@ -563,7 +592,7 @@ button {
 }
 
 .tarjeta-encabezado .subtitulo {
-  font: var(--t-body);
+  font: var(--t-small);
 }
 
 .tarjeta-tabla {
@@ -589,7 +618,7 @@ button {
 .barras-v {
   display: flex;
   flex-direction: column;
-  gap: var(--s-block-dense);
+  gap: var(--p-card-gap);
 }
 
 .barras-v ol {
@@ -631,7 +660,7 @@ button {
 }
 
 .barras-v-meses {
-  margin-top: var(--s-sm);
+  margin-top: var(--s-xs);
   color: var(--c-text-secondary);
   font: var(--t-small);
 }
@@ -671,40 +700,33 @@ button {
   grid-template-columns: var(--etiqueta) minmax(0, 1fr) var(--cifra);
   align-items: center;
   gap: var(--s-block-dense);
-  height: var(--alto);
+  height: var(--p-h-bar-row);
   font: var(--t-body);
 }
 
 .barras-h-normal {
   --etiqueta: var(--p-h-bar-label-md);
   --cifra: var(--p-h-bar-value-sm);
-  --alto: var(--p-h-bar-row-sm);
 }
 
 .barras-h-zona {
   --etiqueta: var(--p-h-bar-label-md);
   --cifra: var(--p-h-bar-value-xl);
-  --alto: var(--p-h-bar-row-lg);
-  padding-top: var(--p-field-gap);
 }
 
 .barras-h-prueba {
   --etiqueta: var(--p-h-bar-label-sm);
   --cifra: var(--p-h-bar-value-sm);
-  --alto: var(--p-h-bar-row-md);
-  padding-top: var(--s-xs);
 }
 
 .barras-h-canal {
   --etiqueta: var(--p-h-bar-label-lg);
   --cifra: var(--p-h-bar-value-lg);
-  --alto: var(--p-h-bar-row-sm);
 }
 
 .barras-h-auditoria {
   --etiqueta: var(--p-h-bar-label-xl);
   --cifra: var(--p-h-bar-value-md);
-  --alto: var(--p-h-bar-row-sm);
 }
 
 .barras-h-riel {
@@ -731,10 +753,6 @@ button {
   gap: var(--s-xs);
 }
 
-.tarjeta-decision .tarjeta-encabezado {
-  margin-bottom: var(--s-xs);
-}
-
 .decisiones li + li {
   border-top: var(--z-border-width) solid var(--c-border);
 }
@@ -743,9 +761,15 @@ button {
   display: flex;
   align-items: center;
   gap: var(--s-block-dense);
-  padding: var(--s-block-dense) 0;
+  padding: var(--p-decision-row-y) 0;
   color: var(--c-text);
   text-decoration: none;
+}
+
+.decisiones .icono-cuadro {
+  width: var(--p-decision-icon);
+  height: var(--p-decision-icon);
+  border-radius: var(--r-nav-item);
 }
 
 .decisiones a > .icono:last-child {
@@ -801,8 +825,8 @@ button {
 .ciclo li {
   display: flex;
   flex-direction: column;
-  gap: var(--s-xs);
-  padding: var(--s-block-dense) var(--p-cell-x);
+  gap: var(--p-tight-gap);
+  padding: var(--p-cell-y) var(--p-cell-x);
 }
 
 .ciclo li + li {
@@ -818,7 +842,7 @@ button {
 }
 
 .ciclo span {
-  font: var(--t-row-title);
+  font: var(--t-body-medium);
   font-variant-numeric: tabular-nums;
 }
 
@@ -831,8 +855,8 @@ button {
 .ruta li {
   display: flex;
   flex-direction: column;
-  gap: var(--s-xs);
-  padding: var(--s-block-dense) var(--p-cell-x);
+  gap: var(--p-tight-gap);
+  padding: var(--p-cell-y) var(--p-cell-x);
   border: var(--z-border-width) solid var(--c-border);
   border-radius: var(--r-md);
   background: var(--c-surface);

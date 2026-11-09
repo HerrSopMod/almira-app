@@ -10,6 +10,7 @@
 // recordatorios se quedan "programado" en vez de marcarse como enviados sin salir nada.
 // Nunca se escriben teléfonos ni mensajes en los logs.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { formatearSoles } from '../_shared/soles.ts';
 
 type Fila = {
   id: string;
@@ -30,13 +31,11 @@ function normalizarTelefono(telefono: string | null): string | null {
   return null;
 }
 
-const soles = (monto: number) => `S/ ${monto.toFixed(2)}`;
-
 function mensaje(fila: Fila): string {
   const municipalidad = fila.municipalidades?.nombre ?? 'Almira';
   const deuda = fila.deudas;
   if (!deuda) return `Almira: tienes un aviso de tu ${municipalidad}. Revisa la app.`;
-  const detalle = `${deuda.concepto} por ${soles(deuda.total)}`;
+  const detalle = `${deuda.concepto} por ${formatearSoles(deuda.total)}`;
   if (fila.tipo === 'preventivo') {
     return `Almira: tu ${detalle} vence el ${deuda.vencimiento}. Págalo desde la app. ${municipalidad}.`;
   }

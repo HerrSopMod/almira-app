@@ -20,7 +20,8 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 - El aspecto lo manda `docs/design/turquesa`: lee `LEEME.md` y sigue la imagen que indica `PANTALLAS.md` para cada pantalla. Los textos y recorridos salen de `docs/design/prototipo/TEXTOS.md`, con los cambios de `PANTALLAS.md`. De Stitch se toma el estilo, nunca sus textos.
 - Usa los tokens de `@almira/shared`. No escribas colores ni medidas sueltas.
 - Fondo `#FFFFFF`, color principal `#0B7F86` y texto `#0F2A2E`. Solo Inter, con cifras tabulares en montos.
-- Botones de 52 px y ancho completo, con márgenes de 20 px. No los pongas dentro de tarjetas.
+- App móvil: botones de 52 px y ancho completo, con márgenes de 20 px. No los pongas dentro de tarjetas.
+- Panel web: se permiten botones pequeños dentro de tablas y tarjetas, como en las maquetas `docs/design/turquesa/web` (medidas en `LEEME.md` → Panel web).
 - Máximo un bloque `Destacado` por pantalla. Los colores de estado solo van en insignias y estados.
 - Montos con `formatearSoles`, alineados a la derecha en filas y tablas.
 - El mapa de obras es OpenStreetMap con Leaflet (`MAPA.md`) y siempre muestra la atribución.

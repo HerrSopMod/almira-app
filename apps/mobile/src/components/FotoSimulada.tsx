@@ -46,7 +46,7 @@ function Dibujo({ tipo }: { tipo: TipoReclamo | 'obra' }) {
   if (tipo === 'alumbrado') return <Poste />;
   return (
     <View style={estilos.generico}>
-      <MaterialIcons name={ICONO_TIPO[tipo]} size={56} color={colors.textSecondary} />
+      <MaterialIcons name={ICONO_TIPO[tipo]} size={sizes.iconDrawing} color={colors.textSecondary} />
     </View>
   );
 }

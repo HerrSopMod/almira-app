@@ -8,20 +8,21 @@ import { Interruptor } from '@/components/Interruptor';
 import { Menu } from '@/components/Menu';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
-import { useDatosMunicipales } from '@/sesion';
-import { useAuth } from '@/auth';
+import { useDatosMunicipales, useSesion } from '@/sesion';
 import { useTextoGrande } from '@/textoGrande';
 
 // Pantalla 21 (maqueta 21-mi-perfil), dentro de la pestaña Inicio.
 export default function Perfil() {
   const { municipalidad, vecino, predios } = useDatosMunicipales();
   const textoGrande = useTextoGrande();
-  const { cerrarSesion: cerrarSesionReal } = useAuth();
+  const { cerrarSesion: cerrarSesionCuenta } = useSesion();
 
   const cerrarSesion = () => {
-    void cerrarSesionReal();
     if (router.canDismiss()) router.dismissAll();
     router.replace('/ingreso');
+    // Cierra la sesión de Supabase (signOut), si está configurado, y olvida el ingreso.
+    // Va después de navegar: al olvidar el consentimiento se cierran las pantallas protegidas.
+    void cerrarSesionCuenta();
   };
 
   return (

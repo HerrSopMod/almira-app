@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import solesFunciones from '../../../supabase/functions/_shared/soles.ts?raw';
+import solesCompartido from './soles.ts?raw';
 import {
   CENTRO_MAPA_LIMA,
   coloresMapa,
@@ -488,7 +490,7 @@ describe('panel municipal', () => {
 
   it('usa las medidas del panel web del prototipo', () => {
     expect(panelSizes.sidebar).toBe(248);
-    expect(panelSizes.navItem).toBe(40);
+    expect(panelSizes.navItem).toBe(36);
   });
 });
 
@@ -719,7 +721,7 @@ describe('mapa de obras', () => {
       interactivo: true,
       colores,
       centroPorDefecto: centroLince,
-      ubicacion: { latitud: -12.088, longitud: -77.033 },
+      ubicacion: { latitud: -12.0844, longitud: -77.0315 },
     });
     const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]!);
     expect(scripts).toHaveLength(2);
@@ -734,5 +736,12 @@ describe('mapa de obras', () => {
     expect(leerMensajeDelMapa({ tipo: 'obra', id: 3 })).toBeNull();
     expect(leerMensajeDelMapa('no es json')).toBeNull();
     expect(leerMensajeDelMapa(null)).toBeNull();
+  });
+});
+
+describe('copia de soles.ts en las Edge Functions', () => {
+  it('coincide con packages/shared/src/soles.ts, salvo el comentario inicial', () => {
+    const sinComentario = (texto: string) => texto.replace(/^(\/\/[^\n]*\n)+/, '');
+    expect(sinComentario(solesFunciones)).toBe(sinComentario(solesCompartido));
   });
 });

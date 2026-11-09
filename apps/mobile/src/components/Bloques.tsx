@@ -268,9 +268,13 @@ export function Rotulo({ texto }: { texto: string }) {
   );
 }
 
-// Ya no muestra el aviso de prototipo; queda como componente vacío para no tocar las 20 pantallas que lo usan.
+// Los datos que muestra la app siguen siendo de ejemplo.
 export function PiePrototipo() {
-  return null;
+  return (
+    <Texto variante="caption" color={colors.textSecondary} alineacion="center">
+      Prototipo académico · Datos ficticios
+    </Texto>
+  );
 }
 
 export function Vacio({ texto }: { texto: string }) {
