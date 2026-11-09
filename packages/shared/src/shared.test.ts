@@ -527,7 +527,7 @@ describe('panel: atención, alertas y accesos', () => {
 
   it('dispara una alerta por cada umbral superado', () => {
     const superados = panel.umbrales.filter(superaUmbral).map((umbral) => umbral.evento);
-    expect(superados).toEqual(['Respuestas graves de la IA']);
+    expect(superados).toEqual(['Respuestas graves del asistente']);
     expect(panel.alertasActivas).toHaveLength(superados.length);
   });
 
@@ -539,6 +539,24 @@ describe('panel: atención, alertas y accesos', () => {
   it('deja la cola por debajo del umbral de alerta', () => {
     const enCola = panel.casos.filter((caso) => caso.estado === 'en_cola').length;
     expect(enCola).toBeLessThan(panel.atencion.umbralCola);
+  });
+
+  it('marca en rojo solo la espera larga y un solo paso del incidente', () => {
+    const largas = panel.casos.filter(
+      (caso) => (caso.esperaMinutos ?? 0) >= panel.atencion.esperaLargaMinutos,
+    );
+    expect(largas.map((caso) => caso.codigo)).toEqual(['H-209']);
+    expect(panel.rutaIncidente.filter((paso) => paso.alerta)).toHaveLength(1);
+  });
+
+  it('llama "Asistente" al asistente, sin "IA"', () => {
+    const textos = [
+      ...panel.casos.map((caso) => caso.origen),
+      ...panel.umbrales.map((umbral) => umbral.evento),
+      ...panel.auditoria.map((fila) => fila.nombre),
+      ...panel.registroAccesos.map((acceso) => acceso.accion),
+    ];
+    expect(textos.filter((texto) => /\bIA\b/.test(texto))).toEqual([]);
   });
 });
 

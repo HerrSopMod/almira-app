@@ -7,6 +7,8 @@ export const PERSONAL_PANEL_EJEMPLO = {
   usuario: 'responsable.rentas',
   cargo: 'Responsable municipal',
   area: 'Rentas',
+  // Iniciales del avatar: el cargo y el área ("Responsable" de "Rentas").
+  iniciales: 'RR',
 } as const;
 
 export interface MesRecaudacion {
@@ -27,7 +29,7 @@ export interface VariantePrueba {
   pagoPct: number;
 }
 
-export type OrigenCaso = 'Asistente IA' | 'SMS' | 'WhatsApp';
+export type OrigenCaso = 'Asistente' | 'SMS' | 'WhatsApp';
 export type EstadoCaso = 'en_cola' | 'en_atencion' | 'atendido';
 
 // Caso de atención humana (web-07). No lleva datos personales del vecino.
@@ -64,6 +66,8 @@ export interface Control {
 export interface PasoTexto {
   titulo: string;
   texto: string;
+  // Paso donde la alerta supera el umbral (web-08): va con borde rojo.
+  alerta?: boolean;
 }
 
 export type UnidadUmbral = 'evento' | '%' | 'por semana';
@@ -125,6 +129,8 @@ export interface PanelEjemplo {
   casos: CasoAtencion[];
   atencion: {
     umbralCola: number;
+    // Minutos de espera desde los que el caso se marca en rojo (web-07).
+    esperaLargaMinutos: number;
     derivadosPct: number;
     conversaciones: number;
     atencionesModulo: number;
@@ -235,7 +241,7 @@ const LINCE: PanelEjemplo = {
     {
       codigo: 'H-211',
       motivo: 'Fraccionamiento con deuda en dos predios',
-      origen: 'Asistente IA',
+      origen: 'Asistente',
       area: 'Rentas',
       esperaMinutos: 12,
       estado: 'en_cola',
@@ -243,7 +249,7 @@ const LINCE: PanelEjemplo = {
     {
       codigo: 'H-212',
       motivo: 'Vecino pide revisar multa ya reclamada',
-      origen: 'Asistente IA',
+      origen: 'Asistente',
       area: 'Fiscalización',
       esperaMinutos: 25,
       estado: 'en_cola',
@@ -267,6 +273,7 @@ const LINCE: PanelEjemplo = {
   ],
   atencion: {
     umbralCola: 10,
+    esperaLargaMinutos: 30,
     derivadosPct: 7.4,
     conversaciones: 3120,
     atencionesModulo: 412,
@@ -278,18 +285,18 @@ const LINCE: PanelEjemplo = {
   rutaIncidente: [
     { titulo: 'Detección', texto: 'Muestreo: 3 respuestas erróneas' },
     { titulo: 'S3*', texto: 'Valida la gravedad' },
-    { titulo: 'Canal algedónico', texto: 'Supera el umbral' },
+    { titulo: 'Canal algedónico', texto: 'Supera el umbral', alerta: true },
     { titulo: 'S5', texto: 'Comité y municipalidad' },
     { titulo: 'Corrección', texto: 'Actualizar la base de conocimiento' },
   ],
   umbrales: [
     { evento: 'Fuga de datos', umbral: 1, hoy: 0, unidad: 'evento' },
     { evento: 'Pagos erróneos', umbral: 0.5, hoy: 0.1, unidad: '%' },
-    { evento: 'Respuestas graves de la IA', umbral: 2, hoy: 3, unidad: 'por semana' },
+    { evento: 'Respuestas graves del asistente', umbral: 2, hoy: 3, unidad: 'por semana' },
     { evento: 'Fallas masivas de envío', umbral: 5, hoy: 1.1, unidad: '%' },
   ],
   auditoria: [
-    { nombre: 'Respuestas IA', porcentaje: 98.5 },
+    { nombre: 'Respuestas del asistente', porcentaje: 98.5 },
     { nombre: 'Clasificación', porcentaje: 96.2 },
     { nombre: 'Conciliación', porcentaje: 99.9 },
     { nombre: 'Mensajes A/B', porcentaje: 100 },
@@ -297,7 +304,7 @@ const LINCE: PanelEjemplo = {
   registroAccesos: [
     { hora: '09:32', rol: 'Rentas', accion: 'Consultó el reclamo R-01851' },
     { hora: '09:18', rol: 'Obras', accion: 'Actualizó el avance de una obra' },
-    { hora: '08:57', rol: 'Auditor S3*', accion: 'Revisó muestra de respuestas de IA' },
+    { hora: '08:57', rol: 'Auditor S3*', accion: 'Revisó muestra de respuestas del asistente' },
     { hora: '08:40', rol: 'Atención', accion: 'Tomó el caso H-205' },
   ],
   solicitudesArco: [

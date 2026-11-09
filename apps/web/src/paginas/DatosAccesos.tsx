@@ -1,7 +1,7 @@
 import { formatearFechaCorta, nombreDistrito, type EstadoArco } from '@almira/shared';
-import { Chip, Encabezado, NotaEjemplo, Tabla, Tarjeta, type TonoChip } from '../componentes';
+import { CajaIcono, Chip, Encabezado, NotaEjemplo, Tabla, Tarjeta, type TonoChip } from '../componentes';
 import { useSesion } from '../estado';
-import { Icono, type NombreIcono } from '../iconos';
+import type { NombreIcono } from '../iconos';
 
 const ESTADO_ARCO: Record<EstadoArco, { texto: string; tono: TonoChip }> = {
   en_plazo: { texto: 'En plazo', tono: 'info' },
@@ -16,16 +16,18 @@ export function DatosAccesos() {
   const { sesion } = useSesion();
   const { panel } = sesion;
 
-  const principios: { icono: NombreIcono; titulo: string; texto: string }[] = [
+  const principios: { icono: NombreIcono; titulo: string; previsto?: boolean; texto: string }[] = [
     {
       icono: 'candado',
       titulo: 'Datos aislados',
       texto: `${nombreDistrito(sesion.municipalidad)} nunca ve datos de otra municipalidad. Lo común es la plataforma.`,
     },
     {
-      icono: 'personas',
+      icono: 'credencial',
       titulo: 'Acceso por rol',
-      texto: 'Previsto: cada funcionario verá solo lo que su área necesita.',
+      // El panel todavía no filtra por rol: por eso va como "Previsto".
+      previsto: true,
+      texto: 'Cada funcionario verá solo lo que su área necesita.',
     },
     {
       icono: 'prohibido',
@@ -44,11 +46,12 @@ export function DatosAccesos() {
       <div className="cifras cifras-3">
         {principios.map((principio) => (
           <section key={principio.titulo} className="tarjeta principio">
-            <span className="icono-cuadro">
-              <Icono nombre={principio.icono} />
-            </span>
+            <CajaIcono icono={principio.icono} grande />
             <div>
-              <h2>{principio.titulo}</h2>
+              <h2>
+                {principio.titulo}
+                {principio.previsto && <Chip tono="neutral">Previsto</Chip>}
+              </h2>
               <p>{principio.texto}</p>
             </div>
           </section>
@@ -60,7 +63,7 @@ export function DatosAccesos() {
           <Tabla columnas={[{ titulo: 'Hora' }, { titulo: 'Rol' }, { titulo: 'Acción' }]}>
             {panel.registroAccesos.map((acceso) => (
               <tr key={`${acceso.hora}-${acceso.accion}`}>
-                <td>{acceso.hora}</td>
+                <td className="num">{acceso.hora}</td>
                 <td>{acceso.rol}</td>
                 <td>{acceso.accion}</td>
               </tr>

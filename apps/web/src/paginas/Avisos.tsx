@@ -6,12 +6,13 @@ import {
 } from '@almira/shared';
 import { useState } from 'react';
 import {
-  AvisoInfo,
   BarrasHorizontales,
   Chip,
   Cifra,
   Encabezado,
+  Leyenda,
   MensajeMemoria,
+  Nota,
   Tabla,
   Tarjeta,
 } from '../componentes';
@@ -36,7 +37,7 @@ export function Avisos() {
         subtitulo={`Qué aviso funciona mejor en ${nombreDistrito(sesion.municipalidad)}`}
       />
 
-      <div className="fila fila-2">
+      <div className="fila fila-avisos">
         <Tarjeta
           titulo="Escalera de avisos"
           subtitulo={`${panel.periodo}. Pagos dentro de los ${panel.diasRespuestaAviso} días posteriores al aviso.`}
@@ -44,9 +45,9 @@ export function Avisos() {
           <Tabla
             columnas={[
               { titulo: 'Aviso' },
-              { titulo: 'Enviados' },
-              { titulo: 'Entregados' },
-              { titulo: 'Pagaron' },
+              { titulo: 'Enviados', derecha: true },
+              { titulo: 'Entregados', derecha: true },
+              { titulo: 'Pagaron', derecha: true },
             ]}
           >
             {panel.escalera.map((paso) => (
@@ -57,35 +58,44 @@ export function Avisos() {
                     {paso.nombre}
                   </span>
                 </td>
-                <td>{formatearNumero(paso.enviados)}</td>
-                <td>{formatearPorcentaje(paso.entregadosPct)}</td>
-                <td>
-                  <strong>{formatearPorcentaje(paso.pagaronPct)}</strong>
-                </td>
+                <td className="monto">{formatearNumero(paso.enviados)}</td>
+                <td className="monto">{formatearPorcentaje(paso.entregadosPct)}</td>
+                <td className="monto fuerte">{formatearPorcentaje(paso.pagaronPct)}</td>
               </tr>
             ))}
           </Tabla>
         </Tarjeta>
 
         <Tarjeta titulo={panel.pruebaAB.titulo} subtitulo={panel.pruebaAB.politica}>
+          {/* Dos series (ganadora y la otra): llevan leyenda (LEEME.md → Gráficos). */}
           <BarrasHorizontales
+            variante="prueba"
             filas={panel.pruebaAB.variantes.map((variante) => ({
               nombre: `${variante.letra} · ${variante.nombre}`,
               valor: variante.pagoPct,
               etiqueta: formatearPorcentaje(variante.pagoPct),
               tono: variante.letra === mejor?.letra ? 'primario' : 'secundario',
+              destacada: variante.letra === mejor?.letra,
             }))}
           />
-          <AvisoInfo>{panel.pruebaAB.nota}</AvisoInfo>
+          <Leyenda
+            series={[
+              { nombre: 'Variante con más pagos', tono: 'primario' },
+              { nombre: 'Otra variante', tono: 'secundario' },
+            ]}
+          />
+          <Nota>{panel.pruebaAB.nota}</Nota>
           {mejor &&
             (datos.varianteElegida ? (
               <p className="variante-elegida">
                 <Chip tono="ok">Variante {datos.varianteElegida} elegida para el próximo ciclo</Chip>
               </p>
             ) : (
-              <button type="button" className="boton boton-primario boton-bajo" onClick={() => elegir(mejor.letra)}>
-                Usar variante {mejor.letra} en el próximo ciclo
-              </button>
+              <div>
+                <button type="button" className="boton boton-primario" onClick={() => elegir(mejor.letra)}>
+                  Usar variante {mejor.letra} en el próximo ciclo
+                </button>
+              </div>
             ))}
           <MensajeMemoria texto={mensaje} />
         </Tarjeta>
@@ -107,6 +117,7 @@ export function Avisos() {
         subtitulo="Avisos entregados por canal. El SMS cubre a vecinos sin smartphone."
       >
         <BarrasHorizontales
+          variante="canal"
           filas={panel.canales.map((canal) => ({ nombre: canal.nombre, valor: canal.cantidad }))}
         />
       </Tarjeta>

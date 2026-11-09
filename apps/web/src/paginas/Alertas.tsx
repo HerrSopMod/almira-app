@@ -1,7 +1,7 @@
 import { formatearNumero, formatearPorcentaje, superaUmbral, type Umbral } from '@almira/shared';
 import { useState } from 'react';
 import {
-  AvisoInfo,
+  AlertaActiva,
   BarrasHorizontales,
   Chip,
   Encabezado,
@@ -42,31 +42,45 @@ export function Alertas() {
       />
 
       {panel.alertasActivas.map((alerta) => (
-        <AvisoInfo key={alerta} icono="alerta" fuerte>
+        <AlertaActiva key={alerta}>
           <strong>Alerta activa:</strong> {alerta}
-        </AvisoInfo>
+        </AlertaActiva>
       ))}
 
       <Tarjeta titulo="Ruta de un incidente" subtitulo="Cómo sube desde la unidad hasta el S5.">
-        <ol className="ciclo">
-          {panel.rutaIncidente.map((paso) => (
-            <li key={paso.titulo}>
-              <strong>{paso.titulo}</strong>
+        <ol className="ruta">
+          {panel.rutaIncidente.map((paso, indice) => (
+            <li key={paso.titulo} className={paso.alerta ? 'alerta' : undefined}>
+              <strong>
+                {indice + 1} · {paso.titulo}
+              </strong>
               <span>{paso.texto}</span>
             </li>
           ))}
         </ol>
       </Tarjeta>
 
-      <div className="fila fila-2">
+      <div className="fila fila-2 fila-arriba">
         <Tarjeta titulo="Umbrales de disparo" subtitulo="Propuestos, por calibrar en el piloto.">
-          <Tabla columnas={[{ titulo: 'Evento' }, { titulo: 'Umbral' }, { titulo: 'Hoy' }]}>
+          <Tabla
+            columnas={[
+              { titulo: 'Evento' },
+              { titulo: 'Umbral', derecha: true },
+              { titulo: 'Hoy', derecha: true },
+              { titulo: 'Estado' },
+            ]}
+          >
             {panel.umbrales.map((umbral) => (
               <tr key={umbral.evento}>
                 <td>{umbral.evento}</td>
-                <td>{textoUmbral(umbral)}</td>
+                <td className="monto">{textoUmbral(umbral)}</td>
+                <td className="monto fuerte">{textoHoy(umbral)}</td>
                 <td>
-                  <Chip tono={superaUmbral(umbral) ? 'bad' : 'ok'}>{textoHoy(umbral)}</Chip>
+                  {superaUmbral(umbral) ? (
+                    <Chip tono="bad">Supera</Chip>
+                  ) : (
+                    <Chip tono="ok">Normal</Chip>
+                  )}
                 </td>
               </tr>
             ))}
@@ -78,6 +92,7 @@ export function Alertas() {
           subtitulo={`${panel.periodo}. Muestra revisada por personas.`}
         >
           <BarrasHorizontales
+            variante="auditoria"
             maximo={100}
             filas={panel.auditoria.map((fila) => ({
               nombre: fila.nombre,

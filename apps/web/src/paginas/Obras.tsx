@@ -12,9 +12,11 @@ import {
   Encabezado,
   Interruptor,
   MensajeMemoria,
+  Nota,
   Progreso,
   Tabla,
   Tarjeta,
+  TarjetaTabla,
 } from '../componentes';
 import { diasSinActualizar, useSesion } from '../estado';
 import { Icono } from '../iconos';
@@ -66,10 +68,10 @@ export function Obras() {
       <Encabezado
         titulo="Obras publicadas"
         subtitulo="Lo que ve el vecino en el mapa de la app"
-        extra={
+        accion={
           <button
             type="button"
-            className="boton boton-primario boton-bajo"
+            className="boton boton-primario"
             onClick={() => {
               setCreando(true);
               setMensaje(null);
@@ -90,11 +92,11 @@ export function Obras() {
         />
       )}
 
-      <section className="tarjeta">
+      <TarjetaTabla>
         <Tabla
           columnas={[
             { titulo: 'Obra' },
-            { titulo: 'Avance' },
+            { titulo: 'Avance', clase: 'columna-avance' },
             { titulo: 'Presupuesto', derecha: true },
             { titulo: 'Actualizada' },
             { titulo: 'Publicada' },
@@ -105,7 +107,7 @@ export function Obras() {
             const atrasada = diasSinActualizar(obra) > frecuencia;
             const actualizada = haceDias(obra.actualizadaEn, HOY_EJEMPLO);
             return (
-              <tr key={obra.id} className="alta">
+              <tr key={obra.id}>
                 <td>
                   <span className="doble">
                     <strong>{obra.nombre}</strong>
@@ -114,7 +116,7 @@ export function Obras() {
                 </td>
                 <td>
                   <span className="avance">
-                    <Progreso porcentaje={obra.avancePct} />
+                    <Progreso porcentaje={obra.avancePct} etiqueta={`Avance de ${obra.nombre}`} ancho />
                     <strong>{formatearPorcentaje(obra.avancePct)}</strong>
                   </span>
                 </td>
@@ -127,11 +129,11 @@ export function Obras() {
                     onCambiar={() => alternarPublicada(obra)}
                   />
                 </td>
-                <td className="celda-accion">
+                <td>
                   {obra.avancePct < 100 && (
                     <button
                       type="button"
-                      className="boton boton-secundario boton-fila"
+                      className="boton boton-secundario boton-sm"
                       onClick={() => sumarAvance(obra)}
                     >
                       +{formatearPorcentaje(PASO_AVANCE)} de avance
@@ -142,7 +144,7 @@ export function Obras() {
             );
           })}
         </Tabla>
-      </section>
+      </TarjetaTabla>
 
       <div className="fila fila-obras">
         <Tarjeta titulo="Vista del vecino" subtitulo="Solo aparecen las obras publicadas.">
@@ -159,22 +161,20 @@ export function Obras() {
           </p>
         </Tarjeta>
         <Tarjeta titulo="Cómo se publica">
-          <ul className="lista-publica">
-            <li>
-              <Icono nombre="ojo" />
+          <div className="lista-publica">
+            <Nota icono="ojo">
               Solo las obras con «Publicada» activo aparecen en el mapa y la lista de la app.
-            </li>
-            <li>
-              <Icono nombre="ubicacion" />
-              Cada obra tiene una ubicación (latitud y longitud) que define su punto en el mapa.
-              Una obra sin ubicación sale en la lista, pero no en el mapa.
-            </li>
-            <li>
-              <Icono nombre="actualizar" />
+            </Nota>
+            {/* La última frase no está en la maqueta: explica por qué una obra nueva no sale en el mapa. */}
+            <Nota icono="ubicacion">
+              Cada obra tiene una ubicación (latitud y longitud) que define su punto en el mapa. Una
+              obra sin ubicación sale en la lista, pero no en el mapa.
+            </Nota>
+            <Nota icono="actualizar">
               La municipalidad decide qué obras publica y con qué detalle. La frecuencia mínima de
               actualización se acuerda con Almira: {frecuencia} días.
-            </li>
-          </ul>
+            </Nota>
+          </div>
         </Tarjeta>
       </div>
       <MensajeMemoria texto={mensaje} />
