@@ -1,4 +1,5 @@
 import {
+  centroMapaDe,
   colors,
   ETIQUETA_ESTADO_OBRA,
   formatearSoles,
@@ -17,8 +18,7 @@ import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
-// Pantalla 19 del prototipo. El mapa es un dibujo fijo; los datos son las obras
-// que la municipalidad publicó.
+// Pantalla 19 del prototipo: mapa real de OpenStreetMap con las obras publicadas.
 export default function MapaDeObras() {
   const { municipalidad, obras } = useDatosMunicipales();
 
@@ -30,7 +30,11 @@ export default function MapaDeObras() {
       encabezado={<BarraSuperior variante="raiz" titulo="Obras" />}
     >
       <View style={estilos.cabecera}>
-        <MapaObras obras={obras} />
+        <MapaObras
+          obras={obras}
+          centro={centroMapaDe(municipalidad.id)}
+          accessibilityLabel={`Mapa de obras de ${nombreDistrito(municipalidad)}`}
+        />
         <View style={estilos.hoja}>
           <View style={estilos.fila}>
             <Texto

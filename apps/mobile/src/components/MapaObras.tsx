@@ -1,141 +1,84 @@
-import { colors, radius, sizes, spacing, type Obra } from '@almira/shared';
-import { router } from 'expo-router';
-import { Pressable, StyleSheet, View, type DimensionValue } from 'react-native';
-import { Texto } from './Texto';
+import { leerMensajeDelMapa } from '@almira/shared';
+import { useEffect, useRef, useState } from 'react';
+import { Linking, View } from 'react-native';
+import { WebView } from 'react-native-webview';
+import type {
+  ShouldStartLoadRequest,
+  WebViewMessageEvent,
+  WebViewOpenWindowEvent,
+} from 'react-native-webview/lib/WebViewTypes';
+import {
+  ALTO_MAPA,
+  Cargando,
+  estilosMapa,
+  NotaErrorMapa,
+  useHtmlMapa,
+  type PropsMapa,
+} from './mapaComun';
 
-// Puestos fijos de los marcadores en el dibujo (fracciones del ancho y del alto),
-// medidos en la pantalla 19. Las obras no tienen coordenadas: se ubican en orden.
-const PUESTOS = [
-  { x: 0.3, y: 0.32 },
-  { x: 0.62, y: 0.55 },
-  { x: 0.24, y: 0.76 },
-  { x: 0.82, y: 0.2 },
-  { x: 0.5, y: 0.86 },
-];
+// OpenStreetMap exige un Referer en las teselas: el baseUrl hace que el WebView lo envíe.
+const BASE_URL = 'https://github.com/HerrSopMod/almira-app';
 
-const TERCIO = 100 / 3;
-const CELDAS = [0, 1, 2].flatMap((fila) => [0, 1, 2].map((columna) => ({ fila, columna })));
-// La manzana verde es un parque, como en el prototipo.
-const PARQUE = { fila: 1, columna: 2 };
-const porcentaje = (valor: number) => `${valor}%` as DimensionValue;
+// Mapa real de obras en el teléfono: Leaflet dentro de un WebView (MAPA.md).
+export function MapaObras(props: PropsMapa) {
+  const { seleccionadaId = null, onSeleccionar, alto = ALTO_MAPA, enTarjeta, accessibilityLabel } = props;
+  const html = useHtmlMapa(props);
+  // Los tipos de react-native-webview 14 usan P = undefined, que con TypeScript 6
+  // deja las props en never; con P = object quedan las props reales.
+  const webview = useRef<WebView<object>>(null);
+  const [estado, setEstado] = useState<'cargando' | 'listo' | 'error'>('cargando');
 
-// Mapa de la pantalla 19: es un dibujo fijo, no un mapa real.
-export function MapaObras({ obras }: { obras: Obra[] }) {
+  useEffect(() => setEstado('cargando'), [html]);
+
+  // Selección desde la lista: centra y resalta el marcador sin recargar el mapa.
+  useEffect(() => {
+    if (estado !== 'listo') return;
+    webview.current?.injectJavaScript(
+      `window.almiraMapa && window.almiraMapa.seleccionar(${JSON.stringify(seleccionadaId)}); true;`,
+    );
+  }, [seleccionadaId, estado]);
+
+  const alRecibir = (evento: WebViewMessageEvent) => {
+    const mensaje = leerMensajeDelMapa(evento.nativeEvent.data);
+    if (!mensaje) return;
+    if (mensaje.tipo === 'obra') onSeleccionar?.(mensaje.id);
+    else if (mensaje.tipo === 'listo') setEstado('listo');
+    else setEstado('error');
+  };
+
+  // Los enlaces (la atribución) se abren en el navegador, no dentro del mapa.
+  const abrirFuera = (url: string) => {
+    if (/^https?:\/\//.test(url)) void Linking.openURL(url);
+  };
+
+  if (estado === 'error') return <NotaErrorMapa />;
+
   return (
-    <View style={estilos.mapa}>
-      {CELDAS.map(({ fila, columna }) => (
-        <View
-          key={`${fila}-${columna}`}
-          style={[
-            estilos.celda,
-            { top: porcentaje(fila * TERCIO), left: porcentaje(columna * TERCIO) },
-          ]}
-        >
-          <View
-            style={[
-              estilos.manzana,
-              fila === PARQUE.fila && columna === PARQUE.columna && estilos.parque,
-            ]}
-          />
-        </View>
-      ))}
-      {[1, 2].map((corte) => (
-        <View key={`v${corte}`} style={[estilos.calleVertical, { left: porcentaje(corte * TERCIO) }]} />
-      ))}
-      {[1, 2].map((corte) => (
-        <View key={`h${corte}`} style={[estilos.calleHorizontal, { top: porcentaje(corte * TERCIO) }]} />
-      ))}
-      <View style={estilos.avenida} />
-
-      {obras.slice(0, PUESTOS.length).map((obra, indice) => {
-        const puesto = PUESTOS[indice]!;
-        const concluida = obra.estado === 'finalizada';
-        return (
-          <Pressable
-            key={obra.id}
-            accessibilityRole="button"
-            accessibilityLabel={`${obra.nombre}: ${obra.avancePct} % de avance`}
-            onPress={() => router.push({ pathname: '/obras/[id]', params: { id: obra.id } })}
-            hitSlop={8}
-            style={[
-              estilos.marcador,
-              {
-                left: porcentaje(puesto.x * 100),
-                top: puesto.y * sizes.mapHeight - sizes.mapMarker / 2,
-                backgroundColor: concluida ? colors.success : colors.primary,
-              },
-            ]}
-          >
-            <Texto variante="labelSm" color={colors.onPrimary}>
-              {obra.avancePct}
-            </Texto>
-          </Pressable>
-        );
-      })}
-
-      <View style={estilos.etiqueta}>
-        <Texto variante="caption" color={colors.textSecondary}>
-          Mapa ilustrativo
-        </Texto>
-      </View>
+    <View
+      accessible
+      accessibilityLabel={accessibilityLabel}
+      style={[enTarjeta ? estilosMapa.enTarjeta : estilosMapa.marco, { height: alto }]}
+    >
+      <WebView<object>
+        ref={webview}
+        source={{ html, baseUrl: BASE_URL }}
+        originWhitelist={['*']}
+        onMessage={alRecibir}
+        onError={() => setEstado('error')}
+        onShouldStartLoadWithRequest={(pedido: ShouldStartLoadRequest) => {
+          // La carga inicial del HTML llega con el baseUrl; todo lo demás sale del mapa.
+          if (pedido.url === BASE_URL || pedido.url.startsWith('about:')) return true;
+          abrirFuera(pedido.url);
+          return false;
+        }}
+        setSupportMultipleWindows={false}
+        onOpenWindow={(evento: WebViewOpenWindowEvent) => abrirFuera(evento.nativeEvent.targetUrl)}
+        scrollEnabled={false}
+        bounces={false}
+        nestedScrollEnabled
+        style={{ backgroundColor: 'transparent' }}
+      />
+      {estado === 'cargando' ? <Cargando /> : null}
     </View>
   );
 }
-
-const estilos = StyleSheet.create({
-  mapa: { height: sizes.mapHeight, overflow: 'hidden', backgroundColor: colors.track },
-  celda: {
-    position: 'absolute',
-    width: porcentaje(TERCIO),
-    height: porcentaje(TERCIO),
-    padding: spacing.blockDense,
-  },
-  manzana: { flex: 1, borderRadius: radius.md, backgroundColor: colors.drawingBlock },
-  parque: { backgroundColor: colors.drawingPark },
-  calleVertical: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: sizes.mapStreet,
-    marginLeft: -sizes.mapStreet / 2,
-    backgroundColor: colors.surface,
-  },
-  calleHorizontal: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: sizes.mapStreet,
-    marginTop: -sizes.mapStreet / 2,
-    backgroundColor: colors.surface,
-  },
-  // Avenida en diagonal, de abajo a la izquierda hacia arriba a la derecha.
-  avenida: {
-    position: 'absolute',
-    left: '-10%',
-    width: '120%',
-    top: sizes.mapHeight / 2,
-    height: sizes.mapAvenue,
-    backgroundColor: colors.drawingAvenue,
-    transform: [{ rotate: '-29deg' }],
-  },
-  marcador: {
-    position: 'absolute',
-    width: sizes.mapMarker,
-    height: sizes.mapMarker,
-    marginLeft: -sizes.mapMarker / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: sizes.mapMarker / 2,
-    borderWidth: sizes.mapMarkerBorder,
-    borderColor: colors.surface,
-  },
-  etiqueta: {
-    position: 'absolute',
-    top: spacing.sm,
-    left: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs / 2,
-    borderRadius: radius.full,
-    backgroundColor: colors.surface,
-  },
-});
