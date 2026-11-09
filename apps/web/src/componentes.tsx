@@ -265,13 +265,16 @@ export function AlertaActiva({ children }: { children: ReactNode }) {
 export function CajaIcono({
   icono,
   tono = 'normal',
+  grande = false,
 }: {
   icono: NombreIcono;
   tono?: 'normal' | 'bad' | 'warn';
+  // Ícono de 24 px (web-09); el de 20 va en las filas de decisión (web-02).
+  grande?: boolean;
 }) {
   return (
     <span className={`icono-cuadro ${tono}`}>
-      <Icono nombre={icono} />
+      <Icono nombre={icono} tamano={grande ? 'lg' : undefined} />
     </span>
   );
 }
