@@ -2,11 +2,13 @@
 // El "hoy" del prototipo es el 1 de noviembre de 2026: los "hace N días" y
 // los plazos se calcularon desde esa fecha.
 import type {
+  CentroMapa,
   Deuda,
   Municipalidad,
   Obra,
   Pago,
   Predio,
+  PuntoMapa,
   Reclamo,
   Recordatorio,
   Vecino,
@@ -385,6 +387,9 @@ export const reclamos: Reclamo[] = [
   },
 ];
 
+// Coordenadas aproximadas de las obras, del centro de Lince y del predio de Rosa.
+// Verifícalas en openstreetmap.org antes de presentar (busca la dirección, clic derecho
+// → «Mostrar dirección» y copia las coordenadas). Ver docs/design/turquesa/MAPA.md.
 export const obras: Obra[] = [
   {
     id: 'o-pistas-merino',
@@ -403,6 +408,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-29',
     porcentajeTributos: null,
     hitos: [],
+    latitud: -12.0905,
+    longitud: -77.032,
   },
   {
     id: 'o-parque-castilla',
@@ -421,6 +428,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-26',
     porcentajeTributos: 62,
     hitos: ['Riego y áreas verdes: 80 %', 'Juegos y luminarias: en curso'],
+    latitud: -12.0862,
+    longitud: -77.039,
   },
   {
     id: 'o-veredas-risso',
@@ -439,6 +448,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-14',
     porcentajeTributos: null,
     hitos: [],
+    latitud: -12.0822,
+    longitud: -77.0345,
   },
   {
     id: 'o-luminarias-led',
@@ -457,6 +468,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-30',
     porcentajeTributos: null,
     hitos: [],
+    latitud: -12.085,
+    longitud: -77.0372,
   },
   {
     id: 'o-parque-central-vv',
@@ -475,5 +488,18 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-20',
     porcentajeTributos: null,
     hitos: [],
+    latitud: null,
+    longitud: null,
   },
 ];
+
+// Centro del mapa de cada municipalidad, para cuando no hay obras con ubicación.
+// La base no tiene esta columna: es un dato de ejemplo, como zonaReclamo del panel.
+export const CENTROS_MAPA_EJEMPLO: Record<string, CentroMapa> = {
+  [LINCE]: { latitud: -12.085, longitud: -77.036, zoom: 15 },
+};
+
+// Ubicación simulada del predio, que Nuevo reclamo usa como si fuera el GPS.
+export const UBICACIONES_PREDIO_EJEMPLO: Record<string, PuntoMapa> = {
+  'p-rosa-li': { latitud: -12.088, longitud: -77.033 },
+};

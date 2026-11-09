@@ -186,6 +186,9 @@ function NuevaObra({
       actualizadaEn: HOY_EJEMPLO,
       porcentajeTributos: null,
       hitos: [],
+      // Sin ubicación: sale en la tabla, pero no en la vista del vecino.
+      latitud: null,
+      longitud: null,
     });
   };
 

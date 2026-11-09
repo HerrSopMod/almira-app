@@ -22,6 +22,15 @@ export type TipoReclamo =
 export type EstadoReclamo = 'en_atencion' | 'derivado' | 'resuelto';
 export type EstadoObra = 'en_ejecucion' | 'finalizada';
 
+export interface PuntoMapa {
+  latitud: number;
+  longitud: number;
+}
+
+export interface CentroMapa extends PuntoMapa {
+  zoom: number;
+}
+
 export interface Municipalidad {
   id: string;
   slug: string;
@@ -137,4 +146,7 @@ export interface Obra {
   // Parte del presupuesto que sale de tributos del distrito; el resto son transferencias.
   porcentajeTributos: number | null;
   hitos: string[];
+  // Punto de la obra en el mapa. Si falta, la obra sale en la lista pero no en el mapa.
+  latitud: number | null;
+  longitud: number | null;
 }

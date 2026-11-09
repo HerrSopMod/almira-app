@@ -11,6 +11,7 @@ import {
   AREA_TIPO_RECLAMO,
   PLAZO_DIAS_RECLAMO,
   siguienteCodigoReclamo,
+  UBICACIONES_PREDIO_EJEMPLO,
   tituloReclamo,
   totalDeuda,
   USUARIO_EJEMPLO,
@@ -144,6 +145,11 @@ export function SesionProvider({ children }: { children: ReactNode }) {
           ),
         );
         // La foto y la ubicación son simuladas: no se sube ningún archivo ni se lee el GPS.
+        // El punto del mapa es el del predio; si el vecino cambió la dirección, no hay punto.
+        const predio = predios.find(
+          (p) => p.vecinoId === vecino.id && p.direccion === direccion,
+        );
+        const punto = predio ? UBICACIONES_PREDIO_EJEMPLO[predio.id] : undefined;
         const reclamo: Reclamo = {
           id: `nuevo-${municipalidadId}-${codigo}`,
           municipalidadId,
@@ -156,8 +162,8 @@ export function SesionProvider({ children }: { children: ReactNode }) {
           area: AREA_TIPO_RECLAMO[tipo],
           fotoRuta: `${municipalidadId}/simulada-${codigo}.jpg`,
           direccion,
-          latitud: null,
-          longitud: null,
+          latitud: punto?.latitud ?? null,
+          longitud: punto?.longitud ?? null,
           plazo: null,
           plazoDias: PLAZO_DIAS_RECLAMO,
           creadoEn: HOY_EJEMPLO,
