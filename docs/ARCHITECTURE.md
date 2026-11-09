@@ -131,11 +131,16 @@ El bucket privado `evidencias` usa la ruta `{municipalidad_id}/{user_id}/{archiv
 
 Al agregar una tabla: incluye `municipalidad_id`, activa RLS y revoca los permisos de `anon` y `authenticated`, porque Supabase los concede por defecto en tablas nuevas.
 
-## Recordatorios
+## Recordatorios y SMS
 
-`supabase/functions/enviar-recordatorios` procesa los recordatorios con estado `programado` cuya fecha ya pasó. Requiere `Authorization: Bearer <RECORDATORIOS_SECRETO>` y falla cerrada si el secreto no existe.
+`supabase/functions/enviar-recordatorios` procesa los recordatorios con estado `programado`, canal `sms` y fecha vencida, y los envía con Twilio. Requiere `Authorization: Bearer <RECORDATORIOS_SECRETO>` y falla cerrada si el secreto no existe. Los secretos de Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` y `TWILIO_MESSAGING_SERVICE_SID` o `TWILIO_FROM`) se cargan con `supabase secrets set`, nunca en el repositorio.
 
-**El envío es simulado:** `enviarPorCanal` solo registra el intento y devuelve éxito, así que los recordatorios quedan como `enviado` sin que salga ningún mensaje. No se debe programar en producción hasta conectar un proveedor. Falta también el cron que la invoque.
+- WhatsApp y la app no tienen proveedor conectado: sus recordatorios se quedan en `programado`, no se marcan como enviados.
+- Un recordatorio sin teléfono peruano válido pasa a `fallido`.
+- Los logs no incluyen teléfonos ni mensajes.
+- Falta el cron que invoque la función.
+
+El ingreso con celular usa Phone Auth de Supabase (Authentication → Providers → Phone, con Twilio): `signInWithOtp` y `verifyOtp` en `src/auth.tsx`.
 
 ## Comandos
 

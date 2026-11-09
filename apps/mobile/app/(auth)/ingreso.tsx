@@ -24,14 +24,26 @@ import { useSesion } from '@/sesion';
 import { supabaseConfigurado } from '@/supabase';
 
 const CLAVE_MINIMA = 8;
+const celularValido = (valor: string) => /^9\d{8}$/.test(valor);
 const correoValido = (valor: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor.trim());
 
 // Primera pantalla: Google arriba y, debajo, ingreso clásico con correo y contraseña.
 // Sin Supabase configurado, Google sigue la simulación anterior.
 export default function Ingreso() {
   const { iniciarConGoogle: googleSimulado } = useSesion();
-  const { sesion, iniciarConGoogle, iniciarConCorreo, crearCuenta } = useAuth();
+  const {
+    sesion,
+    iniciarConGoogle,
+    iniciarConCorreo,
+    crearCuenta,
+    enviarCodigoSms,
+    verificarCodigoSms,
+  } = useAuth();
   const { top, bottom } = useSafeAreaInsets();
+  const [metodo, setMetodo] = useState<'correo' | 'celular'>('correo');
+  const [celular, setCelular] = useState('');
+  const [codigo, setCodigo] = useState('');
+  const [codigoEnviado, setCodigoEnviado] = useState(false);
   const [registro, setRegistro] = useState(false);
   const [correo, setCorreo] = useState('');
   const [clave, setClave] = useState('');
@@ -72,6 +84,14 @@ export default function Ingreso() {
       return null;
     });
 
+  const pedirCodigo = () =>
+    ejecutar(async () => {
+      const error = await enviarCodigoSms(celular);
+      if (!error) setCodigoEnviado(true);
+      return error;
+    });
+  const verificar = () => ejecutar(() => verificarCodigoSms(celular, codigo));
+
   const listo = correoValido(correo) && clave.length >= CLAVE_MINIMA;
   const enviar = () =>
     ejecutar(() => (registro ? crearCuenta(correo, clave) : iniciarConCorreo(correo, clave)));
@@ -98,7 +118,12 @@ export default function Ingreso() {
           {
             opacity: aparece,
             transform: [
-              { translateY: aparece.interpolate({ inputRange: [0, 1], outputRange: [32, 0] }) },
+              {
+                translateY: aparece.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [32, 0],
+                }),
+              },
             ],
           },
         ]}
@@ -121,67 +146,129 @@ export default function Ingreso() {
           <View style={estilos.divisor}>
             <View style={estilos.linea} />
             <Texto variante="bodyMd" color={colors.textSecondary}>
-              o con tu correo
+              o con tu {metodo === 'correo' ? 'correo' : 'celular'}
             </Texto>
             <View style={estilos.linea} />
           </View>
 
-          <Campo
-            etiqueta="Correo"
-            placeholder="nombre@correo.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect={false}
-            value={correo}
-            onChangeText={setCorreo}
-          />
-          <View>
-            <Campo
-              etiqueta="Contraseña"
-              placeholder={`Mínimo ${CLAVE_MINIMA} caracteres`}
-              secureTextEntry={!verClave}
-              autoCapitalize="none"
-              autoComplete={registro ? 'new-password' : 'current-password'}
-              value={clave}
-              onChangeText={setClave}
-              onSubmitEditing={listo ? enviar : undefined}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              onPress={() => setVerClave((v) => !v)}
-              hitSlop={8}
-              style={estilos.ojo}
-            >
-              <MaterialIcons
-                name={verClave ? 'visibility-off' : 'visibility'}
-                size={sizes.iconSm}
-                color={colors.textSecondary}
-              />
-            </Pressable>
+          <View style={estilos.metodos}>
+            {(['correo', 'celular'] as const).map((m) => (
+              <Pressable
+                key={m}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: metodo === m }}
+                onPress={() => {
+                  setMetodo(m);
+                  setMensaje(null);
+                }}
+                style={[estilos.metodo, metodo === m && estilos.metodoActivo]}
+              >
+                <Texto
+                  variante="bodyLgMedium"
+                  color={metodo === m ? colors.onPrimary : colors.primary}
+                  alineacion="center"
+                >
+                  {m === 'correo' ? 'Correo' : 'Celular'}
+                </Texto>
+              </Pressable>
+            ))}
           </View>
 
-          {mensaje ? <Nota texto={mensaje} /> : null}
+          {metodo === 'celular' ? (
+            <>
+              <Campo
+                etiqueta="Celular (+51)"
+                placeholder="9 dígitos"
+                keyboardType="number-pad"
+                maxLength={9}
+                autoComplete="tel"
+                value={celular}
+                onChangeText={(t) => {
+                  setCelular(t.replace(/\D/g, ''));
+                  setCodigoEnviado(false);
+                }}
+              />
+              {codigoEnviado ? (
+                <Campo
+                  etiqueta="Código de 6 dígitos"
+                  placeholder="Código que te llegó por SMS"
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  autoComplete="sms-otp"
+                  value={codigo}
+                  onChangeText={(t) => setCodigo(t.replace(/\D/g, ''))}
+                />
+              ) : null}
+              {mensaje ? <Nota texto={mensaje} /> : null}
+              <Boton
+                titulo={codigoEnviado ? 'Verificar código' : 'Enviar código por SMS'}
+                icono={codigoEnviado ? undefined : 'sms'}
+                deshabilitado={
+                  ocupado || !celularValido(celular) || (codigoEnviado && codigo.length !== 6)
+                }
+                onPress={codigoEnviado ? verificar : pedirCodigo}
+              />
+            </>
+          ) : (
+            <>
+              <Campo
+                etiqueta="Correo"
+                placeholder="nombre@correo.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
+                value={correo}
+                onChangeText={setCorreo}
+              />
+              <View>
+                <Campo
+                  etiqueta="Contraseña"
+                  placeholder={`Mínimo ${CLAVE_MINIMA} caracteres`}
+                  secureTextEntry={!verClave}
+                  autoCapitalize="none"
+                  autoComplete={registro ? 'new-password' : 'current-password'}
+                  value={clave}
+                  onChangeText={setClave}
+                  onSubmitEditing={listo ? enviar : undefined}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  onPress={() => setVerClave((v) => !v)}
+                  hitSlop={8}
+                  style={estilos.ojo}
+                >
+                  <MaterialIcons
+                    name={verClave ? 'visibility-off' : 'visibility'}
+                    size={sizes.iconSm}
+                    color={colors.textSecondary}
+                  />
+                </Pressable>
+              </View>
 
-          <Boton
-            titulo={registro ? 'Crear cuenta' : 'Ingresar'}
-            deshabilitado={!listo || ocupado}
-            onPress={enviar}
-          />
+              {mensaje ? <Nota texto={mensaje} /> : null}
 
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setRegistro((v) => !v);
-              setMensaje(null);
-            }}
-            style={estilos.cambiar}
-          >
-            <Texto variante="bodyLgMedium" color={colors.primary} alineacion="center">
-              {registro ? '¿Ya tienes cuenta? Ingresa' : '¿No tienes cuenta? Créala'}
-            </Texto>
-          </Pressable>
+              <Boton
+                titulo={registro ? 'Crear cuenta' : 'Ingresar'}
+                deshabilitado={!listo || ocupado}
+                onPress={enviar}
+              />
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  setRegistro((v) => !v);
+                  setMensaje(null);
+                }}
+                style={estilos.cambiar}
+              >
+                <Texto variante="bodyLgMedium" color={colors.primary} alineacion="center">
+                  {registro ? '¿Ya tienes cuenta? Ingresa' : '¿No tienes cuenta? Créala'}
+                </Texto>
+              </Pressable>
+            </>
+          )}
 
           <Texto variante="caption" color={colors.textSecondary} alineacion="center">
             Al continuar, aceptas los términos de servicio y la política de privacidad.
@@ -207,7 +294,11 @@ const estilos = StyleSheet.create({
     borderTopRightRadius: radius.lg,
   },
   contenido: { padding: spacing.margin, gap: spacing.md },
-  divisor: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
+  divisor: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.blockDense,
+  },
   linea: { flex: 1, height: sizes.borderWidth, backgroundColor: colors.border },
   ojo: {
     position: 'absolute',
@@ -216,5 +307,15 @@ const estilos = StyleSheet.create({
     height: sizes.input,
     justifyContent: 'center',
   },
+  metodos: { flexDirection: 'row', gap: spacing.sm },
+  metodo: {
+    flex: 1,
+    minHeight: sizes.buttonTertiary,
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    borderWidth: sizes.borderWidth,
+    borderColor: colors.primary,
+  },
+  metodoActivo: { backgroundColor: colors.primary },
   cambiar: { minHeight: sizes.buttonTertiary, justifyContent: 'center' },
 });

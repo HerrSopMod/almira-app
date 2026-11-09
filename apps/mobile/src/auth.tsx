@@ -13,6 +13,8 @@ type Autenticacion = {
   iniciarConGoogle: () => Promise<string | null>;
   iniciarConCorreo: (correo: string, clave: string) => Promise<string | null>;
   crearCuenta: (correo: string, clave: string) => Promise<string | null>;
+  enviarCodigoSms: (celular: string) => Promise<string | null>;
+  verificarCodigoSms: (celular: string, codigo: string) => Promise<string | null>;
   cerrarSesion: () => Promise<void>;
 };
 
@@ -69,6 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data, error } = await supabase.auth.signUp({ email: correo.trim(), password: clave });
         if (error) return 'No pudimos crear la cuenta. Revisa el correo y usa al menos 8 caracteres.';
         return data.session ? null : 'Te enviamos un correo para confirmar tu cuenta. Confírmalo y vuelve a ingresar.';
+      },
+      // El SMS lo manda Supabase con el proveedor configurado (Twilio). Celular peruano de 9 dígitos.
+      enviarCodigoSms: async (celular) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { error } = await supabase.auth.signInWithOtp({ phone: `+51${celular}` });
+        return error ? 'No pudimos enviar el código. Revisa tu número e inténtalo de nuevo.' : null;
+      },
+      verificarCodigoSms: async (celular, codigo) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { error } = await supabase.auth.verifyOtp({ phone: `+51${celular}`, token: codigo, type: 'sms' });
+        return error ? 'El código no es correcto o ya venció.' : null;
       },
       cerrarSesion: async () => {
         if (supabaseConfigurado) await supabase.auth.signOut();
