@@ -92,7 +92,7 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 - `src/MapaObras.tsx` con `MapContainer`, `TileLayer` (`MAPA_TILES` y
   `MAPA_ATRIBUCION`) y `Marker` con el mismo `divIcon`. Importa
   `leaflet/dist/leaflet.css`.
-- En web-06, la tarjeta "Vista del vecino" (380 × 320) muestra las obras publicadas. Si
+- En web-06, la tarjeta "Vista del vecino" (380 × 300) muestra las obras publicadas. Si
   cambias el interruptor "Publicada", el marcador aparece o desaparece al instante.
 
 ## Límites honestos
