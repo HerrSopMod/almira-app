@@ -1066,6 +1066,72 @@ tbody tr:last-child td {
   font: var(--t-small);
 }
 
+/* Obras publicadas (web-06): vista del vecino y cómo se publica */
+
+.fila-obras {
+  grid-template-columns: calc(var(--p-neighbor-map-width) + 2 * var(--p-card-padding-x)) minmax(0, 1fr);
+  align-items: start;
+}
+
+.mapa-vecino {
+  display: grid;
+  gap: var(--s-block-dense);
+}
+
+.mapa-vecino-lienzo {
+  width: 100%;
+  max-width: var(--p-neighbor-map-width);
+  height: var(--p-neighbor-map-height);
+  border: var(--z-border-width) solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-subtle);
+  font-family: var(--fuente);
+}
+
+.mapa-vecino-lienzo .leaflet-control-attribution {
+  color: var(--c-text);
+  font: var(--t-small);
+}
+
+.mapa-vecino-lienzo .leaflet-control-attribution a {
+  color: var(--c-text);
+}
+
+.mapa-vecino-lienzo .leaflet-bar {
+  border: var(--z-border-width) solid var(--c-border);
+  border-radius: var(--r-md);
+  box-shadow: none;
+}
+
+.mapa-vecino-lienzo .leaflet-bar a {
+  color: var(--c-text);
+}
+
+.leyenda .punto-obra {
+  border-radius: var(--r-full);
+  background: var(--c-primary);
+}
+
+.leyenda .punto-obra.concluida {
+  background: var(--c-success);
+}
+
+.lista-publica {
+  display: grid;
+  gap: var(--s-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--c-text-secondary);
+  font: var(--t-body);
+}
+
+.lista-publica li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-sm);
+}
+
 /* En pantallas angostas las columnas se apilan. CSS no admite variables en
    @media, por eso el corte va escrito aquí. */
 @media (max-width: 1100px) {
@@ -1082,6 +1148,7 @@ tbody tr:last-child td {
   .cifras-4,
   .fila-2,
   .fila-decision,
+  .fila-obras,
   .ciclo,
   .formulario-obra {
     grid-template-columns: minmax(0, 1fr);

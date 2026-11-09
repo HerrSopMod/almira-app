@@ -50,10 +50,6 @@ export const colors = {
   drawingNightGround: '#3A4A60',
   drawingPole: '#7F8B9B',
   drawingLamp: '#B9C3CD',
-  // Mapa ilustrativo de obras (pantalla 19), hasta el mapa real de la etapa 4.
-  drawingBlock: '#F5F5F5',
-  drawingPark: '#CDE8D5',
-  drawingAvenue: '#F3D3D5',
 } as const;
 
 export const spacing = {
@@ -150,14 +146,12 @@ export const sizes = {
   fundingBar: 12,
   legendDot: 10,
   noticeStep: 56,
-  // Mapa móvil, marcador y calles del dibujo provisional.
+  // Mapa móvil y marcador del mapa (MAPA.md).
   mapHeight: 300,
   // Minimapa de Nuevo reclamo (pantalla 16).
   miniMap: 120,
   mapMarker: 28,
   mapMarkerBorder: 2,
-  mapStreet: 9,
-  mapAvenue: 10,
 } as const;
 
 // "Texto más grande" de Mi perfil (pantalla 21) multiplica letra e interlineado.
@@ -248,6 +242,9 @@ export const panelSizes = {
   loginCard: 400,
   loginHeader: 56,
   loginTop: 258,
+  // Mapa "Vista del vecino" de Obras publicadas (web-06).
+  neighborMapWidth: 380,
+  neighborMapHeight: 320,
 } as const;
 
 // Textos del panel web, todos en Inter.

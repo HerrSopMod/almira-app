@@ -1,12 +1,15 @@
 // Datos ficticios que siguen el prototipo de Figma (docs/design/prototipo).
 // El "hoy" del prototipo es el 1 de noviembre de 2026: los "hace N días" y
 // los plazos se calcularon desde esa fecha.
+import { CENTRO_MAPA_LIMA } from './mapa';
 import type {
+  CentroMapa,
   Deuda,
   Municipalidad,
   Obra,
   Pago,
   Predio,
+  PuntoMapa,
   Reclamo,
   Recordatorio,
   Vecino,
@@ -385,6 +388,9 @@ export const reclamos: Reclamo[] = [
   },
 ];
 
+// Coordenadas aproximadas de las obras, del centro de Lince y del predio de Rosa.
+// Verifícalas en openstreetmap.org antes de presentar (busca la dirección, clic derecho
+// → «Mostrar dirección» y copia las coordenadas). Ver docs/design/turquesa/MAPA.md.
 export const obras: Obra[] = [
   {
     id: 'o-pistas-merino',
@@ -487,3 +493,18 @@ export const obras: Obra[] = [
     longitud: null,
   },
 ];
+
+// Centro del mapa de cada municipalidad, para cuando no hay obras con ubicación.
+// La base no tiene esta columna: es un dato de ejemplo, como zonaReclamo del panel.
+export const CENTROS_MAPA_EJEMPLO: Record<string, CentroMapa> = {
+  [LINCE]: { latitud: -12.085, longitud: -77.036, zoom: 15 },
+};
+
+export function centroMapaDe(municipalidadId: string): CentroMapa {
+  return CENTROS_MAPA_EJEMPLO[municipalidadId] ?? CENTRO_MAPA_LIMA;
+}
+
+// Ubicación simulada del predio, que Nuevo reclamo usa como si fuera el GPS.
+export const UBICACIONES_PREDIO_EJEMPLO: Record<string, PuntoMapa> = {
+  'p-rosa-li': { latitud: -12.088, longitud: -77.033 },
+};

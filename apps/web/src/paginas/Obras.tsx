@@ -1,7 +1,13 @@
-import { HOY_EJEMPLO, formatearPorcentaje, formatearSoles, haceDias, type Obra } from '@almira/shared';
+import {
+  centroMapaDe,
+  formatearPorcentaje,
+  formatearSoles,
+  haceDias,
+  HOY_EJEMPLO,
+  type Obra,
+} from '@almira/shared';
 import { useState, type FormEvent } from 'react';
 import {
-  AvisoInfo,
   Chip,
   Encabezado,
   Interruptor,
@@ -12,6 +18,7 @@ import {
 } from '../componentes';
 import { diasSinActualizar, useSesion } from '../estado';
 import { Icono } from '../iconos';
+import { MapaObras } from '../MapaObras';
 
 const PASO_AVANCE = 5;
 
@@ -137,10 +144,39 @@ export function Obras() {
         </Tabla>
       </section>
 
-      <AvisoInfo>
-        La municipalidad decide qué obras publica y con qué detalle. La frecuencia mínima de
-        actualización se acuerda con Almira: {frecuencia} días.
-      </AvisoInfo>
+      <div className="fila fila-obras">
+        <Tarjeta titulo="Vista del vecino" subtitulo="Solo aparecen las obras publicadas.">
+          <MapaObras obras={datos.obras} centro={centroMapaDe(sesion.municipalidad.id)} />
+          <p className="leyenda">
+            <span>
+              <i className="punto-obra" />
+              En ejecución
+            </span>
+            <span>
+              <i className="punto-obra concluida" />
+              Concluida
+            </span>
+          </p>
+        </Tarjeta>
+        <Tarjeta titulo="Cómo se publica">
+          <ul className="lista-publica">
+            <li>
+              <Icono nombre="ojo" />
+              Solo las obras con «Publicada» activo aparecen en el mapa y la lista de la app.
+            </li>
+            <li>
+              <Icono nombre="ubicacion" />
+              Cada obra tiene una ubicación (latitud y longitud) que define su punto en el mapa.
+              Una obra sin ubicación sale en la lista, pero no en el mapa.
+            </li>
+            <li>
+              <Icono nombre="actualizar" />
+              La municipalidad decide qué obras publica y con qué detalle. La frecuencia mínima de
+              actualización se acuerda con Almira: {frecuencia} días.
+            </li>
+          </ul>
+        </Tarjeta>
+      </div>
       <MensajeMemoria texto={mensaje} />
     </>
   );
@@ -186,6 +222,7 @@ function NuevaObra({
       actualizadaEn: HOY_EJEMPLO,
       porcentajeTributos: null,
       hitos: [],
+      // Sin ubicación: sale en la tabla, pero no en la vista del vecino.
       latitud: null,
       longitud: null,
     });

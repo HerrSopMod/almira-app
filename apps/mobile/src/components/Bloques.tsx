@@ -1,11 +1,13 @@
 import {
   colors,
   ETIQUETA_ESTADO_DEUDA,
+  ETIQUETA_ESTADO_OBRA,
   formatearSoles,
   radius,
   sizes,
   spacing,
   type EstadoDeuda,
+  type EstadoObra,
 } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
@@ -124,6 +126,16 @@ const TONO_ESTADO_DEUDA: Record<EstadoDeuda, TonoInsignia> = {
 // «En mora», «Por vencer» y «Pagada».
 export function ChipEstadoDeuda({ estado }: { estado: EstadoDeuda }) {
   return <Insignia texto={ETIQUETA_ESTADO_DEUDA[estado]} tono={TONO_ESTADO_DEUDA[estado]} />;
+}
+
+// «En ejecución» (info) o «Concluida» (ok), como en las maquetas 19 y 20.
+export function ChipEstadoObra({ estado }: { estado: EstadoObra }) {
+  return (
+    <Insignia
+      texto={ETIQUETA_ESTADO_OBRA[estado]}
+      tono={estado === 'finalizada' ? 'ok' : 'info'}
+    />
+  );
 }
 
 // Plazo de un reclamo («Quedan 3 d») o «Resuelto».

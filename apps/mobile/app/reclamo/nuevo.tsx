@@ -1,15 +1,23 @@
-import { colors, radius, sizes, spacing } from '@almira/shared';
+import {
+  centroMapaDe,
+  colors,
+  radius,
+  sizes,
+  spacing,
+  UBICACIONES_PREDIO_EJEMPLO,
+  type PuntoMapa,
+} from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { Nota, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Campo } from '@/components/Campo';
-import { MapaLeaflet } from '@/components/MapaLeaflet';
+import { MapaObras } from '@/components/MapaObras';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
@@ -19,14 +27,18 @@ const DESCRIPCION_EJEMPLO =
   'Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.';
 
 const MAXIMO_DESCRIPCION = 500;
+// El minimapa solo marca la ubicación del reclamo.
+const SIN_OBRAS: never[] = [];
 
-// Pantalla 16 (maqueta 16-nuevo-reclamo). La foto sale de la cámara del dispositivo y la
-// ubicación del GPS, con permiso del vecino. La dirección parte de la del predio y se puede
-// ajustar. La foto todavía no se sube a Storage: eso llega al conectar los reclamos reales.
+// Pantalla 16 (maqueta 16-nuevo-reclamo). La foto sale de la cámara y el punto del GPS,
+// con permiso del vecino. Por ahora los dos se quedan en el teléfono: la foto no se sube a
+// Storage ni el punto se guarda en el reclamo. El minimapa (MAPA.md) marca el punto del GPS
+// si el vecino tocó "Usar mi ubicación"; si no, el punto de ejemplo del predio. Si cambia
+// la dirección sin GPS, el mapa queda en el distrito sin marcador.
 export default function NuevoReclamo() {
-  const { predios } = useDatosMunicipales();
+  const { municipalidad, predios } = useDatosMunicipales();
   const [foto, setFoto] = useState<string | null>(null);
-  const [coordenadas, setCoordenadas] = useState<{ latitud: number; longitud: number } | null>(null);
+  const [coordenadas, setCoordenadas] = useState<PuntoMapa | null>(null);
   const [avisoFoto, setAvisoFoto] = useState<string | null>(null);
   const [avisoGps, setAvisoGps] = useState<string | null>(null);
   const [direccion, setDireccion] = useState(predios[0]?.direccion ?? '');
@@ -59,10 +71,10 @@ export default function NuevoReclamo() {
     }
   };
 
-  const marcadores = useMemo(
-    () => (coordenadas ? [{ id: 'reclamo', ...coordenadas }] : []),
-    [coordenadas],
-  );
+  // Con GPS, el minimapa marca el punto del teléfono; sin GPS, el punto de ejemplo del predio.
+  const predio = predios.find((p) => p.direccion === direccion.trim());
+  const puntoPredio = predio ? (UBICACIONES_PREDIO_EJEMPLO[predio.id] ?? null) : null;
+  const punto = coordenadas ?? puntoPredio;
 
   const listo = foto !== null && direccion.trim() !== '' && descripcion.trim() !== '';
 
@@ -99,12 +111,17 @@ export default function NuevoReclamo() {
       <View style={estilos.grupo}>
         <Texto variante="bodyLgMedium">Ubicación del problema</Texto>
         <Tarjeta style={estilos.ubicacion}>
-          <MapaLeaflet
-            alto={sizes.miniMap}
-            marcadores={marcadores}
-            interactivo={false}
-            etiqueta="Mapa con la ubicación del reclamo"
-          />
+          <View style={estilos.mapa}>
+            <MapaObras
+              obras={SIN_OBRAS}
+              centro={centroMapaDe(municipalidad.id)}
+              ubicacion={punto}
+              interactivo={false}
+              enTarjeta
+              alto={sizes.miniMap}
+              accessibilityLabel="Mapa de la ubicación del problema"
+            />
+          </View>
           <View style={estilos.direccion}>
             {ajustando ? (
               <View style={estilos.flexible}>
@@ -120,7 +137,7 @@ export default function NuevoReclamo() {
                 <View style={estilos.flexible}>
                   <Texto variante="bodyLgMedium">{direccion}</Texto>
                   <Texto variante="bodyMd" color={colors.textSecondary}>
-                    {coordenadas ? 'Ubicación del dispositivo' : 'Dirección del predio'}
+                    {coordenadas ? 'El mapa marca tu ubicación actual' : 'Dirección del predio'}
                   </Texto>
                 </View>
                 <Pressable
@@ -154,6 +171,8 @@ export default function NuevoReclamo() {
           {descripcion.length} / {MAXIMO_DESCRIPCION}
         </Texto>
       </View>
+
+      <Nota texto="Por ahora la foto y tu ubicación se quedan en tu teléfono: no se envían con el reclamo." />
 
       <Nota
         icono="lock-outline"
@@ -192,11 +211,6 @@ const estilos = StyleSheet.create({
   vista: { width: '100%', height: '100%' },
   ubicacion: { padding: 0, gap: 0, overflow: 'hidden' },
   mapa: {
-    height: sizes.miniMap,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.subtle,
     borderBottomWidth: sizes.borderWidth,
     borderBottomColor: colors.border,
   },
