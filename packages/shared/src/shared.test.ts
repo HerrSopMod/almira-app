@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CENTRO_MAPA_LIMA,
+  coloresMapa,
+  encuadreMapa,
+  htmlMapaObras,
+  leerMensajeDelMapa,
+  MAPA_ATRIBUCION,
+  MAPA_ATRIBUCION_URL,
+  obrasConUbicacion,
+} from './mapa';
+import {
+  centroMapaDe,
   deudas,
   HOY_EJEMPLO,
   municipalidades,
@@ -595,5 +606,108 @@ describe('ingreso', () => {
     expect(codigoValido('48217')).toBe(false);
     expect(codigoValido('4821755')).toBe(false);
     expect(codigoValido('48a175')).toBe(false);
+  });
+});
+
+describe('mapa de obras', () => {
+  const colores = coloresMapa(colors);
+  const deLince = obras.filter((obra) => obra.municipalidadId === 'm-lince');
+  const centroLince = centroMapaDe('m-lince');
+
+  it('deja en el mapa solo las obras publicadas con coordenadas', () => {
+    const sinPunto = { ...deLince[0]!, id: 'sin-punto', latitud: null, longitud: null };
+    const ids = obrasConUbicacion([...deLince, sinPunto]).map((obra) => obra.id);
+    expect(ids).toEqual(['o-pistas-merino', 'o-parque-castilla', 'o-veredas-risso']);
+    expect(ids).not.toContain('o-luminarias-led');
+    expect(ids).not.toContain('sin-punto');
+  });
+
+  it('sin puntos se centra en el distrito', () => {
+    expect(encuadreMapa([], centroLince)).toEqual({
+      tipo: 'centro',
+      centro: [centroLince.latitud, centroLince.longitud],
+      zoom: centroLince.zoom,
+    });
+    expect(centroMapaDe('no-existe')).toBe(CENTRO_MAPA_LIMA);
+  });
+
+  it('con un punto lo encierra con margen', () => {
+    const encuadre = encuadreMapa([{ latitud: -12.08, longitud: -77.03 }], centroLince);
+    expect(encuadre.tipo).toBe('limites');
+    if (encuadre.tipo !== 'limites') return;
+    const [[sur, oeste], [norte, este]] = encuadre.limites;
+    expect(sur).toBeLessThan(-12.08);
+    expect(norte).toBeGreaterThan(-12.08);
+    expect(oeste).toBeLessThan(-77.03);
+    expect(este).toBeGreaterThan(-77.03);
+    expect(norte - sur).toBeCloseTo(este - oeste);
+  });
+
+  it('con varios puntos los encierra a todos con margen', () => {
+    const puntos = obrasConUbicacion(deLince);
+    const encuadre = encuadreMapa(puntos, centroLince);
+    expect(encuadre.tipo).toBe('limites');
+    if (encuadre.tipo !== 'limites') return;
+    const [[sur, oeste], [norte, este]] = encuadre.limites;
+    for (const punto of puntos) {
+      expect(punto.latitud).toBeGreaterThan(sur);
+      expect(punto.latitud).toBeLessThan(norte);
+      expect(punto.longitud).toBeGreaterThan(oeste);
+      expect(punto.longitud).toBeLessThan(este);
+    }
+    expect(sur).toBeLessThan(Math.min(...puntos.map((p) => p.latitud)));
+  });
+
+  it('arma el HTML con la atribución y sin obras no publicadas', () => {
+    const html = htmlMapaObras({
+      obras: deLince,
+      interactivo: true,
+      colores,
+      centroPorDefecto: centroLince,
+    });
+    expect(html).toContain(MAPA_ATRIBUCION);
+    expect(html).toContain(MAPA_ATRIBUCION_URL);
+    expect(html).toContain('leaflet@1.9.4/dist/leaflet.js');
+    expect(html).toContain('integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="');
+    expect(html).toContain('o-parque-castilla');
+    expect(html).not.toContain('o-luminarias-led');
+    expect(html).not.toContain('Luminarias LED');
+  });
+
+  it('solo usa los colores que recibe', () => {
+    const html = htmlMapaObras({ obras: deLince, interactivo: false, colores, centroPorDefecto: centroLince });
+    const hex = new Set(html.match(/#[0-9A-Fa-f]{6}\b/g) ?? []);
+    const permitidos = new Set(Object.values(colores));
+    for (const valor of hex) expect(permitidos).toContain(valor);
+  });
+
+  it('no deja cerrar el script con el nombre de una obra', () => {
+    const peligrosa = { ...deLince[1]!, nombre: '</script><script>alert(1)</script>' };
+    const html = htmlMapaObras({ obras: [peligrosa], interactivo: true, colores, centroPorDefecto: centroLince });
+    expect(html).not.toContain('</script><script>alert(1)');
+  });
+
+  it('arma JavaScript válido en el HTML', () => {
+    const html = htmlMapaObras({
+      obras: deLince,
+      seleccionadaId: 'o-parque-castilla',
+      interactivo: true,
+      colores,
+      centroPorDefecto: centroLince,
+      ubicacion: { latitud: -12.088, longitud: -77.033 },
+    });
+    const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]!);
+    expect(scripts).toHaveLength(2);
+    for (const codigo of scripts) expect(() => new Function(codigo)).not.toThrow();
+  });
+
+  it('lee solo mensajes conocidos del mapa', () => {
+    expect(leerMensajeDelMapa({ tipo: 'obra', id: 'o-1' })).toEqual({ tipo: 'obra', id: 'o-1' });
+    expect(leerMensajeDelMapa('{"tipo":"error"}')).toEqual({ tipo: 'error' });
+    expect(leerMensajeDelMapa({ tipo: 'listo' })).toEqual({ tipo: 'listo' });
+    expect(leerMensajeDelMapa({ tipo: 'otro' })).toBeNull();
+    expect(leerMensajeDelMapa({ tipo: 'obra', id: 3 })).toBeNull();
+    expect(leerMensajeDelMapa('no es json')).toBeNull();
+    expect(leerMensajeDelMapa(null)).toBeNull();
   });
 });
