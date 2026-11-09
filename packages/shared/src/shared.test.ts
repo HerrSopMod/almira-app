@@ -67,6 +67,7 @@ import {
   totalSeleccionado,
 } from './pagos';
 import { codigoValido, documentoValido } from './ingreso';
+import { encuadreMapa, htmlMapa, MAPA_ATRIBUCION, marcadoresDeObras } from './mapa';
 
 describe('tokens', () => {
   it('aplica los colores de la guía turquesa', () => {
@@ -595,5 +596,38 @@ describe('ingreso', () => {
     expect(codigoValido('48217')).toBe(false);
     expect(codigoValido('4821755')).toBe(false);
     expect(codigoValido('48a175')).toBe(false);
+  });
+});
+
+describe('mapa', () => {
+  it('solo marca obras publicadas con coordenadas', () => {
+    const marcadores = marcadoresDeObras(obras);
+    expect(marcadores.length).toBeGreaterThan(0);
+    for (const m of marcadores) {
+      const obra = obras.find((o) => o.id === m.id)!;
+      expect(obra.publicada).toBe(true);
+    }
+    expect(marcadores.some((m) => m.id === 'o-luminarias-led')).toBe(false);
+  });
+
+  it('calcula el encuadre con 0, 1 y varios puntos', () => {
+    expect(encuadreMapa([])).toBeNull();
+    expect(encuadreMapa([{ latitud: -12, longitud: -77 }])).toEqual([[-12, -77], [-12, -77]]);
+    expect(
+      encuadreMapa([
+        { latitud: -12, longitud: -77 },
+        { latitud: -13, longitud: -76 },
+      ]),
+    ).toEqual([[-13, -77], [-12, -76]]);
+  });
+
+  it('el HTML incluye la atribución y no filtra datos al script', () => {
+    const html = htmlMapa({
+      marcadores: [{ id: '</script>', latitud: -12, longitud: -77 }],
+      interactivo: false,
+      colores: { primario: '#000', exito: '#000', superficie: '#fff', texto: '#000' },
+    });
+    expect(html).toContain(MAPA_ATRIBUCION);
+    expect(html).not.toContain('"id":"</script>"');
   });
 });

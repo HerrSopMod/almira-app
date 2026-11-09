@@ -403,6 +403,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-29',
     porcentajeTributos: null,
     hitos: [],
+    latitud: -12.0905,
+    longitud: -77.032,
   },
   {
     id: 'o-parque-castilla',
@@ -421,6 +423,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-26',
     porcentajeTributos: 62,
     hitos: ['Riego y áreas verdes: 80 %', 'Juegos y luminarias: en curso'],
+    latitud: -12.0862,
+    longitud: -77.039,
   },
   {
     id: 'o-veredas-risso',
@@ -439,6 +443,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-14',
     porcentajeTributos: null,
     hitos: [],
+    latitud: -12.0822,
+    longitud: -77.0345,
   },
   {
     id: 'o-luminarias-led',
@@ -457,6 +463,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-30',
     porcentajeTributos: null,
     hitos: [],
+    latitud: -12.085,
+    longitud: -77.0372,
   },
   {
     id: 'o-parque-central-vv',
@@ -475,5 +483,7 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-20',
     porcentajeTributos: null,
     hitos: [],
+    latitud: null,
+    longitud: null,
   },
 ];

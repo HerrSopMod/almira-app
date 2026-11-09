@@ -137,4 +137,7 @@ export interface Obra {
   // Parte del presupuesto que sale de tributos del distrito; el resto son transferencias.
   porcentajeTributos: number | null;
   hitos: string[];
+  // Sin coordenadas, la obra sale en la lista pero no en el mapa.
+  latitud: number | null;
+  longitud: number | null;
 }

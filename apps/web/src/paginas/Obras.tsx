@@ -186,6 +186,8 @@ function NuevaObra({
       actualizadaEn: HOY_EJEMPLO,
       porcentajeTributos: null,
       hitos: [],
+      latitud: null,
+      longitud: null,
     });
   };
 
