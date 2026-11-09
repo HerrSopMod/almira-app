@@ -127,6 +127,8 @@ export const sizes = {
   icon: 24,
   iconSm: 20,
   iconXs: 16,
+  // Ícono del dibujo genérico que reemplaza a la foto (FotoSimulada).
+  iconDrawing: 56,
   // Burbujas de mensaje: ancho máximo.
   bubbleWidth: '84%',
   borderWidth: 1,
