@@ -488,7 +488,7 @@ describe('panel municipal', () => {
 
   it('usa las medidas del panel web del prototipo', () => {
     expect(panelSizes.sidebar).toBe(248);
-    expect(panelSizes.navItem).toBe(40);
+    expect(panelSizes.navItem).toBe(36);
   });
 });
 
