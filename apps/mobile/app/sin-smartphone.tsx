@@ -6,7 +6,7 @@ import {
   spacing,
 } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useState, type ComponentProps } from 'react';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { CajaIcono, PiePrototipo, Rotulo, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
@@ -35,7 +35,15 @@ export default function SinSmartphone() {
         <Canal
           icono="sms"
           titulo="Por SMS desde cualquier celular"
-          detalle={`Envía DEUDA al ${SMS_NUMERO_EJEMPLO} (número simulado). Es gratis.`}
+          detalle={
+            <>
+              Envía{' '}
+              <Texto variante="bodyMd" peso="700" color={colors.text}>
+                DEUDA
+              </Texto>{' '}
+              al {SMS_NUMERO_EJEMPLO} (número simulado). Es gratis.
+            </>
+          }
         />
       </Tarjeta>
 
@@ -90,7 +98,7 @@ function Canal({
   icono: ComponentProps<typeof CajaIcono>['icono'];
   tono?: ComponentProps<typeof CajaIcono>['tono'];
   titulo: string;
-  detalle: string;
+  detalle: ReactNode;
 }) {
   return (
     <View style={estilos.fila}>
