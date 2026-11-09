@@ -1,8 +1,10 @@
 import { colors, radius, sizes, typography } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '@/auth';
 import { familiaInter, useEscalaTexto } from '@/components/Texto';
+import { supabaseConfigurado } from '@/supabase';
 
 // Pestañas de LEEME.md → Barra inferior, en este orden. "Pagar" conserva la ruta cuenta.
 // MaterialIcons no trae versión de contorno de estos íconos: la activa solo cambia de color.
@@ -17,6 +19,8 @@ const PESTANAS = [
 export default function LayoutPestanas() {
   const { bottom } = useSafeAreaInsets();
   const escala = useEscalaTexto();
+  const { sesion, cargando } = useAuth();
+  if (supabaseConfigurado && !cargando && !sesion) return <Redirect href="/entrada" />;
   return (
     <Tabs
       screenOptions={{

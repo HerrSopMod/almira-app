@@ -1,7 +1,8 @@
 import { colors, documentoValido, sizes, spacing } from '@almira/shared';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useAuth } from '@/auth';
 import { Nota, PiePrototipo, TituloPantalla } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
@@ -9,17 +10,29 @@ import { CampoDocumento } from '@/components/CampoDocumento';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { DOCUMENTO_EJEMPLO, useSesion } from '@/sesion';
+import { supabaseConfigurado } from '@/supabase';
 
 // Pantalla 02a (Stitch 1). Con Google sigue a Vincula tu DNI; con DNI, al código.
-// Todo es simulado: no se abre Google, no se envía ningún SMS ni se guarda nada.
+// Google es real solo si Supabase está configurado; el SMS y el DNI siguen simulados.
 export default function Ingreso() {
   const { iniciarConGoogle, iniciarConDni } = useSesion();
   const [documento, setDocumento] = useState(DOCUMENTO_EJEMPLO);
   const [falloGoogle, setFalloGoogle] = useState(false);
 
+  const { sesion, iniciarConGoogle: googleReal } = useAuth();
+
+  // Con Supabase conectado, Google es real y al volver con sesión sigue a Vincula tu DNI.
+  useEffect(() => {
+    if (supabaseConfigurado && sesion) router.replace('/vincular-dni');
+  }, [sesion]);
+
   const conGoogle = async () => {
     setFalloGoogle(false);
     try {
+      if (supabaseConfigurado) {
+        setFalloGoogle((await googleReal()) !== null);
+        return;
+      }
       await iniciarConGoogle();
       router.push('/vincular-dni');
     } catch {
