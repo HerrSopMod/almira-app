@@ -1,7 +1,6 @@
 import {
   centroMapaDe,
   colors,
-  ETIQUETA_ESTADO_OBRA,
   formatearSoles,
   nombreDistrito,
   sizes,
@@ -13,7 +12,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import { Pressable, StyleSheet, View, type ScrollView } from 'react-native';
 import {
   Avance,
-  ChipPlazo,
+  ChipEstadoObra,
   PiePrototipo,
   Tarjeta,
   TituloPantalla,
@@ -143,7 +142,7 @@ function FilaObra({ obra, seleccionada }: { obra: Obra; seleccionada: boolean })
             <Texto variante="headlineSm">{obra.nombre}</Texto>
             <Texto color={colors.textSecondary}>{obra.ubicacion}</Texto>
           </View>
-          <ChipPlazo texto={ETIQUETA_ESTADO_OBRA[obra.estado]} tono={concluida ? 'resuelto' : 'plazo'} />
+          <ChipEstadoObra estado={obra.estado} />
         </View>
         <Avance porcentaje={obra.avancePct} tono={concluida ? 'concluida' : 'acento'} />
         <View style={estilos.fila}>

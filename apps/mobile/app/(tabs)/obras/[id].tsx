@@ -1,6 +1,5 @@
 import {
   colors,
-  ETIQUETA_ESTADO_OBRA,
   formatearFechaCorta,
   formatearSoles,
   haceDias,
@@ -16,7 +15,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import {
   Avance,
-  ChipPlazo,
+  ChipEstadoObra,
   FilaDato,
   Nota,
   PiePrototipo,
@@ -83,7 +82,7 @@ export default function DetalleObra() {
           <Texto variante="headlineLg" accessibilityRole="header" style={estilos.flexible}>
             {obra.nombre}
           </Texto>
-          <ChipPlazo texto={ETIQUETA_ESTADO_OBRA[obra.estado]} tono={concluida ? 'resuelto' : 'plazo'} />
+          <ChipEstadoObra estado={obra.estado} />
         </View>
         <View style={estilos.ubicacion}>
           <MaterialIcons name="place" size={sizes.iconSm} color={colors.textSecondary} />
@@ -193,7 +192,7 @@ function Leyenda({ color, texto }: { color: string; texto: string }) {
 function Valor({ monto }: { monto: number }) {
   return (
     <Texto variante="bodyLgMedium" alineacion="right" tabular>
-      {formatearSoles(monto)}
+      {formatearSoles(monto, { sinDecimales: true })}
     </Texto>
   );
 }
