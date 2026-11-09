@@ -23,7 +23,16 @@ import {
   type Reclamo,
   type TipoReclamo,
 } from '@almira/shared';
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  leerDatosIngreso,
+  metodoDeSesion,
+  nombreDeSesion,
+  useAuth,
+  type DatosIngreso,
+  type MetodoIngreso,
+} from './auth';
+import { supabaseConfigurado } from './supabase';
 
 // Lo que el vecino autoriza en la pantalla 03 (Tus datos, tus reglas).
 export type Consentimientos = {
@@ -32,23 +41,31 @@ export type Consentimientos = {
   avisosSms: boolean;
 };
 
-// Cómo entró el vecino en la pantalla 02a.
-export type MetodoIngreso = 'google' | 'dni';
+export type { MetodoIngreso };
 
-// Lo que devuelve la cuenta de Google al ingresar.
-export type CuentaGoogle = { userId: string; nombre: string };
+const CONSENTIMIENTOS_INICIALES: Consentimientos = {
+  asistenteIa: true,
+  avisosWhatsapp: true,
+  avisosSms: true,
+};
 
-// Estado en memoria con datos de ejemplo; todavía no hay conexión a Supabase.
+// Con Supabase, el método, el nombre y lo aceptado salen de la cuenta; sin Supabase, el
+// ingreso es simulado y todo vive en memoria. Los datos que se ven siguen siendo de ejemplo.
 type Sesion = {
-  // null hasta que el vecino elige cómo ingresar.
+  // null hasta que el vecino se autentica.
   metodoIngreso: MetodoIngreso | null;
   // Nombre de la cuenta de Google, para saludar en Vincula tu DNI.
-  nombreGoogle: string | null;
-  iniciarConGoogle: () => Promise<CuentaGoogle>;
-  iniciarConDni: () => void;
+  nombreCuenta: string | null;
+  // Ingreso simulado, solo cuando Supabase no está configurado.
+  ingresarSimulado: (metodo: MetodoIngreso) => void;
+  // true cuando ya aceptó el consentimiento (pantalla 03): recién ahí entra a Inicio.
+  consentimientoAceptado: boolean;
+  aceptarConsentimientos: (consentimientos: Consentimientos) => void;
+  cerrarSesion: () => Promise<void>;
   municipalidadId: string;
   elegirMunicipalidad: (id: string) => void;
   consentimientos: Consentimientos;
+  // Cambia los permisos desde Privacidad y mis datos.
   guardarConsentimientos: (consentimientos: Consentimientos) => void;
   // Canales de aviso prendidos en Recordatorios, por municipalidad. Sin elección,
   // solo el canal preferido del vecino. Siempre queda al menos uno.
@@ -89,41 +106,81 @@ function canalInicial(municipalidadId: string): CanalAviso {
   return vecino?.canalPreferido ?? 'whatsapp';
 }
 
+// La municipalidad guardada, si sigue activa; si no, la primera de los datos.
+function municipalidadValida(id: string | null | undefined): string {
+  return municipalidades.find((m) => m.id === id && m.activa)?.id ?? municipalidades[0]!.id;
+}
+
 export function SesionProvider({ children }: { children: ReactNode }) {
-  const [municipalidadId, elegirMunicipalidad] = useState(municipalidades[0]!.id);
-  const [metodoIngreso, setMetodoIngreso] = useState<MetodoIngreso | null>(null);
-  const [nombreGoogle, setNombreGoogle] = useState<string | null>(null);
+  const auth = useAuth();
+  const cuenta = supabaseConfigurado ? auth.sesion : null;
+  const guardado = useMemo(() => leerDatosIngreso(cuenta), [cuenta]);
+  // Lo elegido en esta sesión manda sobre lo guardado en la cuenta.
+  const [metodoSimulado, setMetodoSimulado] = useState<MetodoIngreso | null>(null);
+  const [aceptadoAhora, setAceptadoAhora] = useState(false);
+  const [municipalidadElegida, setMunicipalidadElegida] = useState<string | null>(null);
+  const [consentimientosElegidos, setConsentimientosElegidos] = useState<Consentimientos | null>(
+    null,
+  );
   const [canalesAviso, setCanalesAviso] = useState<Record<string, CanalAviso[]>>({});
   const [reclamosNuevos, setReclamosNuevos] = useState<Reclamo[]>([]);
   const [pagosSimulados, setPagosSimulados] = useState<Pago[]>([]);
-  const [consentimientos, guardarConsentimientos] = useState<Consentimientos>({
-    asistenteIa: true,
-    avisosWhatsapp: true,
-    avisosSms: true,
-  });
-  const valor = useMemo<Sesion>(
-    () => ({
+
+  // Si entra otra cuenta, no hereda lo elegido por la anterior.
+  const usuarioId = cuenta?.user.id ?? null;
+  useEffect(() => {
+    setAceptadoAhora(false);
+    setMunicipalidadElegida(null);
+    setConsentimientosElegidos(null);
+  }, [usuarioId]);
+
+  const metodoIngreso = cuenta ? metodoDeSesion(cuenta) : metodoSimulado;
+  const nombreCuenta = cuenta
+    ? nombreDeSesion(cuenta)
+    : metodoSimulado === 'google'
+      ? USUARIO_EJEMPLO.nombre
+      : null;
+  const consentimientoAceptado = aceptadoAhora || guardado !== null;
+  const municipalidadId = municipalidadValida(municipalidadElegida ?? guardado?.municipalidadId);
+  const consentimientos =
+    consentimientosElegidos ?? guardado?.consentimientos ?? CONSENTIMIENTOS_INICIALES;
+  const { guardarDatosIngreso, cerrarSesion: cerrarSesionAuth } = auth;
+
+  const valor = useMemo<Sesion>(() => {
+    const guardar = (cambios: Partial<DatosIngreso>) =>
+      void guardarDatosIngreso({
+        municipalidadId,
+        consentimientos,
+        consentimientoAceptadoEn: guardado?.consentimientoAceptadoEn ?? new Date().toISOString(),
+        ...cambios,
+      });
+    return {
       metodoIngreso,
-      nombreGoogle,
-      // Único punto donde se conectará supabase.auth.signInWithOAuth({ provider: 'google' }).
-      // Mientras no haya Supabase, devuelve la cuenta de ejemplo de Rosa sin abrir Google.
-      iniciarConGoogle: async () => {
-        const cuenta: CuentaGoogle = {
-          userId: USUARIO_EJEMPLO.id,
-          nombre: USUARIO_EJEMPLO.nombre,
-        };
-        setMetodoIngreso('google');
-        setNombreGoogle(cuenta.nombre);
-        return cuenta;
+      nombreCuenta,
+      ingresarSimulado: setMetodoSimulado,
+      consentimientoAceptado,
+      aceptarConsentimientos: (elegidos) => {
+        setConsentimientosElegidos(elegidos);
+        setAceptadoAhora(true);
+        guardar({ consentimientos: elegidos, consentimientoAceptadoEn: new Date().toISOString() });
       },
-      iniciarConDni: () => {
-        setMetodoIngreso('dni');
-        setNombreGoogle(null);
+      cerrarSesion: async () => {
+        await cerrarSesionAuth();
+        setMetodoSimulado(null);
+        setAceptadoAhora(false);
+        setMunicipalidadElegida(null);
+        setConsentimientosElegidos(null);
       },
       municipalidadId,
-      elegirMunicipalidad,
+      elegirMunicipalidad: (id) => {
+        setMunicipalidadElegida(id);
+        if (consentimientoAceptado) guardar({ municipalidadId: id });
+      },
       consentimientos,
-      guardarConsentimientos,
+      guardarConsentimientos: (elegidos) => {
+        setConsentimientosElegidos(elegidos);
+        if (consentimientoAceptado) guardar({ consentimientos: elegidos });
+      },
       canalesAviso,
       alternarCanalAviso: (canal) =>
         setCanalesAviso((previos) => ({
@@ -192,17 +249,20 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         setPagosSimulados((previos) => [...nuevos, ...previos]);
         return referencia;
       },
-    }),
-    [
-      metodoIngreso,
-      nombreGoogle,
-      municipalidadId,
-      canalesAviso,
-      reclamosNuevos,
-      consentimientos,
-      pagosSimulados,
-    ],
-  );
+    };
+  }, [
+    metodoIngreso,
+    nombreCuenta,
+    consentimientoAceptado,
+    guardado,
+    guardarDatosIngreso,
+    cerrarSesionAuth,
+    municipalidadId,
+    canalesAviso,
+    reclamosNuevos,
+    consentimientos,
+    pagosSimulados,
+  ]);
   return <ContextoSesion.Provider value={valor}>{children}</ContextoSesion.Provider>;
 }
 

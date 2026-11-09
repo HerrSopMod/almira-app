@@ -1,15 +1,18 @@
 import { codigoValido, USUARIO_EJEMPLO } from '@almira/shared';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Nota, TituloPantalla } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { CasillasCodigo } from '@/components/CasillasCodigo';
 import { Pantalla } from '@/components/Pantalla';
+import { useSesion } from '@/sesion';
 
-// Pantalla 02b (Stitch 2). Todo es simulado: no se envía ningún SMS y sirve
-// cualquier código de 6 dígitos. Viene lleno con el código de ejemplo.
+// Pantalla 02b (Stitch 2), después de Vincula tu DNI. El SMS al celular del padrón es
+// simulado: no se envía nada y sirve cualquier código de 6 dígitos. Viene lleno con el
+// código de ejemplo.
 export default function Codigo() {
+  const { metodoIngreso } = useSesion();
   const [codigo, setCodigo] = useState<string>(USUARIO_EJEMPLO.codigoSmsEjemplo);
   const [reenviado, setReenviado] = useState(false);
 
@@ -18,6 +21,8 @@ export default function Codigo() {
     if (router.canGoBack()) router.back();
     else router.replace('/ingreso');
   };
+
+  if (!metodoIngreso) return <Redirect href="/ingreso" />;
 
   return (
     <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 1 de 3" />}>
