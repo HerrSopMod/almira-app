@@ -43,10 +43,11 @@ export type Consentimientos = {
 
 export type { MetodoIngreso };
 
+// Como en la maqueta 03: el SMS, canal alterno, empieza apagado.
 const CONSENTIMIENTOS_INICIALES: Consentimientos = {
   asistenteIa: true,
   avisosWhatsapp: true,
-  avisosSms: true,
+  avisosSms: false,
 };
 
 // Con Supabase, el método, el nombre y lo aceptado salen de la cuenta; sin Supabase, el
