@@ -53,7 +53,7 @@ otra cosa.
 | 15 | Reclamos | `(tabs)/reclamos` | Stitch 10 | Botón "Nuevo reclamo con foto" arriba. Tarjetas con código, título, insignia, miniatura de la foto simulada, área y plazo. Nota del área y el plazo. Al final, "¿Necesitas ayuda? Hablar con una persona" (lleva a 14), sin teléfono. Sin "Geo-validación". |
 | 16 | Nuevo reclamo | `reclamo/nuevo` | Maqueta `16-nuevo-reclamo` | Foto con la cámara ("Tomar foto", "Tomar otra foto") y botón "Usar mi ubicación" con el GPS, ambos con permiso. Minimapa real con un marcador: el punto del GPS o, si no lo hay, el del predio de ejemplo (ver MAPA.md). Nota: "Por ahora la foto y tu ubicación se quedan en tu teléfono: no se envían con el reclamo." No digas que la foto se envía como evidencia. |
 | 17 | Envío al área | `reclamo/envio` | Maqueta `17-envio-al-area` | |
-| 18 | Seguimiento | `(tabs)/reclamos/[id]` | Maqueta `18-seguimiento` | |
+| 18 | Seguimiento | `(tabs)/reclamos/[id]` | Maqueta `18-seguimiento` | La fila del plazo dice "Quedan 3 de 10 días" (no "3 de 10 días") y la barra muestra el tiempo que ya pasó (7 de 10). |
 | 19 | Obras (mapa) | `(tabs)/obras` | Maqueta `19-mapa-de-obras` | Mapa real (MAPA.md). Al tocar un marcador se resalta su tarjeta y la lista se desplaza hasta ella. Chips para filtrar. |
 | 20 | Detalle de la obra | `(tabs)/obras/[id]` | Maqueta `20-detalle-de-la-obra` | El ícono de mapa y "Ver en el mapa" vuelven a 19 con esa obra seleccionada. |
 | 21 | Mi perfil | `(tabs)/inicio/perfil` | Maqueta `21-mi-perfil` | "Mi municipalidad" abre 02d. "Texto más grande" mantiene `largeTextScale`. |
