@@ -1,4 +1,11 @@
-import { colors, radius, sizes, spacing } from '@almira/shared';
+import {
+  centroMapaDe,
+  colors,
+  radius,
+  sizes,
+  spacing,
+  UBICACIONES_PREDIO_EJEMPLO,
+} from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -7,6 +14,7 @@ import { Nota, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Campo } from '@/components/Campo';
+import { MapaObras } from '@/components/MapaObras';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
@@ -16,16 +24,22 @@ const DESCRIPCION_EJEMPLO =
   'Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.';
 
 const MAXIMO_DESCRIPCION = 500;
+// El minimapa solo marca la ubicación del reclamo.
+const SIN_OBRAS: never[] = [];
 
 // Pantalla 16 (maqueta 16-nuevo-reclamo). La foto y la ubicación son simuladas: no
 // se usa la cámara ni el GPS. La ubicación parte de la dirección del predio y se
-// puede ajustar. El recuadro "Mapa" es provisional hasta que llegue el mapa real.
+// puede ajustar. El minimapa real (MAPA.md) marca el punto simulado del predio; si el
+// vecino cambia la dirección, el mapa queda en el distrito sin marcador.
 export default function NuevoReclamo() {
-  const { predios } = useDatosMunicipales();
+  const { municipalidad, predios } = useDatosMunicipales();
   const [foto, setFoto] = useState(false);
   const [direccion, setDireccion] = useState(predios[0]?.direccion ?? '');
   const [ajustando, setAjustando] = useState(direccion === '');
   const [descripcion, setDescripcion] = useState(DESCRIPCION_EJEMPLO);
+
+  const predio = predios.find((p) => p.direccion === direccion.trim());
+  const punto = predio ? (UBICACIONES_PREDIO_EJEMPLO[predio.id] ?? null) : null;
 
   const listo = foto && direccion.trim() !== '' && descripcion.trim() !== '';
 
@@ -60,12 +74,16 @@ export default function NuevoReclamo() {
       <View style={estilos.grupo}>
         <Texto variante="bodyLgMedium">Ubicación del problema</Texto>
         <Tarjeta style={estilos.ubicacion}>
-          {/* Recuadro provisional: el mapa real llega en la etapa 4 (MAPA.md). */}
-          <View accessible accessibilityLabel="Mapa provisional" style={estilos.mapa}>
-            <MaterialIcons name="map" size={sizes.icon} color={colors.textSecondary} />
-            <Texto variante="bodyMdMedium" color={colors.textSecondary}>
-              Mapa
-            </Texto>
+          <View style={estilos.mapa}>
+            <MapaObras
+              obras={SIN_OBRAS}
+              centro={centroMapaDe(municipalidad.id)}
+              ubicacion={punto}
+              interactivo={false}
+              enTarjeta
+              alto={sizes.miniMap}
+              accessibilityLabel="Mapa de la ubicación del problema"
+            />
           </View>
           <View style={estilos.direccion}>
             {ajustando ? (
@@ -151,11 +169,6 @@ const estilos = StyleSheet.create({
   fotoLista: { borderStyle: 'solid' },
   ubicacion: { padding: 0, gap: 0, overflow: 'hidden' },
   mapa: {
-    height: sizes.miniMap,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.subtle,
     borderBottomWidth: sizes.borderWidth,
     borderBottomColor: colors.border,
   },
