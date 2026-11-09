@@ -204,25 +204,37 @@ export const typography = {
   },
 } as const satisfies Record<string, EstiloTexto>;
 
-// Medidas del panel web (LEEME.md → Panel web). Los radios, insignias, interruptor y
+// Medidas del panel web (LEEME.md → Panel web), en densidad compacta: el Panel municipal
+// entra sin scroll en una laptop de 1536 × 730. Los radios, insignias, interruptor y
 // escalera son los mismos de la app (radius y sizes).
 export const panelSizes = {
   // Barra lateral blanca: ancho, relleno y alto de cada módulo.
   sidebar: 248,
   sidebarX: 12,
-  sidebarY: 20,
+  sidebarY: 16,
   // Relleno extra de la marca y del usuario respecto de los módulos.
   sidebarBrandX: 10,
-  navItem: 40,
+  navItem: 36,
   navGap: 4,
   navIcon: 20,
   navBadge: 20,
+  // Logo y avatar de la barra lateral, más chicos que los de la app (32 y 36).
+  logo: 28,
+  avatar: 32,
   // Contenido: márgenes, separación entre tarjetas y relleno interior.
-  contentX: 28,
-  contentY: 24,
-  gap: 16,
-  cardPaddingX: 20,
-  cardPaddingY: 18,
+  contentX: 20,
+  contentY: 16,
+  gap: 12,
+  cardPaddingX: 16,
+  cardPaddingY: 14,
+  cardGap: 8,
+  // Indicadores: relleno vertical, separación interna y barra de avance (no pasan de 96 px).
+  kpiPaddingY: 10,
+  kpiGap: 2,
+  kpiProgress: 4,
+  // "Requiere tu decisión": caja de ícono de 32 y relleno de cada fila (40 px de alto).
+  decisionIcon: 32,
+  decisionRowY: 2,
   // Botones de 40 px (pequeños, 32) y chips de filtro de 32.
   button: 40,
   buttonSm: 32,
@@ -232,30 +244,28 @@ export const panelSizes = {
   loginCard: 400,
   // Mapa "Vista del vecino" de Obras publicadas (web-06).
   neighborMapWidth: 380,
-  neighborMapHeight: 320,
+  neighborMapHeight: 300,
   // Marca y usuario de la barra lateral: relleno arriba y abajo de la marca, y sobre el usuario.
   sidebarBrandTop: 2,
-  sidebarBrandBottom: 18,
-  sidebarFooterTop: 14,
+  sidebarBrandBottom: 12,
+  sidebarFooterTop: 10,
   // Columna del detalle del reclamo (web-05) y de la columna de avance de obras (web-06).
   detailColumn: 400,
   progressColumn: 170,
   // Tablas: celdas, encabezado y relleno de la tarjeta que solo lleva una tabla.
   tableCellX: 12,
-  tableCellY: 12,
-  tableHeadY: 10,
+  tableCellY: 8,
+  tableHeadY: 8,
   tableCardX: 8,
   tableCardY: 6,
   // Barras verticales: alto total, espacio para la cifra, separación y ancho máximo.
-  barChartHeight: 170,
+  barChartHeight: 120,
   barChartTop: 22,
   barGap: 14,
   barMaxWidth: 72,
   // Barras horizontales: riel, alto de fila, ancho del nombre y de la cifra.
   hBarTrack: 10,
-  hBarRowSm: 30,
-  hBarRowMd: 36,
-  hBarRowLg: 38,
+  hBarRow: 24,
   hBarLabelSm: 120,
   hBarLabelMd: 140,
   hBarLabelLg: 160,
@@ -272,6 +282,8 @@ export const panelSizes = {
   // celdas del ciclo, descripción del reclamo y alerta activa (14).
   innerGap: 10,
   cellX: 14,
+  // Relleno vertical de las celdas del ciclo y de la ruta del incidente.
+  cellY: 4,
   // Ícono dentro de textos (origen de un caso) y separación entre título y fecha del reclamo.
   inlineIcon: 18,
   tightGap: 2,
@@ -280,9 +292,12 @@ export const panelSizes = {
 // Textos del panel web, todos en Inter.
 export const panelTypography = {
   brand: { fontSize: 16, fontWeight: '700', lineHeight: 20 },
-  title: { fontSize: 24, fontWeight: '700', lineHeight: 30, letterSpacing: -0.24 },
-  cardTitle: { fontSize: 16, fontWeight: '600', lineHeight: 22 },
-  kpi: { fontSize: 28, fontWeight: '700', lineHeight: 34, letterSpacing: -0.28 },
+  title: { fontSize: 20, fontWeight: '700', lineHeight: 26, letterSpacing: -0.2 },
+  // Subtítulo de la página (13) y de la tarjeta (12, el estilo small).
+  pageSubtitle: { fontSize: 13, fontWeight: '400', lineHeight: 18 },
+  cardTitle: { fontSize: 15, fontWeight: '600', lineHeight: 20 },
+  kpi: { fontSize: 24, fontWeight: '700', lineHeight: 30, letterSpacing: -0.24 },
+  kpiLabel: { fontSize: 12, fontWeight: '500', lineHeight: 16 },
   nav: { fontSize: 14, fontWeight: '500', lineHeight: 20 },
   navActive: { fontSize: 14, fontWeight: '600', lineHeight: 20 },
   subtitle: { fontSize: 14, fontWeight: '400', lineHeight: 20 },

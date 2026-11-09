@@ -37,7 +37,7 @@ export function Encabezado({
 }) {
   return (
     <header className="encabezado">
-      <div>
+      <div className="encabezado-titulo">
         <h1>{titulo}</h1>
         <p className="subtitulo">{subtitulo}</p>
       </div>
