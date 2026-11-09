@@ -70,11 +70,11 @@ El pago es simulado: al confirmar, `registrarPagoSimulado` crea pagos en memoria
 
 El asistente se llama "Asistente" y no usa IA (la pantalla lo dice en su nota: "Prototipo: respuestas fijas de ejemplo"): `responderAsistente` (`packages/shared/src/asistente.ts`) responde con textos fijos si la pregunta menciona cuotas o la multa, y con un mensaje que orienta a las preguntas sugeridas o a hablar con una persona en cualquier otro caso. La conversación vive solo en la pantalla. La simulación de cuotas usa las deudas pendientes (o solo las vencidas) y la tasa ilustrativa del prototipo (1 % mensual, cuota fija); es informativa y "Pedir evaluación a Rentas" no envía nada. Atención humana es simulada: el tiempo de espera es de ejemplo y no hay nadie conectado; solo promete compartir la consulta con el asistente si el vecino lo autorizó en el consentimiento.
 
-Reclamos: la foto y la ubicación son simuladas (no se usa la cámara ni el GPS). "Agregar foto" solo marca que hay una foto de ejemplo y las pantallas 15, 17 y 18 muestran un dibujo fijo según la categoría en miniatura (`MiniaturaFoto` de `FotoSimulada.tsx`). Nuevo reclamo muestra un minimapa real, fijo y sin gestos, con un marcador en la ubicación simulada del predio (`UBICACIONES_PREDIO_EJEMPLO`); si el vecino cambia la dirección, el mapa queda en el distrito sin marcador y el reclamo se guarda sin coordenadas. La ayuda de Reclamos lleva a Atención humana; no se muestra ningún teléfono. La ubicación parte de la dirección del predio y el vecino puede ajustarla a mano. `clasificarReclamo` (`packages/shared/src/reclamos.ts`) elige la categoría con palabras clave y `AREA_TIPO_RECLAMO` da el área; no hay IA. El plazo de ejemplo es de 10 días hábiles para todas las categorías. Al confirmar, `registrarReclamo` guarda el reclamo en memoria con el siguiente código de la municipalidad, estado `derivado` y fecha `HOY_EJEMPLO`, y abre su seguimiento. El estado lo cambia la municipalidad.
+Reclamos: Nuevo reclamo (16) toma la foto con la cámara (`expo-image-picker`) y, si el vecino toca "Usar mi ubicación", lee el GPS (`expo-location`), siempre con permiso. Por ahora los dos se quedan en el teléfono: la foto no se sube a Storage, el punto del GPS no se guarda en el reclamo y la pantalla lo dice en una nota. Las pantallas 15, 17 y 18 siguen mostrando un dibujo fijo según la categoría en miniatura (`MiniaturaFoto` de `FotoSimulada.tsx`). El minimapa de la 16 es real, fijo y sin gestos: marca el punto del GPS si lo hay y, si no, la ubicación de ejemplo del predio (`UBICACIONES_PREDIO_EJEMPLO`); si el vecino cambia la dirección sin GPS, el mapa queda en el distrito sin marcador. El reclamo guarda el punto de ejemplo del predio, o ninguno si cambió la dirección. La ayuda de Reclamos lleva a Atención humana; no se muestra ningún teléfono. La ubicación parte de la dirección del predio y el vecino puede ajustarla a mano. `clasificarReclamo` (`packages/shared/src/reclamos.ts`) elige la categoría con palabras clave y `AREA_TIPO_RECLAMO` da el área; no hay IA. El plazo de ejemplo es de 10 días hábiles para todas las categorías. Al confirmar, `registrarReclamo` guarda el reclamo en memoria con el siguiente código de la municipalidad, estado `derivado` y fecha `HOY_EJEMPLO`, y abre su seguimiento. El estado lo cambia la municipalidad.
 
 Obras: el mapa es real (ver «Mapa de obras» más abajo). La pantalla 19 filtra con los chips Todas, En ejecución y Concluidas; al tocar un marcador se resalta su tarjeta y la lista baja hasta ella. Con `/obras?obra=<id>` la obra llega seleccionada y centrada: así vuelven el ícono de mapa y "Ver en el mapa" del detalle (20), que solo aparecen si la obra tiene ubicación. El botón de recentrar vuelve al encuadre de las obras; no usa el GPS. El detalle muestra una imagen ilustrativa porque no hay fotos publicadas.
 
-Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGrande.tsx`) agranda en memoria todos los textos de `Texto`. Cerrar sesión vuelve a la entrada. Privacidad y mis datos muestra y cambia los permisos que guardó el consentimiento; las solicitudes ARCO son simuladas. Sin smartphone usa un número SMS y un horario de ejemplo (`SMS_NUMERO_EJEMPLO`, `HORARIO_MODULO_EJEMPLO`) y la reserva de turno es simulada.
+Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGrande.tsx`) agranda en memoria todos los textos de `Texto`. Cerrar sesión cierra la sesión de Supabase, si está configurado, y vuelve al ingreso. Privacidad y mis datos muestra y cambia los permisos que guardó el consentimiento; las solicitudes ARCO son simuladas. Sin smartphone usa un número SMS y un horario de ejemplo (`SMS_NUMERO_EJEMPLO`, `HORARIO_MODULO_EJEMPLO`) y la reserva de turno es simulada.
 
 Recordatorios vive dentro de la pestaña Inicio; el detalle del aviso y "Cómo llegan los avisos" se abren encima de las pestañas. Los títulos y mensajes de los avisos salen de `packages/shared/src/avisos.ts` con los datos de la deuda y el `nombreCorto` de la obra (si la obra no lo tiene, el mensaje no la menciona). En "¿Por dónde te avisamos?" los canales van con interruptores y se pueden prender varios. Se guardan en memoria por municipalidad, empiezan con el canal preferido del vecino y siempre queda al menos uno (`alternarCanal` en `packages/shared/src/avisos.ts`). En la base sigue habiendo un solo `canal_preferido`; la lista de canales todavía no se guarda. Los mensajes de la pantalla 11 son ejemplos: no se envía nada.
 
@@ -109,7 +109,7 @@ Cada tabla de datos lleva `municipalidad_id`.
 - `vecinos` tiene una fila por persona y municipalidad: quien tributa en dos distritos tiene dos filas. `user_id` queda vacío hasta que vincula su DNI.
 - Las llaves foráneas compuestas `(municipalidad_id, id)` impiden que una deuda, un pago o un reclamo apunte a un vecino de otra municipalidad, incluso con `service_role`.
 - `reclamos.foto_ruta` es obligatoria y debe estar en la carpeta de su municipalidad.
-- `obras.latitud` y `obras.longitud` son nulas (`20261115000001_obras_ubicacion.sql`): una obra sin coordenadas sale en la lista, pero no en el mapa.
+- `obras.latitud` y `obras.longitud` son nulas (`20261109000001_obras_ubicacion.sql`): una obra sin coordenadas sale en la lista, pero no en el mapa.
 
 ## Seguridad
 
@@ -144,13 +144,18 @@ El mapa es OpenStreetMap dibujado con Leaflet, sin API key (`docs/design/turques
 - El centro de cada distrito vive en `CENTROS_MAPA_EJEMPLO` (`centroMapaDe`); la base no tiene esa columna. Una municipalidad sin centro usa el de Lima.
 - La atribución siempre se ve, sin el prefijo de Leaflet.
 
-Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo son aproximadas y deben verificarse en openstreetmap.org antes de presentar. El GPS del reclamo sigue simulado; usar `expo-location` sería un paso aparte.
+Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo son aproximadas y deben verificarse en openstreetmap.org antes de presentar. El minimapa del reclamo usa el GPS solo para mostrar el punto; ese punto todavía no se guarda.
 
-## Recordatorios
+## Recordatorios y SMS
 
-`supabase/functions/enviar-recordatorios` procesa los recordatorios con estado `programado` cuya fecha ya pasó. Requiere `Authorization: Bearer <RECORDATORIOS_SECRETO>` y falla cerrada si el secreto no existe.
+`supabase/functions/enviar-recordatorios` procesa los recordatorios con estado `programado`, canal `sms` y fecha vencida, y los envía con Twilio. Requiere `Authorization: Bearer <RECORDATORIOS_SECRETO>` y falla cerrada si el secreto no existe. Los secretos de Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` y `TWILIO_MESSAGING_SERVICE_SID` o `TWILIO_FROM`) se cargan con `supabase secrets set`, nunca en el repositorio.
 
-**El envío es simulado:** `enviarPorCanal` solo registra el intento y devuelve éxito, así que los recordatorios quedan como `enviado` sin que salga ningún mensaje. No se debe programar en producción hasta conectar un proveedor. Falta también el cron que la invoque.
+- WhatsApp y la app no tienen proveedor conectado: sus recordatorios se quedan en `programado`, no se marcan como enviados.
+- Un recordatorio sin teléfono peruano válido pasa a `fallido`.
+- Los logs no incluyen teléfonos ni mensajes.
+- Falta el cron que invoque la función.
+
+El ingreso con celular usa Phone Auth de Supabase (Authentication → Providers → Phone, con Twilio): `signInWithOtp` y `verifyOtp` en `src/auth.tsx`.
 
 ## Comandos
 

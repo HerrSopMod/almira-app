@@ -11,6 +11,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from '@/auth';
 import { SesionProvider } from '@/sesion';
 import { TextoGrandeProvider } from '@/textoGrande';
 
@@ -32,17 +33,19 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <SesionProvider>
-        <TextoGrandeProvider>
-          <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-            }}
-          />
-        </TextoGrandeProvider>
-      </SesionProvider>
+      <AuthProvider>
+        <SesionProvider>
+          <TextoGrandeProvider>
+            <StatusBar style="dark" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.background },
+              }}
+            />
+          </TextoGrandeProvider>
+        </SesionProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

@@ -1,8 +1,6 @@
--- Ubicación de cada obra para el mapa real de OpenStreetMap
--- (docs/design/turquesa/MAPA.md). Son columnas nulas: una obra sin coordenadas
--- sale en la lista, pero no en el mapa.
---
--- No crea tablas ni agrega permisos: obras ya tiene municipalidad_id y RLS.
+-- Coordenadas de las obras para el mapa real de OpenStreetMap.
+-- Son columnas nulas: una obra sin coordenadas sale en la lista pero no en el mapa.
+-- No crea tablas ni agrega permisos: la tabla ya tiene municipalidad_id y RLS.
 -- Pendiente: obras usa grant de tabla completa para authenticated
 -- (20261031000002_rls.sql), así que el personal de la municipalidad también puede
 -- escribir estas columnas mediante "personal actualiza obras". Pasar a permisos por

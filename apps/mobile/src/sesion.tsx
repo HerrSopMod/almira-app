@@ -144,8 +144,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
             (r) => r.municipalidadId === municipalidadId,
           ),
         );
-        // La foto y la ubicación son simuladas: no se sube ningún archivo ni se lee el GPS.
-        // El punto del mapa es el del predio; si el vecino cambió la dirección, no hay punto.
+        // La foto y el punto del GPS de Nuevo reclamo no llegan aquí: no se sube ningún
+        // archivo. El punto guardado es el de ejemplo del predio; si el vecino cambió la
+        // dirección, no hay punto.
         const predio = predios.find(
           (p) => p.vecinoId === vecino.id && p.direccion === direccion,
         );

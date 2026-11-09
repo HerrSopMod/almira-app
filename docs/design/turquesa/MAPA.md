@@ -10,12 +10,12 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 | --- | --- |
 | App 19 · Obras | Las obras publicadas, cada una con un marcador con su % de avance. Al tocar un marcador se selecciona su tarjeta |
 | App 20 · Detalle de la obra | "Ver en el mapa" abre la pantalla 19 con esa obra seleccionada y centrada |
-| App 16 · Nuevo reclamo | Minimapa fijo (sin gestos) con un marcador en la ubicación del reclamo, que sigue simulada |
+| App 16 · Nuevo reclamo | Minimapa fijo (sin gestos) con un marcador: el punto del GPS si el vecino tocó "Usar mi ubicación"; si no, el punto de ejemplo del predio |
 | Web-06 · Obras publicadas | "Vista del vecino": las obras con «Publicada» activo, como las ve el vecino |
 
 ## Datos
 
-1. **Migración nueva** `supabase/migrations/20261115000001_obras_ubicacion.sql`:
+1. **Migración nueva** `supabase/migrations/20261109000001_obras_ubicacion.sql`:
    ```sql
    alter table public.obras
      add column latitud double precision check (latitud between -90 and 90),
@@ -101,4 +101,5 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
   académico, pero no para una app con mucho tráfico; ahí haría falta un proveedor con
   clave.
 - Las coordenadas de ejemplo son aproximadas.
-- El GPS del reclamo sigue simulado. Usar `expo-location` sería un paso aparte.
+- El GPS del reclamo (`expo-location`) solo se usa para el marcador del minimapa: el punto
+  todavía no se guarda en el reclamo.

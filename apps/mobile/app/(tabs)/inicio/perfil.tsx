@@ -9,17 +9,19 @@ import { Menu } from '@/components/Menu';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
+import { useAuth } from '@/auth';
 import { useTextoGrande } from '@/textoGrande';
 
 // Pantalla 21 (maqueta 21-mi-perfil), dentro de la pestaña Inicio.
 export default function Perfil() {
   const { municipalidad, vecino, predios } = useDatosMunicipales();
   const textoGrande = useTextoGrande();
+  const { cerrarSesion: cerrarSesionReal } = useAuth();
 
   const cerrarSesion = () => {
-    // El ingreso es simulado: cerrar sesión vuelve a la entrada.
+    void cerrarSesionReal();
     if (router.canDismiss()) router.dismissAll();
-    router.replace('/entrada');
+    router.replace('/ingreso');
   };
 
   return (

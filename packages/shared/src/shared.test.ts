@@ -687,6 +687,13 @@ describe('mapa de obras', () => {
     expect(html).not.toContain('</script><script>alert(1)');
   });
 
+  it('no deja cerrar el script con el id de una obra', () => {
+    const peligrosa = { ...deLince[1]!, id: '</script>' };
+    const html = htmlMapaObras({ obras: [peligrosa], interactivo: false, colores, centroPorDefecto: centroLince });
+    expect(html).not.toContain('"id":"</script>"');
+    expect([...html.matchAll(/<\/script>/g)]).toHaveLength(3);
+  });
+
   it('arma JavaScript válido en el HTML', () => {
     const html = htmlMapaObras({
       obras: deLince,
