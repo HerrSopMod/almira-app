@@ -396,6 +396,11 @@ button {
   font: var(--t-nav-active);
 }
 
+.menu .icono {
+  width: var(--p-nav-icon);
+  height: var(--p-nav-icon);
+}
+
 .menu-titulo {
   flex: 1;
 }
