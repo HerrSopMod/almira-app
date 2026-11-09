@@ -1256,7 +1256,7 @@ th.monto {
 /* Atención humana (web-07) */
 
 .origen {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--p-field-gap);
 }
