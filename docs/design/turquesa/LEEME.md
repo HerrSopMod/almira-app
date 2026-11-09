@@ -89,9 +89,11 @@ Solo **Inter** (400, 500, 600 y 700). Poppins sale del proyecto. Montos y tablas
 | `caption` | 12 / 16 | 400 | Ayudas y pies |
 | `tabLabel` | 11 / 14 | 500 | Etiquetas de la barra inferior |
 
-**Panel web:** título de página 24 / 30 (700), título de tarjeta 16 / 22 (600), cifra de
-indicador 28 / 34 (700), texto de tabla 13 / 18, encabezado de tabla 11 / 16 (600, en
-mayúsculas, espaciado 0.66) y menú 14 / 20 (500; 600 cuando está activo).
+**Panel web (densidad compacta):** título de página 20 / 26 (700) con su subtítulo de
+13 / 18, título de tarjeta 15 / 20 (600) con su subtítulo de 12 / 16, rótulo de indicador
+12 / 16 (500), cifra de indicador 24 / 30 (700), texto de tabla 13 / 18, encabezado de
+tabla 11 / 16 (600, en mayúsculas, espaciado 0.66) y menú 14 / 20 (500; 600 cuando está
+activo). Las notas y textos de lectura siguen en 14 px.
 
 ## Espacios, radios y medidas
 
@@ -183,15 +185,28 @@ máximo el 84 % del ancho.
 y sombra suave. Va en `primary` si la obra está en ejecución, en `success` si está
 concluida y en `primaryPressed` (algo más grande) si está seleccionada.
 
-**Panel web.**
-- *Barra lateral:* blanca, de 248 px, con borde derecho de 1 px. Arriba van el logo,
-  "Almira" y el nombre de la municipalidad (viene de los datos). Cada módulo mide 40 px;
-  el activo va con fondo `highlight` y texto `primaryPressed` 600. El contador va en
-  círculo `primary` con texto blanco. Abajo va el usuario.
-- *Contenido:* fondo `panelBackground` y márgenes de 24 × 28 px. Las tarjetas son blancas,
-  con borde, radio de 12 px y relleno de 18 × 20 px.
-- *Tablas:* sin bordes verticales, con encabezado en mayúsculas `textSecondary` y filas
-  separadas por 1 px. La fila seleccionada lleva fondo `subtle`.
+**Panel web.** Densidad compacta: el Panel municipal entra completo, sin scroll, en una
+laptop con área visible de 1536 × 730 px (1920 × 1080 al 125 %).
+- *Barra lateral:* blanca, de 248 px, con borde derecho de 1 px y relleno de 16 × 12 px.
+  Arriba van el logo de 28 px, "Almira" y el nombre de la municipalidad (viene de los
+  datos). Cada módulo mide 36 px; el activo va con fondo `highlight` y texto
+  `primaryPressed` 600. El contador va en círculo `primary` con texto blanco. Abajo va el
+  usuario, con avatar de 32 px.
+- *Contenido:* fondo `panelBackground`, márgenes de 16 × 20 px y separación de 12 px entre
+  tarjetas. Las tarjetas son blancas, con borde, radio de 12 px, relleno de 14 × 16 px y
+  separación interna de 8 px. El subtítulo de la página y de cada tarjeta va en la misma
+  línea que el título; si no cabe, pasa abajo.
+- *Indicadores:* relleno de 10 × 16 px, separación de 2 px y barra de avance de 4 px; no
+  pasan de 96 px de alto.
+- *Gráficos:* barras verticales de 120 px de alto (cifra incluida) y barras horizontales
+  en filas de 24 px, con riel de 10 px.
+- *Requiere tu decisión:* filas de 40 px con caja de ícono de 32 px.
+- *Cómo aprende la municipalidad y ruta del incidente:* una fila de 5 celdas con relleno
+  de 4 × 14 px.
+- *Tablas:* sin bordes verticales, celdas con relleno de 8 × 12 px, encabezado en
+  mayúsculas `textSecondary` y filas separadas por 1 px. La fila seleccionada lleva fondo
+  `subtle`.
+- *Mapa "Vista del vecino":* 380 × 300 px.
 - *Botones:* 40 px (pequeños, 32 px), con radio de 10 px.
 
 ## Íconos
