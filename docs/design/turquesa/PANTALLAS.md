@@ -34,7 +34,7 @@ otra cosa.
 | # | Pantalla | Ruta actual | Seguir | Notas de adaptación |
 | --- | --- | --- | --- | --- |
 | 01 | Entrada | `(auth)/entrada` | Maqueta `01-entrada` | Sin selector de municipalidad. "No tengo cuenta ni smartphone propio" lleva a 23. |
-| 02a | Ingresa a tu cuenta | `(auth)/ingreso` | Stitch 1 | Barra superior blanca "Paso 1 de 3", sin flecha atrás ni cabecera de color. Botón Google, divisor "o con tu correo" / "o con tu celular" y control segmentado Correo / Celular. Correo: correo, contraseña (mínimo 8) con botón para verla, "Ingresar" y "¿No tienes cuenta? Créala". Celular (+51, 9 dígitos): "Recibir código por SMS" y, después, el código de 6 dígitos y "Verificar código". Abajo: "Datos de ejemplo…" (solo sin Supabase), "Antes de entrar te pediremos tu consentimiento para usar tus datos." y "Prototipo académico · Datos ficticios". Sin RENIEC, teléfono ni "términos de servicio". |
+| 02a | Ingresa a tu cuenta | `(auth)/ingreso` | Stitch 1 | Barra superior blanca "Paso 1 de 3", sin flecha atrás ni cabecera de color. Botón Google, divisor "o con tu correo" / "o con tu celular" y control segmentado Correo / Celular. Correo: correo, contraseña (mínimo 8) con botón para verla, "Ingresar" y "¿No tienes cuenta? Créala". Celular (+51, 9 dígitos): "Recibir código por SMS" y, después, el código de 6 dígitos y "Verificar código". Abajo: "Datos de ejemplo…" (solo sin Supabase), "Antes de entrar te pediremos tu consentimiento para usar tus datos.", el botón terciario "No tengo cuenta ni smartphone propio" (lleva a 23) y "Prototipo académico · Datos ficticios". Sin RENIEC, teléfono ni "términos de servicio". |
 | 02b | Ingresa el código | `(auth)/codigo` | Stitch 2 | Después de 02c. 6 casillas, "Lo enviamos por SMS al +51 9•• ••• 417", "Reenviar código", "Cambiar DNI". Usa el teclado del sistema, no el teclado dibujado. El SMS del padrón es simulado: código de ejemplo `482175`. |
 | 02c | Vincula tu DNI | `(auth)/vincular-dni` | Stitch 3 | Solo tras Google o correo. Saluda con el nombre de la cuenta de Google si lo hay. Destacado: "Te enviaremos un código SMS al celular registrado en el padrón municipal." Sin "biométrica". Nota de la Ley N.° 29733 sin más afirmaciones. |
 | 02d | Elige tu municipalidad | `(auth)/municipalidad` | Stitch 4 | Después de autenticarse con celular, o después de 02b. Lista de municipalidades desde los datos (hoy solo Lince habilitada). Buscador y chips de zona solo si hay más de 5. Nota "Podrás cambiarla desde Mi perfil". Encabezado "Paso 2 de 3". |
@@ -58,7 +58,7 @@ otra cosa.
 | 20 | Detalle de la obra | `(tabs)/obras/[id]` | Maqueta `20-detalle-de-la-obra` | El ícono de mapa y "Ver en el mapa" vuelven a 19 con esa obra seleccionada. |
 | 21 | Mi perfil | `(tabs)/inicio/perfil` | Maqueta `21-mi-perfil` | "Mi municipalidad" abre 02d. "Texto más grande" mantiene `largeTextScale`. |
 | 22 | Privacidad y mis datos | `privacidad` | Maqueta `22-privacidad-y-mis-datos` | |
-| 23 | Sin smartphone | `sin-smartphone` | Maqueta `23-sin-smartphone` | |
+| 23 | Sin smartphone | `sin-smartphone` | Maqueta `23-sin-smartphone` | Se abre sin sesión desde el ingreso (02a), y también desde Mi perfil y Atención humana. |
 
 ## Panel web
 

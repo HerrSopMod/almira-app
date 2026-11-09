@@ -55,7 +55,8 @@ Flujo de ingreso:
 - Nadie llega a Inicio sin aceptar el consentimiento (Ley N.° 29733). `app/_layout.tsx` pone las pestañas y las demás pantallas de la app dentro de `Stack.Protected` con `consentimientoAceptado`; si se abre una de ellas sin haberlo aceptado, vuelve al ingreso. El ingreso, Privacidad y mis datos y Sin smartphone quedan abiertos.
 - Vincula tu DNI, Ingresa el código y Elige tu municipalidad vuelven al ingreso si el vecino no se autenticó.
 - Al aceptar el consentimiento se cierran las pantallas de ingreso: "volver" ya no regresa a ellas.
-- Entrada (01) sigue en `app/(auth)/entrada.tsx`, pero ya no se abre al iniciar. Sin smartphone se abre desde Atención humana y Mi perfil.
+- En el ingreso, "No tengo cuenta ni smartphone propio" lleva a Sin smartphone, que se abre sin sesión; su flecha vuelve al ingreso. También se abre desde Atención humana y Mi perfil.
+- Entrada (01) sigue en `app/(auth)/entrada.tsx`, pero ya no se abre al iniciar.
 
 `src/auth.tsx` usa Supabase Auth: `signInWithOAuth` con Google (en el teléfono, con `expo-web-browser`), `signInWithPassword` y `signUp` con correo, `signInWithOtp` y `verifyOtp` con celular (+51), y `signOut` al cerrar sesión. La sesión se guarda con AsyncStorage. Al aparecer la sesión, el ingreso sigue el recorrido de `irTrasIngreso` (`src/recorrido.ts`), que elige el paso según el proveedor de la cuenta (`google`, `email` o `phone`).
 

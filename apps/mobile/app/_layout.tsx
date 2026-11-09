@@ -47,7 +47,8 @@ export default function RootLayout() {
 }
 
 // Inicio y las demás pantallas de la app solo se abren después de aceptar el
-// consentimiento (Ley N.° 29733). El ingreso, Privacidad y Sin smartphone quedan abiertos.
+// consentimiento (Ley N.° 29733). El ingreso, Privacidad y Sin smartphone quedan abiertos:
+// Sin smartphone se abre desde el ingreso, sin sesión.
 function Navegacion() {
   const { cargando } = useAuth();
   const { consentimientoAceptado } = useSesion();

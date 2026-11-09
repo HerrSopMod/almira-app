@@ -1,5 +1,6 @@
 import { codigoValido, colors, sizes, spacing, USUARIO_EJEMPLO } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useAuth, type MetodoIngreso } from '@/auth';
@@ -227,6 +228,11 @@ export default function Ingreso() {
       <Texto variante="caption" color={colors.textSecondary} alineacion="center">
         Antes de entrar te pediremos tu consentimiento para usar tus datos.
       </Texto>
+      <Boton
+        tipo="terciario"
+        titulo="No tengo cuenta ni smartphone propio"
+        onPress={() => router.push('/sin-smartphone')}
+      />
       <PiePrototipo />
     </Pantalla>
   );
