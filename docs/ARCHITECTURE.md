@@ -153,7 +153,7 @@ El mapa es OpenStreetMap dibujado con Leaflet, sin API key (`docs/design/turques
 - El centro de cada distrito vive en `CENTROS_MAPA_EJEMPLO` (`centroMapaDe`); la base no tiene esa columna. Una municipalidad sin centro usa el de Lima.
 - La atribución siempre se ve, sin el prefijo de Leaflet.
 
-Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo son aproximadas y deben verificarse en openstreetmap.org antes de presentar. El minimapa del reclamo usa el GPS solo para mostrar el punto; ese punto todavía no se guarda.
+Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo se verificaron en OpenStreetMap (ver `MAPA.md`); en las obras por cuadras marcan el medio del tramo. El minimapa del reclamo usa el GPS solo para mostrar el punto; ese punto todavía no se guarda.
 
 ## Recordatorios y SMS
 

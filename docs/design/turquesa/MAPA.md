@@ -26,17 +26,18 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 2. **Tipo `Obra`** (`packages/shared/src/types.ts`): agrega `latitud: number | null` y
    `longitud: number | null`, igual que en `Reclamo`.
 3. **Datos de ejemplo** (`datos-ejemplo.ts`) y `supabase/seed.sql`: llena las
-   coordenadas. Las de abajo son **aproximadas**; antes de presentar, verifícalas en
-   openstreetmap.org (busca la dirección, clic derecho → «Mostrar dirección» y copia las
-   coordenadas).
+   coordenadas. Las de abajo se verificaron en OpenStreetMap (Nominatim y Overpass) el
+   8 nov 2026. Las cuadras salen de los números de casa cargados en OSM, así que el punto
+   es el medio del tramo, no una dirección exacta. En OSM la vía se llama "Jirón Risso",
+   no avenida.
 
    | Obra | Latitud | Longitud |
    | --- | --- | --- |
-   | Mantenimiento de pistas · Av. Ignacio Merino, cdras. 17-19 | -12.0905 | -77.0320 |
-   | Renovación del parque Castilla · Parque Castilla, Zona 3 | -12.0862 | -77.0390 |
-   | Veredas accesibles · Av. Risso, cdras. 3-7 | -12.0822 | -77.0345 |
-   | Luminarias LED · Jr. Pumacahua y alrededores (no publicada) | -12.0850 | -77.0372 |
-   | Reclamo de ejemplo · Jr. Bernardo Alcedo 480 | -12.0880 | -77.0330 |
+   | Mantenimiento de pistas · Av. Ignacio Merino, cdras. 17-19 | -12.0826 | -77.0329 |
+   | Renovación del parque Castilla · Parque Mariscal Castilla, Zona 3 | -12.0886 | -77.0414 |
+   | Veredas accesibles · Av. Risso, cdras. 3-7 | -12.0852 | -77.0309 |
+   | Luminarias LED · Jr. Brigadier Mateo Pumacahua y alrededores (no publicada) | -12.0852 | -77.0431 |
+   | Predio de ejemplo · Jr. Bernardo Alcedo 480 | -12.0844 | -77.0315 |
 
    Si no hay obras con coordenadas, el mapa se centra en el distrito. Agrega
    `latitud`/`longitud` del centro a la municipalidad de ejemplo en los datos compartidos
@@ -100,6 +101,6 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 - Las teselas públicas de OpenStreetMap son para uso ligero. Sirven para un prototipo
   académico, pero no para una app con mucho tráfico; ahí haría falta un proveedor con
   clave.
-- Las coordenadas de ejemplo son aproximadas.
+- Las coordenadas de ejemplo marcan el medio de cada tramo, no una dirección exacta.
 - El GPS del reclamo (`expo-location`) solo se usa para el marcador del minimapa: el punto
   todavía no se guarda en el reclamo.

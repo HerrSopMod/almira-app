@@ -409,8 +409,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-29',
     porcentajeTributos: null,
     hitos: [],
-    latitud: -12.0905,
-    longitud: -77.032,
+    latitud: -12.0826,
+    longitud: -77.0329,
   },
   {
     id: 'o-parque-castilla',
@@ -429,8 +429,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-26',
     porcentajeTributos: 62,
     hitos: ['Riego y áreas verdes: 80 %', 'Juegos y luminarias: en curso'],
-    latitud: -12.0862,
-    longitud: -77.039,
+    latitud: -12.0886,
+    longitud: -77.0414,
   },
   {
     id: 'o-veredas-risso',
@@ -449,8 +449,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-14',
     porcentajeTributos: null,
     hitos: [],
-    latitud: -12.0822,
-    longitud: -77.0345,
+    latitud: -12.0852,
+    longitud: -77.0309,
   },
   {
     id: 'o-luminarias-led',
@@ -469,8 +469,8 @@ export const obras: Obra[] = [
     actualizadaEn: '2026-10-30',
     porcentajeTributos: null,
     hitos: [],
-    latitud: -12.085,
-    longitud: -77.0372,
+    latitud: -12.0852,
+    longitud: -77.0431,
   },
   {
     id: 'o-parque-central-vv',
@@ -506,5 +506,5 @@ export function centroMapaDe(municipalidadId: string): CentroMapa {
 
 // Ubicación simulada del predio, que Nuevo reclamo usa como si fuera el GPS.
 export const UBICACIONES_PREDIO_EJEMPLO: Record<string, PuntoMapa> = {
-  'p-rosa-li': { latitud: -12.088, longitud: -77.033 },
+  'p-rosa-li': { latitud: -12.0844, longitud: -77.0315 },
 };

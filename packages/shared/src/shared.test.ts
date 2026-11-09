@@ -719,7 +719,7 @@ describe('mapa de obras', () => {
       interactivo: true,
       colores,
       centroPorDefecto: centroLince,
-      ubicacion: { latitud: -12.088, longitud: -77.033 },
+      ubicacion: { latitud: -12.0844, longitud: -77.0315 },
     });
     const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]!);
     expect(scripts).toHaveLength(2);
