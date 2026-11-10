@@ -12,7 +12,6 @@ import {
   ChipEstadoDeuda,
   Destacado,
   FilaDato,
-  PiePrototipo,
   Separador,
   Tarjeta,
   Vacio,
@@ -99,7 +98,6 @@ export default function DetalleDeuda() {
         titulo="¿Crees que este cobro es incorrecto? Reclámalo"
         onPress={() => router.navigate('/reclamos')}
       />
-      <PiePrototipo />
     </Pantalla>
   );
 }

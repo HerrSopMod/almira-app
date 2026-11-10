@@ -7,7 +7,6 @@ import {
   Encabezado,
   Interruptor,
   MensajeMemoria,
-  NotaEjemplo,
   Tabla,
   Tarjeta,
 } from '../componentes';
@@ -31,7 +30,7 @@ export function Alertas() {
 
   const alternarSimulador = () => {
     cambiarDatos((actual) => ({ ...actual, simuladorActivo: !actual.simuladorActivo }));
-    setMensaje('Cambio de ejemplo: no se guarda y el simulador de la app no cambia.');
+    setMensaje(datos.simuladorActivo ? 'Simulador de cuotas desactivado.' : 'Simulador de cuotas activado.');
   };
 
   return (
@@ -116,10 +115,6 @@ export function Alertas() {
           <MensajeMemoria texto={mensaje} />
         </Tarjeta>
       </div>
-
-      <NotaEjemplo>
-        Todo en esta página es de ejemplo: no hay alertas ni auditorías reales conectadas al panel.
-      </NotaEjemplo>
     </>
   );
 }

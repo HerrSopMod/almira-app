@@ -30,6 +30,8 @@ otra cosa.
 
 ## App móvil
 
+> **Texto mínimo (manda sobre TEXTOS.md):** ninguna pantalla lleva el pie «Prototipo académico · Datos ficticios», avisos de «datos de ejemplo» ni notas obvias (por ejemplo «Usa los datos con los que figuras en el padrón»). Los títulos van centrados.
+
 | # | Pantalla | Ruta actual | Seguir | Notas de adaptación |
 | --- | --- | --- | --- | --- |
 | 01 | Entrada | `(auth)/entrada` | Maqueta `01-entrada` | Sin selector de municipalidad. "No tengo cuenta ni smartphone propio" lleva a 23. |

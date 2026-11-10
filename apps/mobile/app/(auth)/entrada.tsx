@@ -6,7 +6,6 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CajaIcono,
-  PiePrototipo,
   Separador,
   Tarjeta,
   type NombreIcono,
@@ -69,7 +68,6 @@ export default function Entrada() {
             titulo="No tengo cuenta ni smartphone propio"
             onPress={() => router.push('/sin-smartphone')}
           />
-          <PiePrototipo />
         </View>
       </ScrollView>
     </View>

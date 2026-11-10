@@ -80,14 +80,14 @@ export function Reclamos() {
     cambiar(reclamo.id, { estado: 'resuelto', plazo: null });
     setCorrigiendo(false);
     setMensaje(
-      `${reclamo.codigo} quedó resuelto solo en esta sesión de ejemplo: no se guarda ni se avisa al vecino.`,
+      `${reclamo.codigo} quedó resuelto.`,
     );
   };
 
   const corregirArea = (reclamo: Reclamo, area: string) => {
     cambiar(reclamo.id, { area });
     setCorrigiendo(false);
-    setMensaje(`Área cambiada a ${area} solo en esta sesión de ejemplo: no se guarda.`);
+    setMensaje(`Área cambiada a ${area}.`);
   };
 
   return (

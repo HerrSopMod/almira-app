@@ -127,14 +127,6 @@ export default function ConfirmarPago() {
               ))}
             </View>
           </View>
-
-          <Nota
-            icono="notifications-off"
-            texto="Al confirmar, los avisos de estas deudas se detienen y no te contactaremos por 48 horas."
-          />
-          <Texto variante="caption" color={colors.textSecondary} alineacion="center">
-            Pago simulado. La pasarela real está por definir en la capa de integración.
-          </Texto>
         </>
       )}
     </Pantalla>

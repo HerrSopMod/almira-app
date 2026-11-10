@@ -251,10 +251,14 @@ export function FilaDato({
 export function TituloPantalla({ titulo, texto }: { titulo: string; texto?: string }) {
   return (
     <View style={estilos.titulo}>
-      <Texto variante="headlineLg" accessibilityRole="header">
+      <Texto variante="headlineLg" accessibilityRole="header" alineacion="center">
         {titulo}
       </Texto>
-      {texto ? <Texto color={colors.textSecondary}>{texto}</Texto> : null}
+      {texto ? (
+        <Texto color={colors.textSecondary} alineacion="center">
+          {texto}
+        </Texto>
+      ) : null}
     </View>
   );
 }
@@ -264,15 +268,6 @@ export function Rotulo({ texto }: { texto: string }) {
   return (
     <Texto variante="overline" color={colors.textSecondary} accessibilityRole="header">
       {texto}
-    </Texto>
-  );
-}
-
-// Los datos que muestra la app siguen siendo de ejemplo.
-export function PiePrototipo() {
-  return (
-    <Texto variante="caption" color={colors.textSecondary} alineacion="center">
-      Prototipo académico · Datos ficticios
     </Texto>
   );
 }

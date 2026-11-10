@@ -17,7 +17,6 @@ import {
   Destacado,
   Insignia,
   Nota,
-  PiePrototipo,
   Tarjeta,
 } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
@@ -38,7 +37,6 @@ function irA(destino: Href) {
 export default function Constancia() {
   const { operacion } = useLocalSearchParams<{ operacion?: string }>();
   const { municipalidad, pagos } = useDatosMunicipales();
-  const [descargaTocada, setDescargaTocada] = useState(false);
   const [falloCompartir, setFalloCompartir] = useState(false);
   const delPago = pagos.filter((pago) => pago.referencia === operacion);
   const primero = delPago[0];
@@ -58,7 +56,6 @@ export default function Constancia() {
         message: [
           `Constancia de pago · ${municipalidad.nombre}`,
           `${formatearSoles(total)} · ${momento} · ${operacion}`,
-          'Pago simulado en Almira. Prototipo académico · Datos ficticios.',
         ].join('\n'),
       });
     } catch {
@@ -109,9 +106,6 @@ export default function Constancia() {
           <Texto variante="bodyLgMedium" alineacion="center">
             Constancia digital
           </Texto>
-          <Texto variante="caption" color={colors.textSecondary} alineacion="center">
-            QR simulado · válido en Rentas y Depósito
-          </Texto>
         </View>
       </Tarjeta>
 
@@ -119,20 +113,9 @@ export default function Constancia() {
         icono="directions-car"
         texto="Lleva este QR, tu DNI y tu tarjeta de propiedad al depósito. No tienes que volver a hacer cola en caja."
       />
-      <Nota
-        icono="notifications-off"
-        texto="Avisos de estas deudas detenidos. Rentas concilia tu pago en el día."
-      />
 
-      <Boton icono="download" titulo="Descargar constancia" onPress={() => setDescargaTocada(true)} />
-      {descargaTocada ? (
-        <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-          Descarga simulada: en este prototipo no se genera ningún archivo.
-        </Texto>
-      ) : null}
       <Boton tipo="secundario" titulo="Mira en qué se usa tu pago" onPress={() => irA('/obras')} />
       <Boton tipo="terciario" titulo="Volver al inicio" onPress={() => irA('/inicio')} />
-      <PiePrototipo />
     </Pantalla>
   );
 }

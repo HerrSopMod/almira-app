@@ -6,7 +6,6 @@ import { StyleSheet, View } from 'react-native';
 import {
   CajaIcono,
   Insignia,
-  PiePrototipo,
   Rotulo,
   Separador,
   Tarjeta,
@@ -59,16 +58,10 @@ export default function AtencionHumana() {
 
       <View style={estilos.botones}>
         <Boton
-          titulo="Esperar y avisarme"
+          titulo={esperando ? 'En espera' : 'Esperar y avisarme'}
           deshabilitado={esperando}
           onPress={() => setEsperando(true)}
         />
-        {esperando ? (
-          <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-            Espera simulada: en este prototipo no hay una persona conectada ni se envía ningún
-            aviso.
-          </Texto>
-        ) : null}
         <Boton
           tipo="secundario"
           titulo="Prefiero ir al módulo presencial"
@@ -80,7 +73,6 @@ export default function AtencionHumana() {
           onPress={() => router.navigate('/asistente')}
         />
       </View>
-      <PiePrototipo />
     </Pantalla>
   );
 }

@@ -30,7 +30,6 @@ import {
   ChipEstadoDeuda,
   ChipPlazo,
   Destacado,
-  PiePrototipo,
   Separador,
   Tarjeta,
 } from '@/components/Bloques';
@@ -164,7 +163,6 @@ export default function Inicio() {
         </View>
       ) : null}
 
-      <PiePrototipo />
     </Pantalla>
   );
 }

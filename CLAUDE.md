@@ -14,6 +14,7 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 - No inventes funciones fuera de las pantallas de `docs/design/turquesa` y `docs/design/prototipo`.
 - No afirmes en la interfaz certificaciones, validaciones o integraciones que la app no tenga.
 - Textos en español de Perú, tratando al vecino de "tú".
+- La interfaz se ve como un producto real: sin «Prototipo académico», «Datos ficticios» ni avisos de datos de ejemplo. Nada de subtítulos u observaciones obvias: textos mínimos.
 
 ## Reglas de diseño
 

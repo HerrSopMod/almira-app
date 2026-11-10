@@ -13,7 +13,6 @@ import { Pressable, StyleSheet, View, type ScrollView } from 'react-native';
 import {
   Avance,
   ChipEstadoObra,
-  PiePrototipo,
   Tarjeta,
   TituloPantalla,
   Vacio,
@@ -80,7 +79,7 @@ export default function MapaDeObras() {
       scrollRef={scroll}
       encabezado={<BarraSuperior variante="raiz" titulo="Obras" />}
     >
-      <TituloPantalla titulo={`Obras de ${distrito}`} texto="Toca un punto del mapa para ver la obra." />
+      <TituloPantalla titulo={`Obras de ${distrito}`} />
       <Chips opciones={FILTROS} elegida={filtro} onElegir={setFiltro} />
 
       <MapaObras
@@ -118,7 +117,6 @@ export default function MapaDeObras() {
           </View>
         ))
       )}
-      <PiePrototipo />
     </Pantalla>
   );
 }

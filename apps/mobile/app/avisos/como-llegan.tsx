@@ -14,7 +14,7 @@ import {
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { CajaIcono, Nota, PiePrototipo, Rotulo } from '@/components/Bloques';
+import { CajaIcono, Nota, Rotulo } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Logo } from '@/components/Logo';
 import { Pantalla } from '@/components/Pantalla';
@@ -102,13 +102,6 @@ export default function ComoLleganLosAvisos() {
           Te derivamos a Atención al vecino. Tiempo estimado: {MINUTOS_ESPERA_EJEMPLO} minutos.
         </Texto>
       </View>
-
-      <Nota
-        conBorde
-        icono="science"
-        texto="Las pruebas A/B ajustan el tono del mensaje, nunca el monto ni los plazos."
-      />
-      <PiePrototipo />
     </Pantalla>
   );
 }

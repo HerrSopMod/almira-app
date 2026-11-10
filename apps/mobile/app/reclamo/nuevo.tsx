@@ -22,10 +22,6 @@ import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales } from '@/sesion';
 
-// Descripción de ejemplo del prototipo: el vecino puede cambiarla.
-const DESCRIPCION_EJEMPLO =
-  'Hay un bache grande en la pista frente a mi casa, los carros lo esquivan.';
-
 const MAXIMO_DESCRIPCION = 500;
 // El minimapa solo marca la ubicación del reclamo.
 const SIN_OBRAS: never[] = [];
@@ -43,7 +39,7 @@ export default function NuevoReclamo() {
   const [avisoGps, setAvisoGps] = useState<string | null>(null);
   const [direccion, setDireccion] = useState(predios[0]?.direccion ?? '');
   const [ajustando, setAjustando] = useState(direccion === '');
-  const [descripcion, setDescripcion] = useState(DESCRIPCION_EJEMPLO);
+  const [descripcion, setDescripcion] = useState('');
 
   const tomarFoto = async () => {
     setAvisoFoto(null);

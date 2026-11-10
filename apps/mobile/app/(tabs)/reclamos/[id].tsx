@@ -12,7 +12,7 @@ import {
 } from '@almira/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { Avance, ChipPlazo, PiePrototipo, Rotulo, Tarjeta, Vacio } from '@/components/Bloques';
+import { Avance, ChipPlazo, Rotulo, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { MiniaturaFoto } from '@/components/FotoSimulada';
@@ -112,7 +112,6 @@ export default function Seguimiento() {
         titulo="Hablar con una persona"
         onPress={() => router.push('/atencion-humana')}
       />
-      <PiePrototipo />
     </Pantalla>
   );
 }

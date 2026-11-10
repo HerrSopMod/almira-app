@@ -9,7 +9,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useState, type ComponentProps, type ReactNode } from 'react';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { CajaIcono, PiePrototipo, Rotulo, Tarjeta } from '@/components/Bloques';
+import { CajaIcono, Rotulo, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Pantalla } from '@/components/Pantalla';
@@ -70,15 +70,10 @@ export default function SinSmartphone() {
       {/* El botón va fuera de la tarjeta (LEEME.md → Botones). */}
       <Boton
         icono="event-available"
-        titulo="Reservar turno sin cola"
+        titulo={reservado ? 'Turno reservado' : 'Reservar turno sin cola'}
         deshabilitado={reservado}
         onPress={() => setReservado(true)}
       />
-      {reservado ? (
-        <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-          Reserva simulada: en este prototipo no se reserva ningún turno.
-        </Texto>
-      ) : null}
 
       <Tarjeta>
         <Canal
@@ -97,7 +92,6 @@ export default function SinSmartphone() {
           </View>
         ))}
       </View>
-      <PiePrototipo />
     </Pantalla>
   );
 }

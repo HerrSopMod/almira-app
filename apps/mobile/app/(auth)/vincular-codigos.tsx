@@ -10,13 +10,12 @@ import { CampoDocumento } from '@/components/CampoDocumento';
 import { Opcion } from '@/components/Opcion';
 import { Pantalla } from '@/components/Pantalla';
 import { useMunicipalidades, useSesion } from '@/sesion';
-import { supabaseConfigurado } from '@/supabase';
 
 // Pantalla 02c. Después de elegir la municipalidad: el vecino vincula su código de
 // contribuyente (o de predio) con su DNI, y puede agregar más. La coincidencia la valida el
 // padrón de la municipalidad (en el servidor con Supabase; sin Supabase, con datos de ejemplo).
 export default function VincularCodigos() {
-  const { metodoIngreso, nombreCuenta, municipalidadId, vinculos, vincularCodigo } = useSesion();
+  const { metodoIngreso, municipalidadId, vinculos, vincularCodigo } = useSesion();
   const municipalidades = useMunicipalidades();
   const municipalidad = municipalidades.find((m) => m.id === municipalidadId);
   const [codigo, setCodigo] = useState('');
@@ -48,7 +47,7 @@ export default function VincularCodigos() {
     <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 3 de 5" />}>
       <TituloPantalla
         titulo="Vincula tus códigos"
-        texto={`${nombreCuenta ? `Hola, ${nombreCuenta}. ` : ''}Con tu código de contribuyente y tu DNI encontramos tus tributos en el padrón${municipalidad ? ` de ${municipalidad.nombre}` : ''}.`}
+        texto={municipalidad?.nombre}
       />
 
       {propios.length > 0 ? (
@@ -82,9 +81,6 @@ export default function VincularCodigos() {
         icono="verified-user"
         texto="Comparamos el código y tu DNI con el padrón de la municipalidad. No guardamos tu DNI en la cuenta."
       />
-      {supabaseConfigurado ? null : (
-        <Nota texto="Datos de ejemplo: prueba con el código 0048217 y el DNI 40000082." />
-      )}
       {mensaje ? <Nota texto={mensaje} /> : null}
 
       <Boton
@@ -102,10 +98,6 @@ export default function VincularCodigos() {
         tipo="terciario"
         titulo="Tengo códigos de otra municipalidad"
         onPress={() => (router.canGoBack() ? router.back() : router.replace('/municipalidad'))}
-      />
-      <Nota
-        icono="verified-user"
-        texto="Tus datos se tratan según la Ley N.° 29733 de Protección de Datos Personales."
       />
     </Pantalla>
   );

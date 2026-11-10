@@ -1,5 +1,5 @@
 import { formatearFechaCorta, nombreDistrito, type EstadoArco } from '@almira/shared';
-import { CajaIcono, Chip, Encabezado, NotaEjemplo, Tabla, Tarjeta, type TonoChip } from '../componentes';
+import { CajaIcono, Chip, Encabezado, Tabla, Tarjeta, type TonoChip } from '../componentes';
 import { useSesion } from '../estado';
 import type { NombreIcono } from '../iconos';
 
@@ -90,11 +90,6 @@ export function DatosAccesos() {
           </Tabla>
         </Tarjeta>
       </div>
-
-      <NotaEjemplo>
-        Todo en esta página es de ejemplo: el registro de accesos y las solicitudes ARCO no son
-        reales.
-      </NotaEjemplo>
     </>
   );
 }

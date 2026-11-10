@@ -20,7 +20,6 @@ import {
   CajaIcono,
   Destacado,
   Nota,
-  PiePrototipo,
   Rotulo,
   Separador,
   Tarjeta,
@@ -133,7 +132,6 @@ export default function Recordatorios() {
         icono="schedule"
         texto="Te contactamos 1 vez por día y 3 por semana como máximo, de 8:00 a 20:00 h. Antes de avisar verificamos si ya pagaste."
       />
-      <PiePrototipo />
     </Pantalla>
   );
 }

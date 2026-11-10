@@ -41,7 +41,7 @@ export function Obras() {
   const alternarPublicada = (obra: Obra) => {
     cambiar(obra.id, (actual) => ({ publicada: !actual.publicada }));
     setMensaje(
-      `${obra.nombre} ${obra.publicada ? 'dejó de estar publicada' : 'quedó publicada'} solo en esta sesión de ejemplo: la app del vecino no cambia.`,
+      `${obra.nombre} ${obra.publicada ? 'dejó de estar publicada' : 'quedó publicada'}.`,
     );
   };
 
@@ -54,13 +54,13 @@ export function Obras() {
         actualizadaEn: HOY_EJEMPLO,
       };
     });
-    setMensaje(`Avance de ${obra.nombre} actualizado solo en esta sesión de ejemplo: no se guarda.`);
+    setMensaje(`Avance de ${obra.nombre} actualizado.`);
   };
 
   const agregar = (obra: Obra) => {
     cambiarDatos((actual) => ({ ...actual, obras: [...actual.obras, obra] }));
     setCreando(false);
-    setMensaje(`${obra.nombre} se agregó sin publicar, solo en esta sesión de ejemplo: no se guarda.`);
+    setMensaje(`${obra.nombre} se agregó sin publicar.`);
   };
 
   return (
@@ -229,7 +229,7 @@ function NuevaObra({
   };
 
   return (
-    <Tarjeta titulo="Nueva obra" subtitulo="Se agrega sin publicar y solo en esta sesión de ejemplo.">
+    <Tarjeta titulo="Nueva obra" subtitulo="Se agrega sin publicar.">
       <form className="formulario-obra" onSubmit={enviar} noValidate>
         <label className="campo">
           Nombre de la obra

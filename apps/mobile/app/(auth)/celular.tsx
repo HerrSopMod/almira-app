@@ -95,9 +95,6 @@ export default function Celular() {
               onChangeText={(texto) => setCodigo(texto.replace(/\D/g, ''))}
             />
           ) : null}
-          {enviado && !supabaseConfigurado ? (
-            <Nota texto="Datos de ejemplo. Sirve cualquier código de 6 dígitos." />
-          ) : null}
           {mensaje ? <Nota texto={mensaje} /> : null}
           <Boton
             titulo={enviado ? 'Confirmar celular' : 'Recibir código por SMS'}
@@ -106,7 +103,6 @@ export default function Celular() {
             onPress={enviado ? verificar : enviar}
           />
           <Boton tipo="terciario" titulo="Ahora no" onPress={continuar} />
-          <Nota texto="Verás las opciones de WhatsApp y SMS en el siguiente paso." />
         </>
       )}
     </Pantalla>

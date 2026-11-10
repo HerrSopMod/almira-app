@@ -21,7 +21,6 @@ import {
   ChipEstadoDeuda,
   FilaDato,
   Nota,
-  PiePrototipo,
   Separador,
   Tarjeta,
   TituloPantalla,
@@ -114,7 +113,6 @@ export default function Pagar() {
         ) : (
           <Vacio texto="No tienes deudas pendientes." />
         )}
-        <Nota texto="Beneficio vigente: consulta con el asistente." />
       </View>
 
       {pagos.length > 0 ? (
@@ -149,7 +147,6 @@ export default function Pagar() {
         </View>
       ) : null}
 
-      <PiePrototipo />
     </Pantalla>
   );
 }

@@ -12,7 +12,6 @@ import {
   Cifra,
   Encabezado,
   MensajeMemoria,
-  NotaEjemplo,
   Tabla,
   TarjetaTabla,
   type TonoChip,
@@ -45,7 +44,7 @@ export function AtencionHumana() {
       ...actual,
       casos: actual.casos.map((c) => (c.codigo === caso.codigo ? { ...c, estado: 'en_atencion' } : c)),
     }));
-    setMensaje(`Tomaste ${caso.codigo} solo en esta sesión de ejemplo: no se guarda.`);
+    setMensaje(`Tomaste ${caso.codigo}.`);
   };
 
   return (
@@ -122,7 +121,6 @@ export function AtencionHumana() {
         </Tabla>
       </TarjetaTabla>
       <MensajeMemoria texto={mensaje} />
-      <NotaEjemplo>Casos de ejemplo: no hay vecinos reales esperando en esta cola.</NotaEjemplo>
     </>
   );
 }

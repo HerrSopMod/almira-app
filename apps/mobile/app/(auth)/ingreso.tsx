@@ -4,9 +4,10 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useAuth, type MetodoIngreso } from '@/auth';
-import { Nota, PiePrototipo, TituloPantalla } from '@/components/Bloques';
+import { Nota, TituloPantalla } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
+import { Logo } from '@/components/Logo';
 import { Campo } from '@/components/Campo';
 import { Pantalla } from '@/components/Pantalla';
 import { Segmentado } from '@/components/Segmentado';
@@ -104,9 +105,11 @@ export default function Ingreso() {
       encabezadoHastaArriba
       encabezado={<BarraSuperior titulo="Paso 1 de 5" conVolver={false} />}
     >
+      <View style={estilos.marca}>
+        <Logo grande />
+      </View>
       <TituloPantalla
         titulo={registro && metodo === 'correo' ? 'Crea tu cuenta' : 'Ingresa a tu cuenta'}
-        texto="Usa los datos con los que figuras en el padrón municipal."
       />
 
       <Boton tipo="google" titulo="Continuar con Google" onPress={conGoogle} deshabilitado={ocupado} />
@@ -152,9 +155,6 @@ export default function Ingreso() {
               value={codigo}
               onChangeText={(texto) => setCodigo(texto.replace(/\D/g, ''))}
             />
-          ) : null}
-          {codigoEnviado && !supabaseConfigurado ? (
-            <Nota texto="Datos de ejemplo. Sirve cualquier código de 6 dígitos." />
           ) : null}
           {mensaje ? <Nota texto={mensaje} /> : null}
           <Boton
@@ -222,23 +222,17 @@ export default function Ingreso() {
         </>
       )}
 
-      {supabaseConfigurado ? null : (
-        <Nota texto="Datos de ejemplo. En este prototipo no se envía ni se guarda ninguna información." />
-      )}
-      <Texto variante="caption" color={colors.textSecondary} alineacion="center">
-        Antes de entrar te pediremos tu consentimiento para usar tus datos.
-      </Texto>
       <Boton
         tipo="terciario"
         titulo="No tengo cuenta ni smartphone propio"
         onPress={() => router.push('/sin-smartphone')}
       />
-      <PiePrototipo />
     </Pantalla>
   );
 }
 
 const estilos = StyleSheet.create({
+  marca: { alignItems: 'center' },
   divisor: { flexDirection: 'row', alignItems: 'center', gap: spacing.blockDense },
   linea: { flex: 1, height: sizes.borderWidth, backgroundColor: colors.border },
   ojo: {

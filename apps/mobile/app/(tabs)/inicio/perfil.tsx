@@ -1,7 +1,7 @@
 import { colors, iniciales, sizes, spacing } from '@almira/shared';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { CajaIcono, PiePrototipo, Tarjeta } from '@/components/Bloques';
+import { CajaIcono, Tarjeta } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Interruptor } from '@/components/Interruptor';
@@ -108,7 +108,6 @@ export default function Perfil() {
       </Tarjeta>
 
       <Boton tipo="peligro" icono="logout" titulo="Cerrar sesión" onPress={cerrarSesion} />
-      <PiePrototipo />
     </Pantalla>
   );
 }

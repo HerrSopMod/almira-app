@@ -45,7 +45,7 @@ export default function Consentimiento() {
     <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 5 de 5" />}>
       <TituloPantalla
         titulo="Tus datos, tus reglas"
-        texto="Elige qué quieres usar. Puedes cambiarlo cuando quieras en Mi perfil."
+        texto="Puedes cambiarlo cuando quieras en Mi perfil."
       />
       <Destacado
         icono="verified-user"
@@ -54,12 +54,6 @@ export default function Consentimiento() {
       />
       <Rotulo texto="Autoriza lo que quieras usar" />
       <InterruptoresConsentimiento valor={permisos} onCambiar={setPermisos} />
-      {celularConfirmado ? null : (
-        <Nota
-          icono="sms"
-          texto="Sin celular confirmado no podemos avisarte por WhatsApp ni SMS. Puedes confirmarlo después en Mi perfil."
-        />
-      )}
       <Nota
         icono="block"
         texto="Nunca vendemos tus datos ni te calificamos como «buen» o «mal» pagador."

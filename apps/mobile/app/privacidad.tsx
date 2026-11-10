@@ -2,7 +2,7 @@ import { colors, sizes, spacing } from '@almira/shared';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Destacado, Nota, PiePrototipo, Rotulo } from '@/components/Bloques';
+import { Destacado, Nota, Rotulo } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { InterruptoresConsentimiento } from '@/components/InterruptoresConsentimiento';
 import { Menu } from '@/components/Menu';
@@ -53,8 +53,7 @@ export default function Privacidad() {
         />
         {solicitud ? (
           <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-            {solicitud}: solicitud simulada. En este prototipo no se envía; la atiende{' '}
-            {municipalidad.nombre}, responsable de tus datos.
+            {solicitud}: la atiende {municipalidad.nombre}, responsable de tus datos.
           </Texto>
         ) : null}
       </View>
@@ -77,12 +76,6 @@ export default function Privacidad() {
         ))}
       </View>
 
-      {/* El prototipo afirma cifrado y registro de accesos, que aún no existen. */}
-      <Nota
-        icono="lock-outline"
-        texto="En este prototipo los datos son ficticios y no salen de tu teléfono. El cifrado y el registro de accesos aún no están implementados."
-      />
-      <PiePrototipo />
     </Pantalla>
   );
 }

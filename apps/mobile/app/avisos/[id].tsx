@@ -21,7 +21,6 @@ import {
   ChipEstadoDeuda,
   FilaDato,
   Nota,
-  PiePrototipo,
   Rotulo,
   Separador,
   Tarjeta,
@@ -89,7 +88,6 @@ export default function DetalleAviso() {
         <FilaDato etiqueta="Estado" valor={<ChipEstadoDeuda estado={deuda.estado} />} />
       </Tarjeta>
 
-      <Nota texto="Antes de enviar cada aviso verificamos si ya pagaste." />
 
       <View style={estilos.botones}>
         <Boton titulo="Ir a pagar" onPress={() => router.navigate('/cuenta')} />
@@ -99,7 +97,6 @@ export default function DetalleAviso() {
           onPress={() => router.navigate('/asistente')}
         />
       </View>
-      <PiePrototipo />
     </Pantalla>
   );
 }

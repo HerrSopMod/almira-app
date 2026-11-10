@@ -16,7 +16,6 @@ import {
   Destacado,
   FilaDato,
   Nota,
-  PiePrototipo,
   Separador,
   Tarjeta,
   Vacio,
@@ -112,16 +111,10 @@ export default function SimulacionCuotas() {
 
           <View style={estilos.botones}>
             <Boton
-              titulo="Pedir evaluación a Rentas"
+              titulo={pedido ? 'Pedido enviado' : 'Pedir evaluación a Rentas'}
               deshabilitado={pedido}
               onPress={() => setPedido(true)}
             />
-            {pedido ? (
-              <Texto variante="bodyMd" color={colors.textSecondary} alineacion="center">
-                Pedido simulado: en este prototipo no se envía nada a Rentas. Rentas evalúa y
-                decide.
-              </Texto>
-            ) : null}
             <Boton
               tipo="secundario"
               titulo="Mejor pago ahora"
@@ -135,7 +128,6 @@ export default function SimulacionCuotas() {
           </View>
         </>
       )}
-      <PiePrototipo />
     </Pantalla>
   );
 }

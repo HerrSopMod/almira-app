@@ -103,14 +103,7 @@ export function Ingreso() {
           <button type="submit" className="boton boton-primario boton-grande">
             Ingresar
           </button>
-
-          <Nota>
-            Datos de ejemplo. Ingreso simulado. Previsto: cada funcionario verá solo lo que su área
-            necesita.
-          </Nota>
         </form>
-
-        <p className="ingreso-pie">Prototipo académico · Datos ficticios</p>
       </div>
     </main>
   );

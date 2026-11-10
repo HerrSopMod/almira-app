@@ -11,7 +11,6 @@ export function CampoDocumento({
   return (
     <Campo
       etiqueta="DNI o carné de extranjería"
-      ayuda="De 8 a 12 letras o números."
       autoCapitalize="characters"
       autoComplete="off"
       autoCorrect={false}

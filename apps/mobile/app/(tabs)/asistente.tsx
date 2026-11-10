@@ -136,7 +136,7 @@ export default function Asistente() {
             <Boton titulo="Simular cuotas" onPress={irASimulacion} />
             <Boton tipo="secundario" titulo="Hablar con una persona" onPress={irAAtencionHumana} />
           </View>
-          <Nota texto="El asistente orienta, no decide. Prototipo: respuestas fijas de ejemplo." />
+          <Nota texto="El asistente orienta, no decide." />
         </ScrollView>
 
         <View style={estilos.entrada}>

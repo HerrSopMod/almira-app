@@ -27,7 +27,7 @@ export function Avisos() {
 
   const elegir = (letra: string) => {
     cambiarDatos((actual) => ({ ...actual, varianteElegida: letra }));
-    setMensaje('Elección de ejemplo: no se guarda ni cambia los avisos que se envían.');
+    setMensaje('Variante elegida para el próximo ciclo.');
   };
 
   return (

@@ -31,7 +31,7 @@ export function Encabezado({
 }: {
   titulo: string;
   subtitulo: string;
-  // Antes de "Datos ficticios" (insignias) y después (botón de la página).
+  // Insignias antes del botón de la página.
   extra?: ReactNode;
   accion?: ReactNode;
 }) {
@@ -43,7 +43,6 @@ export function Encabezado({
       </div>
       <div className="encabezado-extra">
         {extra}
-        <Chip tono="neutral">Datos ficticios</Chip>
         {accion}
       </div>
     </header>
@@ -335,7 +334,3 @@ export function Interruptor({
   );
 }
 
-// Recordatorio de que la página solo muestra datos de ejemplo.
-export function NotaEjemplo({ children }: { children: ReactNode }) {
-  return <p className="nota-ejemplo">{children}</p>;
-}

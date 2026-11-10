@@ -18,7 +18,6 @@ import {
   ChipEstadoObra,
   FilaDato,
   Nota,
-  PiePrototipo,
   Rotulo,
   Separador,
   Tarjeta,
@@ -147,14 +146,12 @@ export default function DetalleObra() {
         </View>
       ) : null}
 
-      <Nota texto="La obra la ejecuta la municipalidad. Almira publica el avance que ella registra." />
       <Boton
         tipo="secundario"
         icono="photo-camera"
         titulo="¿Ves un problema? Repórtalo"
         onPress={() => router.push('/reclamo/nuevo')}
       />
-      <PiePrototipo />
     </Pantalla>
   );
 }

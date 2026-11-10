@@ -75,10 +75,7 @@ export default function ElegirMunicipalidad() {
         />
       }
     >
-      <TituloPantalla
-        titulo="Elige tu municipalidad"
-        texto="Es la del distrito donde está tu predio."
-      />
+      <TituloPantalla titulo="Elige tu municipalidad" />
 
       {conFiltros ? (
         <>
@@ -121,7 +118,6 @@ export default function ElegirMunicipalidad() {
         </View>
       </View>
 
-      {cambio ? null : <Nota texto="Podrás cambiarla desde Mi perfil." />}
     </Pantalla>
   );
 }

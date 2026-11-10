@@ -14,7 +14,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import {
   ChipPlazo,
   Nota,
-  PiePrototipo,
   Rotulo,
   Tarjeta,
   Vacio,
@@ -54,7 +53,6 @@ export default function Reclamos() {
         )}
       </View>
 
-      <Nota texto="Cada reclamo tiene un área responsable y un plazo. Si se vence, la municipalidad recibe una alerta." />
 
       <View style={estilos.ayuda}>
         <Texto variante="bodyLgMedium" alineacion="center">
@@ -67,7 +65,6 @@ export default function Reclamos() {
           onPress={() => router.push('/atencion-humana')}
         />
       </View>
-      <PiePrototipo />
     </Pantalla>
   );
 }
