@@ -144,6 +144,22 @@ El bucket privado `evidencias` usa la ruta `{municipalidad_id}/{user_id}/{archiv
 
 Al agregar una tabla: incluye `municipalidad_id`, activa RLS y revoca los permisos de `anon` y `authenticated`, porque Supabase los concede por defecto en tablas nuevas.
 
+## Datos de la app móvil
+
+Con Supabase configurado y una sesión iniciada, la app lee de la base sus municipalidades, predios,
+deudas, pagos, avisos, reclamos y obras (`apps/mobile/src/datos-remotos.ts`; los conversores de
+fila a tipo están en `packages/shared/src/filas.ts`). Las políticas RLS dejan pasar solo las filas del
+vecino: el vecino se enlaza con su cuenta al vincular un código (`vincular_contribuyente`). Sin
+Supabase, la app sigue con los datos de ejemplo.
+
+- **Pagos:** Almira no procesa pagos. `municipalidades.url_pago` guarda el portal oficial de cada
+  municipalidad (es un dato, no va en el código) y la pantalla "Confirma tu pago" lleva a ese portal.
+  Almira no confirma la operación.
+- **Reclamos:** la foto se sube a `evidencias/{municipalidad}/{usuario}/{archivo}` y el reclamo se
+  inserta con permisos por columna. Sin foto no se envía: `foto_ruta` es obligatoria.
+- **Panel web:** sigue simulado (ingreso sin contraseña real, datos de ejemplo). Los permisos por rol
+  del personal ya existen en la base, pero el panel todavía no los usa.
+
 ## Mapa de obras
 
 El mapa es OpenStreetMap dibujado con Leaflet, sin API key (`docs/design/turquesa/MAPA.md`).
