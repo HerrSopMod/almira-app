@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Devuelve un mensaje de error para mostrar, o null si todo salió bien.
       iniciarConGoogle: async () => {
         if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
-        const redirectTo = Platform.OS === 'web' ? `${window.location.origin}/ingreso` : Linking.createURL('/ingreso');
+        const redirectTo = Platform.OS === 'web' ? `${window.location.origin}/ingreso` : Linking.createURL('ingreso');
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: { redirectTo, skipBrowserRedirect: Platform.OS !== 'web' },
