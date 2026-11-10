@@ -47,6 +47,7 @@ export const municipalidades: Municipalidad[] = [
     zona: 'Lima Centro',
     telefonoAyuda: null,
     avisoDestacado: null,
+    urlPago: 'https://consultas.munilince.gob.pe/pagosenlinea/',
     activa: true,
   },
   {
@@ -56,6 +57,7 @@ export const municipalidades: Municipalidad[] = [
     zona: 'Lima Sur',
     telefonoAyuda: null,
     avisoDestacado: null,
+    urlPago: null,
     activa: true,
   },
   {
@@ -65,6 +67,7 @@ export const municipalidades: Municipalidad[] = [
     zona: 'Lima Este',
     telefonoAyuda: null,
     avisoDestacado: null,
+    urlPago: null,
     activa: true,
   },
   {
@@ -74,6 +77,7 @@ export const municipalidades: Municipalidad[] = [
     zona: 'Lima Norte',
     telefonoAyuda: null,
     avisoDestacado: null,
+    urlPago: null,
     activa: true,
   },
 ];

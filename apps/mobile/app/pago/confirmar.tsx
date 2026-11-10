@@ -11,7 +11,7 @@ import {
 } from '@almira/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 import {
   FilaDato,
   Nota,
@@ -26,6 +26,7 @@ import { Opcion } from '@/components/Opcion';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
 import { useDatosMunicipales, useSesion } from '@/sesion';
+import { supabaseConfigurado } from '@/supabase';
 
 const MEDIOS: { medio: MedioPago; icono: NombreIcono }[] = [
   { medio: 'yape', icono: 'smartphone' },
@@ -34,11 +35,14 @@ const MEDIOS: { medio: MedioPago; icono: NombreIcono }[] = [
   { medio: 'banca_movil', icono: 'account-balance' },
 ];
 
-// Pantalla 07 (Stitch 7, parte inferior). El pago es simulado: no se conecta a
-// ninguna pasarela y solo el servidor podría confirmarlo.
+// Pantalla 07 (Stitch 7, parte inferior). Almira no procesa pagos: si la municipalidad tiene
+// un portal de pago (dato `urlPago`), el botón lleva a ese portal y el vecino paga allí. Sin
+// Supabase, y sin portal, el pago sigue simulado para recorrer el prototipo.
 export default function ConfirmarPago() {
   const { deudas: ids } = useLocalSearchParams<{ deudas?: string }>();
-  const { deudas } = useDatosMunicipales();
+  const { deudas, municipalidad } = useDatosMunicipales();
+  const urlPago = municipalidad.urlPago;
+  const sinPortal = supabaseConfigurado && !urlPago;
   const { registrarPagoSimulado } = useSesion();
   const [medio, setMedio] = useState<MedioPago>('yape');
   // Tras pagar, las deudas ya figuran como pagadas: no se vuelve a dibujar mientras se navega.
@@ -58,6 +62,10 @@ export default function ConfirmarPago() {
     );
   }
 
+  const irAlPortal = () => {
+    if (urlPago) void Linking.openURL(urlPago);
+  };
+
   const pagar = () => {
     const operacion = registrarPagoSimulado(elegidas, medio);
     setPagado(true);
@@ -68,7 +76,18 @@ export default function ConfirmarPago() {
     <Pantalla
       encabezadoHastaArriba
       encabezado={encabezado}
-      pie={<Boton icono="lock-outline" titulo={`Pagar ${formatearSoles(total)}`} onPress={pagar} />}
+      pie={
+        urlPago ? (
+          <Boton icono="open-in-new" titulo="Ir al portal de pago" onPress={irAlPortal} />
+        ) : (
+          <Boton
+            icono="lock-outline"
+            titulo={`Pagar ${formatearSoles(total)}`}
+            deshabilitado={sinPortal}
+            onPress={pagar}
+          />
+        )
+      }
     >
       <Tarjeta>
         {elegidas.map((deuda) => (
@@ -82,31 +101,42 @@ export default function ConfirmarPago() {
         <FilaDato total etiqueta="Total a pagar" valor={formatearSoles(total)} />
       </Tarjeta>
 
-      <View style={estilos.grupo}>
-        <Texto variante="headlineSm" accessibilityRole="header">
-          ¿Cómo quieres pagar?
-        </Texto>
-        <View accessibilityRole="radiogroup" style={estilos.medios}>
-          {MEDIOS.map(({ medio: opcion, icono }) => (
-            <Opcion
-              key={opcion}
-              icono={icono}
-              titulo={ETIQUETA_MEDIO_PAGO[opcion]}
-              detalle={DETALLE_MEDIO_PAGO[opcion]}
-              seleccionada={medio === opcion}
-              onPress={() => setMedio(opcion)}
-            />
-          ))}
-        </View>
-      </View>
+      {urlPago ? (
+        <Nota
+          icono="open-in-new"
+          texto="Te llevamos al portal de pago de tu municipalidad. Allí eliges cómo pagar y completas la operación. Almira no procesa el pago ni lo confirma."
+        />
+      ) : sinPortal ? (
+        <Nota texto="Tu municipalidad todavía no tiene un portal de pago enlazado en Almira." />
+      ) : (
+        <>
+          <View style={estilos.grupo}>
+            <Texto variante="headlineSm" accessibilityRole="header">
+              ¿Cómo quieres pagar?
+            </Texto>
+            <View accessibilityRole="radiogroup" style={estilos.medios}>
+              {MEDIOS.map(({ medio: opcion, icono }) => (
+                <Opcion
+                  key={opcion}
+                  icono={icono}
+                  titulo={ETIQUETA_MEDIO_PAGO[opcion]}
+                  detalle={DETALLE_MEDIO_PAGO[opcion]}
+                  seleccionada={medio === opcion}
+                  onPress={() => setMedio(opcion)}
+                />
+              ))}
+            </View>
+          </View>
 
-      <Nota
-        icono="notifications-off"
-        texto="Al confirmar, los avisos de estas deudas se detienen y no te contactaremos por 48 horas."
-      />
-      <Texto variante="caption" color={colors.textSecondary} alineacion="center">
-        Pago simulado. La pasarela real está por definir en la capa de integración.
-      </Texto>
+          <Nota
+            icono="notifications-off"
+            texto="Al confirmar, los avisos de estas deudas se detienen y no te contactaremos por 48 horas."
+          />
+          <Texto variante="caption" color={colors.textSecondary} alineacion="center">
+            Pago simulado. La pasarela real está por definir en la capa de integración.
+          </Texto>
+        </>
+      )}
     </Pantalla>
   );
 }

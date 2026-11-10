@@ -1,4 +1,4 @@
-import { codigoContribuyenteValido, documentoValido, municipalidades, spacing } from '@almira/shared';
+import { codigoContribuyenteValido, documentoValido, spacing } from '@almira/shared';
 import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -9,7 +9,7 @@ import { Campo } from '@/components/Campo';
 import { CampoDocumento } from '@/components/CampoDocumento';
 import { Opcion } from '@/components/Opcion';
 import { Pantalla } from '@/components/Pantalla';
-import { useSesion } from '@/sesion';
+import { useMunicipalidades, useSesion } from '@/sesion';
 import { supabaseConfigurado } from '@/supabase';
 
 // Pantalla 02c. Después de elegir la municipalidad: el vecino vincula su código de
@@ -17,6 +17,7 @@ import { supabaseConfigurado } from '@/supabase';
 // padrón de la municipalidad (en el servidor con Supabase; sin Supabase, con datos de ejemplo).
 export default function VincularCodigos() {
   const { metodoIngreso, nombreCuenta, municipalidadId, vinculos, vincularCodigo } = useSesion();
+  const municipalidades = useMunicipalidades();
   const municipalidad = municipalidades.find((m) => m.id === municipalidadId);
   const [codigo, setCodigo] = useState('');
   const [documento, setDocumento] = useState('');

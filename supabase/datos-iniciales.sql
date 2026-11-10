@@ -83,6 +83,9 @@ begin
     and not exists (select 1 from public.deudas e where e.municipalidad_id = villa_verde and e.vecino_id = v.id);
 end $$;
 
+-- Enlace al portal de pago de la municipalidad (dato, no va en el código de la app).
+update public.municipalidades set url_pago = 'https://consultas.munilince.gob.pe/pagosenlinea/' where slug = 'lince';
+
 select
   (select count(*) from public.vecinos) as vecinos,
   (select count(*) from public.predios) as predios,

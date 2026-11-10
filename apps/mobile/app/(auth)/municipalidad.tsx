@@ -1,6 +1,6 @@
-import { municipalidades, spacing, type Zona } from '@almira/shared';
+import { spacing, type Zona } from '@almira/shared';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Nota, Rotulo, TituloPantalla } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
@@ -10,7 +10,7 @@ import { Chips } from '@/components/Chips';
 import { Opcion } from '@/components/Opcion';
 import { Pantalla } from '@/components/Pantalla';
 import { Texto } from '@/components/Texto';
-import { useSesion } from '@/sesion';
+import { useMunicipalidades, useSesion } from '@/sesion';
 
 // Con más municipalidades que esto aparecen el buscador y los chips de zona.
 const MAXIMO_SIN_FILTROS = 5;
@@ -31,11 +31,15 @@ export default function ElegirMunicipalidad() {
   const { modo } = useLocalSearchParams<{ modo?: string }>();
   const cambio = modo === 'cambio';
   const { metodoIngreso, municipalidadId, elegirMunicipalidad } = useSesion();
-  const activas = municipalidades.filter((m) => m.activa);
+  const activas = useMunicipalidades();
   const conFiltros = activas.length > MAXIMO_SIN_FILTROS;
   const [elegida, setElegida] = useState(
     activas.some((m) => m.id === municipalidadId) ? municipalidadId : activas[0]?.id,
   );
+  // Con Supabase la lista llega después de abrir la pantalla.
+  useEffect(() => {
+    if (!elegida && activas[0]) setElegida(activas[0].id);
+  }, [elegida, activas]);
   const [busqueda, setBusqueda] = useState('');
   const [zona, setZona] = useState<FiltroZona>('todas');
 

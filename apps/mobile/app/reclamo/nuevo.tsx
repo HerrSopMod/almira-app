@@ -31,8 +31,8 @@ const MAXIMO_DESCRIPCION = 500;
 const SIN_OBRAS: never[] = [];
 
 // Pantalla 16 (maqueta 16-nuevo-reclamo). La foto sale de la cámara y el punto del GPS,
-// con permiso del vecino. Por ahora los dos se quedan en el teléfono: la foto no se sube a
-// Storage ni el punto se guarda en el reclamo. El minimapa (MAPA.md) marca el punto del GPS
+// con permiso del vecino; los dos viajan a Envío al área y, con Supabase, se guardan con el
+// reclamo (la foto en Storage). El minimapa (MAPA.md) marca el punto del GPS
 // si el vecino tocó "Usar mi ubicación"; si no, el punto de ejemplo del predio. Si cambia
 // la dirección sin GPS, el mapa queda en el distrito sin marcador.
 export default function NuevoReclamo() {
@@ -172,8 +172,6 @@ export default function NuevoReclamo() {
         </Texto>
       </View>
 
-      <Nota texto="Por ahora la foto y tu ubicación se quedan en tu teléfono: no se envían con el reclamo." />
-
       <Nota
         icono="lock-outline"
         texto="La foto y la ubicación se usan solo para atender este reclamo."
@@ -185,7 +183,12 @@ export default function NuevoReclamo() {
         onPress={() =>
           router.push({
             pathname: '/reclamo/envio',
-            params: { descripcion: descripcion.trim(), direccion: direccion.trim() },
+            params: {
+              descripcion: descripcion.trim(),
+              direccion: direccion.trim(),
+              ...(foto ? { foto } : {}),
+              ...(punto ? { latitud: String(punto.latitud), longitud: String(punto.longitud) } : {}),
+            },
           })
         }
       />

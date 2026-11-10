@@ -13,7 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Destacado, FilaDato, Separador, Tarjeta, Vacio } from '@/components/Bloques';
+import { Destacado, FilaDato, Nota, Separador, Tarjeta, Vacio } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { Chips } from '@/components/Chips';
@@ -27,12 +27,23 @@ const CATEGORIAS = TIPOS_RECLAMO.map((valor) => ({ valor, titulo: ETIQUETA_TIPO_
 // Pantalla 17 (maqueta 17-envio-al-area). La categoría sale de reglas fijas sobre la
 // descripción (clasificarReclamo) y el área, de la categoría. El vecino puede corregirla.
 export default function EnvioAlArea() {
-  const { descripcion = '', direccion = '' } = useLocalSearchParams<{
+  const {
+    descripcion = '',
+    direccion = '',
+    foto,
+    latitud,
+    longitud,
+  } = useLocalSearchParams<{
     descripcion?: string;
     direccion?: string;
+    foto?: string;
+    latitud?: string;
+    longitud?: string;
   }>();
   const { registrarReclamo } = useSesion();
   const [tipo, setTipo] = useState<TipoReclamo>(() => clasificarReclamo(descripcion));
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState(false);
   const area = AREA_TIPO_RECLAMO[tipo];
   const encabezado = <BarraSuperior titulo="Envío al área" paso="Paso 2 de 2" />;
 
@@ -44,9 +55,23 @@ export default function EnvioAlArea() {
     );
   }
 
-  const confirmar = () => {
-    const id = registrarReclamo({ tipo, descripcion, direccion });
-    if (!id) return;
+  const confirmar = async () => {
+    if (enviando) return;
+    setEnviando(true);
+    setError(false);
+    const id = await registrarReclamo({
+      tipo,
+      descripcion,
+      direccion,
+      fotoUri: foto ?? null,
+      latitud: latitud ? Number(latitud) : null,
+      longitud: longitud ? Number(longitud) : null,
+    });
+    setEnviando(false);
+    if (!id) {
+      setError(true);
+      return;
+    }
     // Cierra Nuevo reclamo y Envío al área, y abre el seguimiento en la pestaña Reclamos.
     if (router.canDismiss()) router.dismissAll();
     router.navigate({ pathname: '/reclamos/[id]', params: { id } });
@@ -90,7 +115,15 @@ export default function EnvioAlArea() {
         </View>
       </Tarjeta>
 
-      <Boton titulo={`Confirmar envío a ${area}`} onPress={confirmar} />
+      {error ? (
+        <Nota texto="No pudimos enviar tu reclamo. Revisa tu conexión e inténtalo de nuevo." />
+      ) : null}
+
+      <Boton
+        titulo={enviando ? 'Enviando…' : `Confirmar envío a ${area}`}
+        deshabilitado={enviando}
+        onPress={confirmar}
+      />
     </Pantalla>
   );
 }

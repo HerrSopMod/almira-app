@@ -38,6 +38,8 @@ export interface Municipalidad {
   zona: Zona;
   telefonoAyuda: string | null;
   avisoDestacado: string | null;
+  // Portal oficial de pago de la municipalidad. Almira no procesa pagos: lleva a este enlace.
+  urlPago: string | null;
   activa: boolean;
 }
 

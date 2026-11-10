@@ -9,3 +9,4 @@ export * from './panel-ejemplo';
 export * from './pagos';
 export * from './ingreso';
 export * from './mapa';
+export * from './filas';

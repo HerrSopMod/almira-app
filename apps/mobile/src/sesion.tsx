@@ -1,13 +1,6 @@
 import {
-  deudas,
   HOY_EJEMPLO,
-  municipalidades,
   buscarVecinoPorCodigo,
-  obras,
-  pagos,
-  predios,
-  reclamos as reclamosEjemplo,
-  recordatorios,
   alternarCanal,
   AREA_TIPO_RECLAMO,
   PLAZO_DIAS_RECLAMO,
@@ -16,15 +9,24 @@ import {
   tituloReclamo,
   totalDeuda,
   USUARIO_EJEMPLO,
-  vecinos,
   type CanalAviso,
   type Deuda,
   type MedioPago,
+  type Municipalidad,
   type Pago,
   type Reclamo,
   type TipoReclamo,
+  type Vecino,
 } from '@almira/shared';
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import {
   leerDatosIngreso,
   metodoDeSesion,
@@ -34,7 +36,13 @@ import {
   type Vinculo,
   type MetodoIngreso,
 } from './auth';
-import { supabaseConfigurado } from './supabase';
+import {
+  cargarDatosRemotos,
+  DATOS_EJEMPLO,
+  DATOS_VACIOS,
+  type FuenteDatos,
+} from './datos-remotos';
+import { supabase, supabaseConfigurado } from './supabase';
 
 // Lo que el vecino autoriza en la pantalla 03 (Tus datos, tus reglas).
 export type Consentimientos = {
@@ -82,8 +90,14 @@ type Sesion = {
   canalesAviso: Record<string, CanalAviso[]>;
   alternarCanalAviso: (canal: CanalAviso) => void;
   reclamosNuevos: Reclamo[];
-  // Guarda en memoria un reclamo de la municipalidad elegida y devuelve su id.
-  registrarReclamo: (datos: NuevoReclamo) => string | null;
+  // Registra el reclamo en la municipalidad elegida y devuelve su id. Con Supabase sube la
+  // foto a Storage y lo guarda en la base; sin Supabase, queda en memoria. null si falla.
+  registrarReclamo: (datos: NuevoReclamo) => Promise<string | null>;
+  // Lo que la app muestra: de la base con Supabase, de ejemplo sin él.
+  datos: FuenteDatos;
+  cargandoDatos: boolean;
+  errorDatos: boolean;
+  recargarDatos: () => Promise<void>;
   pagosSimulados: Pago[];
   // Devuelve el código de operación que comparten los pagos creados.
   registrarPagoSimulado: (deudasAPagar: Deuda[], medio: MedioPago) => string;
@@ -93,6 +107,10 @@ export type NuevoReclamo = {
   tipo: TipoReclamo;
   descripcion: string;
   direccion: string;
+  // Foto de la cámara y punto del GPS de Nuevo reclamo.
+  fotoUri?: string | null;
+  latitud?: number | null;
+  longitud?: number | null;
 };
 
 const ContextoSesion = createContext<Sesion | null>(null);
@@ -108,17 +126,20 @@ function momentoSimulado(): string {
   return `${HOY_EJEMPLO}T${hora}:${minutos}:00`;
 }
 
+// El vecino de la cuenta en esa municipalidad. Con Supabase, las políticas RLS ya dejan solo
+// sus filas; sin Supabase, es el vecino de ejemplo.
+function vecinoDe(datos: FuenteDatos, municipalidadId: string, usuarioId: string): Vecino | undefined {
+  return datos.vecinos.find((v) => v.municipalidadId === municipalidadId && v.userId === usuarioId);
+}
+
 // Canal preferido del vecino en esa municipalidad, o WhatsApp si no está registrado.
-function canalInicial(municipalidadId: string): CanalAviso {
-  const vecino = vecinos.find(
-    (v) => v.municipalidadId === municipalidadId && v.userId === USUARIO_EJEMPLO.id,
-  );
-  return vecino?.canalPreferido ?? 'whatsapp';
+function canalInicial(datos: FuenteDatos, municipalidadId: string, usuarioId: string): CanalAviso {
+  return vecinoDe(datos, municipalidadId, usuarioId)?.canalPreferido ?? 'whatsapp';
 }
 
 // La municipalidad guardada, si sigue activa; si no, la primera de los datos.
-function municipalidadValida(id: string | null | undefined): string {
-  return municipalidades.find((m) => m.id === id && m.activa)?.id ?? municipalidades[0]!.id;
+function municipalidadValida(lista: Municipalidad[], id: string | null | undefined): string {
+  return lista.find((m) => m.id === id && m.activa)?.id ?? lista.find((m) => m.activa)?.id ?? '';
 }
 
 export function SesionProvider({ children }: { children: ReactNode }) {
@@ -138,6 +159,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   const [canalesAviso, setCanalesAviso] = useState<Record<string, CanalAviso[]>>({});
   const [reclamosNuevos, setReclamosNuevos] = useState<Reclamo[]>([]);
   const [pagosSimulados, setPagosSimulados] = useState<Pago[]>([]);
+  const [remotos, setRemotos] = useState<FuenteDatos | null>(null);
+  const [cargandoDatos, setCargandoDatos] = useState(false);
+  const [errorDatos, setErrorDatos] = useState(false);
 
   // Si entra otra cuenta, no hereda lo elegido por la anterior.
   const usuarioId = cuenta?.user.id ?? null;
@@ -148,6 +172,26 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     setVinculosSesion([]);
     setCelularAhora(false);
   }, [usuarioId]);
+
+  // Con Supabase, todo sale de la base; sin Supabase, de los datos de ejemplo.
+  const recargarDatos = useCallback(async () => {
+    if (!supabaseConfigurado || !usuarioId) return;
+    setCargandoDatos(true);
+    try {
+      setRemotos(await cargarDatosRemotos());
+      setErrorDatos(false);
+    } catch {
+      setErrorDatos(true);
+    } finally {
+      setCargandoDatos(false);
+    }
+  }, [usuarioId]);
+  useEffect(() => {
+    setRemotos(null);
+    void recargarDatos();
+  }, [recargarDatos]);
+  const datos = supabaseConfigurado ? (remotos ?? DATOS_VACIOS) : DATOS_EJEMPLO;
+  const idUsuario = usuarioId ?? USUARIO_EJEMPLO.id;
 
   // Con Supabase, los códigos ya vinculados vuelven desde el servidor.
   const { listarVinculos } = auth;
@@ -163,7 +207,10 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       ? USUARIO_EJEMPLO.nombre
       : null;
   const consentimientoAceptado = aceptadoAhora || guardado !== null;
-  const municipalidadId = municipalidadValida(municipalidadElegida ?? guardado?.municipalidadId);
+  const municipalidadId = municipalidadValida(
+    datos.municipalidades,
+    municipalidadElegida ?? guardado?.municipalidadId,
+  );
   const consentimientos =
     consentimientosElegidos ?? guardado?.consentimientos ?? CONSENTIMIENTOS_INICIALES;
   const { guardarDatosIngreso, cerrarSesion: cerrarSesionAuth, vincularContribuyente } = auth;
@@ -212,7 +259,11 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         if (supabaseConfigurado) {
           const error = await vincularContribuyente(municipalidadId, codigo, dni);
           if (error) return error;
-        } else if (!buscarVecinoPorCodigo(vecinos, predios, municipalidadId, codigo, dni)) {
+          // Ya vinculado, las políticas RLS dejan ver sus tributos: se vuelven a leer.
+          await recargarDatos();
+        } else if (
+          !buscarVecinoPorCodigo(datos.vecinos, datos.predios, municipalidadId, codigo, dni)
+        ) {
           return 'No encontramos ese código con ese DNI en el padrón.';
         }
         setVinculosSesion((previos) => [...previos, nuevo]);
@@ -235,25 +286,55 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         setCanalesAviso((previos) => ({
           ...previos,
           [municipalidadId]: alternarCanal(
-            previos[municipalidadId] ?? [canalInicial(municipalidadId)],
+            previos[municipalidadId] ?? [canalInicial(datos, municipalidadId, idUsuario)],
             canal,
           ),
         })),
       reclamosNuevos,
-      registrarReclamo: ({ tipo, descripcion, direccion }) => {
-        const vecino = vecinos.find(
-          (v) => v.municipalidadId === municipalidadId && v.userId === USUARIO_EJEMPLO.id,
-        );
+      registrarReclamo: async ({ tipo, descripcion, direccion, fotoUri, latitud, longitud }) => {
+        const vecino = vecinoDe(datos, municipalidadId, idUsuario);
         if (!vecino) return null;
+        if (supabaseConfigurado) {
+          // La foto va primero a Storage, en {municipalidad}/{usuario}/{archivo}: las políticas
+          // del bucket solo dejan subir a esa carpeta. Sin foto no hay reclamo (foto_ruta es obligatoria).
+          if (!fotoUri) return null;
+          const ruta = `${municipalidadId}/${idUsuario}/${Date.now()}.jpg`;
+          try {
+            const cuerpo = await (await fetch(fotoUri)).arrayBuffer();
+            const subida = await supabase.storage
+              .from('evidencias')
+              .upload(ruta, cuerpo, { contentType: 'image/jpeg' });
+            if (subida.error) return null;
+            const { data, error } = await supabase
+              .from('reclamos')
+              .insert({
+                municipalidad_id: municipalidadId,
+                vecino_id: vecino.id,
+                tipo,
+                titulo: tituloReclamo(descripcion),
+                descripcion,
+                foto_ruta: ruta,
+                direccion,
+                latitud: latitud ?? null,
+                longitud: longitud ?? null,
+              })
+              .select('id')
+              .single();
+            if (error || !data) return null;
+            await recargarDatos();
+            return String(data.id);
+          } catch {
+            return null;
+          }
+        }
         const codigo = siguienteCodigoReclamo(
-          [...reclamosEjemplo, ...reclamosNuevos].filter(
+          [...datos.reclamos, ...reclamosNuevos].filter(
             (r) => r.municipalidadId === municipalidadId,
           ),
         );
-        // La foto y el punto del GPS de Nuevo reclamo no llegan aquí: no se sube ningún
-        // archivo. El punto guardado es el de ejemplo del predio; si el vecino cambió la
-        // dirección, no hay punto.
-        const predio = predios.find(
+        // Sin Supabase no se sube ningún archivo. El punto guardado es el de ejemplo del predio;
+        // si el vecino cambió la dirección, no hay punto.
+        const predio = datos.predios.find(
           (p) => p.vecinoId === vecino.id && p.direccion === direccion,
         );
         const punto = predio ? UBICACIONES_PREDIO_EJEMPLO[predio.id] : undefined;
@@ -269,8 +350,8 @@ export function SesionProvider({ children }: { children: ReactNode }) {
           area: AREA_TIPO_RECLAMO[tipo],
           fotoRuta: `${municipalidadId}/simulada-${codigo}.jpg`,
           direccion,
-          latitud: punto?.latitud ?? null,
-          longitud: punto?.longitud ?? null,
+          latitud: latitud ?? punto?.latitud ?? null,
+          longitud: longitud ?? punto?.longitud ?? null,
           plazo: null,
           plazoDias: PLAZO_DIAS_RECLAMO,
           creadoEn: HOY_EJEMPLO,
@@ -278,6 +359,10 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         setReclamosNuevos((previos) => [reclamo, ...previos]);
         return reclamo.id;
       },
+      datos,
+      cargandoDatos,
+      errorDatos,
+      recargarDatos,
       pagosSimulados,
       registrarPagoSimulado: (deudasAPagar, medio) => {
         const operaciones = new Set(pagosSimulados.map((pago) => pago.referencia));
@@ -314,6 +399,11 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     reclamosNuevos,
     consentimientos,
     pagosSimulados,
+    datos,
+    idUsuario,
+    cargandoDatos,
+    errorDatos,
+    recargarDatos,
   ]);
   return <ContextoSesion.Provider value={valor}>{children}</ContextoSesion.Provider>;
 }
@@ -326,46 +416,53 @@ export function useSesion() {
 
 // Todo lo que el vecino ve pertenece a la municipalidad elegida.
 export function useDatosMunicipales() {
-  const { municipalidadId, canalesAviso, reclamosNuevos, pagosSimulados } = useSesion();
+  const { municipalidadId, canalesAviso, reclamosNuevos, pagosSimulados, datos } = useSesion();
+  const { sesion } = useAuth();
+  const idUsuario = (supabaseConfigurado ? sesion?.user.id : null) ?? USUARIO_EJEMPLO.id;
   return useMemo(() => {
-    const municipalidad = municipalidades.find((m) => m.id === municipalidadId)!;
-    const vecino = vecinos.find(
-      (v) => v.municipalidadId === municipalidadId && v.userId === USUARIO_EJEMPLO.id,
-    );
+    const municipalidad =
+      datos.municipalidades.find((m) => m.id === municipalidadId) ?? datos.municipalidades[0];
+    const vecino = vecinoDe(datos, municipalidadId, idUsuario);
     const delVecino = <T extends { vecinoId: string }>(filas: T[]) =>
       filas.filter((fila) => fila.vecinoId === vecino?.id);
     const simulados = delVecino(pagosSimulados);
     // Las deudas pagadas en esta sesión se ven como pagadas hasta cerrar la app.
     const pagadasEnSesion = new Set(simulados.map((pago) => pago.deudaId));
     return {
-      municipalidad,
+      // Sin municipalidades todavía (cargando los datos) la pantalla recibe un marcador vacío.
+      municipalidad: municipalidad ?? MUNICIPALIDAD_VACIA,
       vecino,
-      predios: delVecino(predios),
-      deudas: delVecino(deudas).map((deuda) =>
+      predios: delVecino(datos.predios),
+      deudas: delVecino(datos.deudas).map((deuda) =>
         pagadasEnSesion.has(deuda.id) ? { ...deuda, estado: 'pagada' as const } : deuda,
       ),
-      pagos: [...simulados, ...delVecino(pagos)].sort((a, b) =>
+      pagos: [...simulados, ...delVecino(datos.pagos)].sort((a, b) =>
         b.creadoEn.localeCompare(a.creadoEn),
       ),
-      recordatorios: delVecino(recordatorios),
-      canalesAviso: canalesAviso[municipalidadId] ?? [canalInicial(municipalidadId)],
+      recordatorios: delVecino(datos.recordatorios),
+      canalesAviso: canalesAviso[municipalidadId] ?? [canalInicial(datos, municipalidadId, idUsuario)],
       reclamos: [
         ...reclamosNuevos.filter((r) => r.municipalidadId === municipalidadId),
-        ...delVecino(reclamosEjemplo),
+        ...delVecino(datos.reclamos),
       ],
-      obras: obras.filter((o) => o.municipalidadId === municipalidadId && o.publicada),
+      obras: datos.obras.filter((o) => o.municipalidadId === municipalidadId && o.publicada),
     };
-  }, [municipalidadId, canalesAviso, reclamosNuevos, pagosSimulados]);
+  }, [municipalidadId, canalesAviso, reclamosNuevos, pagosSimulados, datos, idUsuario]);
 }
 
-// DNI de ejemplo de Rosa: llena el campo del ingreso para recorrer el prototipo.
-export const DOCUMENTO_EJEMPLO =
-  vecinos.find((vecino) => vecino.userId === USUARIO_EJEMPLO.id)?.dni ?? '';
+const MUNICIPALIDAD_VACIA: Municipalidad = {
+  id: '',
+  slug: '',
+  nombre: 'Tu municipalidad',
+  zona: 'Lima Centro',
+  telefonoAyuda: null,
+  avisoDestacado: null,
+  urlPago: null,
+  activa: true,
+};
 
-export function municipalidadesDelVecino() {
-  const propias = vecinos.filter((v) => v.userId === USUARIO_EJEMPLO.id);
-  return propias.map((vecino) => ({
-    municipalidad: municipalidades.find((m) => m.id === vecino.municipalidadId)!,
-    cantidadPredios: predios.filter((p) => p.vecinoId === vecino.id).length,
-  }));
+// Municipalidades activas que el vecino puede elegir.
+export function useMunicipalidades(): Municipalidad[] {
+  const { datos } = useSesion();
+  return useMemo(() => datos.municipalidades.filter((m) => m.activa), [datos]);
 }
