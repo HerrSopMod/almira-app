@@ -45,7 +45,8 @@
         {
           "locationWhenInUsePermission": "Almira usa tu ubicación para marcar dónde está el problema que reportas."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }
