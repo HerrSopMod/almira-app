@@ -5,14 +5,16 @@ import {
   type Reclamo,
 } from '@almira/shared';
 import { useState } from 'react';
-import { Chip, Encabezado, MensajeMemoria, Tabla, type TonoChip } from '../componentes';
+import { Chip, Encabezado, MensajeMemoria, Tabla, TarjetaTabla, type TonoChip } from '../componentes';
 import { estaVencido, etiquetaPlazoReclamo, useSesion } from '../estado';
-import { Icono } from '../iconos';
 
 const FILTROS = ['Todos', 'Vencidos', 'Abiertos', 'Resueltos'] as const;
 type Filtro = (typeof FILTROS)[number];
 
 const AREAS = [...new Set(Object.values(AREA_TIPO_RECLAMO))];
+
+// Desde cuántos días restantes el plazo deja de ir en ámbar (web-05).
+const DIAS_PLAZO_CERCANO = 3;
 
 const abierto = (reclamo: Reclamo) => reclamo.estado !== 'resuelto';
 
@@ -33,10 +35,12 @@ function urgencia(etiqueta: string): number {
   return quedan ? Number(quedan[1]) : Number.POSITIVE_INFINITY;
 }
 
+// Vencido en rojo, hasta 3 días en ámbar, más días en turquesa y resuelto en verde.
 function tonoPlazo(etiqueta: string): TonoChip {
   if (etiqueta === 'Resuelto') return 'ok';
-  // Vencido en rojo; "Vence hoy" y "Quedan N d" en ámbar (LEEME.md → Color).
-  return urgencia(etiqueta) < 0 ? 'bad' : 'warn';
+  const dias = urgencia(etiqueta);
+  if (dias < 0) return 'bad';
+  return dias <= DIAS_PLAZO_CERCANO ? 'warn' : 'info';
 }
 
 const plural = (n: number, singular: string, varios: string) => `${n} ${n === 1 ? singular : varios}`;
@@ -57,6 +61,8 @@ export function Reclamos() {
   const elegido = visibles.find((reclamo) => reclamo.id === elegidoId) ?? visibles[0];
   const vencidos = datos.reclamos.filter(estaVencido).length;
   const abiertos = datos.reclamos.filter(abierto).length;
+  // "Vencidos · 2" y "Abiertos · 6", como en la maqueta.
+  const cantidad: Partial<Record<Filtro, number>> = { Vencidos: vencidos, Abiertos: abiertos };
 
   const elegir = (id: string) => {
     setElegidoId(id);
@@ -104,13 +110,13 @@ export function Reclamos() {
               setCorrigiendo(false);
             }}
           >
-            {opcion}
+            {cantidad[opcion] ? `${opcion} · ${cantidad[opcion]}` : opcion}
           </button>
         ))}
       </div>
 
-      <div className="fila fila-decision fila-arriba">
-        <section className="tarjeta">
+      <div className="fila fila-reclamos">
+        <TarjetaTabla>
           {visibles.length === 0 ? (
             <p className="subtitulo">No hay reclamos en este filtro.</p>
           ) : (
@@ -128,7 +134,7 @@ export function Reclamos() {
                 return (
                   <tr
                     key={reclamo.id}
-                    className={`fila-elegible alta ${reclamo.id === elegido?.id ? 'elegida' : ''}`}
+                    className={`fila-elegible ${reclamo.id === elegido?.id ? 'elegida' : ''}`}
                     tabIndex={0}
                     aria-selected={reclamo.id === elegido?.id}
                     onClick={() => elegir(reclamo.id)}
@@ -139,7 +145,7 @@ export function Reclamos() {
                       }
                     }}
                   >
-                    <td>{reclamo.codigo}</td>
+                    <td className="num fuerte">{reclamo.codigo}</td>
                     <td>
                       <span className="doble">
                         <strong>{reclamo.titulo}</strong>
@@ -156,7 +162,7 @@ export function Reclamos() {
               })}
             </Tabla>
           )}
-        </section>
+        </TarjetaTabla>
 
         {elegido && (
           <section className="tarjeta detalle-reclamo" aria-label={`Detalle del reclamo ${elegido.codigo}`}>
@@ -164,15 +170,15 @@ export function Reclamos() {
               <h2>{elegido.codigo}</h2>
               <Chip tono={tonoPlazo(etiquetaPlazoReclamo(elegido))}>{etiquetaPlazoReclamo(elegido)}</Chip>
             </header>
-            <FotoEvidencia reclamo={elegido} />
-            <div className="detalle-texto">
+            <div className="detalle-titulo">
               <strong>{elegido.titulo}</strong>
-              <span className="detalle-meta">
+              <span>
                 {[elegido.direccion, formatearFechaCorta(elegido.creadoEn)].filter(Boolean).join(' · ')}
               </span>
-              {elegido.descripcion && <p>{elegido.descripcion}</p>}
             </div>
-            <dl className="datos-reclamo">
+            {elegido.descripcion && <p className="detalle-descripcion">{elegido.descripcion}</p>}
+            {/* Sin porcentaje de confianza: la clasificación sale de reglas fijas. */}
+            <dl className="clave-valor">
               <div>
                 <dt>Clasificación automática</dt>
                 <dd>{ETIQUETA_TIPO_RECLAMO[elegido.tipo]}</dd>
@@ -181,7 +187,7 @@ export function Reclamos() {
                 <dt>Área responsable</dt>
                 <dd>
                   {corrigiendo ? (
-                    <label className="campo campo-en-linea">
+                    <label className="campo-en-linea">
                       <span className="oculto">Nueva área responsable</span>
                       <select
                         value={elegido.area ?? ''}
@@ -203,12 +209,12 @@ export function Reclamos() {
             </dl>
             {abierto(elegido) && (
               <div className="acciones">
-                <button type="button" className="boton boton-primario boton-bajo" onClick={() => cerrar(elegido)}>
+                <button type="button" className="boton boton-primario" onClick={() => cerrar(elegido)}>
                   Responder y cerrar
                 </button>
                 <button
                   type="button"
-                  className="boton boton-secundario boton-bajo"
+                  className="boton boton-secundario"
                   onClick={() => setCorrigiendo((valor) => !valor)}
                 >
                   {corrigiendo ? 'Cancelar' : 'Corregir área'}
@@ -220,27 +226,5 @@ export function Reclamos() {
         )}
       </div>
     </>
-  );
-}
-
-// Dibujo fijo en lugar de la foto: el panel no muestra fotos reales.
-function FotoEvidencia({ reclamo }: { reclamo: Reclamo }) {
-  if (reclamo.tipo === 'cobro_indebido') {
-    return (
-      <div className="foto-evidencia" role="img" aria-label="Dibujo de un recibo, foto de ejemplo">
-        <span className="recibo">
-          <i />
-          <i />
-          <i />
-          <b />
-        </span>
-      </div>
-    );
-  }
-  return (
-    <div className="foto-evidencia generica" role="img" aria-label="Foto de ejemplo">
-      <Icono nombre="camara" />
-      <span>Foto de ejemplo</span>
-    </div>
   );
 }

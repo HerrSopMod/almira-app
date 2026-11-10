@@ -1,5 +1,5 @@
 import { municipalidades, spacing, type Zona } from '@almira/shared';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Nota, Rotulo, TituloPantalla } from '@/components/Bloques';
@@ -30,7 +30,7 @@ const normalizar = (texto: string) =>
 export default function ElegirMunicipalidad() {
   const { modo } = useLocalSearchParams<{ modo?: string }>();
   const cambio = modo === 'cambio';
-  const { municipalidadId, elegirMunicipalidad } = useSesion();
+  const { metodoIngreso, municipalidadId, elegirMunicipalidad } = useSesion();
   const activas = municipalidades.filter((m) => m.activa);
   const conFiltros = activas.length > MAXIMO_SIN_FILTROS;
   const [elegida, setElegida] = useState(
@@ -47,6 +47,9 @@ export default function ElegirMunicipalidad() {
           normalizar(m.nombre).includes(normalizar(busqueda.trim())),
       )
     : activas;
+
+  // En el ingreso solo se llega después de autenticarse.
+  if (!cambio && !metodoIngreso) return <Redirect href="/ingreso" />;
 
   const continuar = () => {
     if (!elegida) return;

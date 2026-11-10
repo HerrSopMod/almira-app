@@ -1,17 +1,26 @@
-import { HOY_EJEMPLO, formatearPorcentaje, formatearSoles, haceDias, type Obra } from '@almira/shared';
+import {
+  centroMapaDe,
+  formatearPorcentaje,
+  formatearSoles,
+  haceDias,
+  HOY_EJEMPLO,
+  type Obra,
+} from '@almira/shared';
 import { useState, type FormEvent } from 'react';
 import {
-  AvisoInfo,
   Chip,
   Encabezado,
   Interruptor,
   MensajeMemoria,
+  Nota,
   Progreso,
   Tabla,
   Tarjeta,
+  TarjetaTabla,
 } from '../componentes';
 import { diasSinActualizar, useSesion } from '../estado';
 import { Icono } from '../iconos';
+import { MapaObras } from '../MapaObras';
 
 const PASO_AVANCE = 5;
 
@@ -59,10 +68,10 @@ export function Obras() {
       <Encabezado
         titulo="Obras publicadas"
         subtitulo="Lo que ve el vecino en el mapa de la app"
-        extra={
+        accion={
           <button
             type="button"
-            className="boton boton-primario boton-bajo"
+            className="boton boton-primario"
             onClick={() => {
               setCreando(true);
               setMensaje(null);
@@ -83,11 +92,11 @@ export function Obras() {
         />
       )}
 
-      <section className="tarjeta">
+      <TarjetaTabla>
         <Tabla
           columnas={[
             { titulo: 'Obra' },
-            { titulo: 'Avance' },
+            { titulo: 'Avance', clase: 'columna-avance' },
             { titulo: 'Presupuesto', derecha: true },
             { titulo: 'Actualizada' },
             { titulo: 'Publicada' },
@@ -98,7 +107,7 @@ export function Obras() {
             const atrasada = diasSinActualizar(obra) > frecuencia;
             const actualizada = haceDias(obra.actualizadaEn, HOY_EJEMPLO);
             return (
-              <tr key={obra.id} className="alta">
+              <tr key={obra.id}>
                 <td>
                   <span className="doble">
                     <strong>{obra.nombre}</strong>
@@ -107,7 +116,7 @@ export function Obras() {
                 </td>
                 <td>
                   <span className="avance">
-                    <Progreso porcentaje={obra.avancePct} />
+                    <Progreso porcentaje={obra.avancePct} etiqueta={`Avance de ${obra.nombre}`} ancho />
                     <strong>{formatearPorcentaje(obra.avancePct)}</strong>
                   </span>
                 </td>
@@ -120,11 +129,11 @@ export function Obras() {
                     onCambiar={() => alternarPublicada(obra)}
                   />
                 </td>
-                <td className="celda-accion">
+                <td>
                   {obra.avancePct < 100 && (
                     <button
                       type="button"
-                      className="boton boton-secundario boton-fila"
+                      className="boton boton-secundario boton-sm"
                       onClick={() => sumarAvance(obra)}
                     >
                       +{formatearPorcentaje(PASO_AVANCE)} de avance
@@ -135,12 +144,39 @@ export function Obras() {
             );
           })}
         </Tabla>
-      </section>
+      </TarjetaTabla>
 
-      <AvisoInfo>
-        La municipalidad decide qué obras publica y con qué detalle. La frecuencia mínima de
-        actualización se acuerda con Almira: {frecuencia} días.
-      </AvisoInfo>
+      <div className="fila fila-obras">
+        <Tarjeta titulo="Vista del vecino" subtitulo="Solo aparecen las obras publicadas.">
+          <MapaObras obras={datos.obras} centro={centroMapaDe(sesion.municipalidad.id)} />
+          <p className="leyenda">
+            <span>
+              <i className="punto-obra" />
+              En ejecución
+            </span>
+            <span>
+              <i className="punto-obra concluida" />
+              Concluida
+            </span>
+          </p>
+        </Tarjeta>
+        <Tarjeta titulo="Cómo se publica">
+          <div className="lista-publica">
+            <Nota icono="ojo">
+              Solo las obras con «Publicada» activo aparecen en el mapa y la lista de la app.
+            </Nota>
+            {/* La última frase no está en la maqueta: explica por qué una obra nueva no sale en el mapa. */}
+            <Nota icono="ubicacion">
+              Cada obra tiene una ubicación (latitud y longitud) que define su punto en el mapa. Una
+              obra sin ubicación sale en la lista, pero no en el mapa.
+            </Nota>
+            <Nota icono="actualizar">
+              La municipalidad decide qué obras publica y con qué detalle. La frecuencia mínima de
+              actualización se acuerda con Almira: {frecuencia} días.
+            </Nota>
+          </div>
+        </Tarjeta>
+      </div>
       <MensajeMemoria texto={mensaje} />
     </>
   );
@@ -186,6 +222,7 @@ function NuevaObra({
       actualizadaEn: HOY_EJEMPLO,
       porcentajeTributos: null,
       hitos: [],
+      // Sin ubicación: sale en la tabla, pero no en la vista del vecino.
       latitud: null,
       longitud: null,
     });

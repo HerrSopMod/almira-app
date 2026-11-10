@@ -89,9 +89,10 @@ export default function Seguimiento() {
               Plazo de {reclamo.area ?? 'la municipalidad'}
             </Texto>
             <Texto variante="bodyLgMedium" tabular>
-              {plazo.quedan} de {plazo.total} días
+              Quedan {plazo.quedan} de {plazo.total} días
             </Texto>
           </View>
+          {/* La barra muestra el tiempo que ya pasó: con 3 de 10 por delante, va en 7 de 10. */}
           <Avance porcentaje={((plazo.total - plazo.quedan) / plazo.total) * 100} />
         </View>
       ) : null}

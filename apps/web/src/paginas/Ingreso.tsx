@@ -1,7 +1,9 @@
 import { PERSONAL_PANEL_EJEMPLO } from '@almira/shared';
 import { useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { Chip, Nota } from '../componentes';
 import { municipalidadesConPanel, usePanel } from '../estado';
+import { Icono } from '../iconos';
 
 // Ingreso simulado (web-01): no hay autenticación real. Cualquier usuario y
 // contraseña entran; los campos vienen llenos con el usuario de ejemplo.
@@ -11,6 +13,7 @@ export function Ingreso() {
   const [municipalidadId, setMunicipalidadId] = useState(municipalidadesConPanel[0]?.id ?? '');
   const [usuario, setUsuario] = useState<string>(PERSONAL_PANEL_EJEMPLO.usuario);
   const [contrasena, setContrasena] = useState('ejemplo1');
+  const [verContrasena, setVerContrasena] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (sesion) return <Navigate to="/panel" replace />;
@@ -25,18 +28,28 @@ export function Ingreso() {
     navegar('/panel');
   };
 
-  const unica = municipalidadesConPanel.length === 1 ? municipalidadesConPanel[0] : undefined;
-
   return (
     <main className="ingreso">
-      <form className="ingreso-tarjeta" onSubmit={enviar} noValidate>
-        <h1>Panel municipal (web)</h1>
-        <div className="ingreso-cuerpo">
-          {unica ? (
-            <p className="ingreso-municipalidad">{unica.nombre}</p>
-          ) : (
-            <label className="ingreso-municipalidad">
-              <span className="oculto">Municipalidad</span>
+      <div className="ingreso-columna">
+        <div className="ingreso-marca">
+          <span className="logo" aria-hidden="true">
+            a
+          </span>
+          <strong>Almira</strong>
+          <Chip tono="neutral">Panel municipal</Chip>
+        </div>
+
+        <form className="ingreso-tarjeta" onSubmit={enviar} noValidate>
+          <div className="ingreso-titulo">
+            <h1>Ingresa al panel</h1>
+            <p className="subtitulo">Solo para personal de la municipalidad.</p>
+          </div>
+
+          {/* Las municipalidades salen de los datos: solo las que tienen cifras de panel. */}
+          <label className="campo">
+            Municipalidad
+            <span className="campo-caja">
+              <Icono nombre="ciudad" />
               <select value={municipalidadId} onChange={(e) => setMunicipalidadId(e.target.value)}>
                 {municipalidadesConPanel.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -44,39 +57,61 @@ export function Ingreso() {
                   </option>
                 ))}
               </select>
-            </label>
-          )}
+              <Icono nombre="desplegar" tamano="lg" />
+            </span>
+          </label>
+
           <label className="campo">
             Usuario institucional
-            <input
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-              autoComplete="username"
-            />
+            <span className="campo-caja">
+              <input
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                autoComplete="username"
+              />
+            </span>
           </label>
-          <label className="campo">
-            Contraseña
-            <input
-              type="password"
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              autoComplete="current-password"
-            />
-          </label>
+
+          <div className="campo">
+            <label htmlFor="contrasena">Contraseña</label>
+            <span className="campo-caja">
+              <input
+                id="contrasena"
+                type={verContrasena ? 'text' : 'password'}
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="campo-ojo"
+                aria-label={verContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-pressed={verContrasena}
+                onClick={() => setVerContrasena((valor) => !valor)}
+              >
+                <Icono nombre={verContrasena ? 'ojoTachado' : 'ojo'} />
+              </button>
+            </span>
+          </div>
+
           {error && (
             <p className="campo-error" role="alert">
               {error}
             </p>
           )}
-          <button type="submit" className="boton boton-primario">
+
+          <button type="submit" className="boton boton-primario boton-grande">
             Ingresar
           </button>
-          <p className="ingreso-nota">
-            Datos de ejemplo. Ingreso simulado: entra con cualquier usuario y contraseña. Previsto: cada
-            funcionario verá solo lo que su área necesita.
-          </p>
-        </div>
-      </form>
+
+          <Nota>
+            Datos de ejemplo. Ingreso simulado. Previsto: cada funcionario verá solo lo que su área
+            necesita.
+          </Nota>
+        </form>
+
+        <p className="ingreso-pie">Prototipo académico · Datos ficticios</p>
+      </div>
     </main>
   );
 }

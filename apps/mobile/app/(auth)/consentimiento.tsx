@@ -1,25 +1,34 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Destacado, Nota, Rotulo, TituloPantalla } from '@/components/Bloques';
 import { BarraSuperior } from '@/components/BarraSuperior';
 import { Boton } from '@/components/Boton';
 import { InterruptoresConsentimiento } from '@/components/InterruptoresConsentimiento';
 import { Pantalla } from '@/components/Pantalla';
+import { cerrarPantallasDeIngreso } from '@/recorrido';
 import { useDatosMunicipales, useSesion } from '@/sesion';
 
-// Pantalla 03 (maqueta 03-consentimiento). Los permisos se guardan solo en memoria.
+// Pantalla 03 (maqueta 03-consentimiento). Último paso del ingreso: sin aceptar, no se
+// entra a Inicio. Con Supabase, lo aceptado se guarda en la cuenta; sin Supabase, en memoria.
 export default function Consentimiento() {
   const { municipalidad } = useDatosMunicipales();
-  const { consentimientos, guardarConsentimientos } = useSesion();
+  const { metodoIngreso, consentimientos, consentimientoAceptado, aceptarConsentimientos } =
+    useSesion();
   const [permisos, setPermisos] = useState(consentimientos);
+  const [entrando, setEntrando] = useState(false);
   // Si los cambia en Privacidad y mis datos (desde "Leer la política"), se reflejan aquí.
   useEffect(() => setPermisos(consentimientos), [consentimientos]);
+  // Inicio se abre recién cuando la sesión ya registra el consentimiento.
+  useEffect(() => {
+    if (entrando && consentimientoAceptado) router.replace('/inicio');
+  }, [entrando, consentimientoAceptado]);
+
+  if (!metodoIngreso) return <Redirect href="/ingreso" />;
 
   const entrar = () => {
-    guardarConsentimientos(permisos);
-    // Al entrar, "volver" ya no regresa a las pantallas de ingreso.
-    if (router.canDismiss()) router.dismissAll();
-    router.replace('/inicio');
+    cerrarPantallasDeIngreso();
+    aceptarConsentimientos(permisos);
+    setEntrando(true);
   };
 
   return (

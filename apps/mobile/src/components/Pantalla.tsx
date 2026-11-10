@@ -1,5 +1,5 @@
 import { colors, sizes, spacing } from '@almira/shared';
-import type { ReactNode } from 'react';
+import type { ComponentRef, ReactNode, Ref } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,6 +13,8 @@ type Props = {
   encabezadoHastaArriba?: boolean;
   // 16 px entre bloques; 12 px (blockDense) en listas densas.
   separacion?: keyof typeof spacing;
+  // Para desplazar el contenido desde la pantalla (por ejemplo, hasta una tarjeta).
+  scrollRef?: Ref<ComponentRef<typeof ScrollView>>;
 };
 
 // Fondo blanco y márgenes laterales de 20 px.
@@ -23,6 +25,7 @@ export function Pantalla({
   conPestanas,
   encabezadoHastaArriba,
   separacion = 'block',
+  scrollRef,
 }: Props) {
   const { top, bottom } = useSafeAreaInsets();
   // La barra inferior de expo-router no flota: el contenido termina sobre ella, así
@@ -32,6 +35,7 @@ export function Pantalla({
     <View style={[estilos.raiz, { paddingTop: encabezadoHastaArriba ? 0 : top }]}>
       {encabezado}
       <ScrollView
+        ref={scrollRef}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           estilos.contenido,

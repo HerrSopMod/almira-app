@@ -10,12 +10,12 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 | --- | --- |
 | App 19 · Obras | Las obras publicadas, cada una con un marcador con su % de avance. Al tocar un marcador se selecciona su tarjeta |
 | App 20 · Detalle de la obra | "Ver en el mapa" abre la pantalla 19 con esa obra seleccionada y centrada |
-| App 16 · Nuevo reclamo | Minimapa fijo (sin gestos) con un marcador en la ubicación del reclamo, que sigue simulada |
+| App 16 · Nuevo reclamo | Minimapa fijo (sin gestos) con un marcador: el punto del GPS si el vecino tocó "Usar mi ubicación"; si no, el punto de ejemplo del predio |
 | Web-06 · Obras publicadas | "Vista del vecino": las obras con «Publicada» activo, como las ve el vecino |
 
 ## Datos
 
-1. **Migración nueva** `supabase/migrations/20261115000001_obras_ubicacion.sql`:
+1. **Migración nueva** `supabase/migrations/20261109000001_obras_ubicacion.sql`:
    ```sql
    alter table public.obras
      add column latitud double precision check (latitud between -90 and 90),
@@ -26,17 +26,18 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 2. **Tipo `Obra`** (`packages/shared/src/types.ts`): agrega `latitud: number | null` y
    `longitud: number | null`, igual que en `Reclamo`.
 3. **Datos de ejemplo** (`datos-ejemplo.ts`) y `supabase/seed.sql`: llena las
-   coordenadas. Las de abajo son **aproximadas**; antes de presentar, verifícalas en
-   openstreetmap.org (busca la dirección, clic derecho → «Mostrar dirección» y copia las
-   coordenadas).
+   coordenadas. Las de abajo se verificaron en OpenStreetMap (Nominatim y Overpass) el
+   8 nov 2026. Las cuadras salen de los números de casa cargados en OSM, así que el punto
+   es el medio del tramo, no una dirección exacta. En OSM la vía se llama "Jirón Risso",
+   no avenida.
 
    | Obra | Latitud | Longitud |
    | --- | --- | --- |
-   | Mantenimiento de pistas · Av. Ignacio Merino, cdras. 17-19 | -12.0905 | -77.0320 |
-   | Renovación del parque Castilla · Parque Castilla, Zona 3 | -12.0862 | -77.0390 |
-   | Veredas accesibles · Av. Risso, cdras. 3-7 | -12.0822 | -77.0345 |
-   | Luminarias LED · Jr. Pumacahua y alrededores (no publicada) | -12.0850 | -77.0372 |
-   | Reclamo de ejemplo · Jr. Bernardo Alcedo 480 | -12.0880 | -77.0330 |
+   | Mantenimiento de pistas · Av. Ignacio Merino, cdras. 17-19 | -12.0826 | -77.0329 |
+   | Renovación del parque Castilla · Parque Mariscal Castilla, Zona 3 | -12.0886 | -77.0414 |
+   | Veredas accesibles · Av. Risso, cdras. 3-7 | -12.0852 | -77.0309 |
+   | Luminarias LED · Jr. Brigadier Mateo Pumacahua y alrededores (no publicada) | -12.0852 | -77.0431 |
+   | Predio de ejemplo · Jr. Bernardo Alcedo 480 | -12.0844 | -77.0315 |
 
    Si no hay obras con coordenadas, el mapa se centra en el distrito. Agrega
    `latitud`/`longitud` del centro a la municipalidad de ejemplo en los datos compartidos
@@ -92,7 +93,7 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 - `src/MapaObras.tsx` con `MapContainer`, `TileLayer` (`MAPA_TILES` y
   `MAPA_ATRIBUCION`) y `Marker` con el mismo `divIcon`. Importa
   `leaflet/dist/leaflet.css`.
-- En web-06, la tarjeta "Vista del vecino" (380 × 320) muestra las obras publicadas. Si
+- En web-06, la tarjeta "Vista del vecino" (380 × 300) muestra las obras publicadas. Si
   cambias el interruptor "Publicada", el marcador aparece o desaparece al instante.
 
 ## Límites honestos
@@ -100,5 +101,6 @@ Reemplaza el dibujo actual (`MapaObras.tsx`, tokens `drawing*`) por un mapa real
 - Las teselas públicas de OpenStreetMap son para uso ligero. Sirven para un prototipo
   académico, pero no para una app con mucho tráfico; ahí haría falta un proveedor con
   clave.
-- Las coordenadas de ejemplo son aproximadas.
-- El GPS del reclamo sigue simulado. Usar `expo-location` sería un paso aparte.
+- Las coordenadas de ejemplo marcan el medio de cada tramo, no una dirección exacta.
+- El GPS del reclamo (`expo-location`) solo se usa para el marcador del minimapa: el punto
+  todavía no se guarda en el reclamo.

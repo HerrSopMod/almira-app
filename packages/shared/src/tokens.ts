@@ -50,10 +50,6 @@ export const colors = {
   drawingNightGround: '#3A4A60',
   drawingPole: '#7F8B9B',
   drawingLamp: '#B9C3CD',
-  // Mapa ilustrativo de obras (pantalla 19), hasta el mapa real de la etapa 4.
-  drawingBlock: '#F5F5F5',
-  drawingPark: '#CDE8D5',
-  drawingAvenue: '#F3D3D5',
 } as const;
 
 export const spacing = {
@@ -76,6 +72,8 @@ export const spacing = {
 } as const;
 
 export const radius = {
+  // Muestra de color de la leyenda de los gráficos del panel.
+  legend: 2,
   // Esquina de las barras de gráficos y de la burbuja junto a quien la envía.
   sm: 4,
   badge: 6,
@@ -129,6 +127,8 @@ export const sizes = {
   icon: 24,
   iconSm: 20,
   iconXs: 16,
+  // Ícono del dibujo genérico que reemplaza a la foto (FotoSimulada).
+  iconDrawing: 56,
   // Burbujas de mensaje: ancho máximo.
   bubbleWidth: '84%',
   borderWidth: 1,
@@ -150,14 +150,12 @@ export const sizes = {
   fundingBar: 12,
   legendDot: 10,
   noticeStep: 56,
-  // Mapa móvil, marcador y calles del dibujo provisional.
+  // Mapa móvil y marcador del mapa (MAPA.md).
   mapHeight: 300,
   // Minimapa de Nuevo reclamo (pantalla 16).
   miniMap: 120,
   mapMarker: 28,
   mapMarkerBorder: 2,
-  mapStreet: 9,
-  mapAvenue: 10,
 } as const;
 
 // "Texto más grande" de Mi perfil (pantalla 21) multiplica letra e interlineado.
@@ -208,55 +206,100 @@ export const typography = {
   },
 } as const satisfies Record<string, EstiloTexto>;
 
-// Medidas del panel web (LEEME.md → Panel web). Los radios, insignias, interruptor y
+// Medidas del panel web (LEEME.md → Panel web), en densidad compacta: el Panel municipal
+// entra sin scroll en una laptop de 1536 × 730. Los radios, insignias, interruptor y
 // escalera son los mismos de la app (radius y sizes).
 export const panelSizes = {
   // Barra lateral blanca: ancho, relleno y alto de cada módulo.
   sidebar: 248,
   sidebarX: 12,
-  sidebarY: 20,
+  sidebarY: 16,
   // Relleno extra de la marca y del usuario respecto de los módulos.
   sidebarBrandX: 10,
-  navItem: 40,
+  navItem: 36,
   navGap: 4,
   navIcon: 20,
   navBadge: 20,
+  // Logo y avatar de la barra lateral, más chicos que los de la app (32 y 36).
+  logo: 28,
+  avatar: 32,
   // Contenido: márgenes, separación entre tarjetas y relleno interior.
-  contentX: 28,
-  contentY: 24,
-  gap: 16,
-  cardPaddingX: 20,
-  cardPaddingY: 18,
+  contentX: 20,
+  contentY: 16,
+  gap: 12,
+  cardPaddingX: 16,
+  cardPaddingY: 14,
+  cardGap: 8,
+  // Indicadores: relleno vertical, separación interna y barra de avance (no pasan de 96 px).
+  kpiPaddingY: 10,
+  kpiGap: 2,
+  kpiProgress: 4,
+  // "Requiere tu decisión": caja de ícono de 32 y relleno de cada fila (40 px de alto).
+  decisionIcon: 32,
+  decisionRowY: 2,
   // Botones de 40 px (pequeños, 32) y chips de filtro de 32.
   button: 40,
   buttonSm: 32,
   chip: 32,
-  // Medidas de páginas que se rehacen en la etapa 5.
-  decisionColumn: 478,
-  kpiHeight: 113,
-  tableRow: 46,
-  tableRowTall: 59,
-  barChart: 112,
-  hBarLabel: 138,
-  hBarValue: 94,
-  hBar: 12,
-  hBarRow: 31,
-  decisionIcon: 40,
-  decisionRow: 63,
-  rowButtonWide: 184,
-  progressWide: 148,
+  // Columna "Requiere tu decisión" (web-02) y ancho de la columna del ingreso (web-01).
+  decisionColumn: 460,
   loginCard: 400,
-  loginHeader: 56,
-  loginTop: 258,
+  // Mapa "Vista del vecino" de Obras publicadas (web-06).
+  neighborMapWidth: 380,
+  neighborMapHeight: 300,
+  // Marca y usuario de la barra lateral: relleno arriba y abajo de la marca, y sobre el usuario.
+  sidebarBrandTop: 2,
+  sidebarBrandBottom: 12,
+  sidebarFooterTop: 10,
+  // Columna del detalle del reclamo (web-05) y de la columna de avance de obras (web-06).
+  detailColumn: 400,
+  progressColumn: 170,
+  // Tablas: celdas, encabezado y relleno de la tarjeta que solo lleva una tabla.
+  tableCellX: 12,
+  tableCellY: 8,
+  tableHeadY: 8,
+  tableCardX: 8,
+  tableCardY: 6,
+  // Barras verticales: alto total, espacio para la cifra, separación y ancho máximo.
+  barChartHeight: 120,
+  barChartTop: 22,
+  barGap: 14,
+  barMaxWidth: 72,
+  // Barras horizontales: riel, alto de fila, ancho del nombre y de la cifra.
+  hBarTrack: 10,
+  hBarRow: 24,
+  hBarLabelSm: 120,
+  hBarLabelMd: 140,
+  hBarLabelLg: 160,
+  hBarLabelXl: 170,
+  hBarValueSm: 48,
+  hBarValueMd: 56,
+  hBarValueLg: 70,
+  hBarValueXl: 80,
+  // Ingreso (web-01): relleno y separación de la tarjeta, y separación de cada campo.
+  loginCardPadding: 28,
+  loginCardGap: 18,
+  fieldGap: 6,
+  // Separaciones internas: ícono y texto de notas, escalones y pasos del incidente (10);
+  // celdas del ciclo, descripción del reclamo y alerta activa (14).
+  innerGap: 10,
+  cellX: 14,
+  // Relleno vertical de las celdas del ciclo y de la ruta del incidente.
+  cellY: 4,
+  // Ícono dentro de textos (origen de un caso) y separación entre título y fecha del reclamo.
+  inlineIcon: 18,
+  tightGap: 2,
 } as const;
 
 // Textos del panel web, todos en Inter.
 export const panelTypography = {
   brand: { fontSize: 16, fontWeight: '700', lineHeight: 20 },
-  title: { fontSize: 24, fontWeight: '700', lineHeight: 30, letterSpacing: -0.24 },
-  cardTitle: { fontSize: 16, fontWeight: '600', lineHeight: 22 },
-  kpi: { fontSize: 28, fontWeight: '700', lineHeight: 34, letterSpacing: -0.28 },
-  loginTitle: { fontSize: 18, fontWeight: '600', lineHeight: 24 },
+  title: { fontSize: 20, fontWeight: '700', lineHeight: 26, letterSpacing: -0.2 },
+  // Subtítulo de la página (13) y de la tarjeta (12, el estilo small).
+  pageSubtitle: { fontSize: 13, fontWeight: '400', lineHeight: 18 },
+  cardTitle: { fontSize: 15, fontWeight: '600', lineHeight: 20 },
+  kpi: { fontSize: 24, fontWeight: '700', lineHeight: 30, letterSpacing: -0.24 },
+  kpiLabel: { fontSize: 12, fontWeight: '500', lineHeight: 16 },
   nav: { fontSize: 14, fontWeight: '500', lineHeight: 20 },
   navActive: { fontSize: 14, fontWeight: '600', lineHeight: 20 },
   subtitle: { fontSize: 14, fontWeight: '400', lineHeight: 20 },
@@ -274,6 +317,17 @@ export const panelTypography = {
     letterSpacing: 0.66,
     textTransform: 'uppercase',
   },
+  // "Almira" en el ingreso, títulos de 18 px (ingreso y detalle del reclamo) y filas de 14 px 500.
+  loginBrand: { fontSize: 22, fontWeight: '700', lineHeight: 28, letterSpacing: -0.22 },
+  heading: { fontSize: 18, fontWeight: '600', lineHeight: 24 },
+  rowTitle: { fontSize: 14, fontWeight: '500', lineHeight: 20 },
+  // Título de los principios de Datos y accesos (web-09).
+  principleTitle: { fontSize: 16, fontWeight: '500', lineHeight: 24 },
+  // Rótulos "1 · RECUERDA" del ciclo y de la ruta del incidente.
+  label: { fontSize: 12, fontWeight: '600', lineHeight: 16, letterSpacing: 0.24 },
+  // Campo y botón del ingreso, con las medidas de la app.
+  input: { fontSize: 16, fontWeight: '400', lineHeight: 24 },
+  buttonLg: { fontSize: 16, fontWeight: '600', lineHeight: 20 },
 } as const satisfies Record<string, EstiloTexto>;
 
 export const tokens = {

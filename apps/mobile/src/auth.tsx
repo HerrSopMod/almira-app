@@ -19,8 +19,56 @@ type Autenticacion = {
   verificarCodigoSms: (celular: string, codigo: string) => Promise<string | null>;
   pedirCodigoVinculo: (celular: string) => Promise<string | null>;
   confirmarVinculo: (celular: string, codigo: string) => Promise<ResultadoVinculo>;
+  // Guarda en la cuenta (user_metadata) lo que el vecino eligió al ingresar.
+  guardarDatosIngreso: (datos: DatosIngreso) => Promise<void>;
   cerrarSesion: () => Promise<void>;
 };
+
+// Lo que se guarda en la cuenta al aceptar el consentimiento (pantalla 03), para no
+// pedirlo cada vez que entra. No lleva teléfono, DNI ni otros datos personales.
+export type DatosIngreso = {
+  municipalidadId: string;
+  consentimientos: { asistenteIa: boolean; avisosWhatsapp: boolean; avisosSms: boolean };
+  consentimientoAceptadoEn: string;
+};
+
+export type MetodoIngreso = 'google' | 'correo' | 'celular';
+
+const CLAVE_DATOS = 'almira';
+
+// Lee los datos guardados en la cuenta, o null si todavía no aceptó el consentimiento.
+export function leerDatosIngreso(sesion: Session | null): DatosIngreso | null {
+  const datos: unknown = sesion?.user.user_metadata?.[CLAVE_DATOS];
+  if (!datos || typeof datos !== 'object') return null;
+  const { municipalidadId, consentimientos, consentimientoAceptadoEn } = datos as Partial<DatosIngreso>;
+  if (typeof municipalidadId !== 'string' || typeof consentimientoAceptadoEn !== 'string') return null;
+  if (!consentimientos || typeof consentimientos !== 'object') return null;
+  return {
+    municipalidadId,
+    consentimientoAceptadoEn,
+    consentimientos: {
+      asistenteIa: consentimientos.asistenteIa === true,
+      avisosWhatsapp: consentimientos.avisosWhatsapp === true,
+      avisosSms: consentimientos.avisosSms === true,
+    },
+  };
+}
+
+// Cómo entró el vecino, según el proveedor de Supabase Auth.
+export function metodoDeSesion(sesion: Session | null): MetodoIngreso | null {
+  const proveedor = sesion?.user.app_metadata?.provider;
+  if (proveedor === 'google') return 'google';
+  if (proveedor === 'email') return 'correo';
+  if (proveedor === 'phone') return 'celular';
+  return null;
+}
+
+// Nombre que trae la cuenta de Google, si lo hay.
+export function nombreDeSesion(sesion: Session | null): string | null {
+  const metadatos = sesion?.user.user_metadata;
+  const nombre: unknown = metadatos?.full_name ?? metadatos?.name;
+  return typeof nombre === 'string' && nombre.trim() ? nombre.trim() : null;
+}
 
 const ContextoAuth = createContext<Autenticacion | null>(null);
 
@@ -112,6 +160,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               mensaje:
                 'Vinculamos tu celular, pero todavía no pudimos escribirte por WhatsApp. Lo intentaremos con tus próximos avisos.',
             };
+      },
+      // Si falla, el consentimiento sigue en memoria y se volverá a pedir al próximo ingreso.
+      guardarDatosIngreso: async (datos) => {
+        if (!supabaseConfigurado || !sesion) return;
+        await supabase.auth.updateUser({ data: { [CLAVE_DATOS]: datos } });
       },
       cerrarSesion: async () => {
         if (supabaseConfigurado) await supabase.auth.signOut();
