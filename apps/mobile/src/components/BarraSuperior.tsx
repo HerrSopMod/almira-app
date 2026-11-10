@@ -16,7 +16,7 @@ type Props =
       titulo: string;
     }
   | {
-      // Detalle: flecha atrás y título a la izquierda.
+      // Detalle: flecha atrás y título a la izquierda (sin título ni flecha, solo la franja).
       variante?: 'detalle';
       titulo: string;
       conVolver?: boolean;
@@ -26,8 +26,6 @@ type Props =
       onVolver?: () => void;
       // Acción opcional a la derecha.
       accion?: ReactNode;
-      // "Paso N de M", en lugar de la acción.
-      paso?: string;
     };
 
 // Si no hay a dónde volver (por ejemplo, una pantalla abierta directo), va a Inicio.
@@ -41,9 +39,15 @@ function volver() {
 export function BarraSuperior(props: Props) {
   const { top } = useSafeAreaInsets();
   return (
-    <View style={[estilos.raiz, { paddingTop: top }]}>
-      <StatusBar style="dark" />
-      {props.variante === 'raiz' ? <FilaRaiz titulo={props.titulo} /> : <FilaDetalle {...props} />}
+    <View style={estilos.raiz}>
+      {/* Franja turquesa bajo la hora y la batería, con los íconos del sistema en claro. */}
+      <StatusBar style="light" />
+      <View style={{ height: top, backgroundColor: colors.primary }} />
+      {props.variante === 'raiz' ? (
+        <FilaRaiz titulo={props.titulo} />
+      ) : props.titulo === '' && props.conVolver === false ? null : (
+        <FilaDetalle {...props} />
+      )}
     </View>
   );
 }
@@ -90,7 +94,6 @@ function FilaDetalle({
   iconoVolver = 'volver',
   onVolver = volver,
   accion,
-  paso,
 }: Extract<Props, { variante?: 'detalle' }>) {
   const cerrar = iconoVolver === 'cerrar';
   return (
@@ -114,11 +117,6 @@ function FilaDetalle({
         {titulo}
       </Texto>
       {accion ?? null}
-      {!accion && paso ? (
-        <Texto variante="caption" color={colors.textSecondary}>
-          {paso}
-        </Texto>
-      ) : null}
     </View>
   );
 }

@@ -60,7 +60,7 @@ export default function Celular() {
     });
 
   return (
-    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 4 de 5" />}>
+    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="" />}>
       <TituloPantalla
         titulo="Confirma tu celular"
         texto="Lo usamos para avisarte por WhatsApp antes de que venzan tus tributos."

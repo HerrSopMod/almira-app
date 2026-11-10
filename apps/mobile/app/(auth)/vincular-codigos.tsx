@@ -44,7 +44,7 @@ export default function VincularCodigos() {
   };
 
   return (
-    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 3 de 5" />}>
+    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="" />}>
       <TituloPantalla
         titulo="Vincula tus códigos"
         texto={municipalidad?.nombre}

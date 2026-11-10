@@ -103,7 +103,7 @@ export default function Ingreso() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      encabezado={<BarraSuperior titulo="Paso 1 de 5" conVolver={false} />}
+      encabezado={<BarraSuperior titulo="" conVolver={false} />}
     >
       <View style={estilos.marca}>
         <Logo grande />

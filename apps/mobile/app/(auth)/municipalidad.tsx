@@ -66,7 +66,7 @@ export default function ElegirMunicipalidad() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      encabezado={<BarraSuperior titulo={cambio ? 'Mi municipalidad' : 'Paso 2 de 5'} />}
+      encabezado={<BarraSuperior titulo={cambio ? 'Mi municipalidad' : ''} />}
       pie={
         <Boton
           titulo={cambio ? 'Guardar' : 'Continuar'}

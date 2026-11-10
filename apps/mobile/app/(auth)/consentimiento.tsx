@@ -42,7 +42,7 @@ export default function Consentimiento() {
   };
 
   return (
-    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="Paso 5 de 5" />}>
+    <Pantalla encabezadoHastaArriba encabezado={<BarraSuperior titulo="" />}>
       <TituloPantalla
         titulo="Tus datos, tus reglas"
         texto="Puedes cambiarlo cuando quieras en Mi perfil."

@@ -77,7 +77,7 @@ export default function NuevoReclamo() {
   return (
     <Pantalla
       encabezadoHastaArriba
-      encabezado={<BarraSuperior titulo="Nuevo reclamo" iconoVolver="cerrar" paso="Paso 1 de 2" />}
+      encabezado={<BarraSuperior titulo="Nuevo reclamo" iconoVolver="cerrar" />}
     >
       <View style={estilos.grupo}>
         <Texto variante="bodyLgMedium">Foto del problema</Texto>

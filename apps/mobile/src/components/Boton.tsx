@@ -69,6 +69,7 @@ export function Boton({ titulo, onPress, tipo = 'primario', icono, deshabilitado
           <Texto
             variante={tipo === 'terciario' || tipo === 'google' ? 'bodyLgMedium' : 'button'}
             color={colorTexto}
+            alineacion="center"
           >
             {titulo}
           </Texto>

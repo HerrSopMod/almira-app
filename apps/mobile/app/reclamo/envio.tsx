@@ -45,7 +45,7 @@ export default function EnvioAlArea() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState(false);
   const area = AREA_TIPO_RECLAMO[tipo];
-  const encabezado = <BarraSuperior titulo="Envío al área" paso="Paso 2 de 2" />;
+  const encabezado = <BarraSuperior titulo="Envío al área" />;
 
   if (descripcion === '' || direccion === '') {
     return (
