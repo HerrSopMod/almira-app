@@ -151,6 +151,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           p_codigo: codigo,
           p_dni: dni,
         });
+        if (error?.message.includes('demasiados_intentos')) {
+          return 'Hiciste demasiados intentos. Espera 15 minutos e inténtalo de nuevo.';
+        }
         if (error) return 'No pudimos vincular el código. Inténtalo de nuevo.';
         return data === true ? null : 'No encontramos ese código con ese DNI en el padrón.';
       },
