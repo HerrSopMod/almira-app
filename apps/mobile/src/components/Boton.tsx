@@ -1,7 +1,7 @@
 import { colors, radius, sizes, spacing } from '@almira/shared';
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRef } from 'react';
-import { Animated, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Image, Pressable, StyleSheet, View } from 'react-native';
 import { Texto } from './Texto';
 
 export type TipoBoton = 'primario' | 'secundario' | 'terciario' | 'google' | 'peligro';
@@ -56,8 +56,13 @@ export function Boton({ titulo, onPress, tipo = 'primario', icono, deshabilitado
       >
         <View style={estilos.contenido}>
           {tipo === 'google' ? (
-            // Logo de Google: viene en @expo/vector-icons, sin paquetes nuevos.
-            <FontAwesome name="google" size={sizes.iconSm} color={colorTexto} />
+            // Logo de Google en sus cuatro colores (assets/google.png): las pautas de marca
+            // de Google no permiten teñirlo con otro color.
+            <Image
+              source={require('../../assets/google.png')}
+              accessibilityIgnoresInvertColors
+              style={estilos.logoGoogle}
+            />
           ) : icono ? (
             <MaterialIcons name={icono} size={sizes.iconSm} color={colorTexto} />
           ) : null}
@@ -105,5 +110,6 @@ const estilos = StyleSheet.create({
     borderColor: colors.border,
   },
   deshabilitado: { borderColor: colors.primaryDisabled },
+  logoGoogle: { width: sizes.iconSm, height: sizes.iconSm },
   contenido: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 });

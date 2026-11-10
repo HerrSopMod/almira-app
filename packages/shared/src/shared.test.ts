@@ -79,7 +79,13 @@ import {
   repartoDeuda,
   totalSeleccionado,
 } from './pagos';
-import { codigoValido, documentoValido } from './ingreso';
+import {
+  buscarVecinoPorCodigo,
+  celularValido,
+  codigoContribuyenteValido,
+  codigoValido,
+  documentoValido,
+} from './ingreso';
 
 describe('tokens', () => {
   it('aplica los colores de la guía turquesa', () => {
@@ -743,5 +749,24 @@ describe('copia de soles.ts en las Edge Functions', () => {
   it('coincide con packages/shared/src/soles.ts, salvo el comentario inicial', () => {
     const sinComentario = (texto: string) => texto.replace(/^(\/\/[^\n]*\n)+/, '');
     expect(sinComentario(solesFunciones)).toBe(sinComentario(solesCompartido));
+  });
+});
+
+describe('vincular código de contribuyente', () => {
+  const lince = vecinos.find((v) => v.codigoContribuyente)!;
+  it('acepta el código de contribuyente o el de un predio con su DNI', () => {
+    expect(buscarVecinoPorCodigo(vecinos, predios, lince.municipalidadId, lince.codigoContribuyente!, lince.dni)).toBe(lince);
+    const predio = predios.find((p) => p.vecinoId === lince.id)!;
+    expect(buscarVecinoPorCodigo(vecinos, predios, lince.municipalidadId, ` ${predio.codigo.toLowerCase()} `, lince.dni)).toBe(lince);
+  });
+  it('rechaza un DNI ajeno o una municipalidad distinta', () => {
+    expect(buscarVecinoPorCodigo(vecinos, predios, lince.municipalidadId, lince.codigoContribuyente!, '99999999')).toBeNull();
+    expect(buscarVecinoPorCodigo(vecinos, predios, 'otra', lince.codigoContribuyente!, lince.dni)).toBeNull();
+  });
+  it('valida formatos', () => {
+    expect(codigoContribuyenteValido('0048217')).toBe(true);
+    expect(codigoContribuyenteValido('ab')).toBe(false);
+    expect(celularValido('900000417')).toBe(true);
+    expect(celularValido('800000417')).toBe(false);
   });
 });

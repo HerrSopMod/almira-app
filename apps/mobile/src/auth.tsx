@@ -19,6 +19,12 @@ type Autenticacion = {
   verificarCodigoSms: (celular: string, codigo: string) => Promise<string | null>;
   pedirCodigoVinculo: (celular: string) => Promise<string | null>;
   confirmarVinculo: (celular: string, codigo: string) => Promise<ResultadoVinculo>;
+  // Vincula un código de contribuyente con el DNI en el servidor (padrón de la municipalidad).
+  vincularContribuyente: (municipalidadId: string, codigo: string, dni: string) => Promise<string | null>;
+  listarVinculos: () => Promise<Vinculo[]>;
+  // Confirma el celular de una cuenta de Google o de correo, para los avisos por WhatsApp.
+  enviarCodigoCelular: (celular: string) => Promise<string | null>;
+  verificarCodigoCelular: (celular: string, codigo: string) => Promise<string | null>;
   // Guarda en la cuenta (user_metadata) lo que el vecino eligió al ingresar.
   guardarDatosIngreso: (datos: DatosIngreso) => Promise<void>;
   cerrarSesion: () => Promise<void>;
@@ -26,7 +32,10 @@ type Autenticacion = {
 
 // Lo que se guarda en la cuenta al aceptar el consentimiento (pantalla 03), para no
 // pedirlo cada vez que entra. No lleva teléfono, DNI ni otros datos personales.
+export type Vinculo = { municipalidadId: string; codigo: string };
+
 export type DatosIngreso = {
+  celularConfirmado?: boolean;
   municipalidadId: string;
   consentimientos: { asistenteIa: boolean; avisosWhatsapp: boolean; avisosSms: boolean };
   consentimientoAceptadoEn: string;
@@ -133,6 +142,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       verificarCodigoSms: async (celular, codigo) => {
         if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
         const { error } = await supabase.auth.verifyOtp({ phone: `+51${celular}`, token: codigo, type: 'sms' });
+        return error ? 'El código no es correcto o ya venció.' : null;
+      },
+      vincularContribuyente: async (municipalidadId, codigo, dni) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { data, error } = await supabase.rpc('vincular_contribuyente', {
+          p_municipalidad: municipalidadId,
+          p_codigo: codigo,
+          p_dni: dni,
+        });
+        if (error) return 'No pudimos vincular el código. Inténtalo de nuevo.';
+        return data === true ? null : 'No encontramos ese código con ese DNI en el padrón.';
+      },
+      listarVinculos: async () => {
+        if (!supabaseConfigurado) return [];
+        const { data } = await supabase
+          .from('vinculos_contribuyente')
+          .select('municipalidad_id, codigo')
+          .order('creado_en');
+        return (data ?? []).map((fila) => ({
+          municipalidadId: String(fila.municipalidad_id),
+          codigo: String(fila.codigo),
+        }));
+      },
+      enviarCodigoCelular: async (celular) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { error } = await supabase.auth.updateUser({ phone: `+51${celular}` });
+        return error ? 'No pudimos enviar el código. Revisa tu número e inténtalo de nuevo.' : null;
+      },
+      verificarCodigoCelular: async (celular, codigo) => {
+        if (!supabaseConfigurado) return 'Falta conectar Almira con Supabase.';
+        const { error } = await supabase.auth.verifyOtp({
+          phone: `+51${celular}`,
+          token: codigo,
+          type: 'phone_change',
+        });
         return error ? 'El código no es correcto o ya venció.' : null;
       },
       // Vincular WhatsApp: se confirma el celular de la cuenta ya ingresada con un código SMS

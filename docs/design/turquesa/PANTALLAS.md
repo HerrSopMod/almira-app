@@ -13,10 +13,9 @@ otra cosa.
    "Mi cuenta" pasa a llamarse **Pagar** y conserva su ruta (`(tabs)/cuenta`).
 2. **Ingreso:** la app abre en Ingreso (Stitch 1), con Google, correo o celular (Supabase
    Auth). Después:
-   - Con Google o correo: Vincular DNI (Stitch 3) → Código SMS (Stitch 2) → Elegir
-     municipalidad (Stitch 4) → Consentimiento (03) → Inicio.
-   - Con celular, el código SMS se verifica en el mismo Ingreso: Elegir municipalidad →
-     Consentimiento → Inicio.
+   - Con cualquier método: Elegir municipalidad (Paso 2 de 5) → Vincular códigos (Paso 3) →
+     Confirmar celular (Paso 4, opcional, para WhatsApp) → Consentimiento (Paso 5) → Inicio.
+     Con celular, el número ya queda confirmado.
    - Nadie entra a Inicio sin aceptar el consentimiento. Lo aceptado se guarda en la
      cuenta; en los siguientes ingresos se pasa directo a Inicio.
    - Sin Supabase configurado, los tres métodos se simulan con datos de ejemplo y siguen el
@@ -35,10 +34,10 @@ otra cosa.
 | --- | --- | --- | --- | --- |
 | 01 | Entrada | `(auth)/entrada` | Maqueta `01-entrada` | Sin selector de municipalidad. "No tengo cuenta ni smartphone propio" lleva a 23. |
 | 02a | Ingresa a tu cuenta | `(auth)/ingreso` | Stitch 1 | Barra superior blanca "Paso 1 de 3", sin flecha atrás ni cabecera de color. Botón Google, divisor "o con tu correo" / "o con tu celular" y control segmentado Correo / Celular. Correo: correo, contraseña (mínimo 8) con botón para verla, "Ingresar" y "¿No tienes cuenta? Créala". Celular (+51, 9 dígitos): "Recibir código por SMS" y, después, el código de 6 dígitos y "Verificar código". Abajo: "Datos de ejemplo…" (solo sin Supabase), "Antes de entrar te pediremos tu consentimiento para usar tus datos.", el botón terciario "No tengo cuenta ni smartphone propio" (lleva a 23) y "Prototipo académico · Datos ficticios". Sin RENIEC, teléfono ni "términos de servicio". |
-| 02b | Ingresa el código | `(auth)/codigo` | Stitch 2 | Después de 02c. 6 casillas, "Lo enviamos por SMS al +51 9•• ••• 417", "Reenviar código", "Cambiar DNI". Usa el teclado del sistema, no el teclado dibujado. El SMS del padrón es simulado: código de ejemplo `482175`. |
-| 02c | Vincula tu DNI | `(auth)/vincular-dni` | Stitch 3 | Solo tras Google o correo. Saluda con el nombre de la cuenta de Google si lo hay. Destacado: "Te enviaremos un código SMS al celular registrado en el padrón municipal." Sin "biométrica". Nota de la Ley N.° 29733 sin más afirmaciones. |
-| 02d | Elige tu municipalidad | `(auth)/municipalidad` | Stitch 4 | Después de autenticarse con celular, o después de 02b. Lista de municipalidades desde los datos (hoy solo Lince habilitada). Buscador y chips de zona solo si hay más de 5. Nota "Podrás cambiarla desde Mi perfil". Encabezado "Paso 2 de 3". |
-| 03 | Consentimiento | `(auth)/consentimiento` | Maqueta `03-consentimiento` | Encabezado "Paso 3 de 3". Último paso del ingreso: "Aceptar y entrar" guarda el consentimiento y recién ahí abre Inicio. |
+| 02c | Vincula tus códigos | `(auth)/vincular-codigos` | Stitch 3 | Después de 02d. Código de contribuyente (o de predio) más DNI, validados contra el padrón; se pueden agregar varios. "Continuar" se habilita con al menos uno. Sin "biométrica". |
+| 02d | Elige tu municipalidad | `(auth)/municipalidad` | Stitch 4 | Primer paso tras autenticarse. Lista de municipalidades desde los datos. Buscador y chips de zona solo si hay más de 5. Encabezado "Paso 2 de 5". |
+| 02e | Confirma tu celular | `(auth)/celular` | Stitch 2 | Paso 4 de 5, opcional ("Ahora no"). Celular +51 y código SMS de 6 dígitos. Sin celular confirmado, WhatsApp y SMS quedan apagados en 03. |
+| 03 | Consentimiento | `(auth)/consentimiento` | Maqueta `03-consentimiento` | Encabezado "Paso 5 de 5". Último paso del ingreso: "Aceptar y entrar" guarda el consentimiento y recién ahí abre Inicio. |
 | 04 | Inicio | `(tabs)/inicio` | Stitch 5 | Saludo "Hola, Rosa", municipalidad desde los datos. Destacado: deuda total S/ 120.50, próximo vencimiento, barra En mora / Por vencer y botón "Ver detalle y pagar". Debajo, fila de aviso ("Tu arbitrio vence pronto"), "Tributos registrados" (filas de Stitch 5) y "En tu distrito" (obra con avance y reclamo con plazo). Sin "Pronto pago trimestral" ni otro texto de Stitch. |
 | 05 | Pagar (Mi cuenta municipal) | `(tabs)/cuenta` | Stitch 7, parte superior | Título "Mi cuenta municipal". Lista "Tributos pendientes" con casilla (todas marcadas al entrar): Multa administrativa S/ 40.00 (En mora) y Arbitrios S/ 80.50 (Por vencer). "Total seleccionado" y botón "Pagar S/ 120.50", que cambia al desmarcar. Debajo, "Pagos y constancias". Nota "Beneficio vigente: consulta con el asistente". |
 | 06 | Detalle de la deuda | `(tabs)/cuenta/deuda/[id]` | Stitch 6 | Filas clave–valor, insignia de estado y Destacado "En palabras simples". Botones: Pagar S/ 80.50 / Simular cuotas / Preguntar al asistente. Enlace "¿Crees que este cobro es incorrecto? Reclámalo". Sin "verificado y encriptado". |
