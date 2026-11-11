@@ -1,12 +1,14 @@
-// Edge Function: registro e ingreso con número de cuponera.
-// La tabla de contribuyentes nunca se expone al cliente: la cuponera se valida aquí, con
-// service_role, y recién entonces se crea la cuenta y se vincula con el contribuyente.
+// Edge Function: registro con número de cuponera e ingreso con código de contribuyente.
+// La cuponera es un dato privado (distinto del código de contribuyente): solo la tiene quien
+// recibe la cuponera impresa. La tabla de contribuyentes nunca se expone al cliente: la
+// cuponera se valida aquí, con service_role, y recién entonces se crea la cuenta con la clave
+// web que elige el contribuyente y se vincula con él.
 //
 // Acciones (POST, JSON):
 //   { accion: 'municipalidades' }
 //   { accion: 'verificar', slug, cuponera, dni }   (comprueba sin crear nada)
 //   { accion: 'registrar', slug, cuponera, dni, correo, clave, celular }
-//   { accion: 'ingresar', cuponera, clave }  → devuelve la sesión
+//   { accion: 'ingresar', codigo, clave }   → devuelve la sesión (codigo = código de contribuyente)
 //
 // Cualquier fallo de validación responde igual: no revela si falló la municipalidad, la
 // cuponera, el DNI o si ya estaba vinculada. Nunca se escriben DNI, correos ni teléfonos en logs.
@@ -40,7 +42,9 @@ async function huella(texto: string): Promise<string> {
     .slice(0, 32);
 }
 
-const normalizarCuponera = (texto: unknown) => String(texto ?? '').trim().toUpperCase();
+const normalizarCuponera = (texto: unknown) =>
+  String(texto ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const normalizarCodigo = (texto: unknown) => String(texto ?? '').trim().toUpperCase();
 const soloDigitos = (texto: unknown) => String(texto ?? '').replace(/\D/g, '');
 const correoValido = (texto: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto);
 
@@ -96,18 +100,22 @@ Deno.serve(async (solicitud) => {
   };
 
   const cuponera = normalizarCuponera(cuerpo.cuponera);
+  const codigo = normalizarCodigo(cuerpo.codigo);
   const clave = String(cuerpo.clave ?? '');
   // En 'verificar' todavía no hay clave: solo se comprueban la cuponera y el DNI.
-  if (cuponera.length < 4 || (cuerpo.accion !== 'verificar' && clave.length < 8)) {
+  const ingresando = cuerpo.accion === 'ingresar';
+  if ((ingresando ? codigo.length < 4 : cuponera.length < 6) ||
+      (cuerpo.accion !== 'verificar' && clave.length < 8)) {
     return await fallar(null);
   }
 
   if (cuerpo.accion === 'ingresar') {
-    // Ingreso con cuponera: se busca el contribuyente ya vinculado y se inicia sesión con su correo.
+    // Ingreso con el código de contribuyente: se busca al contribuyente ya vinculado y se
+    // inicia sesión con su correo.
     const { data: filas } = await admin
       .from('vecinos')
       .select('id, municipalidad_id, user_id')
-      .eq('codigo_contribuyente', cuponera)
+      .eq('codigo_contribuyente', codigo)
       .not('user_id', 'is', null);
     if (!filas || filas.length !== 1) return await fallar(null);
     const fila = filas[0]!;
@@ -146,14 +154,16 @@ Deno.serve(async (solicitud) => {
   if (!municipalidad) return await fallar(null);
 
   // Misma municipalidad, cuponera y DNI, y que nadie la haya vinculado todavía.
-  const { data: contribuyente } = await admin
+  const { data: candidatos } = await admin
     .from('vecinos')
-    .select('id, nombre')
+    .select('id, nombre, codigo_contribuyente, numero_cuponera')
     .eq('municipalidad_id', municipalidad.id)
-    .eq('codigo_contribuyente', cuponera)
     .eq('dni', dni)
     .is('user_id', null)
-    .maybeSingle();
+    .not('numero_cuponera', 'is', null);
+  const contribuyente = (candidatos ?? []).find(
+    (c) => normalizarCuponera(c.numero_cuponera) === cuponera,
+  );
   if (!contribuyente) return await fallar(municipalidad.id as string);
   if (soloVerificar) return responder({ ok: true });
 
@@ -182,7 +192,7 @@ Deno.serve(async (solicitud) => {
     municipalidad_id: municipalidad.id,
     user_id: creado.user.id,
     vecino_id: contribuyente.id,
-    codigo: cuponera,
+    codigo: contribuyente.codigo_contribuyente ?? cuponera,
   });
   return responder({ ok: true });
 });

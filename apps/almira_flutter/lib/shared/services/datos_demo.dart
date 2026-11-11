@@ -13,6 +13,9 @@ abstract final class DatosDemo {
 
   /// Código y DNI que el padrón de demostración acepta al vincular.
   static const codigoContribuyente = '0048217';
+
+  /// Número de la cuponera (privado, distinto del código de contribuyente).
+  static const numeroCuponera = '7390215846';
   static const dni = '40000082';
 
   static FuenteDatos crear(DateTime hoy) {

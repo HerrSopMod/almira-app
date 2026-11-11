@@ -55,13 +55,13 @@ abstract class ServicioAuth {
   /// Crea (o cambia) la clave web de la cuenta, para entrar después con correo o cuponera.
   Future<void> crearClaveWeb(String clave);
 
-  /// Ingreso con el número de cuponera y la clave web.
-  Future<void> ingresarConCuponera(String cuponera, String clave);
+  /// Ingreso con el código de contribuyente (el del estado de cuenta) y la clave web.
+  Future<void> ingresarConCodigo(String codigo, String clave);
 
   /// Municipalidades entre las que se elige al registrarse.
   Future<List<MunicipalidadRegistro>> municipalidadesRegistro();
 
-  /// Comprueba en el servidor que la cuponera y el DNI son de esa municipalidad y que nadie
+  /// Comprueba en el servidor que el número de cuponera y el DNI son de esa municipalidad y que nadie
   /// los vinculó todavía. Si no, lanza un error genérico: no dice cuál dato falló.
   Future<void> verificarCuponera({required String slug, required String cuponera, required String dni});
 
@@ -195,11 +195,11 @@ class ServicioAuthSupabase implements ServicioAuth {
   }
 
   @override
-  Future<void> ingresarConCuponera(String cuponera, String clave) async {
-    final r = await _llamar({'accion': 'ingresar', 'cuponera': cuponera.trim(), 'clave': clave});
+  Future<void> ingresarConCodigo(String codigo, String clave) async {
+    final r = await _llamar({'accion': 'ingresar', 'codigo': codigo.trim(), 'clave': clave});
     final refresco = r['refresh_token'];
     if (refresco is! String) {
-      throw const ErrorApp(TipoError.servidor, 'Cuponera o clave incorrectas.');
+      throw const ErrorApp(TipoError.servidor, 'Código o clave incorrectos.');
     }
     await _intentar(
       () => _cliente.auth.setSession(refresco),
@@ -313,7 +313,7 @@ class ServicioAuthDemo implements ServicioAuth {
   Future<void> crearClaveWeb(String clave) async => throw _noDisponible;
 
   @override
-  Future<void> ingresarConCuponera(String cuponera, String clave) async => throw _noDisponible;
+  Future<void> ingresarConCodigo(String codigo, String clave) async => throw _noDisponible;
 
   @override
   Future<List<MunicipalidadRegistro>> municipalidadesRegistro() async => throw _noDisponible;

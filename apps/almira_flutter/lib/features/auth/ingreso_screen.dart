@@ -62,7 +62,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
     final usuario = _usuario.text.trim();
     _ejecutar(() => usuario.contains('@')
         ? auth.ingresarConCorreo(usuario, _clave.text)
-        : auth.ingresarConCuponera(usuario, _clave.text));
+        : auth.ingresarConCodigo(usuario, _clave.text));
   }
 
   @override
@@ -173,11 +173,11 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
           autocorrect: false,
           textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
-            labelText: 'Correo o número de cuponera',
+            labelText: 'Correo o código de contribuyente',
             prefixIcon: Icon(Icons.person_outline_rounded),
           ),
           validator: (valor) =>
-              (valor ?? '').trim().length >= 4 ? null : 'Escribe tu correo o tu número de cuponera.',
+              (valor ?? '').trim().length >= 4 ? null : 'Escribe tu correo o tu código de contribuyente.',
         ),
         espacio,
         TextFormField(

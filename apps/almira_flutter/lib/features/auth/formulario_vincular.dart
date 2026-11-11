@@ -77,8 +77,8 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
               labelText: 'Número de cuponera',
               prefixIcon: const Icon(Icons.badge_outlined),
               helperText: esDemo
-                  ? 'Demostración: usa ${DatosDemo.codigoContribuyente}'
-                  : 'Está en tu cuponera o estado de cuenta.',
+                  ? 'Demostración: usa ${DatosDemo.numeroCuponera}'
+                  : 'Es el número privado de tu cuponera impresa.',
             ),
             validator: (valor) => _codigoValido.hasMatch((valor ?? '').trim())
                 ? null

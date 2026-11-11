@@ -263,6 +263,18 @@ select d.municipalidad_id, d.vecino_id, d.id, d.pagos_aplicados,
 from public.deudas d join public.vecinos v on v.id = d.vecino_id join public.municipalidades m on m.id = v.municipalidad_id
 where m.slug = 'cercado-de-lima' and v.codigo_contribuyente = 'CER-0005' and d.estado = 'pagada' and d.pagos_aplicados > 0;
 
+-- Número de cuponera (dato privado, distinto del código de contribuyente) de cada contribuyente.
+update public.vecinos v set numero_cuponera = x.cuponera
+from (values
+  ('lince', 'LIN-0001', '5817403962'),
+  ('pueblo-libre', 'PUL-0002', '6204891735'),
+  ('la-victoria', 'LAV-0003', '4952706183'),
+  ('miraflores', 'MIR-0004', '8136520947'),
+  ('cercado-de-lima', 'CER-0005', '3079468215'),
+  ('lince', '0048217', '7390215846')
+) as x(slug, codigo, cuponera), public.municipalidades m
+where m.id = v.municipalidad_id and m.slug = x.slug and v.codigo_contribuyente = x.codigo;
+
 -- Los contribuyentes anteriores de Lince y Villa Verde pasan a verse como datos normales.
 update public.vecinos set nombre = replace(nombre, ' (ejemplo)', ''),
   nombres = coalesce(nombres, 'Rosa'), apellidos = coalesce(apellidos, 'Quispe Huamán'),

@@ -152,7 +152,7 @@ class RepositorioDemo implements Repositorio {
   @override
   Future<String?> vincularCodigo(String municipalidadId, String codigo, String dni) async {
     final coincide = municipalidadId == DatosDemo.municipalidadId &&
-        codigo.trim().toUpperCase() == DatosDemo.codigoContribuyente &&
+        codigo.replaceAll(RegExp(r'[^A-Za-z0-9]'), '') == DatosDemo.numeroCuponera &&
         dni.trim() == DatosDemo.dni;
     return coincide ? null : 'No encontramos ese código con ese DNI en el padrón.';
   }

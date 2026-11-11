@@ -91,7 +91,7 @@ class ConfigurarScreen extends ConsumerWidget {
                 onPressed: vinculada && elegida != null
                     ? () {
                         ref.read(sesionProvider.notifier).elegirMunicipalidad(elegida);
-                        context.push(Rutas.verificarCelular);
+                        context.push(Rutas.crearClave);
                       }
                     : null,
                 child: const Text('Continuar'),

@@ -19,10 +19,10 @@ final _municipalidadesRegistroProvider = FutureProvider.autoDispose<List<Municip
   (ref) => ref.watch(servicioAuthProvider).municipalidadesRegistro(),
 );
 
-/// Registro con la cuponera: municipalidad, cuponera y DNI; correo y clave web;
-/// y la verificación del celular. La cuponera es un dato privado, así que solo
-/// los contribuyentes pueden registrarse; el servidor la valida y no dice cuál
-/// dato falló.
+/// Registro con la cuponera: municipalidad, número de cuponera y DNI; correo y clave web
+/// (que el contribuyente crea aquí); y la verificación del celular. La cuponera es un dato
+/// privado, distinto del código de contribuyente: solo la tiene quien recibe la cuponera
+/// impresa. El servidor la valida y no dice cuál dato falló.
 class RegistroScreen extends ConsumerStatefulWidget {
   const RegistroScreen({super.key});
 
@@ -227,7 +227,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             decoration: const InputDecoration(
               labelText: 'Número de cuponera',
               prefixIcon: Icon(Icons.badge_outlined),
-              helperText: 'Lo encuentras en tu cuponera o estado de cuenta.',
+              helperText: 'Es el número privado de tu cuponera impresa.',
             ),
             validator: (v) => RegExp(r'^[A-Za-z0-9-]{4,20}$').hasMatch((v ?? '').trim())
                 ? null
