@@ -86,7 +86,11 @@ class _VerificarCelularScreenState extends ConsumerState<VerificarCelularScreen>
                         onChanged: (_) {
                           if (_codigoPedido) setState(() => _codigoPedido = false);
                         },
-                        decoration: const InputDecoration(labelText: 'Celular', prefixText: '+51 '),
+                        decoration: const InputDecoration(
+                          labelText: 'Celular',
+                          prefixText: '+51 ',
+                          prefixIcon: Icon(Icons.smartphone_rounded),
+                        ),
                         validator: (v) => _celularValido.hasMatch(v ?? '')
                             ? null
                             : 'Escribe los 9 dígitos de tu celular.',
@@ -102,7 +106,10 @@ class _VerificarCelularScreenState extends ConsumerState<VerificarCelularScreen>
                             LengthLimitingTextInputFormatter(6),
                           ],
                           onFieldSubmitted: (_) => _verificar(),
-                          decoration: const InputDecoration(labelText: 'Código de 6 dígitos'),
+                          decoration: const InputDecoration(
+                            labelText: 'Código de 6 dígitos',
+                            prefixIcon: Icon(Icons.pin_outlined),
+                          ),
                           validator: (v) =>
                               (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',
                         ),

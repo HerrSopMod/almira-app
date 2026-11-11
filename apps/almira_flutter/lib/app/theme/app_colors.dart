@@ -10,9 +10,20 @@ abstract final class AppColors {
   static const primarySoft = Color(0xFFE6F5F4);
   static const onPrimary = Color(0xFFFFFFFF);
 
+  /// Acompañan al turquesa en degradados y detalles: una menta más clara y un coral cálido
+  /// (el complementario del turquesa). El coral es decorativo: no se usa para texto pequeño.
+  static const menta = Color(0xFF38B2A6);
+  static const mentaSuave = Color(0xFFD7F0EC);
+  static const coral = Color(0xFFF2785C);
+  static const coralSuave = Color(0xFFFFEDE7);
+  static const noche = Color(0xFF053F44);
+
   static const background = Color(0xFFFFFFFF);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceSubtle = Color(0xFFF6FAFA);
+
+  /// Fondo de los campos de texto: un gris verdoso apenas visible.
+  static const campo = Color(0xFFF1F7F7);
 
   static const textPrimary = Color(0xFF0F2A2E);
   static const textSecondary = Color(0xFF5B6B70);

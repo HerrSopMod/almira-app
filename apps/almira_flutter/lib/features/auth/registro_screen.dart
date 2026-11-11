@@ -226,6 +226,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             inputFormatters: [LengthLimitingTextInputFormatter(20)],
             decoration: const InputDecoration(
               labelText: 'Número de cuponera',
+              prefixIcon: Icon(Icons.badge_outlined),
               helperText: 'Lo encuentras en tu cuponera o estado de cuenta.',
             ),
             validator: (v) => RegExp(r'^[A-Za-z0-9-]{4,20}$').hasMatch((v ?? '').trim())
@@ -239,7 +240,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             textInputAction: TextInputAction.done,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(8)],
             onFieldSubmitted: (_) => _paso1(),
-            decoration: const InputDecoration(labelText: 'DNI'),
+            decoration: const InputDecoration(labelText: 'DNI', prefixIcon: Icon(Icons.credit_card_outlined)),
             validator: (v) => (v ?? '').length == 8 ? null : 'Escribe los 8 dígitos de tu DNI.',
           ),
           if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
@@ -261,7 +262,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               autofillHints: const [AutofillHints.email],
               autocorrect: false,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Correo'),
+              decoration: const InputDecoration(labelText: 'Correo', prefixIcon: Icon(Icons.mail_outline_rounded)),
               validator: (v) =>
                   _correoValido.hasMatch((v ?? '').trim()) ? null : 'Escribe un correo válido.',
             ),
@@ -273,6 +274,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 labelText: 'Clave web',
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
                 helperText: 'Mínimo $_claveMinima caracteres.',
                 suffixIcon: IconButton(
                   tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
@@ -289,7 +291,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               obscureText: !_verClave,
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _paso2(),
-              decoration: const InputDecoration(labelText: 'Repite tu clave'),
+              decoration: const InputDecoration(labelText: 'Repite tu clave', prefixIcon: Icon(Icons.lock_reset_rounded)),
               validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
             ),
             if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
@@ -312,7 +314,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               onChanged: (_) {
                 if (_codigoPedido) setState(() => _codigoPedido = false);
               },
-              decoration: const InputDecoration(labelText: 'Celular', prefixText: '+51 '),
+              decoration: const InputDecoration(labelText: 'Celular', prefixText: '+51 ', prefixIcon: Icon(Icons.smartphone_rounded)),
               validator: (v) =>
                   _celularValido.hasMatch(v ?? '') ? null : 'Escribe los 9 dígitos de tu celular.',
             ),
@@ -324,7 +326,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
                 autofillHints: const [AutofillHints.oneTimeCode],
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
                 onFieldSubmitted: (_) => _crearCuenta(),
-                decoration: const InputDecoration(labelText: 'Código de 6 dígitos'),
+                decoration: const InputDecoration(labelText: 'Código de 6 dígitos', prefixIcon: Icon(Icons.pin_outlined)),
                 validator: (v) => (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',
               ),
             ],

@@ -15,7 +15,7 @@ abstract final class AppSpacing {
 }
 
 abstract final class AppRadius {
-  static const double campo = 12;
+  static const double campo = 14;
   static const double boton = 14;
   static const double tarjeta = 18;
   static const double pastilla = 999;

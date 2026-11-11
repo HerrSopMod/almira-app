@@ -75,6 +75,7 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
             inputFormatters: [LengthLimitingTextInputFormatter(20)],
             decoration: InputDecoration(
               labelText: 'Número de cuponera',
+              prefixIcon: const Icon(Icons.badge_outlined),
               helperText: esDemo
                   ? 'Demostración: usa ${DatosDemo.codigoContribuyente}'
                   : 'Está en tu cuponera o estado de cuenta.',
@@ -92,6 +93,7 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
             onFieldSubmitted: (_) => _vincular(),
             decoration: InputDecoration(
               labelText: 'DNI o carné de extranjería',
+              prefixIcon: const Icon(Icons.credit_card_outlined),
               helperText: esDemo ? 'Demostración: usa ${DatosDemo.dni}' : null,
             ),
             validator: (valor) => _documentoValido.hasMatch((valor ?? '').trim())

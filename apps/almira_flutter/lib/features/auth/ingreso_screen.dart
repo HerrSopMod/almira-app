@@ -13,9 +13,10 @@ import '../../shared/services/proveedores.dart';
 
 const _claveMinima = 8;
 
-/// Ingreso con correo o con el número de cuponera, y la clave web. Quien no
-/// tiene cuenta se registra con su cuponera (`RegistroScreen`). En modo
-/// demostración no hay cuentas: un solo botón, dicho con claridad.
+/// Ingreso: cabecera con degradado turquesa y la marca, y debajo una tarjeta con Google
+/// como método principal y, como alternativa, el correo o el número de cuponera con la
+/// clave web. Quien no tiene cuenta se registra con su cuponera. En modo demostración no
+/// hay cuentas: un solo botón, dicho con claridad.
 class IngresoScreen extends ConsumerStatefulWidget {
   const IngresoScreen({super.key});
 
@@ -66,49 +67,56 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
     final esDemo = ref.watch(esDemoProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: barraSobreBlanco,
+      value: barraSobreTurquesa,
       child: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.margen,
-                vertical: AppSpacing.xl,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: Form(
-                  key: _formulario,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Center(child: LogoAlmira(lado: 96)),
-                      espacioChico,
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          'Almira',
-                          style: textos.headlineSmall,
-                          textAlign: TextAlign.center,
+        backgroundColor: AppColors.surfaceSubtle,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              const _Cabecera(),
+              Transform.translate(
+                offset: const Offset(0, -32),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margen),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.noche.withValues(alpha: 0.10),
+                            blurRadius: 28,
+                            offset: const Offset(0, 12),
+                          ),
+                        ],
+                      ),
+                      child: Form(
+                        key: _formulario,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Ingresa a tu cuenta',
+                              style: Theme.of(context).textTheme.titleLarge,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            if (esDemo) ..._demo() else ..._conCuenta(),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Tus pagos, reclamos y obras municipales en un solo lugar.',
-                        style: textos.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.xxl),
-                      if (esDemo) ..._demo() else ..._conCuenta(),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
+              SizedBox(height: MediaQuery.paddingOf(context).bottom + AppSpacing.md),
+            ],
           ),
         ),
       ),
@@ -135,12 +143,18 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
 
   List<Widget> _conCuenta() => [
         OutlinedButton.icon(
-          onPressed: _ocupado ? null : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarConGoogle()),
-          icon: const _LogoGoogle(),
+          onPressed: _ocupado
+              ? null
+              : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarConGoogle()),
+          icon: const LogoGoogle(),
           label: const Text('Continuar con Google'),
-          style: OutlinedButton.styleFrom(foregroundColor: AppColors.textPrimary),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.textPrimary,
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Color(0xFFDADCE0)),
+          ),
         ),
-        espacio,
+        const SizedBox(height: AppSpacing.xl),
         Row(
           children: [
             const Expanded(child: Divider()),
@@ -151,14 +165,17 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
             const Expanded(child: Divider()),
           ],
         ),
-        espacio,
+        const SizedBox(height: AppSpacing.xl),
         TextFormField(
           controller: _usuario,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.username],
           autocorrect: false,
           textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(labelText: 'Correo o número de cuponera'),
+          decoration: const InputDecoration(
+            labelText: 'Correo o número de cuponera',
+            prefixIcon: Icon(Icons.person_outline_rounded),
+          ),
           validator: (valor) =>
               (valor ?? '').trim().length >= 4 ? null : 'Escribe tu correo o tu número de cuponera.',
         ),
@@ -171,6 +188,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
           onFieldSubmitted: (_) => _ingresar(),
           decoration: InputDecoration(
             labelText: 'Clave web',
+            prefixIcon: const Icon(Icons.lock_outline_rounded),
             suffixIcon: IconButton(
               tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
               icon: Icon(_verClave ? Icons.visibility_off_rounded : Icons.visibility_rounded),
@@ -181,7 +199,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
               (valor ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
         ),
         if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
-        espacio,
+        const SizedBox(height: AppSpacing.xl),
         FilledButton(
           onPressed: _ocupado ? null : _ingresar,
           child: _ocupado
@@ -192,27 +210,109 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
                 )
               : const Text('Ingresar'),
         ),
+        const SizedBox(height: AppSpacing.sm),
         TextButton(
           onPressed: _ocupado ? null : () => context.push(Rutas.registro),
+          style: TextButton.styleFrom(foregroundColor: AppColors.primaryDark),
           child: const Text('Crear cuenta con correo'),
         ),
       ];
 }
 
-/// "G" de Google, sin depender de un archivo de imagen.
-class _LogoGoogle extends StatelessWidget {
-  const _LogoGoogle();
+/// Cabecera con degradado turquesa y formas suaves, con un toque de coral y menta.
+class _Cabecera extends StatelessWidget {
+  const _Cabecera();
 
   @override
-  Widget build(BuildContext context) => const ExcludeSemantics(
-        child: Text(
-          'G',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF4285F4),
-          ),
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.margen,
+        MediaQuery.paddingOf(context).top + AppSpacing.xxl,
+        AppSpacing.margen,
+        AppSpacing.xxl + 40,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.noche, AppColors.primaryDark, AppColors.menta],
+          stops: [0, 0.55, 1],
         ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
+      ),
+      child: ClipRect(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              right: -70,
+              top: -60,
+              child: _Circulo(lado: 170, color: AppColors.coral.withValues(alpha: 0.30)),
+            ),
+            Positioned(
+              left: -60,
+              bottom: -90,
+              child: _Circulo(lado: 160, color: Colors.white.withValues(alpha: 0.10)),
+            ),
+            Center(
+              child: Column(
+                children: [
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.18),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Center(child: LogoAlmira(lado: 66)),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      'Almira',
+                      style: textos.headlineMedium!.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Tus pagos, reclamos y obras municipales en un solo lugar.',
+                    style: textos.bodyMedium!.copyWith(color: Colors.white.withValues(alpha: 0.92)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Circulo extends StatelessWidget {
+  const _Circulo({required this.lado, required this.color});
+
+  final double lado;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: lado,
+        height: lado,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       );
 }
