@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../app/router.dart';
 
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
@@ -68,21 +70,12 @@ class FilaDeuda extends StatelessWidget {
   }
 }
 
-/// Acción de pago. Almira no procesa pagos: lleva al portal oficial de la
-/// municipalidad cuando existe, y lo dice. En modo demostración no hay pago.
+/// Acción de pago: abre el pago en línea. En modo demostración no hay pago.
 class AccionPago extends StatelessWidget {
   const AccionPago({super.key, required this.municipalidad, required this.esDemo});
 
   final Municipalidad? municipalidad;
   final bool esDemo;
-
-  Future<void> _abrir(BuildContext context, String url) async {
-    final abierto = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)
-        .catchError((_) => false);
-    if (!abierto && context.mounted) {
-      mostrarMensaje(context, 'No se pudo abrir el portal de pago.');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,25 +85,10 @@ class AccionPago extends StatelessWidget {
         tono: Tono.aviso,
       );
     }
-    final url = municipalidad?.urlPago;
-    if (url == null || url.isEmpty) {
-      return const Aviso('Tu municipalidad aún no tiene un portal de pago enlazado en Almira.');
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FilledButton.icon(
-          onPressed: () => _abrir(context, url),
-          icon: const Icon(Icons.open_in_new_rounded, size: 20),
-          label: const Text('Pagar en el portal municipal'),
-        ),
-        espacioChico,
-        Text(
-          'El pago se hace en el portal de tu municipalidad. Puede tardar en verse aquí.',
-          style: Theme.of(context).textTheme.bodySmall,
-          textAlign: TextAlign.center,
-        ),
-      ],
+    return FilledButton.icon(
+      onPressed: () => context.push(Rutas.pagoEnLinea),
+      icon: const Icon(Icons.lock_outline_rounded, size: 20),
+      label: const Text('Pagar en línea'),
     );
   }
 }

@@ -1,6 +1,6 @@
 # Almira · app de vecinos (Flutter)
 
-Cliente móvil de Almira en Flutter y Dart. Reemplaza a la app de Expo (`apps/mobile`), que queda en el repo como referencia. Usa el mismo backend de Supabase, sin cambios en tablas, políticas ni funciones.
+Cliente móvil de Almira en Flutter y Dart. Reemplaza a la app de Expo (`apps/mobile`), que queda en el repo como referencia. Usa el mismo backend de Supabase; las migraciones `20261111000001_estado_de_cuenta.sql` y la función `registro-contribuyente` agregan el estado de cuenta, el pago y el registro por cuponera.
 
 ## Ejecutar
 
@@ -22,8 +22,6 @@ Para conectar el backend, copia `env.example.json` como `env.json` y completa:
 
 `env.json` está fuera de git. Sin esas variables la app abre en **modo demostración**.
 
-Para el ingreso con Google, agrega `almira://ingreso` a las Redirect URLs del proyecto de Supabase (Authentication → URL Configuration).
-
 ## Compilar la APK
 
 ```bash
@@ -39,19 +37,22 @@ La compilación `release` se firma con la clave de depuración de Android: sirve
 
 Supabase, el mismo que usa el repo (`supabase/migrations`):
 
-- **Auth:** Google, correo con contraseña y celular con código SMS. La sesión se guarda cifrada (`flutter_secure_storage`). Lo elegido en el ingreso va en `user_metadata.almira`, con las mismas claves que la app anterior.
+- **Auth:** correo o número de cuponera con la clave web. El registro pide municipalidad, cuponera y DNI (se validan en el servidor con la Edge Function `registro-contribuyente`, que nunca expone la tabla de contribuyentes), correo y clave, y la verificación del celular. La sesión se guarda cifrada (`flutter_secure_storage`). Lo elegido en el ingreso va en `user_metadata.almira`.
 - **Datos:** lee `municipalidades`, `vecinos`, `predios`, `deudas`, `pagos`, `recordatorios`, `reclamos` y `obras`. Las políticas RLS dejan pasar solo las filas del vecino.
 - **Reclamos:** la foto sube al bucket privado `evidencias`, en `{municipalidad}/{usuario}/{archivo}`, y el reclamo se inserta con las columnas que el vecino puede escribir. En el seguimiento la foto se lee con una URL firmada de una hora.
-- **Código de contribuyente:** función `vincular_contribuyente`.
+- **Código de contribuyente:** función `vincular_contribuyente` (códigos adicionales desde Mi perfil).
+- **Estado de cuenta y cuponera:** `deudas` guarda un periodo por fila (tributo, año, trimestre, insoluto, gastos, intereses, descuento, pagos, saldo, nro. de valor y expediente coactivo). Los PDF (estado de cuenta, HR, HLP y HLA) se generan en el teléfono (`pdf`, `printing`).
+- **Pago en línea:** la función `registrar_pago` confirma el pago en el servidor: toma el saldo de la base, registra el pago y marca la deuda como pagada. La pantalla se actualiza sola por Realtime.
+- **Datos de prueba:** `supabase/seed-contribuyentes.sql` (idempotente) carga los cinco contribuyentes.
 - **Canal de avisos:** actualiza `vecinos.canal_preferido`.
 
 ## Qué funciona, qué es demostración y qué falta
 
 | Función | Con Supabase | Modo demostración |
 | --- | --- | --- |
-| Ingreso | Google, correo, celular | Un botón, sin cuentas |
+| Ingreso | Correo o cuponera, y registro con cuponera | Un botón, sin cuentas |
 | Inicio, Pagar, Obras | Datos de la base | Registros de ejemplo, con la etiqueta «Demostración» |
-| Pago | Abre el portal de la municipalidad (`url_pago`). Almira no cobra ni confirma | No disponible, y lo dice |
+| Pago en línea | Pestañas por tributo, medio de pago y confirmación en el servidor | No disponible, y lo dice |
 | Nuevo reclamo | Sube la foto y guarda en la base. La foto es obligatoria (lo exige la tabla) | Se guarda en el teléfono, con foto y ubicación. La foto es opcional |
 | Seguimiento | Foto desde Storage, mapa y plazo calculado | Igual, desde el teléfono |
 | Asistente | Reglas fijas sobre los datos de la cuenta. No es IA, y lo dice | Igual |
@@ -62,7 +63,8 @@ Los datos de demostración salen de `packages/shared/src/datos-ejemplo.ts` y viv
 
 Pendiente o fuera de alcance:
 
-- **Constancia de pago en PDF y pago dentro de la app:** no existen en el backend.
+- **Pasarela real de cobro:** el pago se registra en el servidor, pero no se conecta con un banco ni con Yape/Plin.
+- **Verificación del celular:** el código de 6 dígitos no se envía por SMS (no hay proveedor contratado) y la pantalla acepta cualquier código de 6 dígitos.
 - **Simulación de cuotas y chat con una persona:** eran simulados en la app anterior y no se migraron.
 - **Buscar una dirección en el mapa:** el pin se ubica moviendo el mapa o con el GPS.
 - **Textos legales de privacidad:** son informativos. Falta validarlos con la asesoría legal de la municipalidad (Ley N.° 29733).

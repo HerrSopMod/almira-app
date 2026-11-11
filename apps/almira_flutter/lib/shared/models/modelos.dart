@@ -23,9 +23,14 @@ enum CanalAviso {
 }
 
 enum TipoDeuda {
-  predial,
-  arbitrios,
-  multa;
+  predial('Predial'),
+  arbitrios('Arbitrios'),
+  multa('Multa'),
+  coactivo('Coactivo'),
+  otros('Otros');
+
+  const TipoDeuda(this.etiqueta);
+  final String etiqueta;
 
   static TipoDeuda de(String valor) =>
       values.firstWhere((t) => t.name == valor, orElse: () => TipoDeuda.arbitrios);
@@ -41,6 +46,19 @@ enum EstadoDeuda {
 
   static EstadoDeuda de(String valor) =>
       values.firstWhere((e) => e.name == valor, orElse: () => EstadoDeuda.vigente);
+}
+
+/// Medios con los que se registra un pago.
+enum MedioPago {
+  yape('yape', 'Yape', 'Desde tu app Yape'),
+  plin('plin', 'Plin', 'Desde tu app Plin'),
+  tarjeta('tarjeta', 'Tarjeta de débito o crédito', 'Visa, Mastercard o American Express'),
+  bancaMovil('banca_movil', 'Banca móvil o agente', 'Desde la app de tu banco o un agente');
+
+  const MedioPago(this.clave, this.etiqueta, this.detalle);
+  final String clave;
+  final String etiqueta;
+  final String detalle;
 }
 
 enum EstadoPago {
@@ -159,6 +177,10 @@ class Vecino {
     required this.nombre,
     this.codigoContribuyente,
     this.canalPreferido = CanalAviso.app,
+    this.nombres,
+    this.apellidos,
+    this.domicilioFiscal,
+    this.dni,
   });
 
   final String id;
@@ -167,6 +189,18 @@ class Vecino {
   final String nombre;
   final String? codigoContribuyente;
   final CanalAviso canalPreferido;
+  final String? nombres;
+  final String? apellidos;
+  final String? domicilioFiscal;
+
+  /// Documento del propio contribuyente: solo se usa en su estado de cuenta.
+  final String? dni;
+
+  /// "APELLIDOS NOMBRES", como figura en el estado de cuenta.
+  String get nombreCompleto {
+    final a = apellidos?.trim() ?? '', n = nombres?.trim() ?? '';
+    return a.isEmpty && n.isEmpty ? nombre : '$a $n'.trim().toUpperCase();
+  }
 
   Vecino conCanal(CanalAviso canal) => Vecino(
         id: id,
@@ -175,9 +209,14 @@ class Vecino {
         nombre: nombre,
         codigoContribuyente: codigoContribuyente,
         canalPreferido: canal,
+        nombres: nombres,
+        apellidos: apellidos,
+        domicilioFiscal: domicilioFiscal,
+        dni: dni,
       );
 
-  // El DNI y el teléfono no se leen: la app no los muestra.
+  // El teléfono no se lee. El DNI es del propio contribuyente (las políticas RLS no dejan
+  // ver el de otro) y solo aparece en su estado de cuenta.
   factory Vecino.deFila(Fila f) => Vecino(
         id: _texto(f, 'id'),
         municipalidadId: _texto(f, 'municipalidad_id'),
@@ -185,6 +224,10 @@ class Vecino {
         nombre: _texto(f, 'nombre'),
         codigoContribuyente: _textoONulo(f, 'codigo_contribuyente'),
         canalPreferido: CanalAviso.de(_texto(f, 'canal_preferido')),
+        nombres: _textoONulo(f, 'nombres'),
+        apellidos: _textoONulo(f, 'apellidos'),
+        domicilioFiscal: _textoONulo(f, 'domicilio_fiscal'),
+        dni: _textoONulo(f, 'dni'),
       );
 }
 
@@ -225,7 +268,17 @@ class Deuda {
     required this.vencimiento,
     required this.estado,
     this.predioId,
-  });
+    this.anio,
+    this.trimestre,
+    this.fechaPago,
+    this.gastosEmision = 0,
+    this.interesActualizacion = 0,
+    this.descuento = 0,
+    this.pagosAplicados = 0,
+    this.nroValor,
+    this.expCoactivo,
+    double? saldo,
+  }) : _saldo = saldo;
 
   final String id;
   final String municipalidadId;
@@ -238,9 +291,30 @@ class Deuda {
   final double interesMoratorio;
   final DateTime? vencimiento;
   final EstadoDeuda estado;
+  final int? anio;
+  final int? trimestre;
+  final DateTime? fechaPago;
+  final double gastosEmision;
+  final double interesActualizacion;
+  final double descuento;
+  final double pagosAplicados;
+  final String? nroValor;
+  final String? expCoactivo;
+  final double? _saldo;
 
-  double get total => montoInsoluto + interesMoratorio;
+  /// Importe emitido: insoluto + gastos de emisión + intereses - descuento.
+  double get importe =>
+      montoInsoluto + gastosEmision + interesMoratorio + interesActualizacion - descuento;
+
+  /// Lo que falta pagar: importe - pagos. Si la base lo calculó, se usa ese valor.
+  double get saldo => _saldo ?? (importe - pagosAplicados);
+
+  /// Lo que se muestra: el saldo mientras está pendiente; el importe pagado, después.
+  double get total => pendiente ? saldo : importe;
   bool get pendiente => estado != EstadoDeuda.pagada;
+
+  /// Año del tributo: el de la columna o, si falta, el del vencimiento.
+  int get anioTributo => anio ?? vencimiento?.year ?? 0;
 
   /// Estado según la fecha real: una deuda "vigente" cuyo vencimiento ya pasó
   /// se muestra como vencida aunque la base todavía no la haya actualizado.
@@ -263,6 +337,16 @@ class Deuda {
         interesMoratorio: _numero(f, 'interes_moratorio'),
         vencimiento: leerFecha(_textoONulo(f, 'vencimiento')),
         estado: EstadoDeuda.de(_texto(f, 'estado')),
+        anio: _numeroONulo(f, 'anio')?.round(),
+        trimestre: _numeroONulo(f, 'trimestre')?.round(),
+        fechaPago: leerFecha(_textoONulo(f, 'fecha_pago')),
+        gastosEmision: _numero(f, 'gastos_emision'),
+        interesActualizacion: _numero(f, 'interes_actualizacion'),
+        descuento: _numero(f, 'descuento'),
+        pagosAplicados: _numero(f, 'pagos_aplicados'),
+        nroValor: _textoONulo(f, 'nro_valor'),
+        expCoactivo: _textoONulo(f, 'exp_coactivo'),
+        saldo: _numeroONulo(f, 'saldo'),
       );
 }
 
@@ -276,6 +360,7 @@ class Pago {
     required this.estado,
     required this.creadoEn,
     this.referencia,
+    this.medio,
   });
 
   final String id;
@@ -287,6 +372,17 @@ class Pago {
   final String? referencia;
   final DateTime? creadoEn;
 
+  /// yape, plin, tarjeta o banca_movil.
+  final String? medio;
+
+  String get etiquetaMedio => switch (medio) {
+        'yape' => 'Yape',
+        'plin' => 'Plin',
+        'tarjeta' => 'Tarjeta',
+        'banca_movil' => 'Banca móvil',
+        _ => 'Pago',
+      };
+
   factory Pago.deFila(Fila f) => Pago(
         id: _texto(f, 'id'),
         municipalidadId: _texto(f, 'municipalidad_id'),
@@ -296,6 +392,7 @@ class Pago {
         estado: EstadoPago.de(_texto(f, 'estado')),
         referencia: _textoONulo(f, 'referencia'),
         creadoEn: leerFecha(_textoONulo(f, 'creado_en')),
+        medio: _textoONulo(f, 'medio'),
       );
 }
 

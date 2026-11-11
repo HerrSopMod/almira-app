@@ -45,7 +45,8 @@ class SesionNotifier extends Notifier<Sesion> {
     final auth = ref.watch(servicioAuthProvider);
     final suscripcion = auth.cambios.listen((cuenta) {
       // Si entra otra cuenta, no hereda lo elegido por la anterior.
-      final mismaCuenta = cuenta?.id == state.cuenta?.id;
+      // La municipalidad elegida antes de ingresar (registro) se conserva al entrar la cuenta.
+      final mismaCuenta = cuenta?.id == state.cuenta?.id || state.cuenta == null;
       state = Sesion(
         cuenta: cuenta,
         municipalidadElegida: mismaCuenta ? state.municipalidadElegida : null,
@@ -105,7 +106,18 @@ class DatosNotifier extends AsyncNotifier<FuenteDatos> {
   Future<FuenteDatos> build() async {
     final usuario = ref.watch(sesionProvider.select((s) => s.usuarioId));
     if (usuario == null) return const FuenteDatos();
-    return ref.watch(repositorioProvider).cargar();
+    final repositorio = ref.watch(repositorioProvider);
+    // Cuando cambia una deuda (por ejemplo, tras un pago) la pantalla se actualiza sola.
+    Timer? espera;
+    final suscripcion = repositorio.cambiosDeudas.listen((_) {
+      espera?.cancel();
+      espera = Timer(const Duration(milliseconds: 400), recargar);
+    });
+    ref.onDispose(() {
+      espera?.cancel();
+      suscripcion.cancel();
+    });
+    return repositorio.cargar();
   }
 
   /// Vuelve a leer sin borrar lo que ya se ve.

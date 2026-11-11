@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -150,6 +151,51 @@ class RepositorioSupabase implements Repositorio {
     } catch (error) {
       throw ErrorApp.de(error);
     }
+  }
+
+  @override
+  Future<String> pagar(List<String> deudaIds, MedioPago medio) async {
+    try {
+      final operacion = await _cliente.rpc('registrar_pago', params: {
+        'p_deudas': deudaIds,
+        'p_medio': medio.clave,
+      }).timeout(_espera);
+      return operacion.toString();
+    } on PostgrestException catch (error) {
+      final m = error.message;
+      throw ErrorApp(
+        TipoError.servidor,
+        m.contains('deudas_invalidas')
+            ? 'Alguna de las deudas ya fue pagada. Actualiza la pantalla e inténtalo de nuevo.'
+            : 'No pudimos registrar el pago. Inténtalo de nuevo.',
+      );
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
+  @override
+  Stream<void> get cambiosDeudas {
+    late final StreamController<void> control;
+    RealtimeChannel? canal;
+    control = StreamController<void>.broadcast(
+      onListen: () {
+        canal = _cliente
+            .channel('deudas-vecino')
+            .onPostgresChanges(
+              event: PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'deudas',
+              callback: (_) => control.add(null),
+            )
+            .subscribe();
+      },
+      onCancel: () async {
+        final abierto = canal;
+        if (abierto != null) await _cliente.removeChannel(abierto);
+      },
+    );
+    return control.stream;
   }
 
   @override

@@ -61,10 +61,12 @@ class DeudaDetalleScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   FilaDato('Importe', soles(deuda.montoInsoluto)),
-                  if (deuda.interesMoratorio > 0)
-                    FilaDato('Intereses', soles(deuda.interesMoratorio)),
+                  if (deuda.gastosEmision > 0) FilaDato('Gastos de emisión', soles(deuda.gastosEmision)),
+                  if (deuda.interesMoratorio + deuda.interesActualizacion > 0)
+                    FilaDato('Intereses', soles(deuda.interesMoratorio + deuda.interesActualizacion)),
+                  if (deuda.descuento > 0) FilaDato('Descuento', '- ${soles(deuda.descuento)}'),
                   const Divider(height: AppSpacing.xl),
-                  FilaDato('Total', soles(deuda.total), destacado: true),
+                  FilaDato(deuda.pendiente ? 'Saldo' : 'Total pagado', soles(deuda.total), destacado: true),
                 ],
               ),
             ),

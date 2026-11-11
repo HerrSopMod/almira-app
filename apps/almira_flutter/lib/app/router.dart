@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/assistant/asistente_screen.dart';
+import '../features/account/cuponera_screen.dart';
+import '../features/account/estado_cuenta_screen.dart';
 import '../features/auth/configurar_screen.dart';
 import '../features/auth/ingreso_screen.dart';
+import '../features/auth/registro_screen.dart';
 import '../features/complaints/nuevo_reclamo_screen.dart';
 import '../features/complaints/reclamo_detalle_screen.dart';
 import '../features/complaints/reclamos_screen.dart';
@@ -12,6 +15,8 @@ import '../features/home/inicio_screen.dart';
 import '../features/notifications/avisos_screen.dart';
 import '../features/onboarding/consentimiento_screen.dart';
 import '../features/payments/deuda_detalle_screen.dart';
+import '../features/payments/pago_confirmar_screen.dart';
+import '../features/payments/pago_en_linea_screen.dart';
 import '../features/payments/pagos_screen.dart';
 import '../features/profile/atencion_screen.dart';
 import '../features/profile/municipalidad_screen.dart';
@@ -26,10 +31,15 @@ import '../shared/services/proveedores.dart';
 /// Rutas de la app.
 abstract final class Rutas {
   static const ingreso = '/ingreso';
+  static const registro = '/registro';
   static const configurar = '/configurar';
   static const consentimiento = '/consentimiento';
   static const inicio = '/inicio';
   static const pagos = '/pagos';
+  static const pagoEnLinea = '/pagos/en-linea';
+  static const confirmarPago = '/pagos/en-linea/confirmar';
+  static const estadoCuenta = '/pagos/estado-cuenta';
+  static const cuponera = '/pagos/cuponera';
   static const reclamos = '/reclamos';
   static const obras = '/obras';
   static const asistente = '/asistente';
@@ -52,9 +62,17 @@ const _pasosIngreso = [Rutas.configurar, Rutas.consentimiento];
 /// configurar, a terminar el ingreso (una sola vez); con todo listo, directo
 /// a Inicio. Así el recorrido inicial no reaparece en cada apertura.
 String? redirigir(Sesion sesion, String ruta) {
-  if (!sesion.conCuenta) return ruta == Rutas.ingreso ? null : Rutas.ingreso;
-  if (!sesion.lista) return _pasosIngreso.contains(ruta) ? null : Rutas.configurar;
-  if (ruta == Rutas.ingreso || _pasosIngreso.contains(ruta)) return Rutas.inicio;
+  if (!sesion.conCuenta) {
+    return ruta == Rutas.ingreso || ruta == Rutas.registro ? null : Rutas.ingreso;
+  }
+  if (!sesion.lista) {
+    // Quien se registró con su cuponera ya eligió municipalidad: solo falta el consentimiento.
+    final destino = sesion.municipalidadElegida != null ? Rutas.consentimiento : Rutas.configurar;
+    return _pasosIngreso.contains(ruta) ? null : destino;
+  }
+  if (ruta == Rutas.ingreso || ruta == Rutas.registro || _pasosIngreso.contains(ruta)) {
+    return Rutas.inicio;
+  }
   return null;
 }
 
@@ -72,6 +90,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     onException: (context, estado, router) => router.go(Rutas.inicio),
     routes: [
       GoRoute(path: Rutas.ingreso, builder: (_, _) => const IngresoScreen()),
+      GoRoute(path: Rutas.registro, builder: (_, _) => const RegistroScreen()),
       GoRoute(path: Rutas.configurar, builder: (_, _) => const ConfigurarScreen()),
       GoRoute(path: Rutas.consentimiento, builder: (_, _) => const ConsentimientoScreen()),
       StatefulShellRoute.indexedStack(
@@ -90,6 +109,19 @@ final routerProvider = Provider<GoRouter>((ref) {
                   path: 'deuda/:id',
                   builder: (_, estado) => DeudaDetalleScreen(id: estado.pathParameters['id']!),
                 ),
+                GoRoute(
+                  path: 'en-linea',
+                  builder: (_, _) => const PagoEnLineaScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'confirmar',
+                      builder: (_, estado) =>
+                          PagoConfirmarScreen(deudaIds: (estado.extra as List<String>?) ?? const []),
+                    ),
+                  ],
+                ),
+                GoRoute(path: 'estado-cuenta', builder: (_, _) => const EstadoCuentaScreen()),
+                GoRoute(path: 'cuponera', builder: (_, _) => const CuponeraScreen()),
               ],
             ),
           ]),

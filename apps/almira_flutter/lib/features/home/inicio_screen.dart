@@ -6,6 +6,7 @@ import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
+import '../../core/widgets/cara_saldo.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
@@ -101,7 +102,9 @@ class InicioScreen extends ConsumerWidget {
     final obra = v.obras.where((o) => o.estado == EstadoObra.enEjecucion).firstOrNull;
 
     return [
-      _TarjetaResumen(resumen: resumen, hoy: hoy),
+      _TarjetaResumen(resumen: resumen, hoy: hoy, codigo: v.vecino?.codigoContribuyente),
+      espacio,
+      const _Accesos(),
       espacio,
       if (resumen.alDia)
         OutlinedButton(
@@ -146,10 +149,11 @@ class InicioScreen extends ConsumerWidget {
 }
 
 class _TarjetaResumen extends StatelessWidget {
-  const _TarjetaResumen({required this.resumen, required this.hoy});
+  const _TarjetaResumen({required this.resumen, required this.hoy, this.codigo});
 
   final ResumenDeuda resumen;
   final DateTime hoy;
+  final String? codigo;
 
   @override
   Widget build(BuildContext context) {
@@ -161,14 +165,14 @@ class _TarjetaResumen extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.margen),
         child: Row(
           children: [
-            const CajaIcono(Icons.check_rounded, tono: Tono.exito, lado: 44),
-            const SizedBox(width: AppSpacing.md),
+            const CaraSaldo(alDia: true),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Estás al día', style: textos.titleLarge),
-                  Text('No tienes obligaciones pendientes.', style: textos.bodyMedium),
+                  Text('¡Estás al día con tus tributos!', style: textos.titleLarge),
+                  if (codigo != null) Text('Cuponera $codigo', style: textos.bodyMedium),
                 ],
               ),
             ),
@@ -185,6 +189,25 @@ class _TarjetaResumen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              const CaraSaldo(alDia: false, lado: 56),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tienes ${soles(resumen.total)} pendientes',
+                      style: textos.titleSmall!.copyWith(color: AppColors.primaryDark),
+                    ),
+                    if (codigo != null) Text('Cuponera $codigo', style: textos.bodySmall),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
           Text(
             'Total pendiente',
             style: textos.titleSmall!.copyWith(color: AppColors.primaryDark),
@@ -302,6 +325,49 @@ class _TarjetaObra extends StatelessWidget {
           const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
         ],
       ),
+    );
+  }
+}
+
+/// Accesos rápidos a lo que más se usa, en dos filas para que quepan con letra grande.
+class _Accesos extends StatelessWidget {
+  const _Accesos();
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    Widget acceso(IconData icono, String texto, String ruta) => Expanded(
+          child: Tarjeta(
+            onTap: () => context.go(ruta),
+            semantica: texto,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.md),
+            child: Row(
+              children: [
+                CajaIcono(icono, lado: 36),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: Text(texto, style: textos.labelLarge, maxLines: 2)),
+              ],
+            ),
+          ),
+        );
+    Widget fila(Widget a, Widget b) => IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [a, const SizedBox(width: AppSpacing.sm), b],
+          ),
+        );
+    return Column(
+      children: [
+        fila(
+          acceso(Icons.lock_outline_rounded, 'Pagar en línea', Rutas.pagoEnLinea),
+          acceso(Icons.receipt_long_outlined, 'Estado de cuenta', Rutas.estadoCuenta),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        fila(
+          acceso(Icons.description_outlined, 'Cuponera', Rutas.cuponera),
+          acceso(Icons.history_rounded, 'Historial', Rutas.estadoCuenta),
+        ),
+      ],
     );
   }
 }

@@ -40,4 +40,13 @@ abstract class Repositorio {
   /// Vincula un código de contribuyente con su DNI. Devuelve un mensaje de
   /// error para mostrar, o null si quedó vinculado.
   Future<String?> vincularCodigo(String municipalidadId, String codigo, String dni);
+
+  /// Registra el pago de las deudas elegidas, con el medio indicado, y
+  /// devuelve el número de operación. El servidor toma los montos de la base y
+  /// confirma el pago: el cliente no manda importes.
+  Future<String> pagar(List<String> deudaIds, MedioPago medio);
+
+  /// Avisa cada vez que cambia una deuda del vecino (por ejemplo, tras un
+  /// pago), para que la pantalla se actualice sola.
+  Stream<void> get cambiosDeudas;
 }

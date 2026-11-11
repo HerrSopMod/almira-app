@@ -3,14 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'formulario_vincular.dart';
 
-/// Primer ingreso, paso 1 de 2: municipalidad y código de contribuyente.
+/// Primer ingreso: municipalidad y código de contribuyente.
 /// El código es opcional aquí; sin él se pueden ver las obras, y se vincula
 /// después desde Mi perfil.
 class ConfigurarScreen extends ConsumerWidget {
@@ -50,8 +49,6 @@ class ConfigurarScreen extends ConsumerWidget {
             }
             final elegida = sesion.municipalidadElegida ?? v.municipalidad?.id;
             return [
-              Text('Paso 1 de 2', style: textos.labelMedium!.copyWith(color: AppColors.primary)),
-              const SizedBox(height: AppSpacing.xs),
               TituloSeccion('Tu municipalidad'),
               espacioChico,
               Tarjeta(

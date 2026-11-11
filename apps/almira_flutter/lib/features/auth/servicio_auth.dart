@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/config/env.dart';
 import '../../core/errors/error_app.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/datos_demo.dart';
@@ -24,6 +22,23 @@ class Cuenta {
   final DatosIngreso? ingreso;
 }
 
+/// Municipalidad que se puede elegir al registrarse.
+class MunicipalidadRegistro {
+  const MunicipalidadRegistro({required this.id, required this.slug, required this.nombre, this.zona = ''});
+
+  final String id;
+  final String slug;
+  final String nombre;
+  final String zona;
+
+  factory MunicipalidadRegistro.deJson(Map<String, dynamic> f) => MunicipalidadRegistro(
+        id: '${f['id']}',
+        slug: '${f['slug']}',
+        nombre: '${f['nombre']}',
+        zona: '${f['zona'] ?? ''}',
+      );
+}
+
 /// Ingreso a la app. Los métodos lanzan [ErrorApp] con un mensaje para mostrar.
 abstract class ServicioAuth {
   bool get esDemo;
@@ -32,11 +47,26 @@ abstract class ServicioAuth {
 
   Future<void> ingresarConCorreo(String correo, String clave);
 
-  /// Devuelve false si la cuenta quedó creada pero falta confirmar el correo.
-  Future<bool> crearCuenta(String correo, String clave);
-  Future<void> ingresarConGoogle();
-  Future<void> enviarCodigoSms(String celular);
-  Future<void> verificarCodigoSms(String celular, String codigo);
+  /// Ingreso con el número de cuponera y la clave web.
+  Future<void> ingresarConCuponera(String cuponera, String clave);
+
+  /// Municipalidades entre las que se elige al registrarse.
+  Future<List<MunicipalidadRegistro>> municipalidadesRegistro();
+
+  /// Comprueba en el servidor que la cuponera y el DNI son de esa municipalidad y que nadie
+  /// los vinculó todavía. Si no, lanza un error genérico: no dice cuál dato falló.
+  Future<void> verificarCuponera({required String slug, required String cuponera, required String dni});
+
+  /// Crea la cuenta con correo y clave, la vincula con el contribuyente e inicia sesión.
+  Future<void> registrarConCuponera({
+    required String slug,
+    required String cuponera,
+    required String dni,
+    required String correo,
+    required String clave,
+    required String celular,
+  });
+
   Future<void> ingresarDemo();
   Future<void> guardarIngreso(DatosIngreso datos);
   Future<void> cerrarSesion();
@@ -115,36 +145,83 @@ class ServicioAuthSupabase implements ServicioAuth {
         'Correo o contraseña incorrectos.',
       );
 
-  @override
-  Future<bool> crearCuenta(String correo, String clave) async {
-    final respuesta = await _intentar(
-      () => _cliente.auth.signUp(email: correo.trim(), password: clave),
-      'No pudimos crear la cuenta. Revisa el correo y usa al menos 8 caracteres.',
-    );
-    return respuesta.session != null;
+  /// Llama a la función del servidor. Ante un rechazo muestra el mensaje que ella devuelve.
+  Future<Map<String, dynamic>> _llamar(Map<String, dynamic> cuerpo) async {
+    try {
+      final respuesta = await _cliente.functions
+          .invoke('registro-contribuyente', body: cuerpo)
+          .timeout(const Duration(seconds: 25));
+      final datos = respuesta.data;
+      return datos is Map ? Map<String, dynamic>.from(datos) : <String, dynamic>{};
+    } on FunctionException catch (error) {
+      final detalles = error.details;
+      final mensaje = detalles is Map ? detalles['error'] : null;
+      throw ErrorApp(
+        TipoError.servidor,
+        mensaje is String && mensaje.isNotEmpty
+            ? mensaje
+            : 'No pudimos verificar tus datos. Revisa la municipalidad, la cuponera y el DNI.',
+      );
+    } catch (error) {
+      final e = ErrorApp.de(error);
+      throw e.sinConexion
+          ? const ErrorApp(TipoError.sinConexion, 'Sin conexión. Revisa tu internet e inténtalo de nuevo.')
+          : const ErrorApp(TipoError.servidor, 'No pudimos completar la solicitud. Inténtalo de nuevo.');
+    }
   }
 
   @override
-  Future<void> ingresarConGoogle() => _intentar(
-        () => _cliente.auth.signInWithOAuth(
-          OAuthProvider.google,
-          redirectTo: kIsWeb ? null : Env.retornoIngreso,
-          authScreenLaunchMode: LaunchMode.externalApplication,
-        ),
-        'No pudimos abrir el ingreso con Google. Inténtalo de nuevo.',
-      );
+  Future<void> ingresarConCuponera(String cuponera, String clave) async {
+    final r = await _llamar({'accion': 'ingresar', 'cuponera': cuponera.trim(), 'clave': clave});
+    final refresco = r['refresh_token'];
+    if (refresco is! String) {
+      throw const ErrorApp(TipoError.servidor, 'Cuponera o clave incorrectas.');
+    }
+    await _intentar(
+      () => _cliente.auth.setSession(refresco),
+      'No pudimos iniciar tu sesión. Inténtalo de nuevo.',
+    );
+  }
 
   @override
-  Future<void> enviarCodigoSms(String celular) => _intentar(
-        () => _cliente.auth.signInWithOtp(phone: '+51$celular'),
-        'No pudimos enviar el código. Revisa tu número e inténtalo de nuevo.',
-      );
+  Future<List<MunicipalidadRegistro>> municipalidadesRegistro() async {
+    final r = await _llamar({'accion': 'municipalidades'});
+    final lista = r['municipalidades'];
+    if (lista is! List) return const [];
+    return lista
+        .map((f) => MunicipalidadRegistro.deJson(Map<String, dynamic>.from(f as Map)))
+        .toList();
+  }
 
   @override
-  Future<void> verificarCodigoSms(String celular, String codigo) => _intentar(
-        () => _cliente.auth.verifyOTP(phone: '+51$celular', token: codigo, type: OtpType.sms),
-        'El código no es correcto o ya venció.',
-      );
+  Future<void> verificarCuponera({
+    required String slug,
+    required String cuponera,
+    required String dni,
+  }) async {
+    await _llamar({'accion': 'verificar', 'slug': slug, 'cuponera': cuponera.trim(), 'dni': dni.trim()});
+  }
+
+  @override
+  Future<void> registrarConCuponera({
+    required String slug,
+    required String cuponera,
+    required String dni,
+    required String correo,
+    required String clave,
+    required String celular,
+  }) async {
+    await _llamar({
+      'accion': 'registrar',
+      'slug': slug,
+      'cuponera': cuponera.trim(),
+      'dni': dni.trim(),
+      'correo': correo.trim(),
+      'clave': clave,
+      'celular': celular,
+    });
+    await ingresarConCorreo(correo, clave);
+  }
 
   @override
   Future<void> ingresarDemo() async {}
@@ -206,16 +283,29 @@ class ServicioAuthDemo implements ServicioAuth {
   Future<void> ingresarConCorreo(String correo, String clave) async => throw _noDisponible;
 
   @override
-  Future<bool> crearCuenta(String correo, String clave) async => throw _noDisponible;
+  Future<void> ingresarConCuponera(String cuponera, String clave) async => throw _noDisponible;
 
   @override
-  Future<void> ingresarConGoogle() async => throw _noDisponible;
+  Future<List<MunicipalidadRegistro>> municipalidadesRegistro() async => throw _noDisponible;
 
   @override
-  Future<void> enviarCodigoSms(String celular) async => throw _noDisponible;
+  Future<void> verificarCuponera({
+    required String slug,
+    required String cuponera,
+    required String dni,
+  }) async =>
+      throw _noDisponible;
 
   @override
-  Future<void> verificarCodigoSms(String celular, String codigo) async => throw _noDisponible;
+  Future<void> registrarConCuponera({
+    required String slug,
+    required String cuponera,
+    required String dni,
+    required String correo,
+    required String clave,
+    required String celular,
+  }) async =>
+      throw _noDisponible;
 
   @override
   Future<void> ingresarDemo() async {

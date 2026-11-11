@@ -137,6 +137,24 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
               espacio,
               AccionPago(municipalidad: v.municipalidad, esDemo: esDemo),
             ],
+            espacioGrande,
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => context.push(Rutas.estadoCuenta),
+                    child: const Text('Estado de cuenta'),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => context.push(Rutas.cuponera),
+                    child: const Text('Cuponera'),
+                  ),
+                ),
+              ],
+            ),
           ];
         },
       ),

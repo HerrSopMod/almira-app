@@ -140,6 +140,13 @@ class RepositorioDemo implements Repositorio {
       _preferencias.setString(_claveCanal, canal.name);
 
   @override
+  Future<String> pagar(List<String> deudaIds, MedioPago medio) async =>
+      throw const ErrorApp(TipoError.servidor, 'El pago necesita conexión con el servicio.');
+
+  @override
+  Stream<void> get cambiosDeudas => const Stream.empty();
+
+  @override
   Future<String?> vincularCodigo(String municipalidadId, String codigo, String dni) async {
     final coincide = municipalidadId == DatosDemo.municipalidadId &&
         codigo.trim().toUpperCase() == DatosDemo.codigoContribuyente &&
