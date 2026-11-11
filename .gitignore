@@ -9,8 +9,8 @@ web-build/
 # Expo
 .expo/
 expo-env.d.ts
-ios/
-android/
+apps/mobile/ios/
+apps/mobile/android/
 
 # Supabase local
 supabase/.branches/

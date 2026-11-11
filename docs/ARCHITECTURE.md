@@ -8,7 +8,8 @@ Almira permite a vecinos de distintas municipalidades de Lima pagar tributos y r
 
 | Carpeta | Contenido |
 | --- | --- |
-| `apps/mobile` | App de vecinos con Expo, React Native, TypeScript y expo-router |
+| `apps/almira_flutter` | App de vecinos en Flutter y Dart. Es el cliente móvil vigente: ver su `README.md` |
+| `apps/mobile` | App de vecinos anterior, con Expo y React Native. Queda como referencia |
 | `apps/web` | Panel municipal con Vite, React y TypeScript |
 | `packages/shared` | Tokens de diseño, tipos, formato y datos de ejemplo |
 | `supabase` | Migraciones, RLS, datos de semilla y Edge Function |

@@ -1,12 +1,13 @@
 # Almira
 
-Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tipos y tokens (`packages/shared`) y backend (`supabase`). Lee `docs/ARCHITECTURE.md` antes de cambiar la estructura o el esquema.
+Monorepo pnpm: app de vecinos en Flutter (`apps/almira_flutter`), app de vecinos anterior en Expo (`apps/mobile`, solo como referencia), panel municipal (`apps/web`), tipos y tokens (`packages/shared`) y backend (`supabase`). Lee `docs/ARCHITECTURE.md` antes de cambiar la estructura o el esquema.
 
 ## Comandos
 
 - `pnpm install`: instala todo.
 - `pnpm typecheck`, `pnpm test`, `pnpm build:web`: corre los tres antes de hacer commit.
-- `pnpm mobile`, `pnpm web`: levantan cada app.
+- `pnpm mobile`, `pnpm web`: levantan la app de Expo y el panel.
+- App Flutter, desde `apps/almira_flutter`: `flutter analyze`, `flutter test` y `flutter run` (ver su `README.md`).
 
 ## Reglas de producto
 
@@ -14,7 +15,8 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 - No inventes funciones fuera de las pantallas de `docs/design/turquesa` y `docs/design/prototipo`.
 - No afirmes en la interfaz certificaciones, validaciones o integraciones que la app no tenga.
 - Textos en español de Perú, tratando al vecino de "tú".
-- La interfaz se ve como un producto real: sin «Prototipo académico», «Datos ficticios» ni avisos de datos de ejemplo. Nada de subtítulos u observaciones obvias: textos mínimos.
+- La interfaz se ve como un producto real: sin «Prototipo académico» ni «Datos ficticios». Nada de subtítulos u observaciones obvias: textos mínimos.
+- Excepción en la app Flutter: sin Supabase configurado abre en modo demostración y lo marca con la etiqueta «Demostración». Nunca muestra datos de ejemplo como si fueran oficiales.
 
 ## Reglas de diseño
 
@@ -26,6 +28,13 @@ Monorepo pnpm: app de vecinos (`apps/mobile`), panel municipal (`apps/web`), tip
 - Máximo un bloque `Destacado` por pantalla. Los colores de estado solo van en insignias y estados.
 - Montos con `formatearSoles`, alineados a la derecha en filas y tablas.
 - El mapa de obras es OpenStreetMap con Leaflet (`MAPA.md`) y siempre muestra la atribución.
+
+### App Flutter
+
+- Colores, medidas y tipografía salen de `lib/app/theme`. No escribas colores sueltos en los widgets.
+- Un solo mapa: `MapaAlmira` (`flutter_map` con OpenStreetMap), siempre con atribución.
+- Fechas y plazos con la fecha real del teléfono (`relojProvider`), nunca con una fecha fija.
+- Cada pantalla con datos cubre carga, vacío, error y sin conexión (`CuerpoAsync`).
 
 ## Reglas de datos
 
