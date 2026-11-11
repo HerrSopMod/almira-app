@@ -11,6 +11,7 @@ import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import '../account/estado_cuenta_logica.dart';
+import 'pasos_pago.dart';
 
 const _pestanas = [TipoDeuda.predial, TipoDeuda.arbitrios, TipoDeuda.coactivo, TipoDeuda.otros];
 
@@ -75,8 +76,12 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
 
             return Column(
               children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.lg, AppSpacing.margen, 0),
+                  child: PasosPago(actual: 0),
+                ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.lg, AppSpacing.margen, 0),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.md, AppSpacing.margen, 0),
                   child: SegmentedButton<bool>(
                     segments: const [
                       ButtonSegment(value: true, label: Text('Beneficio al vencimiento')),

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/config/env.dart';
 import '../../core/errors/error_app.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/datos_demo.dart';
@@ -45,7 +47,13 @@ abstract class ServicioAuth {
   Cuenta? get cuenta;
   Stream<Cuenta?> get cambios;
 
+  /// Ingreso con Google (Supabase Auth). Abre el navegador y vuelve a la app por `almira://ingreso`.
+  Future<void> ingresarConGoogle();
+
   Future<void> ingresarConCorreo(String correo, String clave);
+
+  /// Crea (o cambia) la clave web de la cuenta, para entrar después con correo o cuponera.
+  Future<void> crearClaveWeb(String clave);
 
   /// Ingreso con el número de cuponera y la clave web.
   Future<void> ingresarConCuponera(String cuponera, String clave);
@@ -143,6 +151,22 @@ class ServicioAuthSupabase implements ServicioAuth {
   Future<void> ingresarConCorreo(String correo, String clave) => _intentar(
         () => _cliente.auth.signInWithPassword(email: correo.trim(), password: clave),
         'Correo o contraseña incorrectos.',
+      );
+
+  @override
+  Future<void> ingresarConGoogle() => _intentar(
+        () => _cliente.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: kIsWeb ? null : Env.retornoIngreso,
+          authScreenLaunchMode: LaunchMode.externalApplication,
+        ),
+        'No pudimos abrir el ingreso con Google. Inténtalo de nuevo.',
+      );
+
+  @override
+  Future<void> crearClaveWeb(String clave) => _intentar(
+        () => _cliente.auth.updateUser(UserAttributes(password: clave)),
+        'No pudimos guardar tu clave. Usa al menos 8 caracteres e inténtalo de nuevo.',
       );
 
   /// Llama a la función del servidor. Ante un rechazo muestra el mensaje que ella devuelve.
@@ -281,6 +305,12 @@ class ServicioAuthDemo implements ServicioAuth {
 
   @override
   Future<void> ingresarConCorreo(String correo, String clave) async => throw _noDisponible;
+
+  @override
+  Future<void> ingresarConGoogle() async => throw _noDisponible;
+
+  @override
+  Future<void> crearClaveWeb(String clave) async => throw _noDisponible;
 
   @override
   Future<void> ingresarConCuponera(String cuponera, String clave) async => throw _noDisponible;

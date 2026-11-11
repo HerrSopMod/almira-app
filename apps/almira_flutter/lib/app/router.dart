@@ -8,6 +8,7 @@ import '../features/account/estado_cuenta_screen.dart';
 import '../features/auth/configurar_screen.dart';
 import '../features/auth/ingreso_screen.dart';
 import '../features/auth/registro_screen.dart';
+import '../features/auth/verificar_celular_screen.dart';
 import '../features/complaints/nuevo_reclamo_screen.dart';
 import '../features/complaints/reclamo_detalle_screen.dart';
 import '../features/complaints/reclamos_screen.dart';
@@ -33,6 +34,7 @@ abstract final class Rutas {
   static const ingreso = '/ingreso';
   static const registro = '/registro';
   static const configurar = '/configurar';
+  static const verificarCelular = '/verificar-celular';
   static const consentimiento = '/consentimiento';
   static const inicio = '/inicio';
   static const pagos = '/pagos';
@@ -56,7 +58,7 @@ abstract final class Rutas {
   static String obra(String id) => '$obras/$id';
 }
 
-const _pasosIngreso = [Rutas.configurar, Rutas.consentimiento];
+const _pasosIngreso = [Rutas.configurar, Rutas.verificarCelular, Rutas.consentimiento];
 
 /// Adónde va cada quien: sin cuenta, al ingreso; con cuenta a medio
 /// configurar, a terminar el ingreso (una sola vez); con todo listo, directo
@@ -92,6 +94,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Rutas.ingreso, builder: (_, _) => const IngresoScreen()),
       GoRoute(path: Rutas.registro, builder: (_, _) => const RegistroScreen()),
       GoRoute(path: Rutas.configurar, builder: (_, _) => const ConfigurarScreen()),
+      GoRoute(path: Rutas.verificarCelular, builder: (_, _) => const VerificarCelularScreen()),
       GoRoute(path: Rutas.consentimiento, builder: (_, _) => const ConsentimientoScreen()),
       StatefulShellRoute.indexedStack(
         builder: (_, _, navegacion) => ShellPrincipal(navegacion: navegacion),

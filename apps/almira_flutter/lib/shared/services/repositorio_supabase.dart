@@ -10,6 +10,10 @@ import 'repositorio.dart';
 const _espera = Duration(seconds: 20);
 const _bucket = 'evidencias';
 
+/// Ante cualquier fallo de la vinculación se responde lo mismo: no se dice si falló la
+/// cuponera, el DNI o la municipalidad.
+const _mensajeVinculo = 'No pudimos verificar tus datos. Revisa la municipalidad, la cuponera y el DNI.';
+
 /// Backend real: las tablas, políticas RLS y el bucket privado que ya existen
 /// en `supabase/migrations`. No se cambia ningún contrato.
 class RepositorioSupabase implements Repositorio {
@@ -154,6 +158,16 @@ class RepositorioSupabase implements Repositorio {
   }
 
   @override
+  Future<bool> guardarCelular(String celular) async {
+    try {
+      final r = await _cliente.rpc('guardar_celular', params: {'p_celular': celular}).timeout(_espera);
+      return r == true;
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
+  @override
   Future<String> pagar(List<String> deudaIds, MedioPago medio) async {
     try {
       final operacion = await _cliente.rpc('registrar_pago', params: {
@@ -206,17 +220,17 @@ class RepositorioSupabase implements Repositorio {
         'p_codigo': codigo.trim(),
         'p_dni': dni.trim(),
       }).timeout(_espera);
-      return resultado == true ? null : 'No encontramos ese código con ese DNI en el padrón.';
+      return resultado == true ? null : _mensajeVinculo;
     } on PostgrestException catch (error) {
       if (error.message.contains('demasiados_intentos')) {
         return 'Hiciste demasiados intentos. Espera 15 minutos e inténtalo de nuevo.';
       }
-      return 'No pudimos vincular el código. Inténtalo de nuevo.';
+      return _mensajeVinculo;
     } catch (error) {
       final e = ErrorApp.de(error);
       return e.sinConexion
           ? 'Sin conexión. Revisa tu internet e inténtalo de nuevo.'
-          : 'No pudimos vincular el código. Inténtalo de nuevo.';
+          : _mensajeVinculo;
     }
   }
 }

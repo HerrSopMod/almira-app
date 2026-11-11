@@ -9,9 +9,9 @@ import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'formulario_vincular.dart';
 
-/// Primer ingreso: municipalidad y código de contribuyente.
-/// El código es opcional aquí; sin él se pueden ver las obras, y se vincula
-/// después desde Mi perfil.
+/// Primer ingreso con Google: la cuenta todavía no es de un contribuyente. Elige la
+/// municipalidad y vincula su número de cuponera con su DNI; el servidor valida los
+/// dos y, ante cualquier fallo, responde lo mismo. Sin vínculo no se sigue.
 class ConfigurarScreen extends ConsumerWidget {
   const ConfigurarScreen({super.key});
 
@@ -23,7 +23,7 @@ class ConfigurarScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configura tu cuenta'),
+        title: const Text('Vincula tu cuponera'),
         actions: [
           TextButton(
             onPressed: () => ref.read(sesionProvider.notifier).cerrarSesion(),
@@ -48,6 +48,7 @@ class ConfigurarScreen extends ConsumerWidget {
               ];
             }
             final elegida = sesion.municipalidadElegida ?? v.municipalidad?.id;
+            final vinculada = v.vecino != null;
             return [
               TituloSeccion('Tu municipalidad'),
               espacioChico,
@@ -71,28 +72,28 @@ class ConfigurarScreen extends ConsumerWidget {
                 ),
               ),
               espacioGrande,
-              TituloSeccion('Tu código de contribuyente'),
+              TituloSeccion('Tu número de cuponera'),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Con él verás tus tributos y podrás reclamar. Puedes vincularlo después.',
+                'Es un dato privado: confirma que eres contribuyente.',
                 style: textos.bodyMedium,
               ),
               espacio,
-              if (v.vecino != null)
+              if (vinculada)
                 Aviso(
-                  'Código vinculado: ${v.vecino!.codigoContribuyente ?? v.vecino!.nombre}',
+                  'Cuponera vinculada: ${v.vecino!.codigoContribuyente ?? v.vecino!.nombre}',
                   tono: Tono.exito,
                 )
               else if (elegida != null)
                 FormularioVincular(municipalidadId: elegida),
               espacioGrande,
               FilledButton(
-                onPressed: elegida == null
-                    ? null
-                    : () {
+                onPressed: vinculada && elegida != null
+                    ? () {
                         ref.read(sesionProvider.notifier).elegirMunicipalidad(elegida);
-                        context.push(Rutas.consentimiento);
-                      },
+                        context.push(Rutas.verificarCelular);
+                      }
+                    : null,
                 child: const Text('Continuar'),
               ),
             ];

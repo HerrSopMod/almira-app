@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/errors/error_app.dart';
@@ -133,6 +134,24 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
       ];
 
   List<Widget> _conCuenta() => [
+        OutlinedButton.icon(
+          onPressed: _ocupado ? null : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarConGoogle()),
+          icon: const _LogoGoogle(),
+          label: const Text('Continuar con Google'),
+          style: OutlinedButton.styleFrom(foregroundColor: AppColors.textPrimary),
+        ),
+        espacio,
+        Row(
+          children: [
+            const Expanded(child: Divider()),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Text('o con tu clave web', style: Theme.of(context).textTheme.bodySmall),
+            ),
+            const Expanded(child: Divider()),
+          ],
+        ),
+        espacio,
         TextFormField(
           controller: _usuario,
           keyboardType: TextInputType.emailAddress,
@@ -175,7 +194,25 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
         ),
         TextButton(
           onPressed: _ocupado ? null : () => context.push(Rutas.registro),
-          child: const Text('Crear una cuenta'),
+          child: const Text('Crear cuenta con correo'),
         ),
       ];
+}
+
+/// "G" de Google, sin depender de un archivo de imagen.
+class _LogoGoogle extends StatelessWidget {
+  const _LogoGoogle();
+
+  @override
+  Widget build(BuildContext context) => const ExcludeSemantics(
+        child: Text(
+          'G',
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF4285F4),
+          ),
+        ),
+      );
 }

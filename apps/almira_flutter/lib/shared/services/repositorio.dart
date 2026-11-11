@@ -41,6 +41,10 @@ abstract class Repositorio {
   /// error para mostrar, o null si quedó vinculado.
   Future<String?> vincularCodigo(String municipalidadId, String codigo, String dni);
 
+  /// Guarda el celular de los avisos de la cuenta (9 dígitos). Devuelve false si la cuenta
+  /// todavía no tiene un contribuyente vinculado.
+  Future<bool> guardarCelular(String celular);
+
   /// Registra el pago de las deudas elegidas, con el medio indicado, y
   /// devuelve el número de operación. El servidor toma los montos de la base y
   /// confirma el pago: el cliente no manda importes.

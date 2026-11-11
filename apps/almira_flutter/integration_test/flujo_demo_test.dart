@@ -23,6 +23,12 @@ void main() {
     await tester.scrollUntilVisible(find.text('Continuar'), 200);
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, '987654321');
+    await tester.tap(find.text('Recibir código'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).last, '123456');
+    await tester.tap(find.text('Verificar'));
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Continuar'), 200);
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();

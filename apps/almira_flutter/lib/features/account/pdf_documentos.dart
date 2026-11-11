@@ -314,3 +314,69 @@ Future<Uint8List> pdfLiquidacion({
   );
   return doc.save();
 }
+
+/// Una línea del comprobante: lo que se pagó.
+class LineaComprobante {
+  const LineaComprobante({required this.concepto, required this.periodo, required this.monto});
+
+  final String concepto;
+  final String periodo;
+  final double monto;
+}
+
+/// Comprobante de pago con su número de operación. No lleva datos de la tarjeta ni de Yape.
+Future<Uint8List> pdfComprobante({
+  required Municipalidad? municipalidad,
+  required Vecino? vecino,
+  required String operacion,
+  required DateTime fecha,
+  required MedioPago medio,
+  required List<LineaComprobante> lineas,
+}) async {
+  final doc = pw.Document(title: 'Comprobante $operacion', author: 'Almira');
+  final total = lineas.fold<double>(0, (s, l) => s + l.monto);
+  final fechaHora = DateFormat('dd-MM-yyyy HH:mm').format(fecha);
+
+  doc.addPage(
+    pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(32),
+      build: (_) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+        _titulo('COMPROBANTE DE PAGO', operacion, municipalidad),
+        pw.SizedBox(height: 16),
+        pw.Container(
+          padding: const pw.EdgeInsets.all(10),
+          decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.6, color: _verde)),
+          child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+            pw.Text('Número de operación: $operacion', style: _estilo(tamano: 11, negrita: true)),
+            pw.SizedBox(height: 3),
+            pw.Text('Fecha: $fechaHora', style: _estilo(tamano: 9)),
+            pw.Text('Medio de pago: ${medio.etiqueta}', style: _estilo(tamano: 9)),
+          ]),
+        ),
+        pw.SizedBox(height: 14),
+        if (vecino != null) _encabezadoContribuyente(municipalidad, vecino),
+        pw.SizedBox(height: 14),
+        pw.TableHelper.fromTextArray(
+          headers: ['Concepto', 'Periodo', 'Importe'],
+          data: [for (final l in lineas) [l.concepto, l.periodo, _m(l.monto)]],
+          headerStyle: _estilo(tamano: 9, negrita: true),
+          cellStyle: _estilo(tamano: 9),
+          cellAlignments: {2: pw.Alignment.centerRight},
+          headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFE7F2F3)),
+        ),
+        pw.SizedBox(height: 8),
+        pw.Align(
+          alignment: pw.Alignment.centerRight,
+          child: pw.Text('Total pagado: S/ ${_m(total)}', style: _estilo(tamano: 12, negrita: true)),
+        ),
+        pw.Spacer(),
+        pw.Text(
+          'Conserva este comprobante. Tu estado de cuenta se actualizó con este pago.',
+          style: _estilo(tamano: 8, color: _gris),
+        ),
+      ]),
+    ),
+  );
+  return doc.save();
+}

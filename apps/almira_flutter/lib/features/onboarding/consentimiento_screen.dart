@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
@@ -9,7 +8,7 @@ import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'privacidad_widgets.dart';
 
-/// Primer ingreso, paso 2 de 2. Separa lo necesario para dar el servicio
+/// Último paso del primer ingreso. Separa lo necesario para dar el servicio
 /// (se informa) de lo opcional (se elige, y empieza apagado). «Continuar» no
 /// activa nada opcional.
 class ConsentimientoScreen extends ConsumerStatefulWidget {
@@ -54,8 +53,6 @@ class _ConsentimientoScreenState extends ConsumerState<ConsentimientoScreen> {
             AppSpacing.xl,
           ),
           children: [
-            Text('Paso 2 de 2', style: textos.labelMedium!.copyWith(color: AppColors.primary)),
-            const SizedBox(height: AppSpacing.xs),
             Semantics(
               header: true,
               child: Text('Tus datos', style: textos.headlineSmall),

@@ -74,7 +74,7 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
             textInputAction: TextInputAction.next,
             inputFormatters: [LengthLimitingTextInputFormatter(20)],
             decoration: InputDecoration(
-              labelText: 'Código de contribuyente o de predio',
+              labelText: 'Número de cuponera',
               helperText: esDemo
                   ? 'Demostración: usa ${DatosDemo.codigoContribuyente}'
                   : 'Está en tu cuponera o estado de cuenta.',

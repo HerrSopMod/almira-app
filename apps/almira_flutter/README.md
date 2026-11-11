@@ -37,12 +37,12 @@ La compilación `release` se firma con la clave de depuración de Android: sirve
 
 Supabase, el mismo que usa el repo (`supabase/migrations`):
 
-- **Auth:** correo o número de cuponera con la clave web. El registro pide municipalidad, cuponera y DNI (se validan en el servidor con la Edge Function `registro-contribuyente`, que nunca expone la tabla de contribuyentes), correo y clave, y la verificación del celular. La sesión se guarda cifrada (`flutter_secure_storage`). Lo elegido en el ingreso va en `user_metadata.almira`.
+- **Auth:** Google (Supabase Auth, con regreso por `almira://ingreso`) como método principal, y correo o número de cuponera con la clave web como alternativa. Con Google, la cuenta nueva vincula su cuponera: municipalidad, número de cuponera y DNI (función `vincular_contribuyente`, con límite de intentos y un mismo mensaje ante cualquier fallo), verifica su celular y acepta el consentimiento. Quien ya está vinculado entra directo. También se puede registrar con correo (Edge Function `registro-contribuyente`, que nunca expone la tabla de contribuyentes). La clave web se crea después desde Mi perfil. La sesión se guarda cifrada (`flutter_secure_storage`). Lo elegido en el ingreso va en `user_metadata.almira`.
 - **Datos:** lee `municipalidades`, `vecinos`, `predios`, `deudas`, `pagos`, `recordatorios`, `reclamos` y `obras`. Las políticas RLS dejan pasar solo las filas del vecino.
 - **Reclamos:** la foto sube al bucket privado `evidencias`, en `{municipalidad}/{usuario}/{archivo}`, y el reclamo se inserta con las columnas que el vecino puede escribir. En el seguimiento la foto se lee con una URL firmada de una hora.
 - **Código de contribuyente:** función `vincular_contribuyente` (códigos adicionales desde Mi perfil).
 - **Estado de cuenta y cuponera:** `deudas` guarda un periodo por fila (tributo, año, trimestre, insoluto, gastos, intereses, descuento, pagos, saldo, nro. de valor y expediente coactivo). Los PDF (estado de cuenta, HR, HLP y HLA) se generan en el teléfono (`pdf`, `printing`).
-- **Pago en línea:** la función `registrar_pago` confirma el pago en el servidor: toma el saldo de la base, registra el pago y marca la deuda como pagada. La pantalla se actualiza sola por Realtime.
+- **Pago en línea (3 pasos):** Deuda → Medio de pago (tarjeta o Yape) → Comprobante en PDF. Los datos de la tarjeta o de Yape solo se comprueban en el teléfono: no se guardan ni se registran, y al servidor viajan únicamente las deudas y el medio. La función `registrar_pago` confirma el pago en el servidor: toma el saldo de la base, registra el pago y marca la deuda como pagada. El cobro pasa por la interfaz `PaymentGateway` (`payment_gateway.dart`): hoy la implementa `PasarelaServidor`, y `PasarelaMunicipal` es el lugar para la pasarela real de la municipalidad. La pantalla se actualiza sola por Realtime.
 - **Datos de prueba:** `supabase/seed-contribuyentes.sql` (idempotente) carga los cinco contribuyentes.
 - **Canal de avisos:** actualiza `vecinos.canal_preferido`.
 
@@ -64,7 +64,7 @@ Los datos de demostración salen de `packages/shared/src/datos-ejemplo.ts` y viv
 Pendiente o fuera de alcance:
 
 - **Pasarela real de cobro:** el pago se registra en el servidor, pero no se conecta con un banco ni con Yape/Plin.
-- **Verificación del celular:** el código de 6 dígitos no se envía por SMS (no hay proveedor contratado) y la pantalla acepta cualquier código de 6 dígitos.
+- **Verificación del celular y de Yape:** el código de 6 dígitos no se envía por SMS (no hay proveedor contratado) y el de aprobación de Yape tampoco se valida con Yape: las pantallas aceptan cualquier código de 6 dígitos.
 - **Simulación de cuotas y chat con una persona:** eran simulados en la app anterior y no se migraron.
 - **Buscar una dirección en el mapa:** el pin se ubica moviendo el mapa o con el GPS.
 - **Textos legales de privacidad:** son informativos. Falta validarlos con la asesoría legal de la municipalidad (Ley N.° 29733).

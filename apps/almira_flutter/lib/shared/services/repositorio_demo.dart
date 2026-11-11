@@ -140,6 +140,9 @@ class RepositorioDemo implements Repositorio {
       _preferencias.setString(_claveCanal, canal.name);
 
   @override
+  Future<bool> guardarCelular(String celular) async => true;
+
+  @override
   Future<String> pagar(List<String> deudaIds, MedioPago medio) async =>
       throw const ErrorApp(TipoError.servidor, 'El pago necesita conexión con el servicio.');
 
