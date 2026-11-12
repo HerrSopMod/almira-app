@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/scroll_formulario.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pasos_pago.dart';
 import 'servicio_auth.dart';
@@ -149,8 +150,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
         ),
         body: SafeArea(
           top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.margen),
+          child: ScrollFormulario(
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
@@ -200,8 +200,9 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             error: (error, _) => Aviso(
               ErrorApp.de(error).detalle,
               tono: Tono.error,
-              accion: TextButton(
+              accion: OutlinedButton(
                 onPressed: () => ref.invalidate(_municipalidadesRegistroProvider),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                 child: const Text('Reintentar'),
               ),
             ),

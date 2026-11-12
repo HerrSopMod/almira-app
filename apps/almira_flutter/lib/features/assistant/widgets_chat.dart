@@ -93,13 +93,15 @@ class BurbujaChat extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
-              TextButton.icon(
+              OutlinedButton.icon(
                 onPressed: alReintentar,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Reintentar'),
-                style: TextButton.styleFrom(
+                style: OutlinedButton.styleFrom(
                   minimumSize: const Size(48, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  backgroundColor: AppColors.surface,
+                  shape: const StadiumBorder(),
                 ),
               ),
             ],

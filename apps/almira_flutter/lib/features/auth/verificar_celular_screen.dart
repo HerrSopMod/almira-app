@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
-import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/scroll_formulario.dart';
 import '../../shared/services/proveedores.dart';
 
 final _celularValido = RegExp(r'^9\d{8}$');
@@ -65,8 +65,7 @@ class _VerificarCelularScreenState extends ConsumerState<VerificarCelularScreen>
         appBar: AppBar(title: const Text('Verifica tu celular')),
         body: SafeArea(
           top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.margen),
+          child: ScrollFormulario(
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),

@@ -157,7 +157,6 @@ abstract final class AppTheme {
         ),
         suffixIconColor: AppColors.textSecondary,
         labelStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary),
-        floatingLabelStyle: textos.bodyLarge!.copyWith(color: AppColors.primary),
         hintStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary),
         helperStyle: textos.bodySmall,
         errorStyle: textos.bodySmall!.copyWith(color: AppColors.error),
@@ -166,9 +165,12 @@ abstract final class AppTheme {
         border: _borde(Colors.transparent),
         enabledBorder: _borde(Colors.transparent),
         disabledBorder: _borde(Colors.transparent),
-        focusedBorder: _borde(AppColors.primary, 2),
+        // Foco sutil: solo un borde turquesa suave. La etiqueta ya está arriba desde el inicio,
+        // así que al enfocar no se mueve ni cambia de tamaño; tampoco cambia el relleno.
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        focusedBorder: _borde(AppColors.foco, 1.5),
         errorBorder: _borde(AppColors.error, 1.4),
-        focusedErrorBorder: _borde(AppColors.error, 2),
+        focusedErrorBorder: _borde(AppColors.error, 1.5),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
@@ -213,6 +215,23 @@ abstract final class AppTheme {
           (e) => e.contains(WidgetState.selected) ? AppColors.primary : AppColors.track,
         ),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+      ),
+      // Selector segmentado: la opción activa va rellena en turquesa con texto blanco; la
+      // inactiva, en blanco con borde. Se distingue a primera vista.
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (e) => e.contains(WidgetState.selected) ? AppColors.primary : AppColors.surface,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (e) => e.contains(WidgetState.selected) ? Colors.white : AppColors.textPrimary,
+          ),
+          side: const WidgetStatePropertyAll(BorderSide(color: AppColors.bordeControl)),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.boton)),
+          ),
+        ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surface,

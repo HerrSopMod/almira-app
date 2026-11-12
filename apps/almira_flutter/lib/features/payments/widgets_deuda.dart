@@ -7,6 +7,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/tributo.dart';
 import '../../shared/models/modelos.dart';
 import 'pagos_logica.dart';
 
@@ -41,11 +42,13 @@ class FilaDeuda extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          IconoTributo(deuda.tipo, lado: 36),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(deuda.concepto, style: textos.titleMedium),
+                Text(deuda.tipo.nombre, style: textos.titleMedium),
                 if (deuda.periodo.isNotEmpty) Text(deuda.periodo, style: textos.bodyMedium),
                 const SizedBox(height: AppSpacing.sm),
                 Text(vencimientoDe(deuda, hoy), style: textos.bodySmall),

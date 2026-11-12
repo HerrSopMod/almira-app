@@ -28,15 +28,23 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
   final _entrada = TextEditingController();
   final _desplazamiento = ScrollController();
   bool _lejosDelFinal = false;
+  final _foco = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _desplazamiento.addListener(_vigilarDesplazamiento);
+    _foco.addListener(_alEnfocar);
+  }
+
+  // Al abrirse el teclado, la conversación baja hasta el último mensaje.
+  void _alEnfocar() {
+    if (_foco.hasFocus) Future<void>.delayed(const Duration(milliseconds: 300), _alFinal);
   }
 
   @override
   void dispose() {
+    _foco.dispose();
     _entrada.dispose();
     _desplazamiento.dispose();
     super.dispose();
@@ -167,7 +175,7 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
                   ],
                 ),
               ),
-              _BarraEntrada(controlador: _entrada, enviando: chat.enviando, alEnviar: _enviar),
+              _BarraEntrada(controlador: _entrada, foco: _foco, enviando: chat.enviando, alEnviar: _enviar),
             ],
           ),
           if (_lejosDelFinal)
@@ -185,9 +193,10 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
 /// Barra para escribir: campo redondeado de hasta 4 líneas y botón de enviar circular, que se
 /// apaga si no hay texto o se espera una respuesta.
 class _BarraEntrada extends StatelessWidget {
-  const _BarraEntrada({required this.controlador, required this.enviando, required this.alEnviar});
+  const _BarraEntrada({required this.controlador, required this.foco, required this.enviando, required this.alEnviar});
 
   final TextEditingController controlador;
+  final FocusNode foco;
   final bool enviando;
   final void Function(String texto) alEnviar;
 
@@ -214,6 +223,7 @@ class _BarraEntrada extends StatelessWidget {
                   label: 'Escribe tu pregunta',
                   child: TextField(
                     controller: controlador,
+                    focusNode: foco,
                     minLines: 1,
                     maxLines: 4,
                     maxLength: _maximoPregunta,
@@ -229,7 +239,7 @@ class _BarraEntrada extends StatelessWidget {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
                       border: _borde(),
                       enabledBorder: _borde(),
-                      focusedBorder: _borde(AppColors.primary, 1.6),
+                      focusedBorder: _borde(AppColors.foco, 1.5),
                     ),
                   ),
                 ),

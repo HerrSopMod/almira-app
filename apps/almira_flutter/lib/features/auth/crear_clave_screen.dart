@@ -6,6 +6,7 @@ import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/scroll_formulario.dart';
 import '../../shared/services/proveedores.dart';
 
 const _claveMinima = 8;
@@ -61,8 +62,7 @@ class _CrearClaveScreenState extends ConsumerState<CrearClaveScreen> {
         appBar: AppBar(title: const Text('Crea tu clave web')),
         body: SafeArea(
           top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.margen),
+          child: ScrollFormulario(
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
@@ -119,7 +119,7 @@ class _CrearClaveScreenState extends ConsumerState<CrearClaveScreen> {
                             : const Text('Guardar clave'),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      TextButton(onPressed: _ocupado ? null : _seguir, child: const Text('Ahora no')),
+                      OutlinedButton(onPressed: _ocupado ? null : _seguir, child: const Text('Ahora no')),
                     ],
                   ),
                 ),

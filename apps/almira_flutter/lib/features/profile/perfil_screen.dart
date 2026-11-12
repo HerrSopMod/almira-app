@@ -7,6 +7,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
+import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pagos_logica.dart';
@@ -17,30 +18,27 @@ class PerfilScreen extends ConsumerWidget {
   const PerfilScreen({super.key});
 
   Future<void> _cerrarSesion(BuildContext context, WidgetRef ref) async {
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder: (dialogo) => AlertDialog(
-        title: const Text('¿Cerrar sesión?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogo, false), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogo, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Cerrar sesión'),
-          ),
-        ],
-      ),
+    final acepta = await confirmar(
+      context,
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a ingresar para ver tu información.',
+      textoConfirmar: 'Cerrar sesión',
+      destructivo: true,
     );
     // Al cerrarse, la app vuelve sola al ingreso.
-    if (confirmar == true) await ref.read(sesionProvider.notifier).cerrarSesion();
+    if (acepta) await ref.read(sesionProvider.notifier).cerrarSesion();
   }
 
   Future<void> _crearClave(BuildContext context, WidgetRef ref) async {
-    final clave = await showDialog<String>(context: context, builder: (_) => const _DialogoClave());
+    final clave = await showDialog<String>(
+      context: context,
+      builder: (_) => const _DialogoClave(),
+    );
     if (clave == null || !context.mounted) return;
     try {
       await ref.read(servicioAuthProvider).crearClaveWeb(clave);
-      if (context.mounted) mostrarMensaje(context, 'Tu clave web quedó guardada.');
+      if (context.mounted)
+        mostrarMensaje(context, 'Tu clave web quedó guardada.');
     } catch (error) {
       if (context.mounted) mostrarMensaje(context, ErrorApp.de(error).detalle);
     }
@@ -70,7 +68,12 @@ class PerfilScreen extends ConsumerWidget {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.lg, AppSpacing.margen, AppSpacing.xl),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.margen,
+            AppSpacing.lg,
+            AppSpacing.margen,
+            AppSpacing.xl,
+          ),
           children: [
             Row(
               children: [
@@ -78,13 +81,21 @@ class PerfilScreen extends ConsumerWidget {
                   width: 52,
                   height: 52,
                   alignment: Alignment.center,
-                  decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primarySoft,
+                    shape: BoxShape.circle,
+                  ),
                   child: nombre == null
-                      ? const Icon(Icons.person_outline_rounded, color: AppColors.primaryDark)
+                      ? const Icon(
+                          Icons.person_outline_rounded,
+                          color: AppColors.primaryDark,
+                        )
                       : ExcludeSemantics(
                           child: Text(
                             iniciales(nombre),
-                            style: textos.titleMedium!.copyWith(color: AppColors.primaryDark),
+                            style: textos.titleMedium!.copyWith(
+                              color: AppColors.primaryDark,
+                            ),
                           ),
                         ),
                 ),
@@ -117,7 +128,9 @@ class PerfilScreen extends ConsumerWidget {
                   ),
                 _Opcion(
                   icono: Icons.badge_outlined,
-                  titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
+                  titulo: vecino == null
+                      ? 'Vincular cuponera'
+                      : 'Vincular otra cuponera',
                   alTocar: () => context.push(Rutas.vincular),
                 ),
                 _Opcion(
@@ -162,7 +175,9 @@ class PerfilScreen extends ConsumerWidget {
                 _Opcion(
                   icono: Icons.receipt_long_outlined,
                   titulo: 'Constancias de pago',
-                  alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
+                  alTocar: () => context.go(
+                    '${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}',
+                  ),
                 ),
                 _Opcion(
                   icono: Icons.support_agent_rounded,
@@ -171,12 +186,15 @@ class PerfilScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Center(
-              child: TextButton.icon(
-                onPressed: () => _cerrarSesion(context, ref),
-                icon: const Icon(Icons.logout_rounded, size: 20),
-                label: Text(esDemo ? 'Salir de la demostración' : 'Cerrar sesión'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            OutlinedButton.icon(
+              onPressed: () => _cerrarSesion(context, ref),
+              icon: const Icon(Icons.logout_rounded, size: 20),
+              label: Text(
+                esDemo ? 'Salir de la demostración' : 'Cerrar sesión',
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                side: const BorderSide(color: AppColors.error, width: 1.2),
               ),
             ),
           ],
@@ -195,28 +213,36 @@ class _Grupo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.sm),
-              child: Semantics(
-                header: true,
-                child: Text(titulo, style: Theme.of(context).textTheme.labelMedium),
-              ),
-            ),
-            Tarjeta(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-              child: Column(children: hijos),
-            ),
-          ],
+    padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            left: AppSpacing.xs,
+            bottom: AppSpacing.sm,
+          ),
+          child: Semantics(
+            header: true,
+            child: Text(titulo, style: Theme.of(context).textTheme.labelMedium),
+          ),
         ),
-      );
+        Tarjeta(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Column(children: hijos),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Opcion extends StatelessWidget {
-  const _Opcion({required this.icono, required this.titulo, required this.alTocar, this.detalle});
+  const _Opcion({
+    required this.icono,
+    required this.titulo,
+    required this.alTocar,
+    this.detalle,
+  });
 
   final IconData icono;
   final String titulo;
@@ -225,12 +251,15 @@ class _Opcion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        leading: Icon(icono),
-        title: Text(titulo),
-        subtitle: detalle == null ? null : Text(detalle!),
-        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-        onTap: alTocar,
-      );
+    leading: Icon(icono),
+    title: Text(titulo),
+    subtitle: detalle == null ? null : Text(detalle!),
+    trailing: const Icon(
+      Icons.chevron_right_rounded,
+      color: AppColors.textSecondary,
+    ),
+    onTap: alTocar,
+  );
 }
 
 /// Pide la clave web dos veces. La clave no se guarda en el teléfono.
@@ -255,45 +284,48 @@ class _DialogoClaveState extends State<_DialogoClave> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-        title: const Text('Clave web'),
-        content: Form(
-          key: _formulario,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _clave,
-                obscureText: !_ver,
-                decoration: InputDecoration(
-                  labelText: 'Nueva clave',
-                  helperText: 'Mínimo 8 caracteres.',
-                  suffixIcon: IconButton(
-                    tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
-                    icon: Icon(_ver ? Icons.visibility_off_rounded : Icons.visibility_rounded),
-                    onPressed: () => setState(() => _ver = !_ver),
-                  ),
+  Widget build(BuildContext context) => AppConfirmDialog(
+    titulo: 'Clave web',
+    textoConfirmar: 'Guardar',
+    alConfirmar: () {
+      if (_formulario.currentState!.validate())
+        Navigator.pop(context, _clave.text);
+    },
+    alCancelar: () => Navigator.pop(context),
+    contenido: Form(
+      key: _formulario,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _clave,
+            obscureText: !_ver,
+            decoration: InputDecoration(
+              labelText: 'Nueva clave',
+              helperText: 'Mínimo 8 caracteres.',
+              suffixIcon: IconButton(
+                tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
+                icon: Icon(
+                  _ver
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
                 ),
-                validator: (v) => (v ?? '').length >= 8 ? null : 'Usa al menos 8 caracteres.',
+                onPressed: () => setState(() => _ver = !_ver),
               ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _repetir,
-                obscureText: !_ver,
-                decoration: const InputDecoration(labelText: 'Repite tu clave'),
-                validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
-              ),
-            ],
+            ),
+            validator: (v) =>
+                (v ?? '').length >= 8 ? null : 'Usa al menos 8 caracteres.',
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () {
-              if (_formulario.currentState!.validate()) Navigator.pop(context, _clave.text);
-            },
-            child: const Text('Guardar'),
+          const SizedBox(height: AppSpacing.md),
+          TextFormField(
+            controller: _repetir,
+            obscureText: !_ver,
+            decoration: const InputDecoration(labelText: 'Repite tu clave'),
+            validator: (v) =>
+                v == _clave.text ? null : 'Las claves no coinciden.',
           ),
         ],
-      );
+      ),
+    ),
+  );
 }

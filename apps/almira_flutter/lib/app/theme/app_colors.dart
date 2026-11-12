@@ -30,6 +30,28 @@ abstract final class AppColors {
   static const border = Color(0xFFE2EAEA);
   static const track = Color(0xFFE6EFF0);
 
+  /// Borde de un campo con el foco: un turquesa suave, sin cambiar el relleno.
+  static const foco = menta;
+
+  /// Borde de controles que deben distinguirse a primera vista (chips, selector): contraste
+  /// 3,4:1 sobre blanco.
+  static const bordeControl = Color(0xFF7F8E92);
+
+  /// Colores de acento de los accesos rápidos del inicio. Solo van en el ícono y su círculo
+  /// (al 12 %). Contraste del ícono sobre su círculo: 3:1 o más.
+  static const accesoPagar = Color(0xFF15803D);
+  static const accesoEstado = Color(0xFF2563EB);
+  static const accesoCuponera = Color(0xFF7C3AED);
+  static const accesoHistorial = Color(0xFFB45309);
+
+  /// Un color por tributo, distinto de los de los accesos rápidos. Impuesto predial: magenta;
+  /// arbitrios (tasas por servicios): cian; multas: ladrillo; cobranza coactiva: pizarra.
+  static const tributoPredial = Color(0xFFBE185D);
+  static const tributoArbitrios = Color(0xFF0E7490);
+  static const tributoMulta = Color(0xFF9A3412);
+  static const tributoCoactivo = Color(0xFF475569);
+  static const tributoOtros = Color(0xFF6B7280);
+
   static const success = Color(0xFF1F7A50);
   static const successSoft = Color(0xFFEAF6F0);
   static const warning = Color(0xFF8A5E00);

@@ -9,6 +9,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/filtros.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
@@ -70,10 +71,9 @@ class AvanceFisico extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.pastilla),
           child: LinearProgressIndicator(
             value: pct / 100,
-            minHeight: 6,
+            minHeight: 8,
             color: colorObra(obra),
-            semanticsLabel: 'Avance físico',
-            semanticsValue: '${pct.round()} por ciento',
+            semanticsLabel: 'Avance físico ${pct.round()} por ciento',
           ),
         ),
       ],
@@ -201,15 +201,13 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
                   ];
                 }
                 return [
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: [
+                  GrupoFiltros(
+                    chips: [
                       for (final filtro in FiltroObra.values)
-                        ChoiceChip(
-                          label: Text(filtro.etiqueta),
-                          selected: _filtro == filtro,
-                          onSelected: (_) => setState(() {
+                        ChipFiltro(
+                          texto: filtro.etiqueta,
+                          activo: _filtro == filtro,
+                          alTocar: () => setState(() {
                             _filtro = filtro;
                             _seleccionada = null;
                           }),
@@ -292,14 +290,11 @@ class _TarjetaObra extends StatelessWidget {
             if (alVerEnMapa != null)
               Align(
                 alignment: Alignment.centerLeft,
-                child: TextButton.icon(
+                child: OutlinedButton.icon(
                   onPressed: alVerEnMapa,
                   icon: const Icon(Icons.place_outlined, size: 18),
                   label: const Text('Ver en el mapa'),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    textStyle: textos.labelMedium,
-                  ),
+                  style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44), textStyle: textos.labelMedium),
                 ),
               )
             else ...[

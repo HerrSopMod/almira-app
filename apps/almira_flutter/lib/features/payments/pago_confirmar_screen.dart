@@ -419,7 +419,7 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
               child: const Text('Ver estado de cuenta'),
             ),
             espacioChico,
-            TextButton(onPressed: () => context.go(Rutas.inicio), child: const Text('Volver al inicio')),
+            OutlinedButton(onPressed: () => context.go(Rutas.inicio), child: const Text('Volver al inicio')),
           ],
         ),
       ),

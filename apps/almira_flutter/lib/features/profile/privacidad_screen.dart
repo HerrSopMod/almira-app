@@ -65,9 +65,9 @@ class _PrivacidadScreenState extends ConsumerState<PrivacidadScreen> {
             ),
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton(
+              child: OutlinedButton(
                 onPressed: () => mostrarInformacionPrivacidad(context),
-                style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                 child: const Text('Leer la información completa'),
               ),
             ),

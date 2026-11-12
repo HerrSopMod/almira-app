@@ -304,27 +304,34 @@ class _TarjetaObra extends StatelessWidget {
   }
 }
 
-/// Accesos rápidos a lo que más se usa, en dos filas para que quepan con letra grande.
+/// Accesos rápidos a lo que más se usa, en dos filas. Cada uno lleva un círculo tintado (su
+/// color al 12 %) con el ícono en su color; la tarjeta sigue blanca y de borde suave.
 class _Accesos extends StatelessWidget {
   const _Accesos();
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    Widget acceso(IconData icono, String texto, String ruta) => Expanded(
+    Widget acceso(IconData icono, Color color, String texto, String ruta) => Expanded(
           child: Tarjeta(
             onTap: () => context.go(ruta),
             semantica: texto,
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm),
             child: Column(
               children: [
-                CajaIcono(icono, lado: 36),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
+                  child: Icon(icono, size: 22, color: color),
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  texto,
-                  style: textos.titleSmall,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
+                SizedBox(
+                  width: double.infinity,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(texto, style: textos.titleSmall!.copyWith(fontSize: 15), maxLines: 1, softWrap: false),
+                  ),
                 ),
               ],
             ),
@@ -339,13 +346,13 @@ class _Accesos extends StatelessWidget {
     return Column(
       children: [
         fila(
-          acceso(Icons.lock_outline_rounded, 'Pagar en línea', Rutas.pagoEnLinea),
-          acceso(Icons.receipt_long_outlined, 'Estado de cuenta', Rutas.estadoCuenta),
+          acceso(Icons.lock_outline_rounded, AppColors.accesoPagar, 'Pagar en línea', Rutas.pagoEnLinea),
+          acceso(Icons.receipt_long_outlined, AppColors.accesoEstado, 'Estado de cuenta', Rutas.estadoCuenta),
         ),
         const SizedBox(height: AppSpacing.sm),
         fila(
-          acceso(Icons.description_outlined, 'Cuponera', Rutas.cuponera),
-          acceso(Icons.history_rounded, 'Historial', Rutas.estadoCuenta),
+          acceso(Icons.description_outlined, AppColors.accesoCuponera, 'Cuponera', Rutas.cuponera),
+          acceso(Icons.history_rounded, AppColors.accesoHistorial, 'Historial', Rutas.estadoCuenta),
         ),
       ],
     );

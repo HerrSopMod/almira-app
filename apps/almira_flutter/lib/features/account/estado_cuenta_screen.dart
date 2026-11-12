@@ -8,6 +8,8 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/filtros.dart';
+import '../../core/widgets/tributo.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'estado_cuenta_logica.dart';
@@ -125,15 +127,34 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
         espacio,
         const VistaVacia(icono: Icons.receipt_long_outlined, titulo: 'Aún no tienes tributos registrados'),
       ] else ...[
-        for (final tributo in estado.tributos) ...[
+        // Impuestos y tasas son tributos distintos: se agrupan con su propio encabezado.
+        for (final grupo in _gruposDeTributos(estado.tributos)) ...[
           espacioGrande,
-          TituloSeccion(tributo.titulo),
-          espacioChico,
-          for (final anio in tributo.anios) ...[
-            _TablaAnio(anio: anio),
+          Semantics(
+            header: true,
+            child: Text(grupo.titulo, style: textos.titleLarge),
+          ),
+          for (final tributo in grupo.tributos) ...[
+            espacio,
+            Row(
+              children: [
+                IconoTributo(tributo.tipo, lado: 32),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    tributo.tipo.nombre,
+                    style: textos.titleMedium!.copyWith(color: tributo.tipo.color),
+                  ),
+                ),
+              ],
+            ),
             espacioChico,
+            for (final anio in tributo.anios) ...[
+              _TablaAnio(anio: anio),
+              espacioChico,
+            ],
+            _FilaResumen('Total acumulado', tributo.acumulado, tono: Tono.primario),
           ],
-          _FilaResumen('Total acumulado', tributo.acumulado, tono: Tono.primario),
         ],
         espacioGrande,
         _FilaResumen('Total general', estado.general, tono: Tono.neutro, grande: true),
@@ -156,34 +177,25 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
     final total = lista.fold<double>(0, (s, p) => s + p.pago.monto);
 
     return [
-      Wrap(
-        spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
-        children: [
-          ChoiceChip(
-            label: const Text('Todos los años'),
-            selected: _anio == null,
-            onSelected: (_) => setState(() => _anio = null),
-          ),
+      GrupoFiltros(
+        titulo: 'Año',
+        chips: [
+          ChipFiltro(texto: 'Todos', activo: _anio == null, alTocar: () => setState(() => _anio = null)),
           for (final a in aniosConPago)
-            ChoiceChip(label: Text('$a'), selected: _anio == a, onSelected: (_) => setState(() => _anio = a)),
+            ChipFiltro(texto: '$a', activo: _anio == a, alTocar: () => setState(() => _anio = a)),
         ],
       ),
-      espacioChico,
-      Wrap(
-        spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
-        children: [
-          ChoiceChip(
-            label: const Text('Todos los tributos'),
-            selected: _tributo == null,
-            onSelected: (_) => setState(() => _tributo = null),
-          ),
+      espacio,
+      GrupoFiltros(
+        titulo: 'Tributo',
+        chips: [
+          ChipFiltro(texto: 'Todos', activo: _tributo == null, alTocar: () => setState(() => _tributo = null)),
           for (final t in tributos)
-            ChoiceChip(
-              label: Text(t.etiqueta),
-              selected: _tributo == t,
-              onSelected: (_) => setState(() => _tributo = t),
+            ChipFiltro(
+              texto: t.nombreCorto,
+              icono: t.icono,
+              activo: _tributo == t,
+              alTocar: () => setState(() => _tributo = t),
             ),
         ],
       ),
@@ -191,13 +203,20 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
       if (lista.isEmpty)
         const VistaVacia(icono: Icons.receipt_long_outlined, titulo: 'No hay pagos con ese filtro')
       else ...[
-        Row(
-          children: [
-            Expanded(child: Text(plural(lista.length, 'pago', 'pagos'), style: textos.bodyMedium)),
-            Text(soles(total), style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares)),
-          ],
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.primarySoft,
+            borderRadius: BorderRadius.circular(AppRadius.campo),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: Text(plural(lista.length, 'pago', 'pagos'), style: textos.titleSmall)),
+              Text(soles(total), style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares)),
+            ],
+          ),
         ),
-        espacioChico,
+        const SizedBox(height: AppSpacing.md),
         Tarjeta(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
           child: Column(
@@ -229,19 +248,27 @@ class _FilaHistorial extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (d != null) ...[IconoTributo(d.tipo, lado: 36), const SizedBox(width: AppSpacing.md)],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(d?.concepto ?? 'Pago', style: textos.titleSmall),
-                if (d != null) Text(etiquetaPeriodo(d) + ' ' + d.anioTributo.toString(), style: textos.bodyMedium),
+                Text(
+                  d?.tipo.nombre ?? 'Pago',
+                  style: textos.titleSmall!.copyWith(fontSize: 15),
+                ),
+                if (d != null)
+                  Text(
+                    _periodoConAnio(d),
+                    style: textos.bodySmall!.copyWith(fontSize: 13),
+                  ),
                 Text(
                   [
                     if (fecha != null) fechaCorta(fecha),
                     pago.pago.etiquetaMedio,
                     if (pago.pago.referencia != null) pago.pago.referencia!,
                   ].join(' · '),
-                  style: textos.bodySmall,
+                  style: textos.bodySmall!.copyWith(fontSize: 13),
                 ),
               ],
             ),
@@ -249,7 +276,8 @@ class _FilaHistorial extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Text(
             soles(pago.pago.monto),
-            style: textos.titleSmall!.copyWith(fontFeatures: cifrasTabulares),
+            textAlign: TextAlign.right,
+            style: textos.titleSmall!.copyWith(fontSize: 15, fontFeatures: cifrasTabulares),
           ),
         ],
       ),
@@ -430,4 +458,29 @@ class _TablaAnio extends StatelessWidget {
       ),
     );
   }
+}
+
+class _GrupoDeTributos {
+  const _GrupoDeTributos(this.titulo, this.tributos);
+
+  final String titulo;
+  final List<GrupoTributo> tributos;
+}
+
+/// Impuestos (predial), tasas (arbitrios) y, si los hay, otros cobros (multas, coactivo…).
+List<_GrupoDeTributos> _gruposDeTributos(List<GrupoTributo> tributos) {
+  final impuestos = [for (final t in tributos) if (t.tipo == TipoDeuda.predial) t];
+  final tasas = [for (final t in tributos) if (t.tipo.esTasa) t];
+  final otros = [for (final t in tributos) if (t.tipo != TipoDeuda.predial && !t.tipo.esTasa) t];
+  return [
+    if (impuestos.isNotEmpty) _GrupoDeTributos('Impuestos', impuestos),
+    if (tasas.isNotEmpty) _GrupoDeTributos('Tasas (arbitrios)', tasas),
+    if (otros.isNotEmpty) _GrupoDeTributos('Otros cobros', otros),
+  ];
+}
+
+/// «Trimestre 02 2026»; si el periodo ya trae el año («4.ª cuota 2026»), no se repite.
+String _periodoConAnio(Deuda d) {
+  final periodo = etiquetaPeriodo(d);
+  return periodo.contains('${d.anioTributo}') ? periodo : '$periodo ${d.anioTributo}';
 }

@@ -293,10 +293,11 @@ class _ErrorFoto extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
               textAlign: TextAlign.center,
             ),
-            TextButton.icon(
+            OutlinedButton.icon(
               onPressed: alReintentar,
               icon: const Icon(Icons.refresh_rounded, size: 20),
               label: const Text('Reintentar'),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
             ),
           ],
         ),

@@ -7,6 +7,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/filtros.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'pagos_logica.dart';
@@ -80,15 +81,13 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
               ],
             ),
             espacio,
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
+            GrupoFiltros(
+              chips: [
                 for (final filtro in FiltroDeuda.values)
-                  ChoiceChip(
-                    label: Text(filtro.etiqueta),
-                    selected: _filtro == filtro,
-                    onSelected: (_) => setState(() => _filtro = filtro),
+                  ChipFiltro(
+                    texto: filtro.etiqueta,
+                    activo: _filtro == filtro,
+                    alTocar: () => setState(() => _filtro = filtro),
                   ),
               ],
             ),

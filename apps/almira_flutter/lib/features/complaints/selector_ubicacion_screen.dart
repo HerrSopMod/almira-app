@@ -114,9 +114,9 @@ class _SelectorUbicacionScreenState extends State<SelectorUbicacionScreen> {
                         _falla!.mensaje,
                         tono: Tono.aviso,
                         accion: _falla!.ofrecerAjustes
-                            ? TextButton(
+                            ? OutlinedButton(
                                 onPressed: abrirAjustesDeUbicacion,
-                                style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                                 child: const Text('Abrir ajustes'),
                               )
                             : null,
