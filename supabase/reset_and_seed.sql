@@ -293,6 +293,17 @@ select d.municipalidad_id, d.vecino_id, d.id, d.pagos_aplicados,
 from public.deudas d join public.vecinos v on v.id = d.vecino_id join public.municipalidades m on m.id = v.municipalidad_id
 where m.slug = 'cercado-de-lima' and v.codigo_contribuyente = 'CER-0005' and d.estado = 'pagada' and d.pagos_aplicados > 0;
 
+-- DNI del equipo: cada integrante se registra con el DNI de su contribuyente.
+update public.vecinos v set dni = x.dni
+from (values
+  ('lince', 'LIN-0001', '73126351'),
+  ('pueblo-libre', 'PUL-0002', '71531911'),
+  ('la-victoria', 'LAV-0003', '71666641'),
+  ('miraflores', 'MIR-0004', '72019990'),
+  ('cercado-de-lima', 'CER-0005', '74931395')
+) as x(slug, codigo, dni), public.municipalidades m
+where m.id = v.municipalidad_id and m.slug = x.slug and v.codigo_contribuyente = x.codigo;
+
 -- Número de cuponera (dato privado, distinto del código de contribuyente) de cada contribuyente.
 update public.vecinos v set numero_cuponera = x.cuponera
 from (values
