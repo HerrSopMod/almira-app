@@ -5,15 +5,8 @@ import '../../shared/services/proveedores.dart';
 import '../complaints/reclamos_logica.dart';
 import '../payments/pagos_logica.dart';
 
-/// El asistente no usa IA: responde con reglas fijas sobre los datos que la
-/// app ya tiene del vecino. No inventa deudas, expedientes ni decisiones.
-const preguntasSugeridas = [
-  '¿Cuánto debo?',
-  '¿Cuándo vence?',
-  '¿Cómo pago?',
-  '¿Cómo va mi reclamo?',
-  '¿Qué obras hay?',
-];
+/// Respaldo del asistente cuando no hay conexión con el servicio: reglas fijas sobre los datos
+/// que la app ya tiene del vecino. No inventa deudas, expedientes ni decisiones.
 
 class Respuesta {
   const Respuesta(this.texto, {this.accion, this.ruta});
@@ -24,10 +17,6 @@ class Respuesta {
   final String? accion;
   final String? ruta;
 }
-
-const saludoAsistente =
-    'Hola. Respondo preguntas sobre tus tributos, reclamos y obras con los datos de tu cuenta. '
-    'Es orientación: las decisiones son de tu municipalidad.';
 
 Respuesta responder(String pregunta, VistaMunicipal v, DateTime hoy) {
   final texto = normalizar(pregunta);
@@ -79,16 +68,37 @@ Respuesta responder(String pregunta, VistaMunicipal v, DateTime hoy) {
     return Respuesta(partes.join(' '), accion: 'Ver mis obligaciones', ruta: Rutas.pagos);
   }
 
-  if (tiene(r'como pag|donde pag|pagar|pago')) {
-    final url = v.municipalidad?.urlPago;
+  if (tiene(r'ultimo pago|ultimos pagos|pague|pagos hech|historial')) {
+    final pagos = v.pagos.where((p) => p.estado == EstadoPago.confirmado && p.creadoEn != null).toList()
+      ..sort((a, b) => b.creadoEn!.compareTo(a.creadoEn!));
+    if (pagos.isEmpty) {
+      return const Respuesta('Aún no tienes pagos registrados en esta municipalidad.');
+    }
+    final p = pagos.first;
     return Respuesta(
-      url == null || url.isEmpty
-          ? 'Tu municipalidad aún no tiene un portal de pago enlazado en Almira. '
-              'Puedes pagar en sus canales habituales.'
-          : 'Se paga en el portal de tu municipalidad. En Pagar eliges la obligación y te llevamos allí. '
-              'Almira no cobra ni confirma el pago.',
-      accion: 'Ir a Pagar',
-      ruta: Rutas.pagos,
+      'Tu último pago fue de ${soles(p.monto)} el ${fechaLarga(p.creadoEn!)}, con ${p.etiquetaMedio}'
+      '${p.referencia == null ? '' : ' (operación ${p.referencia})'}.',
+      accion: 'Ver historial de pagos',
+      ruta: Rutas.estadoCuenta,
+    );
+  }
+
+  if (tiene(r'estado de cuenta|cuponera|liquidacion')) {
+    return Respuesta(
+      resumen.alDia
+          ? 'Tu estado de cuenta está al día: no tienes saldo pendiente.'
+          : 'Tu estado de cuenta tiene un saldo pendiente de ${soles(resumen.total)}.',
+      accion: 'Ver estado de cuenta',
+      ruta: Rutas.estadoCuenta,
+    );
+  }
+
+  if (tiene(r'como pag|donde pag|pagar|pago')) {
+    return const Respuesta(
+      'Entra a Pagar en línea, elige los periodos, escoge tarjeta o Yape y confirma. '
+      'Al terminar puedes descargar tu comprobante.',
+      accion: 'Pagar en línea',
+      ruta: Rutas.pagoEnLinea,
     );
   }
 

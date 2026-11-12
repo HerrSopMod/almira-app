@@ -39,6 +39,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo_almira.png
+    - assets/bot_avatar.svg
   fonts:
     - family: Inter
       fonts:

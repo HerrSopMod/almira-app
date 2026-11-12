@@ -55,7 +55,7 @@ Supabase, el mismo que usa el repo (`supabase/migrations`):
 | Pago en línea | Pestañas por tributo, medio de pago y confirmación en el servidor | No disponible, y lo dice |
 | Nuevo reclamo | Sube la foto y guarda en la base. La foto es obligatoria (lo exige la tabla) | Se guarda en el teléfono, con foto y ubicación. La foto es opcional |
 | Seguimiento | Foto desde Storage, mapa y plazo calculado | Igual, desde el teléfono |
-| Asistente | Reglas fijas sobre los datos de la cuenta. No es IA, y lo dice | Igual |
+| Asistente | Chat tipo mensajería con la función `asistente` de Supabase (Gemini), que lee solo los datos del propio vecino y recibe los totales ya calculados, sin DNI ni cuponera. Ver `supabase/functions/asistente/README.md` | Reglas fijas sobre los datos de la app |
 | Avisos | Lista los recordatorios recibidos y cambia el canal preferido | Igual, en el teléfono |
 | Atención | Muestra el teléfono de ayuda si la municipalidad lo publicó | Igual |
 

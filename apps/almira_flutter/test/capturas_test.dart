@@ -3,11 +3,14 @@
 //
 // Cada corrida vuelve a escribir las capturas en docs/capturas/rediseno/ (no se comparan píxel
 // a píxel: sirven para revisar a simple vista). Si una pantalla se desborda, el test falla.
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:almira_flutter/app/app.dart';
 import 'package:almira_flutter/app/router.dart';
+import 'package:almira_flutter/features/assistant/chat_modelo.dart';
+import 'package:almira_flutter/features/assistant/servicio_asistente.dart';
 import 'package:almira_flutter/features/auth/servicio_auth.dart';
 import 'package:almira_flutter/shared/services/proveedores.dart';
 import 'package:almira_flutter/shared/services/repositorio_demo.dart';
@@ -156,4 +159,95 @@ void main() {
     await tester.pumpAndSettle();
     await _capturar(tester, 'registro-360x640');
   });
+
+  // --- Chat con el asistente ---
+  const ingresoJson =
+      '{"municipalidadId":"demo-lince","consentimientos":{"asistenteIa":false,"avisosWhatsapp":false,"avisosSms":false},'
+      '"consentimientoAceptadoEn":"2026-11-11T10:00:00.000Z"}';
+
+  Widget appChat(SharedPreferences p, ServicioAsistente servicio) => ProviderScope(
+        overrides: [
+          preferenciasProvider.overrideWithValue(p),
+          repositorioProvider.overrideWithValue(RepositorioDemo(p, reloj: () => _hoy)),
+          servicioAuthProvider.overrideWithValue(ServicioAuthDemo(p)),
+          relojProvider.overrideWithValue(() => _hoy),
+          servicioAsistenteProvider.overrideWithValue(servicio),
+        ],
+        child: const AlmiraApp(),
+      );
+
+  Future<SharedPreferences> prefsConSesion() async {
+    SharedPreferences.setMockInitialValues({'demo.sesion': true, 'demo.ingreso': ingresoJson});
+    return SharedPreferences.getInstance();
+  }
+
+  Future<void> abrirChat(WidgetTester tester) async {
+    await tester.pumpAndSettle();
+    ProviderScope.containerOf(tester.element(find.byType(AlmiraApp))).read(routerProvider).go(Rutas.asistente);
+    await tester.pumpAndSettle();
+  }
+
+  for (final (etiqueta, ancho, alto, escala) in tamanos) {
+    testWidgets('chat del asistente $etiqueta', (tester) async {
+      _pantalla(tester, ancho, alto, escala);
+      var turno = 0;
+      final servicio = _Respondedor((mensaje, _) async {
+        turno++;
+        return switch (turno) {
+          1 => const RespuestaAsistente(
+              'Tu total pendiente es S/ 120.50 en 2 obligaciones. Una está vencida desde el 15 de octubre '
+              'y la otra vence el 30 de noviembre.',
+              acciones: [
+                AccionChat('Pagar en línea', Rutas.pagoEnLinea),
+                AccionChat('Ver estado de cuenta', Rutas.estadoCuenta),
+              ],
+            ),
+          2 => const RespuestaAsistente('Tu último pago fue de S/ 186.40 el 28 de octubre de 2026, con Yape.'),
+          _ => const RespuestaAsistente(
+              'Ahora mismo no puedo responderte. Revisa tu conexión e inténtalo de nuevo.',
+              fallo: true,
+            ),
+        };
+      });
+      await tester.pumpWidget(appChat(await prefsConSesion(), servicio));
+      await abrirChat(tester);
+      await _capturar(tester, 'chat-bienvenida-$etiqueta');
+
+      await tester.tap(find.text('¿Cuánto debo?'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Mi último pago');
+      await tester.pump();
+      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Gracias, ¿y cuándo vence lo que falta?');
+      await tester.pump();
+      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.pumpAndSettle();
+      await _capturar(tester, 'chat-conversacion-$etiqueta');
+    });
+
+    testWidgets('chat escribiendo $etiqueta', (tester) async {
+      _pantalla(tester, ancho, alto, escala);
+      final espera = Completer<RespuestaAsistente>();
+      await tester.pumpWidget(appChat(await prefsConSesion(), _Respondedor((_, _) => espera.future)));
+      await abrirChat(tester);
+      await tester.tap(find.text('¿Cómo pago?'));
+      await tester.pump(const Duration(milliseconds: 450));
+      expect(tester.takeException(), isNull);
+      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/chat-escribiendo-$etiqueta.png'));
+      espera.complete(const RespuestaAsistente('Listo.'));
+      await tester.pumpAndSettle();
+    });
+  }
+}
+
+/// Asistente de mentira para las capturas.
+class _Respondedor implements ServicioAsistente {
+  _Respondedor(this._responder);
+
+  final Future<RespuestaAsistente> Function(String mensaje, List<MensajeChat> historial) _responder;
+
+  @override
+  Future<RespuestaAsistente> preguntar(String mensaje, List<MensajeChat> historial) =>
+      _responder(mensaje, historial);
 }

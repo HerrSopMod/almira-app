@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/app.dart';
 import 'app/theme/app_theme.dart';
 import 'core/config/env.dart';
+import 'features/assistant/servicio_asistente.dart';
 import 'features/auth/servicio_auth.dart';
 import 'shared/services/proveedores.dart';
 import 'shared/services/repositorio.dart';
@@ -24,6 +25,7 @@ Future<void> main() async {
   final preferencias = await SharedPreferences.getInstance();
   final Repositorio repositorio;
   final ServicioAuth auth;
+  ServicioAsistente? asistente;
 
   if (Env.supabaseConfigurado) {
     await Supabase.initialize(
@@ -38,6 +40,8 @@ Future<void> main() async {
     final cliente = Supabase.instance.client;
     repositorio = RepositorioSupabase(cliente);
     auth = ServicioAuthSupabase(cliente);
+    // Con conexión con el servicio, el asistente responde con la función de Supabase.
+    asistente = ServicioAsistenteSupabase(cliente);
   } else {
     // Sin SUPABASE_URL ni SUPABASE_ANON_KEY: modo demostración, sin red.
     repositorio = RepositorioDemo(preferencias);
@@ -50,6 +54,7 @@ Future<void> main() async {
         preferenciasProvider.overrideWithValue(preferencias),
         repositorioProvider.overrideWithValue(repositorio),
         servicioAuthProvider.overrideWithValue(auth),
+        if (asistente != null) servicioAsistenteProvider.overrideWithValue(asistente),
       ],
       child: const AlmiraApp(),
     ),
