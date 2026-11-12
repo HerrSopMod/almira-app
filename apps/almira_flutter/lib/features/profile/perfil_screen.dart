@@ -11,6 +11,7 @@ import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pagos_logica.dart';
+import 'whatsapp_opcion.dart';
 
 /// Mi perfil: cabecera compacta y opciones agrupadas. Solo muestra el nombre
 /// y el código de contribuyente; nunca el DNI ni el teléfono.
@@ -156,6 +157,8 @@ class PerfilScreen extends ConsumerWidget {
                   titulo: 'Avisos y canales',
                   alTocar: () => context.push(Rutas.avisos),
                 ),
+                // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
+                if (!esDemo && vecino != null) const OpcionWhatsapp(),
                 _Opcion(
                   icono: Icons.shield_outlined,
                   titulo: 'Privacidad',

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/errors/error_app.dart';
 import '../models/modelos.dart';
+import '../models/preferencia_whatsapp.dart';
 import 'datos_demo.dart';
 import 'repositorio.dart';
 
@@ -141,6 +142,16 @@ class RepositorioDemo implements Repositorio {
 
   @override
   Future<bool> guardarCelular(String celular) async => true;
+
+  // Los recordatorios por WhatsApp necesitan la cuenta real: en modo demostración no hay nada que activar.
+  @override
+  Future<PreferenciaWhatsapp?> preferenciaWhatsapp() async => null;
+
+  @override
+  Future<ResultadoWhatsapp> activarWhatsapp(String celular) async => ResultadoWhatsapp.noSeEnvio;
+
+  @override
+  Future<void> desactivarWhatsapp() async {}
 
   @override
   Future<String> pagar(List<String> deudaIds, MedioPago medio) async =>

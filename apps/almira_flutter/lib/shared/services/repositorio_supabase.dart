@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/errors/error_app.dart';
 import '../models/modelos.dart';
+import '../models/preferencia_whatsapp.dart';
 import 'repositorio.dart';
 
 const _espera = Duration(seconds: 20);
@@ -169,6 +170,75 @@ class RepositorioSupabase implements Repositorio {
     try {
       final r = await _cliente.rpc('guardar_celular', params: {'p_celular': celular}).timeout(_espera);
       return r == true;
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
+  @override
+  Future<PreferenciaWhatsapp?> preferenciaWhatsapp() async {
+    try {
+      // La política RLS deja ver solo la fila propia.
+      final filas = await _cliente
+          .from('preferencias_notificacion')
+          .select('whatsapp_activo, whatsapp_numero')
+          .limit(1)
+          .timeout(_espera);
+      if (filas.isEmpty) return null;
+      final fila = filas.first;
+      return PreferenciaWhatsapp(
+        activo: fila['whatsapp_activo'] == true,
+        numero: fila['whatsapp_numero'] as String?,
+      );
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
+  @override
+  Future<ResultadoWhatsapp> activarWhatsapp(String celular) async {
+    try {
+      final guardado = await _cliente.rpc('activar_whatsapp', params: {
+        'p_numero': celular,
+        'p_version': versionConsentimientoWhatsapp,
+      }).timeout(_espera);
+      if (guardado == 'sin_vinculo') return ResultadoWhatsapp.sinVinculo;
+      if (guardado != 'ok') return ResultadoWhatsapp.noSeEnvio;
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+
+    // Preferencia guardada: ahora la función manda la bienvenida al número ya guardado.
+    ResultadoWhatsapp resultado;
+    try {
+      final respuesta = await _cliente.functions
+          .invoke('enviar-recordatorios', body: {'accion': 'bienvenida'}).timeout(const Duration(seconds: 30));
+      final datos = respuesta.data;
+      if (datos is Map && datos['enviado'] == true) return ResultadoWhatsapp.activado;
+      resultado = datos is Map && datos['motivo'] == 'limite' ? ResultadoWhatsapp.limite : ResultadoWhatsapp.noSeEnvio;
+    } on FunctionException catch (error) {
+      resultado = error.status == 429 ? ResultadoWhatsapp.limite : ResultadoWhatsapp.noSeEnvio;
+    } catch (error) {
+      await _apagarSinFallar();
+      throw ErrorApp.de(error);
+    }
+    // El mensaje no llegó: no se deja activo un número al que no se pudo escribir.
+    await _apagarSinFallar();
+    return resultado;
+  }
+
+  Future<void> _apagarSinFallar() async {
+    try {
+      await _cliente.rpc('desactivar_whatsapp').timeout(_espera);
+    } catch (_) {
+      // Si tampoco hay conexión para apagarlo, se corrige al reintentar.
+    }
+  }
+
+  @override
+  Future<void> desactivarWhatsapp() async {
+    try {
+      await _cliente.rpc('desactivar_whatsapp').timeout(_espera);
     } catch (error) {
       throw ErrorApp.de(error);
     }

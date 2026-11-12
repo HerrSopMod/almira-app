@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../models/modelos.dart';
+import '../models/preferencia_whatsapp.dart';
 
 /// Etapas del envío de un reclamo, para mostrar el progreso real.
 enum EtapaEnvio { subiendoFoto, guardando }
@@ -44,6 +45,16 @@ abstract class Repositorio {
   /// Guarda el celular de los avisos de la cuenta (9 dígitos). Devuelve false si la cuenta
   /// todavía no tiene un contribuyente vinculado.
   Future<bool> guardarCelular(String celular);
+
+  /// Estado de los recordatorios por WhatsApp de la cuenta, o null si nunca los configuró.
+  Future<PreferenciaWhatsapp?> preferenciaWhatsapp();
+
+  /// Guarda el número y el consentimiento y pide la bienvenida. Si el mensaje no llega, deja los
+  /// recordatorios apagados: no se activa un número al que no se pudo escribir.
+  Future<ResultadoWhatsapp> activarWhatsapp(String celular);
+
+  /// Apaga los recordatorios por WhatsApp.
+  Future<void> desactivarWhatsapp();
 
   /// Registra el pago de las deudas elegidas, con el medio indicado, y
   /// devuelve el número de operación. El servidor toma los montos de la base y
