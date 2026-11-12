@@ -416,3 +416,7 @@ enabled = true
 # La autoriza RECORDATORIOS_SECRETO, no un JWT de usuario.
 [functions.enviar-recordatorios]
 verify_jwt = false
+
+# Meta llama al webhook sin JWT: se valida la firma X-Hub-Signature-256 con WA_APP_SECRET.
+[functions.whatsapp-webhook]
+verify_jwt = false

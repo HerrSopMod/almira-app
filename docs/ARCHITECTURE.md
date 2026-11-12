@@ -173,16 +173,17 @@ El mapa es OpenStreetMap dibujado con Leaflet, sin API key (`docs/design/turques
 
 Límites: las teselas públicas de OpenStreetMap son para uso ligero; sirven para el prototipo, pero una app con mucho tráfico necesita un proveedor con clave. Las coordenadas de ejemplo se verificaron en OpenStreetMap (ver `MAPA.md`); en las obras por cuadras marcan el medio del tramo. El minimapa del reclamo usa el GPS solo para mostrar el punto; ese punto todavía no se guarda.
 
-## Recordatorios y SMS
+## Recordatorios por WhatsApp (opt-in)
 
-`supabase/functions/enviar-recordatorios` procesa los recordatorios con estado `programado`, canal `sms` y fecha vencida, y los envía con Twilio. Requiere `Authorization: Bearer <RECORDATORIOS_SECRETO>` y falla cerrada si el secreto no existe. Los secretos de Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` y `TWILIO_MESSAGING_SERVICE_SID` o `TWILIO_FROM`) se cargan con `supabase secrets set`, nunca en el repositorio.
+La persona los activa en Mi perfil (app Flutter): celular de 9 dígitos y una casilla de consentimiento con texto versionado. Se guardan en `preferencias_notificacion` (una fila por contribuyente, con el número en E.164, la fecha y la versión del consentimiento y la fecha de baja) y cada mensaje queda en `recordatorios_enviados`, con restricción única (contribuyente, tipo, periodo) para que el envío sea idempotente. Ninguna de las dos tablas guarda el DNI ni el número de cuponera. El cliente solo lee su fila; escribe con las funciones `activar_whatsapp` y `desactivar_whatsapp` (el sello de consentimiento lo pone el servidor) y el log lo escribe solo la Edge Function con service_role.
 
-- Canales `sms` y `whatsapp` salen por Twilio (`supabase/functions/_shared/twilio.ts`). WhatsApp usa el sandbox de Twilio (`TWILIO_WHATSAPP_FROM`): cada persona debe enviar antes el código "join …" al número del sandbox. En producción hace falta un número de empresa verificado por Meta y plantillas aprobadas.
-- La app no tiene proveedor conectado: sus recordatorios se quedan en `programado`, no se marcan como enviados.
-- Un recordatorio sin teléfono peruano válido pasa a `fallido`.
-- Los logs no incluyen teléfonos ni mensajes.
-- El monto del SMS usa `formatearSoles` de `supabase/functions/_shared/soles.ts`, una copia de `packages/shared/src/soles.ts` que debe coincidir con él (las Edge Functions no importan desde `packages/`).
-- Falta el cron que invoque la función.
+- `supabase/functions/enviar-recordatorios`: la programa pg_cron todos los días a las 10:00 de Lima (15:00 UTC, `supabase/cron-recordatorios.sql`) y acepta una ejecución manual con `Authorization: Bearer <RECORDATORIOS_SECRETO>`. Qué avisar lo calcula SQL (`recordatorios_candidatos`): vencimiento (3 días antes), pendiente (como máximo cada 15 días mientras haya deuda vencida) y pago confirmado. Nunca envía con saldo 0, sin consentimiento, con baja, fuera de 9:00 a 20:00 de Lima ni dos veces el mismo tipo y periodo. Con deuda en cobranza coactiva usa solo una plantilla informativa y neutra. Con el JWT de un vecino solo acepta `{"accion":"bienvenida"}`, y escribe al número que ya tiene guardado.
+- `supabase/functions/whatsapp-webhook`: verifica el webhook (GET), valida `X-Hub-Signature-256` con `WA_APP_SECRET`, actualiza los estados (enviado, entregado, leído, fallido) y da de baja con «BAJA», «STOP» o «NO».
+- Envío por la API de WhatsApp Cloud de Meta con mensajes de plantilla (`supabase/functions/_shared/whatsapp.ts`). Plantillas y su aprobación en `docs/whatsapp-plantillas.md`; pasos de puesta en marcha en `docs/whatsapp-configuracion.md`. Secretos: `WA_PHONE_NUMBER_ID`, `WA_ACCESS_TOKEN`, `WA_APP_SECRET`, `WA_VERIFY_TOKEN` y `RECORDATORIOS_SECRETO`, con `supabase secrets set`, nunca en el repositorio.
+- Las variables de las plantillas son solo nombre, municipalidad, tributo, monto, fechas y número de operación. Los logs enmascaran los teléfonos.
+- El monto usa `formatearSoles` de `supabase/functions/_shared/soles.ts`, una copia de `packages/shared/src/soles.ts` que debe coincidir con él (las Edge Functions no importan desde `packages/`).
+- Las pruebas están en `packages/shared/src/recordatorios-whatsapp.test.ts` (Meta simulada) y `supabase/tests/recordatorios_whatsapp.sql` (base, con rollback).
+- La versión anterior de `enviar-recordatorios` enviaba SMS y WhatsApp por Twilio desde la tabla `recordatorios`; esa tabla ya no la procesa ninguna función. Twilio sigue en `_shared/twilio.ts` para `vincular-whatsapp`.
 
 **Vincular WhatsApp:** en Recordatorios, el vecino con sesión real confirma su celular con un código SMS (`updateUser` + `verifyOtp` tipo `phone_change`, sin crear otra sesión). La función `vincular-whatsapp` guarda el celular en sus filas de `vecinos`, pone el canal preferido en WhatsApp y le escribe un mensaje de confirmación.
 

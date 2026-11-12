@@ -1,93 +1,28 @@
-// Edge Function: envía por SMS y WhatsApp (Twilio) los recordatorios programados que ya vencieron.
-// Solo la llama un cron con el secreto RECORDATORIOS_SECRETO; usa service_role
-// porque ninguna política permite escribir recordatorios desde el cliente.
+// Edge Function `enviar-recordatorios`: recordatorios por WhatsApp (Cloud API de Meta, plantillas)
+// para quien activó el opt-in. La programa pg_cron a las 10:00 de Lima (supabase/cron-recordatorios.sql)
+// y también acepta una ejecución manual con RECORDATORIOS_SECRETO. Ver README.md.
 //
-// Secretos necesarios (supabase secrets set ...):
-//   RECORDATORIOS_SECRETO, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
-//   TWILIO_MESSAGING_SERVICE_SID (o TWILIO_FROM) para SMS y TWILIO_WHATSAPP_FROM para WhatsApp.
-//
-// Procesa los canales "sms" y "whatsapp". El canal "app" no tiene proveedor conectado: esos
-// recordatorios se quedan "programado" en vez de marcarse como enviados sin salir nada.
+// Secretos: RECORDATORIOS_SECRETO, WA_PHONE_NUMBER_ID, WA_ACCESS_TOKEN (WA_APP_SECRET y
+// WA_VERIFY_TOKEN los usa `whatsapp-webhook`). SUPABASE_* los pone la plataforma.
 // Nunca se escriben teléfonos ni mensajes en los logs.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { formatearSoles } from '../_shared/soles.ts';
-import { enviarMensaje, normalizarTelefono } from '../_shared/twilio.ts';
+import { crearAlmacen } from './almacen.ts';
+import { crearManejador } from './manejador.ts';
 
-type Fila = {
-  id: string;
-  tipo: 'preventivo' | 'mora' | 'previo_coactiva';
-  canal: 'sms' | 'whatsapp';
-  vecinos: { telefono: string | null } | null;
-  deudas: { concepto: string; total: number; vencimiento: string } | null;
-  municipalidades: { nombre: string } | null;
-};
+const url = Deno.env.get('SUPABASE_URL')!;
+const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 
-const LIMITE_POR_EJECUCION = 100;
-
-
-function mensaje(fila: Fila): string {
-  const municipalidad = fila.municipalidades?.nombre ?? 'Almira';
-  const deuda = fila.deudas;
-  if (!deuda) return `Almira: tienes un aviso de tu ${municipalidad}. Revisa la app.`;
-  const detalle = `${deuda.concepto} por ${formatearSoles(deuda.total)}`;
-  if (fila.tipo === 'preventivo') {
-    return `Almira: tu ${detalle} vence el ${deuda.vencimiento}. Págalo desde la app. ${municipalidad}.`;
-  }
-  return `Almira: tu ${detalle} está vencido desde el ${deuda.vencimiento}. Págalo desde la app para evitar más intereses. ${municipalidad}.`;
-}
-
-function responder(cuerpo: unknown, status = 200) {
-  return new Response(JSON.stringify(cuerpo), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-
-Deno.serve(async (solicitud) => {
-  if (solicitud.method !== 'POST') return responder({ error: 'Método no permitido' }, 405);
-
-  const secreto = Deno.env.get('RECORDATORIOS_SECRETO');
-  const autorizado = secreto && solicitud.headers.get('Authorization') === `Bearer ${secreto}`;
-  if (!autorizado) return responder({ error: 'No autorizado' }, 401);
-
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    { auth: { persistSession: false } },
-  );
-
-  const { data, error } = await supabase
-    .from('recordatorios')
-    .select(
-      'id, tipo, canal, vecinos(telefono), deudas(concepto, total, vencimiento), municipalidades(nombre)',
-    )
-    .eq('estado', 'programado')
-    .in('canal', ['sms', 'whatsapp'])
-    .lte('programado_para', new Date().toISOString())
-    .order('programado_para')
-    .limit(LIMITE_POR_EJECUCION);
-
-  if (error) {
-    console.error('No se pudieron leer los recordatorios', error.message);
-    return responder({ error: 'Error al leer recordatorios' }, 500);
-  }
-
-  let enviados = 0;
-  let fallidos = 0;
-
-  for (const fila of (data ?? []) as unknown as Fila[]) {
-    const telefono = normalizarTelefono(fila.vecinos?.telefono ?? null);
-    const exito = telefono ? await enviarMensaje(fila.canal, telefono, mensaje(fila)).catch(() => false) : false;
-    // El filtro por estado evita pisar otra ejecución simultánea.
-    const { error: errorEstado } = await supabase
-      .from('recordatorios')
-      .update({ estado: exito ? 'enviado' : 'fallido' })
-      .eq('id', fila.id)
-      .eq('estado', 'programado');
-
-    if (errorEstado || !exito) fallidos += 1;
-    else enviados += 1;
-  }
-
-  return responder({ procesados: enviados + fallidos, enviados, fallidos });
-});
+Deno.serve(
+  crearManejador({
+    almacen: crearAlmacen(admin),
+    usuarioDe: async (jwt) => {
+      const { data, error } = await admin.auth.getUser(jwt);
+      return error || !data.user ? null : data.user.id;
+    },
+    fetchMeta: (direccion, init) => fetch(direccion, init),
+    env: (nombre) => Deno.env.get(nombre),
+    ahora: () => new Date(),
+    pausa: (ms) => new Promise((resolver) => setTimeout(resolver, ms)),
+    log: (...partes) => console.error(...partes),
+  }),
+);
