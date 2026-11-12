@@ -40,7 +40,13 @@ class ShellPrincipal extends StatelessWidget {
                 color: AppColors.surface,
                 border: Border(top: BorderSide(color: AppColors.border)),
               ),
-              child: NavigationBar(
+              // Las etiquetas de la barra son de una sola palabra y el ancho es fijo: se limita el
+              // aumento de letra a 1.15 para que «Reclamos» no se parta.
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.15),
+                ),
+                child: NavigationBar(
                 selectedIndex: navegacion.currentIndex,
                 animationDuration: duracionDe(context, 220),
                 onDestinationSelected: (indice) => navegacion.goBranch(
@@ -57,6 +63,7 @@ class ShellPrincipal extends StatelessWidget {
                       tooltip: d.etiqueta,
                     ),
                 ],
+              ),
               ),
             ),
     );

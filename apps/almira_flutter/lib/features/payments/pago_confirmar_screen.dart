@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/errors/error_app.dart';
@@ -132,6 +133,43 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pagos en línea')),
+      bottomNavigationBar: elegidas.isEmpty
+          ? null
+          : Container(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.margen,
+                AppSpacing.md,
+                AppSpacing.margen,
+                MediaQuery.paddingOf(context).bottom + AppSpacing.md,
+              ),
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Text('Total a pagar', style: textos.bodyMedium)),
+                      Text(soles(total), style: textos.titleLarge!.copyWith(fontFeatures: cifrasTabulares)),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  FilledButton.icon(
+                    onPressed: _ocupado || total <= 0 ? null : () => _pagar(elegidas),
+                    icon: _ocupado
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                          )
+                        : const Icon(Icons.lock_outline_rounded, size: 20),
+                    label: Text('Pagar ${soles(total)}'),
+                  ),
+                ],
+              ),
+            ),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -184,24 +222,6 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                     espacio,
                     if (_medio == MedioPago.tarjeta) ..._camposTarjeta(hoy) else ..._camposYape(),
                     if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
-                    espacioGrande,
-                    FilledButton.icon(
-                      onPressed: _ocupado || total <= 0 ? null : () => _pagar(elegidas),
-                      icon: _ocupado
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                            )
-                          : const Icon(Icons.lock_outline_rounded, size: 20),
-                      label: Text('Pagar ${soles(total)}'),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Tus avisos de estas deudas se detienen al confirmar.',
-                      style: textos.bodySmall,
-                      textAlign: TextAlign.center,
-                    ),
                   ],
                 ),
               ),

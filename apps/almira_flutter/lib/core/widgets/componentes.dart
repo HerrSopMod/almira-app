@@ -364,25 +364,66 @@ class VistaError extends StatelessWidget {
   }
 }
 
-class VistaCargando extends StatelessWidget {
+/// Carga con esqueletos: bloques grises que laten suavemente con la forma de lo que va a
+/// aparecer. Con «reducir movimiento» quedan quietos.
+class VistaCargando extends StatefulWidget {
   const VistaCargando({super.key, this.texto = 'Cargando'});
 
   final String texto;
 
   @override
-  Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Semantics(
-            label: texto,
-            child: const SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(strokeWidth: 3),
-            ),
+  State<VistaCargando> createState() => _VistaCargandoState();
+}
+
+class _VistaCargandoState extends State<VistaCargando> with SingleTickerProviderStateMixin {
+  late final AnimationController _pulso =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _pulso.dispose();
+    super.dispose();
+  }
+
+  Widget _bloque(double alto, {double? ancho, double radio = AppRadius.campo}) => Container(
+        width: ancho,
+        height: alto,
+        decoration: BoxDecoration(color: AppColors.track, borderRadius: BorderRadius.circular(radio)),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final quieto = MediaQuery.maybeDisableAnimationsOf(context) == true;
+    return Semantics(
+      label: widget.texto,
+      child: ExcludeSemantics(
+        child: AnimatedBuilder(
+          animation: _pulso,
+          builder: (context, hijo) => Opacity(opacity: quieto ? 0.7 : 0.45 + 0.4 * _pulso.value, child: hijo),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _bloque(132, radio: AppRadius.tarjeta),
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                children: [
+                  Expanded(child: _bloque(64, radio: AppRadius.tarjeta)),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: _bloque(64, radio: AppRadius.tarjeta)),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              _bloque(16, ancho: 120),
+              const SizedBox(height: AppSpacing.md),
+              _bloque(76, radio: AppRadius.tarjeta),
+              const SizedBox(height: AppSpacing.sm),
+              _bloque(76, radio: AppRadius.tarjeta),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 /// Cuerpo de una pantalla conectada a datos: carga, error con reintento o

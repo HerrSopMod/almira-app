@@ -77,6 +77,7 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
               ],
               selected: {_vista},
               showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(textStyle: Theme.of(context).textTheme.labelMedium),
               onSelectionChanged: (s) => setState(() => _vista = s.first),
             ),
             espacio,
@@ -290,90 +291,138 @@ class _FilaResumen extends StatelessWidget {
   }
 }
 
-/// Un año de un tributo: tabla con las mismas columnas del estado de cuenta, que se
-/// desplaza hacia los lados en pantallas angostas.
+/// Un año de un tributo, en tarjetas que caben en el ancho del teléfono (sin desplazarse hacia
+/// los lados): cada periodo muestra su estado, sus fechas y su saldo, y al tocarlo se abre el
+/// detalle con todas las columnas del estado de cuenta.
 class _TablaAnio extends StatelessWidget {
   const _TablaAnio({required this.anio});
 
   final GrupoAnio anio;
 
-  static const _anchos = <double>[104, 44, 156, 78, 62, 66, 62, 78, 78, 118, 108];
-  static const _titulos = [
-    'Periodo', 'Est', 'F.Ven. / F.Pag', 'Insoluto', 'G.E.', 'Int/Act', 'Dscto.', 'Pagos', 'Saldo',
-    'Nro. Valor', 'Exp. Coac.',
-  ];
-  static const _derecha = {3, 4, 5, 6, 7, 8};
+  static String _f(DateTime? d) => d == null ? '' : fechaCorta(d);
 
-  Widget _celda(int i, String texto, {bool negrita = false, Color? color}) => SizedBox(
-        width: _anchos[i],
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
-          child: Text(
-            texto,
-            textAlign: _derecha.contains(i) ? TextAlign.right : TextAlign.left,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: negrita ? FontWeight.w600 : FontWeight.w400,
-              color: color ?? AppColors.textPrimary,
-              fontFeatures: cifrasTabulares,
-            ),
+  void _detalle(BuildContext context, Deuda d) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (_) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, 0, AppSpacing.margen, AppSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${etiquetaPeriodo(d)} ${d.anioTributo}', style: Theme.of(context).textTheme.titleLarge),
+              Text(d.concepto, style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(height: AppSpacing.md),
+              FilaDato('Estado', d.pendiente ? 'Pendiente' : 'Pagado'),
+              FilaDato('Vencimiento', _f(d.vencimiento)),
+              if (d.fechaPago != null) FilaDato('Fecha de pago', _f(d.fechaPago)),
+              const Divider(height: AppSpacing.xl),
+              FilaDato('Insoluto', soles(d.montoInsoluto)),
+              FilaDato('Gastos de emisión', soles(d.gastosEmision)),
+              FilaDato('Interés de actualización', soles(d.interesActualizacion + d.interesMoratorio)),
+              FilaDato('Descuento', '- ${soles(d.descuento)}'),
+              FilaDato('Pagos', soles(d.pagosAplicados)),
+              FilaDato('Saldo', soles(d.saldo), destacado: true),
+              if (d.nroValor != null) ...[
+                const Divider(height: AppSpacing.xl),
+                FilaDato('Nro. de valor', d.nroValor!),
+              ],
+              if (d.expCoactivo != null) FilaDato('Exp. coactivo', d.expCoactivo!),
+            ],
           ),
         ),
-      );
-
-  Widget _fila(List<String> celdas, {bool negrita = false, Color? fondo, Color? color}) => Container(
-        color: fondo,
-        child: Row(children: [for (final (i, c) in celdas.indexed) _celda(i, c, negrita: negrita, color: color)]),
-      );
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     final t = anio.subtotal;
-    String f(DateTime? d) => d == null ? '' : fechaCorta(d);
+    TextStyle cifra(TextStyle base) => base.copyWith(fontFeatures: cifrasTabulares);
+
     return Tarjeta(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      padding: EdgeInsets.zero,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Text('Año ${anio.anio}', style: textos.titleSmall),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
+            child: Row(
+              children: [
+                Expanded(child: Text('Año ${anio.anio}', style: textos.titleSmall)),
+                Text('Saldo', style: textos.bodySmall),
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          const Divider(),
+          for (final d in anio.filas) ...[
+            InkWell(
+              onTap: () => _detalle(context, d),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            etiquetaPeriodo(d),
+                            style: textos.titleSmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            d.pendiente
+                                ? 'Pendiente · vence ${_f(d.vencimiento)}'
+                                : 'Pagado · ${_f(d.fechaPago ?? d.vencimiento)}',
+                            style: textos.bodySmall!.copyWith(
+                              color: d.pendiente ? AppColors.error : AppColors.textSecondary,
+                            ),
+                            maxLines: 2,
+                          ),
+                          if (d.nroValor != null)
+                            Text('Valor ${d.nroValor}', style: textos.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      soles(d.saldo),
+                      textAlign: TextAlign.right,
+                      style: cifra(textos.titleSmall!),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textSecondary),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(),
+          ],
+          Container(
+            color: AppColors.primarySoft,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
             child: Column(
               children: [
-                _fila(_titulos, negrita: true, fondo: AppColors.surfaceSubtle, color: AppColors.textSecondary),
-                for (final d in anio.filas)
-                  _fila([
-                    etiquetaPeriodo(d),
-                    estadoCorto(d),
-                    d.pendiente ? f(d.vencimiento) : '${f(d.vencimiento)} / ${f(d.fechaPago)}',
-                    soles(d.montoInsoluto).substring(3),
-                    soles(d.gastosEmision).substring(3),
-                    soles(d.interesActualizacion + d.interesMoratorio).substring(3),
-                    soles(-d.descuento).replaceFirst('S/ ', ''),
-                    soles(d.pagosAplicados).substring(3),
-                    soles(d.saldo).substring(3),
-                    d.nroValor ?? '',
-                    d.expCoactivo ?? '',
-                  ], color: d.pendiente ? AppColors.error : null),
-                _fila([
-                  'Total ${anio.anio}',
-                  '',
-                  '',
-                  soles(t.insoluto).substring(3),
-                  soles(t.gastos).substring(3),
-                  soles(t.interes).substring(3),
-                  soles(-t.descuento).replaceFirst('S/ ', ''),
-                  soles(t.pagos).substring(3),
-                  soles(t.saldo).substring(3),
-                  '',
-                  '',
-                ], negrita: true, fondo: AppColors.primarySoft),
+                Row(
+                  children: [
+                    Expanded(child: Text('Total ${anio.anio}', style: textos.titleSmall)),
+                    Text(soles(t.saldo), style: cifra(textos.titleSmall!)),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    Expanded(child: Text('Insoluto ${soles(t.insoluto)}', style: textos.bodySmall)),
+                    Text('Pagos ${soles(t.pagos)}', style: cifra(textos.bodySmall!)),
+                  ],
+                ),
               ],
             ),
           ),

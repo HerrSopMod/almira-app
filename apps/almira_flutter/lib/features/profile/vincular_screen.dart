@@ -15,7 +15,7 @@ class VincularScreen extends ConsumerWidget {
     final vista = ref.watch(vistaProvider);
     final textos = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Vincular código')),
+      appBar: AppBar(title: const Text('Vincular cuponera')),
       body: SafeArea(
         top: false,
         child: CuerpoAsync<VistaMunicipal>(
@@ -35,13 +35,13 @@ class VincularScreen extends ConsumerWidget {
               Text(municipalidad.nombre, style: textos.titleMedium),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Comprobamos tu código y tu documento en el padrón de la municipalidad.',
+                'Comprobamos tu número de cuponera y tu DNI.',
                 style: textos.bodyMedium,
               ),
               if (v.vecino != null) ...[
                 espacio,
                 Aviso(
-                  'Ya tienes un código vinculado: ${v.vecino!.codigoContribuyente ?? v.vecino!.nombre}',
+                  'Ya tienes una cuponera vinculada: ${v.vecino!.codigoContribuyente ?? v.vecino!.nombre}',
                   tono: Tono.exito,
                 ),
               ],

@@ -7,6 +7,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
+import '../payments/pasos_pago.dart';
 import 'servicio_auth.dart';
 
 const _claveMinima = 8;
@@ -132,7 +133,6 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const titulos = ['Tu cuponera', 'Tu cuenta', 'Verifica tu celular'];
     return PopScope(
       canPop: _paso == 0,
       onPopInvokedWithResult: (volvio, _) {
@@ -140,20 +140,11 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(titulos[_paso]),
+          title: const Text('Crea tu cuenta'),
           leading: IconButton(
             tooltip: 'Volver',
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: _ocupado ? null : _atras,
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(3),
-            child: LinearProgressIndicator(
-              value: (_paso + 1) / 3,
-              minHeight: 3,
-              backgroundColor: Colors.white24,
-              color: Colors.white,
-            ),
           ),
         ),
         body: SafeArea(
@@ -163,11 +154,18 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
-                child: switch (_paso) {
-                  0 => _vistaCuponera(),
-                  1 => _vistaCuenta(),
-                  _ => _vistaCelular(),
-                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    IndicadorPasos(titulos: const ['Cuponera', 'Cuenta', 'Celular'], actual: _paso),
+                    const SizedBox(height: AppSpacing.xl),
+                    switch (_paso) {
+                      0 => _vistaCuponera(),
+                      1 => _vistaCuenta(),
+                      _ => _vistaCelular(),
+                    },
+                  ],
+                ),
               ),
             ),
           ),

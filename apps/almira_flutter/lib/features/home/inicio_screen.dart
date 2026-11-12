@@ -56,7 +56,9 @@ class InicioScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          if (esDemo) const Center(child: EtiquetaDemo(sobreTurquesa: true)),
+          // Con letra muy grande no entra junto al saludo.
+          if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15)
+            const Center(child: EtiquetaDemo(sobreTurquesa: true)),
           IconButton(
             tooltip: 'Avisos',
             icon: const Icon(Icons.notifications_none_rounded),
@@ -158,50 +160,38 @@ class _TarjetaResumen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    if (resumen.alDia) {
-      return Tarjeta(
-        color: AppColors.successSoft,
-        conBorde: false,
-        padding: const EdgeInsets.all(AppSpacing.margen),
-        child: Row(
-          children: [
-            const CaraSaldo(alDia: true),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('¡Estás al día con tus tributos!', style: textos.titleLarge),
-                  if (codigo != null) Text('Cuponera $codigo', style: textos.bodyMedium),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
+    final alDia = resumen.alDia;
     final vence = resumen.proximoVencimiento;
+    final estado = alDia
+        ? '¡Estás al día con tus tributos!'
+        : [
+            plural(resumen.cantidad, 'obligación', 'obligaciones'),
+            if (vence != null) 'próximo vencimiento: ${diaYMes(vence)}',
+          ].join(' · ');
+
     return Tarjeta(
-      color: AppColors.primarySoft,
+      color: alDia ? AppColors.successSoft : AppColors.primarySoft,
       conBorde: false,
-      padding: const EdgeInsets.all(AppSpacing.margen),
+      padding: const EdgeInsets.all(AppSpacing.xl - AppSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const CaraSaldo(alDia: false, lado: 56),
-              const SizedBox(width: AppSpacing.md),
+              CaraSaldo(alDia: alDia, lado: 64),
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Tienes ${soles(resumen.total)} pendientes',
-                      style: textos.titleSmall!.copyWith(color: AppColors.primaryDark),
+                    Text('Total pendiente', style: textos.bodySmall),
+                    // El monto se achica antes que partirse en dos líneas.
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(soles(resumen.total), style: textos.displaySmall),
                     ),
-                    if (codigo != null) Text('Cuponera $codigo', style: textos.bodySmall),
                   ],
                 ),
               ),
@@ -209,25 +199,16 @@ class _TarjetaResumen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Total pendiente',
-            style: textos.titleSmall!.copyWith(color: AppColors.primaryDark),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          // El monto se achica antes que partirse en dos líneas.
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(soles(resumen.total), style: textos.displaySmall),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            [
-              plural(resumen.cantidad, 'obligación', 'obligaciones'),
-              if (vence != null) 'próximo vencimiento: ${diaYMes(vence)}',
-            ].join(' · '),
+            estado,
             style: textos.bodyMedium!.copyWith(color: AppColors.textPrimary),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
-          if (resumen.cantidadVencidas > 0 && resumen.cantidadPorVencer > 0) ...[
+          if (codigo != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text('Código de contribuyente $codigo', style: textos.bodySmall),
+          ],
+          if (resumen.cantidadVencidas > 0) ...[
             const SizedBox(height: AppSpacing.md),
             Wrap(
               spacing: AppSpacing.sm,
@@ -238,19 +219,13 @@ class _TarjetaResumen extends StatelessWidget {
                   tono: Tono.error,
                   icono: Icons.error_outline_rounded,
                 ),
-                Insignia(
-                  '${resumen.cantidadPorVencer} por vencer · ${soles(resumen.montoPorVencer)}',
-                  tono: Tono.aviso,
-                  icono: Icons.schedule_rounded,
-                ),
+                if (resumen.cantidadPorVencer > 0)
+                  Insignia(
+                    '${resumen.cantidadPorVencer} por vencer · ${soles(resumen.montoPorVencer)}',
+                    tono: Tono.aviso,
+                    icono: Icons.schedule_rounded,
+                  ),
               ],
-            ),
-          ] else if (resumen.cantidadVencidas > 0) ...[
-            const SizedBox(height: AppSpacing.md),
-            Insignia(
-              resumen.cantidadVencidas == 1 ? 'Vencida' : 'Vencidas',
-              tono: Tono.error,
-              icono: Icons.error_outline_rounded,
             ),
           ],
         ],
@@ -340,12 +315,17 @@ class _Accesos extends StatelessWidget {
           child: Tarjeta(
             onTap: () => context.go(ruta),
             semantica: texto,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.md),
-            child: Row(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm),
+            child: Column(
               children: [
                 CajaIcono(icono, lado: 36),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: Text(texto, style: textos.labelLarge, maxLines: 2)),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  texto,
+                  style: textos.titleSmall,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                ),
               ],
             ),
           ),

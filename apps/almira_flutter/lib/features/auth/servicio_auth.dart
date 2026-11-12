@@ -52,6 +52,10 @@ abstract class ServicioAuth {
 
   Future<void> ingresarConCorreo(String correo, String clave);
 
+  /// Envía al correo un enlace para crear una clave nueva. Al abrirlo, la app vuelve con la
+  /// sesión iniciada y la clave se cambia desde Mi perfil.
+  Future<void> enviarEnlaceClave(String correo);
+
   /// Crea (o cambia) la clave web de la cuenta, para entrar después con correo o cuponera.
   Future<void> crearClaveWeb(String clave);
 
@@ -161,6 +165,12 @@ class ServicioAuthSupabase implements ServicioAuth {
           authScreenLaunchMode: LaunchMode.externalApplication,
         ),
         'No pudimos abrir el ingreso con Google. Inténtalo de nuevo.',
+      );
+
+  @override
+  Future<void> enviarEnlaceClave(String correo) => _intentar(
+        () => _cliente.auth.resetPasswordForEmail(correo.trim(), redirectTo: Env.retornoIngreso),
+        'No pudimos enviar el enlace. Revisa el correo e inténtalo de nuevo.',
       );
 
   @override
@@ -308,6 +318,9 @@ class ServicioAuthDemo implements ServicioAuth {
 
   @override
   Future<void> ingresarConGoogle() async => throw _noDisponible;
+
+  @override
+  Future<void> enviarEnlaceClave(String correo) async => throw _noDisponible;
 
   @override
   Future<void> crearClaveWeb(String clave) async => throw _noDisponible;

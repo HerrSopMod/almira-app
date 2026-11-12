@@ -63,32 +63,38 @@ abstract final class AppTheme {
       letterSpacing: 0,
     );
     final textos = TextTheme(
-      // Monto destacado.
+      // Cifra destacada (monto): 30.
       displaySmall: base.copyWith(
-        fontSize: 34,
+        fontSize: 30,
         height: 1.15,
         fontWeight: FontWeight.w700,
         fontFeatures: cifrasTabulares,
       ),
+      // Nombre de la app (solo en el ingreso): 28.
+      headlineMedium: base.copyWith(fontSize: 28, height: 1.2, fontWeight: FontWeight.w600),
+      // Título de pantalla: 22.
       headlineSmall: base.copyWith(fontSize: 22, height: 1.25, fontWeight: FontWeight.w700),
-      titleLarge: base.copyWith(fontSize: 19, height: 1.3, fontWeight: FontWeight.w600),
+      // Título de barra y de sección: 18. Subtítulo: 16.
+      titleLarge: base.copyWith(fontSize: 18, height: 1.3, fontWeight: FontWeight.w600),
       titleMedium: base.copyWith(fontSize: 16, height: 1.35, fontWeight: FontWeight.w600),
       titleSmall: base.copyWith(fontSize: 14, height: 1.35, fontWeight: FontWeight.w600),
-      bodyLarge: base.copyWith(fontSize: 16, height: 1.45, fontWeight: FontWeight.w400),
+      // Cuerpo: 14. Texto que se escribe en un campo: 15 para que se lea bien.
+      bodyLarge: base.copyWith(fontSize: 15, height: 1.45, fontWeight: FontWeight.w400),
       bodyMedium: base.copyWith(
         fontSize: 14,
         height: 1.45,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
       ),
+      // Texto secundario: 12.
       bodySmall: base.copyWith(
-        fontSize: 13,
+        fontSize: 12,
         height: 1.4,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
       ),
-      labelLarge: base.copyWith(fontSize: 16, height: 1.25, fontWeight: FontWeight.w600),
-      labelMedium: base.copyWith(fontSize: 13, height: 1.25, fontWeight: FontWeight.w600),
+      labelLarge: base.copyWith(fontSize: 15, height: 1.25, fontWeight: FontWeight.w600),
+      labelMedium: base.copyWith(fontSize: 12, height: 1.25, fontWeight: FontWeight.w600),
       labelSmall: base.copyWith(fontSize: 12, height: 1.25, fontWeight: FontWeight.w500),
     );
 

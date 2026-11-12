@@ -10,13 +10,27 @@ class PasosPago extends StatelessWidget {
   /// 0, 1 o 2.
   final int actual;
 
-  static const _titulos = ['Deuda', 'Medio de pago', 'Comprobante'];
+  @override
+  Widget build(BuildContext context) =>
+      IndicadorPasos(titulos: const ['Deuda', 'Medio de pago', 'Comprobante'], actual: actual);
+}
+
+/// Indicador de pasos con círculos numerados, línea de avance y el nombre de cada paso.
+class IndicadorPasos extends StatelessWidget {
+  const IndicadorPasos({super.key, required this.titulos, required this.actual});
+
+  final List<String> titulos;
+
+  /// Paso en curso, desde 0.
+  final int actual;
+
+  List<String> get _titulos => titulos;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     return Semantics(
-      label: 'Paso ${actual + 1} de 3: ${_titulos[actual]}',
+      label: 'Paso ${actual + 1} de ${_titulos.length}: ${_titulos[actual]}',
       child: ExcludeSemantics(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

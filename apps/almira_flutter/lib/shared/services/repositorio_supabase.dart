@@ -10,6 +10,12 @@ import 'repositorio.dart';
 const _espera = Duration(seconds: 20);
 const _bucket = 'evidencias';
 
+/// Columnas de `vecinos` que el cliente puede leer. El número de cuponera (privado) no está:
+/// la base ni siquiera deja pedirlo, así que nunca se usa `select *` en esa tabla.
+const _columnasVecino =
+    'id, municipalidad_id, user_id, dni, nombre, telefono, canal_preferido, codigo_contribuyente, '
+    'nombres, apellidos, domicilio_fiscal';
+
 /// Ante cualquier fallo de la vinculación se responde lo mismo: no se dice si falló la
 /// cuponera, el DNI o la municipalidad.
 const _mensajeVinculo = 'No pudimos verificar tus datos. Revisa la municipalidad, la cuponera y el DNI.';
@@ -33,8 +39,9 @@ class RepositorioSupabase implements Repositorio {
     T Function(Fila fila) convertir, {
     String? orden,
     bool ascendente = true,
+    String columnas = '*',
   }) async {
-    final consulta = _cliente.from(tabla).select();
+    final consulta = _cliente.from(tabla).select(columnas);
     final List<Fila> filas = orden == null
         ? await consulta
         : await consulta.order(orden, ascending: ascendente);
@@ -46,7 +53,7 @@ class RepositorioSupabase implements Repositorio {
     try {
       final r = await Future.wait<List<Object>>([
         _leer('municipalidades', Municipalidad.deFila, orden: 'nombre'),
-        _leer('vecinos', Vecino.deFila),
+        _leer('vecinos', Vecino.deFila, columnas: _columnasVecino),
         _leer('predios', Predio.deFila),
         _leer('deudas', Deuda.deFila, orden: 'vencimiento'),
         _leer('pagos', Pago.deFila, orden: 'creado_en', ascendente: false),

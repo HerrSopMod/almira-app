@@ -117,7 +117,7 @@ class PerfilScreen extends ConsumerWidget {
                   ),
                 _Opcion(
                   icono: Icons.badge_outlined,
-                  titulo: vecino == null ? 'Vincular código de contribuyente' : 'Vincular otro código',
+                  titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
                   alTocar: () => context.push(Rutas.vincular),
                 ),
                 _Opcion(

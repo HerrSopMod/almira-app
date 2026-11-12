@@ -307,7 +307,7 @@ class Deuda {
       montoInsoluto + gastosEmision + interesMoratorio + interesActualizacion - descuento;
 
   /// Lo que falta pagar: importe - pagos. Si la base lo calculó, se usa ese valor.
-  double get saldo => _saldo ?? (importe - pagosAplicados);
+  double get saldo => _saldo ?? (estado == EstadoDeuda.pagada ? 0 : importe - pagosAplicados);
 
   /// Lo que se muestra: el saldo mientras está pendiente; el importe pagado, después.
   double get total => pendiente ? saldo : importe;
