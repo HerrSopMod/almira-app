@@ -16,6 +16,8 @@ import '../../core/widgets/mapa_almira.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import '../../shared/services/repositorio.dart';
+import 'clasificacion_foto/clasificador_foto.dart';
+import 'clasificacion_foto/proveedor_clasificador.dart';
 import 'reclamos_logica.dart';
 import 'selector_ubicacion_screen.dart';
 
@@ -40,6 +42,12 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
   String? _fotoRuta;
   String? _errorFoto;
   bool _cargandoFoto = false;
+
+  // Revisión de la foto en el teléfono. Es solo una sugerencia: nunca bloquea el envío.
+  ResultadoFoto? _resultadoFoto;
+  bool _revisandoFoto = false;
+  bool _fotoAceptada = false;
+  int _turnoFoto = 0;
 
   TipoReclamo? _tipo;
   bool _tipoElegidoAMano = false;
@@ -87,6 +95,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
         _foto = bytes;
         _fotoRuta = archivo.path;
       });
+      _revisarFoto(ImagenReclamo(ruta: archivo.path, bytes: bytes));
     } on PlatformException catch (error) {
       final sinPermiso = error.code.contains('denied');
       setState(
@@ -100,6 +109,39 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
     } finally {
       if (mounted) setState(() => _cargandoFoto = false);
     }
+  }
+
+  /// Clasifica la foto sin congelar la pantalla. Si mientras tanto el vecino
+  /// cambia o quita la foto, el resultado de la anterior se descarta.
+  Future<void> _revisarFoto(ImagenReclamo imagen) async {
+    final turno = ++_turnoFoto;
+    setState(() {
+      _revisandoFoto = true;
+      _resultadoFoto = null;
+      _fotoAceptada = false;
+    });
+    ResultadoFoto resultado;
+    try {
+      resultado = await ref.read(clasificadorFotoProvider).clasificar(imagen);
+    } catch (_) {
+      resultado = ResultadoFoto.enRevision;
+    }
+    if (!mounted || turno != _turnoFoto) return;
+    setState(() {
+      _resultadoFoto = resultado;
+      _revisandoFoto = false;
+    });
+  }
+
+  void _quitarFoto() {
+    setState(() {
+      _foto = null;
+      _fotoRuta = null;
+      _turnoFoto++;
+      _resultadoFoto = null;
+      _revisandoFoto = false;
+      _fotoAceptada = false;
+    });
   }
 
   void _menuFoto() {
@@ -131,10 +173,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 title: const Text('Quitar foto'),
                 onTap: () {
                   Navigator.pop(hoja);
-                  setState(() {
-                    _foto = null;
-                    _fotoRuta = null;
-                  });
+                  _quitarFoto();
                 },
               ),
             const SizedBox(height: AppSpacing.sm),
@@ -290,15 +329,34 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 conError: _intentado && fotoObligatoria && _foto == null,
                 alTocar: _enviando ? null : _menuFoto,
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _intentado && fotoObligatoria && _foto == null
-                    ? 'Adjunta una foto para enviar el reclamo.'
-                    : 'Una foto, de la cámara o la galería. La reducimos antes de enviarla.',
-                style: textos.bodySmall!.copyWith(
-                  color: _intentado && fotoObligatoria && _foto == null ? AppColors.error : null,
+              if (_foto != null && (_revisandoFoto || _resultadoFoto != null)) ...[
+                espacioChico,
+                _revisandoFoto ? const _RevisandoFoto() : _EstadoFoto(_resultadoFoto!),
+              ],
+              if (_foto != null && _resultadoFoto?.estado == EstadoFoto.noValida && !_fotoAceptada) ...[
+                espacio,
+                OutlinedButton(
+                  onPressed: _enviando ? null : _menuFoto,
+                  child: const Text('Cambiar foto'),
                 ),
-              ),
+                espacioChico,
+                OutlinedButton(
+                  onPressed: _enviando ? null : () => setState(() => _fotoAceptada = true),
+                  child: const Text('Enviar a revisión'),
+                ),
+              ],
+              // Con foto, el estado de la foto ocupa el lugar de la ayuda.
+              if (_foto == null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  _intentado && fotoObligatoria
+                      ? 'Adjunta una foto para enviar el reclamo.'
+                      : 'Una foto, de la cámara o la galería. La reducimos antes de enviarla.',
+                  style: textos.bodySmall!.copyWith(
+                    color: _intentado && fotoObligatoria ? AppColors.error : null,
+                  ),
+                ),
+              ],
               if (_errorFoto != null) ...[espacioChico, Aviso(_errorFoto!, tono: Tono.error)],
               espacioGrande,
               TextFormField(
@@ -480,6 +538,56 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Mientras se revisa la foto: breve y sin bloquear nada.
+class _RevisandoFoto extends StatelessWidget {
+  const _RevisandoFoto();
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        liveRegion: true,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSpacing.altoInsignia),
+          child: Row(
+            children: [
+              const SizedBox.square(
+                dimension: AppSpacing.iconoInsignia,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(child: Text('Revisando foto…', style: Theme.of(context).textTheme.bodyMedium)),
+            ],
+          ),
+        ),
+      );
+}
+
+/// Estado de la foto en una insignia y, debajo, el motivo en texto secundario.
+class _EstadoFoto extends StatelessWidget {
+  const _EstadoFoto(this.resultado);
+
+  final ResultadoFoto resultado;
+
+  @override
+  Widget build(BuildContext context) {
+    final (texto, tono, icono) = switch (resultado.estado) {
+      EstadoFoto.valida => ('Foto válida', Tono.exito, Icons.check_rounded),
+      EstadoFoto.noValida => ('Foto no válida', Tono.error, Icons.error_outline_rounded),
+      EstadoFoto.enRevision => ('En revisión', Tono.aviso, Icons.schedule_rounded),
+    };
+    return Semantics(
+      liveRegion: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Insignia(texto, tono: tono, icono: icono),
+          const SizedBox(height: AppSpacing.xs),
+          Text(resultado.motivo, style: Theme.of(context).textTheme.bodyMedium),
+        ],
       ),
     );
   }
