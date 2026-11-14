@@ -12,6 +12,10 @@ abstract final class AppSpacing {
 
   /// Alto mínimo de un control táctil.
   static const double toque = 48;
+
+  /// Insignia de estado: alto de la pastilla e ícono de línea.
+  static const double altoInsignia = 24;
+  static const double iconoInsignia = 16;
 }
 
 abstract final class AppRadius {

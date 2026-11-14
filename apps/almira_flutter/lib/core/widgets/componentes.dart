@@ -78,27 +78,29 @@ class Insignia extends StatelessWidget {
   final Tono tono;
   final IconData? icono;
 
+  /// Pastilla de 24 de alto (crece si el texto del teléfono es más grande),
+  /// fondo del color de estado al 12 % y texto e ícono en su tono oscuro.
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        constraints: const BoxConstraints(minHeight: AppSpacing.altoInsignia),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
         decoration: BoxDecoration(
-          color: tono.fondo,
+          color: tono.texto.withValues(alpha: AppColors.alfaFondoInsignia),
           borderRadius: BorderRadius.circular(AppRadius.pastilla),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icono != null) ...[
-              Icon(icono, size: 14, color: tono.texto),
-              const SizedBox(width: 4),
+              Icon(icono, size: AppSpacing.iconoInsignia, color: tono.texto),
+              const SizedBox(width: AppSpacing.xs),
             ],
             Flexible(
               child: Text(
                 texto,
-                style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                      color: tono.texto,
-                      fontWeight: FontWeight.w600,
-                    ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(color: tono.texto),
               ),
             ),
           ],
