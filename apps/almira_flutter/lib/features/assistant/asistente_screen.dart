@@ -8,6 +8,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
 import '../../shared/services/proveedores.dart';
+import '../complaints/piezas_lista.dart';
 import 'chat_asistente.dart';
 import 'chat_modelo.dart';
 import 'widgets_chat.dart';
@@ -94,9 +95,10 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
   String _saludo() {
     final v = ref.read(vistaProvider).valueOrNull;
     final nombre = v?.vecino?.nombres ?? v?.vecino?.nombre ?? ref.read(sesionProvider).cuenta?.nombre;
-    final hola = nombre == null || nombre.trim().isEmpty ? 'Hola' : 'Hola, ${primerNombre(nombre)}';
-    return '$hola. Soy Almira, tu asistente virtual. Te ayudo con tus tributos, pagos y estado de '
-        'cuenta. Oriento, pero las decisiones son de tu municipalidad.';
+    final hola =
+        nombre == null || nombre.trim().isEmpty ? 'Hola' : 'Hola, ${primerNombre(nombrePropio(nombre))}';
+    return '$hola. Soy Almira. Te ayudo con tus tributos, pagos y estado de cuenta. '
+        'Las decisiones finales son de tu municipalidad.';
   }
 
   @override

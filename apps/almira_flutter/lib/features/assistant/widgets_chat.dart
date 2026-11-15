@@ -6,6 +6,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../complaints/piezas_lista.dart';
 import 'chat_modelo.dart';
 
 /// Avatar del asistente: un robot amable, ilustración original en `assets/bot_avatar.svg`.
@@ -71,9 +72,8 @@ class BurbujaChat extends StatelessWidget {
             bottomLeft: r(posicion.ultimo),
           );
 
-    final estiloTexto = textos.bodyMedium!.copyWith(
-      color: mio ? Colors.white : AppColors.textPrimary,
-      height: 1.4,
+    final estiloTexto = textos.cuerpo15.copyWith(
+      color: mio ? AppColors.onPrimary : AppColors.textPrimary,
     );
 
     final contenido = mensaje.fallo
@@ -142,7 +142,8 @@ class BurbujaChat extends StatelessWidget {
                       minimumSize: const Size(0, 40),
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                       shape: const StadiumBorder(),
-                      textStyle: textos.labelMedium,
+                      side: const BorderSide(color: AppColors.primary),
+                      textStyle: textos.secundario13.copyWith(fontWeight: FontWeight.w600),
                     ),
                     child: Text(a.etiqueta),
                   ),
@@ -153,7 +154,7 @@ class BurbujaChat extends StatelessWidget {
         if (posicion.ultimo)
           Padding(
             padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
-            child: Text(hora(mensaje.hora), style: textos.bodySmall),
+            child: Text(hora(mensaje.hora), style: textos.secundario13),
           ),
       ],
     );
@@ -289,13 +290,13 @@ class SugerenciasRapidas extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             for (final p in preguntas)
-              // Chips con borde, como los filtros: blancos, texto turquesa.
+              // Sugerencias con borde fino: blancas, texto turquesa.
               ActionChip(
                 label: Text(p),
                 onPressed: () => alElegir(p),
                 backgroundColor: AppColors.surface,
-                side: const BorderSide(color: AppColors.bordeControl),
-                labelStyle: Theme.of(context).textTheme.titleSmall!.copyWith(color: AppColors.primary),
+                side: const BorderSide(color: AppColors.border),
+                labelStyle: Theme.of(context).textTheme.fila15.copyWith(color: AppColors.primary),
                 shape: const StadiumBorder(),
                 visualDensity: VisualDensity.standard,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -318,8 +319,6 @@ class BotonBajar extends StatelessWidget {
         child: Material(
           color: AppColors.surface,
           shape: const CircleBorder(side: BorderSide(color: AppColors.border)),
-          elevation: 2,
-          shadowColor: Colors.black26,
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: alTocar,

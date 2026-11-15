@@ -212,3 +212,68 @@ class FilaMonto extends StatelessWidget {
     );
   }
 }
+
+/// Nombre de persona en tipo título: «ROSA QUISPE DE LA CRUZ» -> «Rosa Quispe de la Cruz».
+String nombrePropio(String nombre) {
+  const enlaces = {'de', 'del', 'la', 'las', 'los', 'y'};
+  final palabras = nombre.trim().toLowerCase().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+  return [
+    for (final (i, p) in palabras.indexed)
+      i > 0 && enlaces.contains(p) ? p : p[0].toUpperCase() + p.substring(1),
+  ].join(' ');
+}
+
+/// Fila con interruptor: título 15/500, detalle gris 13 y el interruptor a la derecha.
+/// Toda la fila cambia el valor; con [alTocar], tocar el texto hace otra cosa (gestionar).
+class FilaInterruptor extends StatelessWidget {
+  const FilaInterruptor({
+    super.key,
+    required this.titulo,
+    required this.valor,
+    required this.alCambiar,
+    this.detalle,
+    this.alTocar,
+  });
+
+  final String titulo;
+  final String? detalle;
+  final bool valor;
+  final ValueChanged<bool>? alCambiar;
+  final VoidCallback? alTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final cambiar = alCambiar;
+    return MergeSemantics(
+      child: InkWell(
+      onTap: alTocar ?? (cambiar == null ? null : () => cambiar(!valor)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: AppSpacing.cajaGrande + AppSpacing.sm),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(titulo, style: textos.fila15),
+                    if (detalle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(detalle!, style: textos.secundario13),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Switch(value: valor, onChanged: alCambiar),
+            ],
+          ),
+        ),
+      ),
+    ),
+    );
+  }
+}

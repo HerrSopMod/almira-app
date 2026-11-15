@@ -12,6 +12,7 @@ import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pagos_logica.dart';
+import '../complaints/piezas_lista.dart';
 import 'whatsapp_opcion.dart';
 
 /// Mi perfil: cabecera compacta y opciones agrupadas. Solo muestra el nombre
@@ -39,8 +40,7 @@ class PerfilScreen extends ConsumerWidget {
     if (clave == null || !context.mounted) return;
     try {
       await ref.read(servicioAuthProvider).crearClaveWeb(clave);
-      if (context.mounted)
-        mostrarMensaje(context, 'Tu clave web quedó guardada.');
+      if (context.mounted) mostrarMensaje(context, 'Tu clave web quedó guardada.');
     } catch (error) {
       if (context.mounted) mostrarMensaje(context, ErrorApp.de(error).detalle);
     }
@@ -55,6 +55,7 @@ class PerfilScreen extends ConsumerWidget {
     final textos = Theme.of(context).textTheme;
     final vecino = v?.vecino;
     final nombre = vecino?.nombre ?? sesion.cuenta?.nombre;
+    final codigo = vecino?.codigoContribuyente;
 
     return Scaffold(
       appBar: AppBar(
@@ -88,16 +89,11 @@ class PerfilScreen extends ConsumerWidget {
                     shape: BoxShape.circle,
                   ),
                   child: nombre == null
-                      ? const Icon(
-                          Phosphor.user,
-                          color: AppColors.primaryDark,
-                        )
+                      ? const Icon(Phosphor.user, color: AppColors.primaryDark)
                       : ExcludeSemantics(
                           child: Text(
                             iniciales(nombre),
-                            style: textos.titleMedium!.copyWith(
-                              color: AppColors.primaryDark,
-                            ),
+                            style: textos.titleMedium!.copyWith(color: AppColors.primaryDark),
                           ),
                         ),
                 ),
@@ -106,37 +102,28 @@ class PerfilScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(nombre ?? 'Tu cuenta', style: textos.titleLarge),
-                      Text(
-                        vecino?.codigoContribuyente == null
-                            ? (vecino == null ? 'Sin código vinculado' : '')
-                            : 'Contribuyente ${vecino!.codigoContribuyente}',
-                        style: textos.bodyMedium,
-                      ),
+                      Text(nombre == null ? 'Tu cuenta' : nombrePropio(nombre), style: textos.titulo20),
+                      if (codigo != null || vecino == null)
+                        Text(
+                          codigo == null ? 'Sin código vinculado' : 'Contribuyente $codigo',
+                          style: textos.secundario13,
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
-            espacioSeccion,
+            espacioGrande,
             _Grupo(
               titulo: 'Cuenta y predio',
-              hijos: [
+              filas: [
                 for (final predio in v?.predios ?? const [])
-                  ListTile(
-                    leading: const Icon(Phosphor.house),
-                    title: Text(predio.direccion),
-                    subtitle: Text('Predio ${predio.codigo}'),
-                  ),
-                _Opcion(
-                  icono: Phosphor.identificationBadge,
-                  titulo: vecino == null
-                      ? 'Vincular cuponera'
-                      : 'Vincular otra cuponera',
+                  FilaLista(titulo: predio.direccion, detalle: 'Predio ${predio.codigo}'),
+                FilaLista(
+                  titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
                   alTocar: () => context.push(Rutas.vincular),
                 ),
-                _Opcion(
-                  icono: Phosphor.buildings,
+                FilaLista(
                   titulo: 'Municipalidad',
                   detalle: v?.municipalidad?.nombre,
                   alTocar: () => context.push(Rutas.municipalidad),
@@ -145,62 +132,42 @@ class PerfilScreen extends ConsumerWidget {
             ),
             _Grupo(
               titulo: 'Preferencias',
-              hijos: [
+              filas: [
                 if (!esDemo)
-                  _Opcion(
-                    icono: Phosphor.key,
-                    titulo: 'Crear o cambiar clave web',
+                  FilaLista(
+                    titulo: 'Clave web',
                     detalle: 'Para entrar con tu correo o tu cuponera',
                     alTocar: () => _crearClave(context, ref),
                   ),
-                _Opcion(
-                  icono: Phosphor.bell,
-                  titulo: 'Avisos y canales',
-                  alTocar: () => context.push(Rutas.avisos),
-                ),
+                FilaLista(titulo: 'Avisos y canales', alTocar: () => context.push(Rutas.avisos)),
                 // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
                 if (!esDemo && vecino != null) const OpcionWhatsapp(),
-                _Opcion(
-                  icono: Phosphor.shieldCheck,
-                  titulo: 'Privacidad',
-                  alTocar: () => context.push(Rutas.privacidad),
-                ),
-                SwitchListTile(
-                  value: textoGrande,
-                  onChanged: ref.read(textoGrandeProvider.notifier).cambiar,
-                  secondary: const Icon(Phosphor.textAa),
-                  title: const Text('Texto más grande'),
+                FilaLista(titulo: 'Privacidad', alTocar: () => context.push(Rutas.privacidad)),
+                FilaInterruptor(
+                  titulo: 'Texto más grande',
+                  valor: textoGrande,
+                  alCambiar: ref.read(textoGrandeProvider.notifier).cambiar,
                 ),
               ],
             ),
             _Grupo(
               titulo: 'Trámites y ayuda',
-              hijos: [
-                _Opcion(
-                  icono: Phosphor.receipt,
+              filas: [
+                FilaLista(
                   titulo: 'Constancias de pago',
-                  alTocar: () => context.go(
-                    '${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}',
-                  ),
+                  alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
                 ),
-                _Opcion(
-                  icono: Phosphor.headset,
-                  titulo: 'Atención',
-                  alTocar: () => context.push(Rutas.atencion),
-                ),
+                FilaLista(titulo: 'Atención', alTocar: () => context.push(Rutas.atencion)),
               ],
             ),
             // Peligro suave, según la guía: borde gris y texto en rojo oscuro.
-            OutlinedButton.icon(
+            OutlinedButton(
               onPressed: () => _cerrarSesion(context, ref),
-              icon: const Icon(Phosphor.signOut, size: AppIconos.boton),
-              label: Text(
-                esDemo ? 'Salir de la demostración' : 'Cerrar sesión',
-              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.error,
                 side: const BorderSide(color: AppColors.border),
               ),
+              child: Text(esDemo ? 'Salir de la demostración' : 'Cerrar sesión'),
             ),
           ],
         ),
@@ -209,60 +176,25 @@ class PerfilScreen extends ConsumerWidget {
   }
 }
 
-/// Grupo de opciones: un rótulo y una sola tarjeta, sin bordes por fila.
+/// Grupo de opciones: rótulo en mayúsculas pequeñas y filas con divisor, sin caja.
 class _Grupo extends StatelessWidget {
-  const _Grupo({required this.titulo, required this.hijos});
+  const _Grupo({required this.titulo, required this.filas});
 
   final String titulo;
-  final List<Widget> hijos;
+  final List<Widget> filas;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            left: AppSpacing.xs,
-            bottom: AppSpacing.sm,
-          ),
-          child: RotuloSeccion(titulo),
+        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            RotuloSeccion(titulo),
+            const SizedBox(height: AppSpacing.xs),
+            ListaFilas(filas: filas),
+          ],
         ),
-        Tarjeta(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-          child: Column(children: hijos),
-        ),
-      ],
-    ),
-  );
-}
-
-class _Opcion extends StatelessWidget {
-  const _Opcion({
-    required this.icono,
-    required this.titulo,
-    required this.alTocar,
-    this.detalle,
-  });
-
-  final IconData icono;
-  final String titulo;
-  final String? detalle;
-  final VoidCallback alTocar;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-    leading: Icon(icono),
-    title: Text(titulo),
-    subtitle: detalle == null ? null : Text(detalle!),
-    trailing: const Icon(
-      Phosphor.caretRight,
-      size: AppIconos.lista,
-      color: AppColors.textSecondary,
-    ),
-    onTap: alTocar,
-  );
+      );
 }
 
 /// Pide la clave web dos veces. La clave no se guarda en el teléfono.
@@ -291,8 +223,7 @@ class _DialogoClaveState extends State<_DialogoClave> {
     titulo: 'Clave web',
     textoConfirmar: 'Guardar',
     alConfirmar: () {
-      if (_formulario.currentState!.validate())
-        Navigator.pop(context, _clave.text);
+      if (_formulario.currentState!.validate()) Navigator.pop(context, _clave.text);
     },
     alCancelar: () => Navigator.pop(context),
     contenido: Form(
