@@ -21,6 +21,7 @@ import '../../shared/services/repositorio.dart';
 import 'clasificacion_foto/clasificador_foto.dart';
 import 'clasificacion_foto/proveedor_clasificador.dart';
 import 'reclamos_logica.dart';
+import 'piezas_lista.dart';
 import 'selector_ubicacion_screen.dart';
 
 /// Nuevo reclamo: foto, categoría, asunto, descripción y ubicación en una
@@ -328,7 +329,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
             ),
             children: [
               TituloSeccion(fotoObligatoria ? 'Foto del problema' : 'Foto del problema (opcional)'),
-              espacio,
+              espacioChico,
               _CampoFoto(
                 foto: _foto,
                 cargando: _cargandoFoto,
@@ -357,8 +358,8 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 Text(
                   _intentado && fotoObligatoria
                       ? 'Adjunta una foto para enviar el reclamo.'
-                      : 'Una foto, de la cámara o la galería. La reducimos antes de enviarla.',
-                  style: textos.bodySmall!.copyWith(
+                      : 'De la cámara o la galería.',
+                  style: textos.secundario13.copyWith(
                     color: _intentado && fotoObligatoria ? AppColors.error : null,
                   ),
                 ),
@@ -403,7 +404,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 decoration: InputDecoration(
                   labelText: 'Categoría',
                   helperText: _tipo != null && !_tipoElegidoAMano
-                      ? 'Sugerida por tu descripción. Puedes cambiarla.'
+                      ? 'Sugerida por lo que escribiste. Puedes cambiarla.'
                       : null,
                 ),
                 items: [
@@ -418,9 +419,9 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                         }),
                 validator: (tipo) => tipo == null ? 'Elige una categoría.' : null,
               ),
-              espacioSeccion,
+              espacioGrande,
               const TituloSeccion('Ubicación'),
-              espacio,
+              espacioChico,
               MarcoMapa(
                 alto: 170,
                 child: Stack(
@@ -455,30 +456,23 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 ),
               ),
               espacioChico,
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _enviando ? null : () => _elegirEnMapa(vista),
-                      icon: const Icon(Phosphor.mapPin, size: AppIconos.boton),
-                      label: Text(_punto == null ? 'Elegir en mapa' : 'Mover pin'),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _enviando || _buscandoGps ? null : _usarMiUbicacion,
-                      icon: _buscandoGps
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Phosphor.crosshair, size: AppIconos.boton),
-                      label: const Text('Mi ubicación'),
-                    ),
-                  ),
-                ],
+              // Apilados a todo el ancho: lado a lado, el texto se parte en teléfonos angostos.
+              OutlinedButton.icon(
+                onPressed: _enviando ? null : () => _elegirEnMapa(vista),
+                icon: const Icon(Phosphor.mapPin, size: AppIconos.boton),
+                label: Text(_punto == null ? 'Elegir en el mapa' : 'Cambiar en el mapa'),
+              ),
+              espacioChico,
+              OutlinedButton.icon(
+                onPressed: _enviando || _buscandoGps ? null : _usarMiUbicacion,
+                icon: _buscandoGps
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Phosphor.crosshair, size: AppIconos.boton),
+                label: const Text('Usar mi ubicación'),
               ),
               if (_fallaGps != null) ...[
                 espacioChico,
@@ -519,7 +513,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 espacio,
                 Aviso('No se envió el reclamo. ${_errorEnvio!} Tus datos siguen aquí.', tono: Tono.error),
               ],
-              espacioSeccion,
+              espacioGrande,
               FilledButton(
                 onPressed: _enviando ? null : () => _enviar(vista, fotoObligatoria),
                 child: _enviando
@@ -591,7 +585,7 @@ class _EstadoFoto extends StatelessWidget {
         children: [
           Insignia(texto, tono: tono, icono: icono),
           const SizedBox(height: AppSpacing.xs),
-          Text(resultado.motivo, style: Theme.of(context).textTheme.bodyMedium),
+          Text(resultado.motivo, style: Theme.of(context).textTheme.secundario13),
           if (diagnosticoFotoActivo && resultado.diagnostico != null) ...[
             espacioChico,
             _PanelDiagnostico(resultado.diagnostico!),
@@ -696,7 +690,7 @@ class _CampoFoto extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.92),
+                                color: AppColors.surface,
                                 borderRadius: BorderRadius.circular(AppRadius.pastilla),
                               ),
                               child: Row(

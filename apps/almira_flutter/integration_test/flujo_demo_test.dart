@@ -50,12 +50,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ubica el pin a mano: no hace falta el permiso de ubicación.
-    await tester.scrollUntilVisible(find.text('Elegir en mapa'), 200);
-    await tester.tap(find.text('Elegir en mapa'));
+    await tester.scrollUntilVisible(find.text('Elegir en el mapa'), 200);
+    await tester.tap(find.text('Elegir en el mapa'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Confirmar ubicación'));
     await tester.pumpAndSettle();
-    expect(find.text('Mover pin'), findsOneWidget);
+    expect(find.text('Cambiar en el mapa'), findsOneWidget);
 
     await tester.scrollUntilVisible(find.widgetWithText(TextFormField, 'Dirección o referencia'), 200);
     await tester.enterText(
@@ -69,7 +69,7 @@ void main() {
     // Abre el seguimiento del reclamo recién creado.
     expect(find.text('Seguimiento'), findsWidgets);
     expect(find.text('Poste sin luz en mi cuadra'), findsOneWidget);
-    expect(find.textContaining('días hábiles'), findsWidgets);
+    expect(find.textContaining('Respuesta hasta el'), findsOneWidget);
     expect(find.textContaining(' de 10 días'), findsNothing);
     expect(find.text('Sin fotografía adjunta'), findsOneWidget);
   });

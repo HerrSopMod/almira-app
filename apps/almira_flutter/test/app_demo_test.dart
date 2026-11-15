@@ -125,7 +125,8 @@ void main() {
     await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Reclamos')));
     await tester.pumpAndSettle();
     expect(find.text('Poste sin luz en la esquina'), findsOneWidget);
-    expect(find.text('Quedan 5 días hábiles'), findsOneWidget);
+    expect(find.textContaining('Respuesta hasta el'), findsOneWidget);
+    expect(find.textContaining('días hábiles'), findsNothing);
     expect(find.text('Resuelto'), findsOneWidget);
     expect(find.textContaining(' de 10 días'), findsNothing);
   });
