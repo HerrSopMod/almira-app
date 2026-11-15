@@ -102,6 +102,12 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     await _cargarInter();
+    // Las fotos de los reclamos de ejemplo se guardan en una carpeta del teléfono; en el test
+    // basta con una temporal.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (_) async => Directory.systemTemp.path,
+    );
     Directory('docs/capturas/pulido-ui/despues').createSync(recursive: true);
     goldenFileComparator = _GuardarCapturas(Uri.parse('test/capturas_test.dart'));
   });
@@ -146,14 +152,23 @@ void main() {
       await _capturar(tester, 'inicio-$etiqueta');
       for (final (nombre, ruta) in [
         ('pagar', Rutas.pagos),
+        ('deuda-detalle', Rutas.deuda('demo-arbitrios')),
         ('pago-en-linea', Rutas.pagoEnLinea),
         ('estado-de-cuenta', Rutas.estadoCuenta),
         ('cuponera', Rutas.cuponera),
+        ('reclamos', Rutas.reclamos),
+        ('reclamo-detalle', Rutas.reclamo('demo-reclamo-1842')),
+        ('nuevo-reclamo', Rutas.nuevoReclamo),
+        ('obras', Rutas.obras),
+        ('obra-detalle', Rutas.obra('demo-obra-pistas')),
         ('perfil', Rutas.perfil),
       ]) {
         router.go(ruta);
         await _capturar(tester, '$nombre-$etiqueta');
       }
+      // Confirmar pago recibe las deudas elegidas como extra.
+      router.go(Rutas.confirmarPago, extra: ['demo-multa', 'demo-arbitrios']);
+      await _capturar(tester, 'pago-confirmar-$etiqueta');
     });
   }
 
