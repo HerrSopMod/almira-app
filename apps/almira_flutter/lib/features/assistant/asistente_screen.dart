@@ -113,7 +113,6 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        toolbarHeight: 64,
         titleSpacing: 0,
         leading: IconButton(
           tooltip: 'Volver',
@@ -122,25 +121,14 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
         ),
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-              child: const AvatarBot(lado: 36),
-            ),
+            const AvatarBot(lado: 36),
             const SizedBox(width: AppSpacing.md),
             Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Asistente Almira',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textos.titleSmall!.copyWith(color: Colors.white, fontSize: 16),
-                  ),
-                  const EstadoEnLinea(),
-                ],
+              child: Text(
+                'Asistente Almira',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textos.titleLarge,
               ),
             ),
           ],

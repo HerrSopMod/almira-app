@@ -116,7 +116,7 @@ class BurbujaChat extends StatelessWidget {
         decoration: BoxDecoration(
           color: mio
               ? AppColors.primary
-              : (mensaje.fallo ? AppColors.errorSoft : const Color(0xFFF0F4F4)),
+              : (mensaje.fallo ? AppColors.errorSoft : AppColors.surfaceSubtle),
           borderRadius: borde,
         ),
         child: contenido,
@@ -220,7 +220,7 @@ class _IndicadorEscrituraState extends State<IndicadorEscritura> with SingleTick
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
-                color: Color(0xFFF0F4F4),
+                color: AppColors.surfaceSubtle,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(_radioChico),
                   topRight: Radius.circular(_radioGrande),
@@ -289,40 +289,19 @@ class SugerenciasRapidas extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             for (final p in preguntas)
+              // Chips con borde, como los filtros: blancos, texto turquesa.
               ActionChip(
                 label: Text(p),
                 onPressed: () => alElegir(p),
-                backgroundColor: AppColors.primarySoft,
-                side: BorderSide.none,
-                labelStyle: Theme.of(context).textTheme.labelMedium!.copyWith(color: AppColors.primaryDark),
+                backgroundColor: AppColors.surface,
+                side: const BorderSide(color: AppColors.bordeControl),
+                labelStyle: Theme.of(context).textTheme.titleSmall!.copyWith(color: AppColors.primary),
                 shape: const StadiumBorder(),
                 visualDensity: VisualDensity.standard,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
               ),
           ],
         ),
-      );
-}
-
-/// Estado del asistente bajo su nombre, con un punto verde.
-class EstadoEnLinea extends StatelessWidget {
-  const EstadoEnLinea({super.key});
-
-  @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(color: Color(0xFF7BE0A8), shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'En línea',
-            style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white.withValues(alpha: 0.92)),
-          ),
-        ],
       );
 }
 

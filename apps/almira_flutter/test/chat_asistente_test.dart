@@ -176,7 +176,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Asistente Almira'), findsOneWidget);
-      expect(find.text('En línea'), findsOneWidget);
+      // No se afirma una presencia «en línea» que la app no puede garantizar.
+      expect(find.text('En línea'), findsNothing);
       expect(find.textContaining('Soy Almira'), findsOneWidget);
       for (final s in ['¿Cuánto debo?', 'Mi último pago', '¿Cómo pago?', 'Mi estado de cuenta']) {
         expect(find.text(s), findsOneWidget);
