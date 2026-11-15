@@ -58,4 +58,7 @@ abstract final class AppColors {
   static const warningSoft = Color(0xFFFBF5E6);
   static const error = Color(0xFFB42F2F);
   static const errorSoft = Color(0xFFFAEAEA);
+
+  /// Opacidad del color de estado en el fondo de una insignia (12 %).
+  static const double alfaFondoInsignia = 0.12;
 }
