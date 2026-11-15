@@ -1,7 +1,7 @@
 // Capturas de las pantallas principales para revisar el diseño a simple vista, en dos tamaños
 // de teléfono (360×640 y 393×852) y con el texto del sistema al 100 % y al 130 %.
 //
-// Cada corrida vuelve a escribir las capturas en docs/capturas/rediseno/ (no se comparan píxel
+// Cada corrida vuelve a escribir las capturas en docs/capturas/pulido-ui/despues/ (no se comparan píxel
 // a píxel: sirven para revisar a simple vista). Si una pantalla se desborda, el test falla.
 import 'dart:async';
 import 'dart:io';
@@ -88,14 +88,14 @@ void _pantalla(WidgetTester tester, double ancho, double alto, double escala) {
 Future<void> _capturar(WidgetTester tester, String nombre) async {
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull, reason: 'se desborda: $nombre');
-  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/$nombre.png'));
+  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/$nombre.png'));
 }
 
 void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     await _cargarInter();
-    Directory('docs/capturas/rediseno').createSync(recursive: true);
+    Directory('docs/capturas/pulido-ui/despues').createSync(recursive: true);
     goldenFileComparator = _GuardarCapturas(Uri.parse('test/capturas_test.dart'));
   });
 
@@ -234,7 +234,7 @@ void main() {
       await tester.tap(find.text('¿Cómo pago?'));
       await tester.pump(const Duration(milliseconds: 450));
       expect(tester.takeException(), isNull);
-      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/chat-escribiendo-$etiqueta.png'));
+      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/chat-escribiendo-$etiqueta.png'));
       espera.complete(const RespuestaAsistente('Listo.'));
       await tester.pumpAndSettle();
     });

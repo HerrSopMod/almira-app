@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,17 +7,7 @@ import 'app_spacing.dart';
 /// Cifras tabulares para montos y fechas alineadas.
 const cifrasTabulares = [FontFeature.tabularFigures()];
 
-/// Barra del sistema sobre un encabezado turquesa: íconos claros.
-const barraSobreTurquesa = SystemUiOverlayStyle(
-  statusBarColor: Colors.transparent,
-  statusBarIconBrightness: Brightness.light,
-  statusBarBrightness: Brightness.dark,
-  systemNavigationBarColor: Colors.transparent,
-  systemNavigationBarIconBrightness: Brightness.dark,
-  systemNavigationBarContrastEnforced: false,
-);
-
-/// Barra del sistema sobre fondo blanco (ingreso, bienvenida): íconos oscuros.
+/// Barra del sistema sobre fondo blanco: íconos oscuros. Toda la app va sobre blanco.
 const barraSobreBlanco = SystemUiOverlayStyle(
   statusBarColor: Colors.transparent,
   statusBarIconBrightness: Brightness.dark,
@@ -27,6 +16,12 @@ const barraSobreBlanco = SystemUiOverlayStyle(
   systemNavigationBarIconBrightness: Brightness.dark,
   systemNavigationBarContrastEnforced: false,
 );
+
+/// Rótulo de sección en mayúsculas pequeñas («MIS DERECHOS»).
+TextStyle estiloRotulo(BuildContext context) => Theme.of(context)
+    .textTheme
+    .labelMedium!
+    .copyWith(letterSpacing: 0.72, color: AppColors.textSecondary);
 
 abstract final class AppTheme {
   static ThemeData get claro {
@@ -63,45 +58,74 @@ abstract final class AppTheme {
       letterSpacing: 0,
     );
     final textos = TextTheme(
-      // Cifra destacada (monto): 30.
-      displaySmall: base.copyWith(
-        fontSize: 30,
-        height: 1.15,
+      // Monto principal de una pantalla (detalle, comprobante): 36.
+      displayMedium: base.copyWith(
+        fontSize: 36,
+        height: 42 / 36,
+        letterSpacing: -0.72,
         fontWeight: FontWeight.w700,
         fontFeatures: cifrasTabulares,
       ),
-      // Nombre de la app (solo en el ingreso): 28.
-      headlineMedium: base.copyWith(fontSize: 28, height: 1.2, fontWeight: FontWeight.w600),
-      // Título de pantalla: 22.
-      headlineSmall: base.copyWith(fontSize: 22, height: 1.25, fontWeight: FontWeight.w700),
-      // Título de barra y de sección: 18. Subtítulo: 16.
-      titleLarge: base.copyWith(fontSize: 18, height: 1.3, fontWeight: FontWeight.w600),
-      titleMedium: base.copyWith(fontSize: 16, height: 1.35, fontWeight: FontWeight.w600),
-      titleSmall: base.copyWith(fontSize: 14, height: 1.35, fontWeight: FontWeight.w600),
-      // Cuerpo: 14. Texto que se escribe en un campo: 15 para que se lea bien.
-      bodyLarge: base.copyWith(fontSize: 15, height: 1.45, fontWeight: FontWeight.w400),
+      // Monto destacado dentro de un bloque (inicio, pagar): 32.
+      displaySmall: base.copyWith(
+        fontSize: 32,
+        height: 38 / 32,
+        letterSpacing: -0.64,
+        fontWeight: FontWeight.w700,
+        fontFeatures: cifrasTabulares,
+      ),
+      // Nombre de la app en el ingreso: 28.
+      headlineMedium: base.copyWith(
+        fontSize: 28,
+        height: 34 / 28,
+        letterSpacing: -0.56,
+        fontWeight: FontWeight.w700,
+      ),
+      // Título de pantalla: 24.
+      headlineSmall: base.copyWith(
+        fontSize: 24,
+        height: 32 / 24,
+        letterSpacing: -0.24,
+        fontWeight: FontWeight.w700,
+      ),
+      // Título de la barra superior y de sección: 18.
+      titleLarge: base.copyWith(fontSize: 18, height: 24 / 18, fontWeight: FontWeight.w600),
+      // Título de tarjeta y de fila: 16.
+      titleMedium: base.copyWith(fontSize: 16, height: 24 / 16, fontWeight: FontWeight.w600),
+      titleSmall: base.copyWith(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600),
+      // Texto de trámite e instrucciones, y lo que se escribe en un campo: 16.
+      bodyLarge: base.copyWith(fontSize: 16, height: 24 / 16, fontWeight: FontWeight.w400),
+      // Texto de lectura y descripciones: 14, en gris.
       bodyMedium: base.copyWith(
         fontSize: 14,
-        height: 1.45,
+        height: 20 / 14,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
       ),
-      // Texto secundario: 12.
+      // Ayudas y pies: 12, en gris.
       bodySmall: base.copyWith(
         fontSize: 12,
-        height: 1.4,
+        height: 16 / 12,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
       ),
-      labelLarge: base.copyWith(fontSize: 15, height: 1.25, fontWeight: FontWeight.w600),
-      labelMedium: base.copyWith(fontSize: 12, height: 1.25, fontWeight: FontWeight.w600),
-      labelSmall: base.copyWith(fontSize: 12, height: 1.25, fontWeight: FontWeight.w500),
+      // Botones: 16.
+      labelLarge: base.copyWith(fontSize: 16, height: 20 / 16, fontWeight: FontWeight.w600),
+      // Insignias y rótulos: 12.
+      labelMedium: base.copyWith(
+        fontSize: 12,
+        height: 16 / 12,
+        letterSpacing: 0.24,
+        fontWeight: FontWeight.w600,
+      ),
+      // Etiquetas de la barra inferior: 11.
+      labelSmall: base.copyWith(fontSize: 11, height: 14 / 11, fontWeight: FontWeight.w500),
     );
 
     final formaBoton = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.boton),
     );
-    const altoBoton = Size.fromHeight(52);
+    const altoBoton = Size.fromHeight(AppSpacing.boton);
 
     return ThemeData(
       useMaterial3: true,
@@ -110,25 +134,40 @@ abstract final class AppTheme {
       textTheme: textos,
       scaffoldBackgroundColor: AppColors.background,
       splashFactory: InkSparkle.splashFactory,
+      iconTheme: const IconThemeData(color: AppColors.textPrimary, size: AppIconos.navegacion),
+      // Barra superior blanca, con texto oscuro y una línea inferior de 1 px.
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleSpacing: AppSpacing.margen,
-        systemOverlayStyle: barraSobreTurquesa,
-        titleTextStyle: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
-        iconTheme: const IconThemeData(color: AppColors.onPrimary),
-        actionsIconTheme: const IconThemeData(color: AppColors.onPrimary),
+        toolbarHeight: 56,
+        shape: const Border(bottom: BorderSide(color: AppColors.border)),
+        systemOverlayStyle: barraSobreBlanco,
+        titleTextStyle: textos.titleLarge,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary, size: AppIconos.navegacion),
+        actionsIconTheme: const IconThemeData(color: AppColors.textPrimary, size: AppIconos.navegacion),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.textSecondary,
+        indicatorColor: AppColors.primary,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: AppColors.border,
+        labelStyle: textos.titleSmall,
+        unselectedLabelStyle: textos.titleSmall!.copyWith(fontWeight: FontWeight.w500),
+        splashFactory: NoSplash.splashFactory,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: altoBoton,
           shape: formaBoton,
           textStyle: textos.labelLarge,
-          disabledBackgroundColor: AppColors.track,
-          disabledForegroundColor: AppColors.textSecondary,
+          disabledBackgroundColor: AppColors.primaryDisabled,
+          disabledForegroundColor: Colors.white,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -137,39 +176,47 @@ abstract final class AppTheme {
           shape: formaBoton,
           textStyle: textos.labelLarge,
           foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.border),
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
           shape: formaBoton,
-          textStyle: textos.labelLarge,
+          textStyle: textos.labelLarge!.copyWith(fontWeight: FontWeight.w500),
           foregroundColor: AppColors.primary,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
+          foregroundColor: AppColors.textPrimary,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.campo,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        // Con texto de 16 y 24 de interlineado, el campo mide 52.
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 14),
         prefixIconColor: WidgetStateColor.resolveWith(
           (e) => e.contains(WidgetState.focused) ? AppColors.primary : AppColors.textSecondary,
         ),
         suffixIconColor: AppColors.textSecondary,
         labelStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary),
+        floatingLabelStyle: textos.titleSmall!.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
         hintStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary),
         helperStyle: textos.bodySmall,
         errorStyle: textos.bodySmall!.copyWith(color: AppColors.error),
         errorMaxLines: 3,
         helperMaxLines: 3,
-        border: _borde(Colors.transparent),
-        enabledBorder: _borde(Colors.transparent),
-        disabledBorder: _borde(Colors.transparent),
-        // Foco sutil: solo un borde turquesa suave. La etiqueta ya está arriba desde el inicio,
-        // así que al enfocar no se mueve ni cambia de tamaño; tampoco cambia el relleno.
+        border: _borde(AppColors.border),
+        enabledBorder: _borde(AppColors.border),
+        disabledBorder: _borde(AppColors.border),
+        // La etiqueta ya está arriba desde el inicio: al enfocar no se mueve. El foco solo
+        // engrosa el borde en turquesa.
         floatingLabelBehavior: FloatingLabelBehavior.always,
         focusedBorder: _borde(AppColors.foco, 1.5),
-        errorBorder: _borde(AppColors.error, 1.4),
+        errorBorder: _borde(AppColors.error, 1.5),
         focusedErrorBorder: _borde(AppColors.error, 1.5),
       ),
       cardTheme: CardThemeData(
@@ -182,28 +229,25 @@ abstract final class AppTheme {
         ),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1, space: 1),
+      // Barra inferior: sin píldora. La pestaña activa va en turquesa con el ícono relleno.
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        height: 68,
-        indicatorColor: AppColors.primarySoft,
-        indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        height: AppSpacing.barraInferior,
+        indicatorColor: Colors.transparent,
+        indicatorShape: const RoundedRectangleBorder(),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (estados) => textos.labelSmall!.copyWith(
-            fontWeight: estados.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
-            color: estados.contains(WidgetState.selected)
-                ? AppColors.primaryDark
-                : AppColors.textSecondary,
+            fontWeight: estados.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w500,
+            color: estados.contains(WidgetState.selected) ? AppColors.primary : AppColors.textSecondary,
           ),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (estados) => IconThemeData(
-            size: 24,
-            color: estados.contains(WidgetState.selected)
-                ? AppColors.primaryDark
-                : AppColors.textSecondary,
+            size: AppIconos.navegacion,
+            color: estados.contains(WidgetState.selected) ? AppColors.primary : AppColors.textSecondary,
           ),
         ),
       ),
@@ -216,11 +260,21 @@ abstract final class AppTheme {
         ),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.insignia)),
+        side: const BorderSide(color: AppColors.bordeControl, width: 1.5),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (e) => e.contains(WidgetState.selected) ? AppColors.primary : AppColors.bordeControl,
+        ),
+      ),
       // Selector segmentado: la opción activa va rellena en turquesa con texto blanco; la
       // inactiva, en blanco con borde. Se distingue a primera vista.
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
-          minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
+          minimumSize: const WidgetStatePropertyAll(Size(0, AppSpacing.toque)),
+          textStyle: WidgetStatePropertyAll(textos.titleSmall),
           backgroundColor: WidgetStateProperty.resolveWith(
             (e) => e.contains(WidgetState.selected) ? AppColors.primary : AppColors.surface,
           ),
@@ -246,7 +300,7 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.textPrimary,
         contentTextStyle: textos.bodyMedium!.copyWith(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.campo)),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.primary,
@@ -257,12 +311,18 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.dialogo)),
+      ),
       listTileTheme: ListTileThemeData(
         iconColor: AppColors.primary,
-        titleTextStyle: textos.bodyLarge,
+        titleTextStyle: textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500),
         subtitleTextStyle: textos.bodyMedium,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         minVerticalPadding: 12,
+        minTileHeight: AppSpacing.cajaGrande,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {

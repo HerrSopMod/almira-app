@@ -1,5 +1,5 @@
 // Ajustes de diseño, ronda 2: diálogo de confirmación, chips de filtro, teclado abierto y
-// capturas de las pantallas tocadas (docs/capturas/rediseno/).
+// capturas de las pantallas tocadas (docs/capturas/pulido-ui/despues/).
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -112,7 +112,7 @@ void _abrirTeclado(WidgetTester tester) {
 Future<void> _capturar(WidgetTester tester, String nombre) async {
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull, reason: 'se desborda: $nombre');
-  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/$nombre.png'));
+  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/$nombre.png'));
 }
 
 /// El elemento está entero en la zona que deja libre el teclado.
@@ -134,7 +134,7 @@ void main() {
       const MethodChannel('plugins.flutter.io/path_provider'),
       (_) async => Directory.systemTemp.path,
     );
-    Directory('docs/capturas/rediseno').createSync(recursive: true);
+    Directory('docs/capturas/pulido-ui/despues').createSync(recursive: true);
     goldenFileComparator = _GuardarCapturas(Uri.parse('test/ajustes_diseno_test.dart'));
   });
 

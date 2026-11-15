@@ -14,6 +14,7 @@ import '../../shared/services/proveedores.dart';
 
 const _claveMinima = 8;
 const _altoCampo = 52.0;
+const _radioPanel = 32.0;
 
 /// Ingreso. Arriba, un encabezado claro con el logo, el nombre y una frase; abajo, un panel
 /// turquesa con esquinas superiores redondeadas que ocupa el resto de la pantalla, con los
@@ -316,16 +317,6 @@ class _ZonaClara extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Positioned(
-            right: -60,
-            top: -40,
-            child: _Mancha(130, AppColors.mentaSuave),
-          ),
-          Positioned(
-            left: -50,
-            bottom: -30,
-            child: _Mancha(90, AppColors.coralSuave),
-          ),
           Padding(
             padding: EdgeInsets.fromLTRB(
               AppSpacing.xl + AppSpacing.sm,
@@ -343,13 +334,6 @@ class _ZonaClara extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.noche.withValues(alpha: 0.12),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
                     ),
                     child: Center(child: LogoAlmira(lado: logo * 0.68)),
                   ),
@@ -380,20 +364,6 @@ class _ZonaClara extends StatelessWidget {
   }
 }
 
-class _Mancha extends StatelessWidget {
-  const _Mancha(this.lado, this.color);
-
-  final double lado;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: lado,
-    height: lado,
-    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-  );
-}
-
 /// Panel turquesa con esquinas superiores de 32, del alto de su contenido y anclado abajo.
 class _Panel extends StatelessWidget {
   const _Panel({required this.child});
@@ -406,7 +376,7 @@ class _Panel extends StatelessWidget {
     decoration: const BoxDecoration(
       color: AppColors.primary,
       borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppRadius.panel),
+        top: Radius.circular(_radioPanel),
       ),
     ),
     padding: EdgeInsets.fromLTRB(
@@ -491,8 +461,8 @@ class _CampoPildora extends StatelessWidget {
         border: borde(),
         enabledBorder: borde(),
         focusedBorder: borde(AppColors.foco, 1.5),
-        errorBorder: borde(AppColors.coral, 2),
-        focusedErrorBorder: borde(AppColors.coral, 1.5),
+        errorBorder: borde(Colors.white, 2),
+        focusedErrorBorder: borde(Colors.white, 1.5),
         errorStyle: textos.bodySmall!.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w600,

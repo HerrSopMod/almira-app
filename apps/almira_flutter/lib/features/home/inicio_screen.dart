@@ -322,7 +322,7 @@ class _Accesos extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: AppColors.surfaceSubtle, borderRadius: BorderRadius.circular(AppRadius.caja)),
                   child: Icon(icono, size: 22, color: color),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -346,13 +346,13 @@ class _Accesos extends StatelessWidget {
     return Column(
       children: [
         fila(
-          acceso(Icons.lock_outline_rounded, AppColors.accesoPagar, 'Pagar en línea', Rutas.pagoEnLinea),
-          acceso(Icons.receipt_long_outlined, AppColors.accesoEstado, 'Estado de cuenta', Rutas.estadoCuenta),
+          acceso(Icons.lock_outline_rounded, AppColors.primary, 'Pagar en línea', Rutas.pagoEnLinea),
+          acceso(Icons.receipt_long_outlined, AppColors.primary, 'Estado de cuenta', Rutas.estadoCuenta),
         ),
         const SizedBox(height: AppSpacing.sm),
         fila(
-          acceso(Icons.description_outlined, AppColors.accesoCuponera, 'Cuponera', Rutas.cuponera),
-          acceso(Icons.history_rounded, AppColors.accesoHistorial, 'Historial', Rutas.estadoCuenta),
+          acceso(Icons.description_outlined, AppColors.primary, 'Cuponera', Rutas.cuponera),
+          acceso(Icons.history_rounded, AppColors.primary, 'Historial', Rutas.estadoCuenta),
         ),
       ],
     );

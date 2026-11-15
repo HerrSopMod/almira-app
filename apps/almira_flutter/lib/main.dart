@@ -20,7 +20,7 @@ Future<void> main() async {
   // La app dibuja detrás de las barras del sistema (Android 15 ya lo hace
   // siempre): cada pantalla pinta su franja superior y respeta el área segura.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(barraSobreTurquesa);
+  SystemChrome.setSystemUIOverlayStyle(barraSobreBlanco);
 
   final preferencias = await SharedPreferences.getInstance();
   final Repositorio repositorio;

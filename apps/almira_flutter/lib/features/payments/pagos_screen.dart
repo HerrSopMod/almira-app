@@ -70,15 +70,12 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
           final resumen = resumirDeuda(v.deudas, hoy);
           final lista = filtrarDeudas(v.deudas, _filtro, hoy);
           return [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(child: Text('Total pendiente', style: textos.bodyMedium)),
-                Text(
-                  soles(resumen.total),
-                  style: textos.headlineSmall!.copyWith(fontFeatures: cifrasTabulares),
-                ),
-              ],
+            Text('Total pendiente', style: textos.bodyMedium),
+            const SizedBox(height: AppSpacing.xs),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(soles(resumen.total), style: textos.displaySmall),
             ),
             espacio,
             GrupoFiltros(
