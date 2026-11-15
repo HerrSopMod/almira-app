@@ -1,5 +1,7 @@
 import 'package:almira_flutter/app/app.dart';
 import 'package:almira_flutter/features/auth/servicio_auth.dart';
+import 'package:almira_flutter/features/home/inicio_screen.dart';
+import 'package:almira_flutter/features/shell/shell_principal.dart';
 import 'package:almira_flutter/shared/models/modelos.dart';
 import 'package:almira_flutter/shared/services/datos_demo.dart';
 import 'package:almira_flutter/shared/services/proveedores.dart';
@@ -43,6 +45,8 @@ Future<void> _entrar(WidgetTester tester) async {
   // Vincula la cuponera (en demostración ya viene vinculada) y verifica el celular.
   expect(find.text('Vincula tu cuponera'), findsOneWidget);
   await tester.scrollUntilVisible(find.text('Continuar'), 200);
+  await tester.ensureVisible(find.text('Continuar'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Continuar'));
   await tester.pumpAndSettle();
   expect(find.text('Crea tu clave web'), findsOneWidget);
@@ -75,6 +79,8 @@ void main() {
     expect(interruptores.every((i) => i.value == false), isTrue);
 
     await tester.scrollUntilVisible(find.text('Continuar'), 200);
+    await tester.ensureVisible(find.text('Continuar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
 
@@ -93,6 +99,8 @@ void main() {
     await tester.pumpAndSettle();
     await _entrar(tester);
     await tester.scrollUntilVisible(find.text('Continuar'), 200);
+    await tester.ensureVisible(find.text('Continuar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
 
@@ -103,7 +111,7 @@ void main() {
     expect(find.text('S/ 40.00'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('S/ 80.50'), 200);
     expect(find.text('S/ 80.50'), findsOneWidget);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(BarraInferior), findsOneWidget);
 
     // Las cinco pestañas, ida y vuelta, sin errores ni pantallas superpuestas.
     for (var vuelta = 0; vuelta < 2; vuelta++) {
@@ -111,18 +119,19 @@ void main() {
         ('Pagar', 'Pagar'),
         ('Reclamos', 'Nuevo reclamo'),
         ('Asistente', 'Escribe tu pregunta'),
-        // El saludo va en el cuerpo y puede quedar fuera de pantalla: Inicio se reconoce por la marca.
-        ('Inicio', 'Almira'),
+        // La cabecera se desplaza con el contenido y puede quedar fuera de pantalla: Inicio se
+        // reconoce por su pantalla.
+        ('Inicio', null),
       ]) {
-        await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text(pestana)));
+        await tester.tap(find.descendant(of: find.byType(BarraInferior), matching: find.text(pestana)));
         await tester.pumpAndSettle();
-        expect(find.text(titulo), findsWidgets);
+        expect(titulo == null ? find.byType(InicioScreen) : find.text(titulo), findsWidgets);
         expect(tester.takeException(), isNull);
       }
     }
 
     // Reclamos: ningún contador contradictorio.
-    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Reclamos')));
+    await tester.tap(find.descendant(of: find.byType(BarraInferior), matching: find.text('Reclamos')));
     await tester.pumpAndSettle();
     expect(find.text('Poste sin luz en la esquina'), findsOneWidget);
     expect(find.text('Quedan 5 días hábiles'), findsOneWidget);
@@ -137,6 +146,8 @@ void main() {
     await tester.pumpAndSettle();
     await _entrar(tester);
     await tester.scrollUntilVisible(find.text('Continuar'), 200);
+    await tester.ensureVisible(find.text('Continuar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
 
@@ -156,11 +167,13 @@ void main() {
     await tester.pumpAndSettle();
     await _entrar(tester);
     await tester.scrollUntilVisible(find.text('Continuar'), 200);
+    await tester.ensureVisible(find.text('Continuar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
     expect(find.text('Hola, Rosa'), findsOneWidget);
     for (final pestana in ['Pagar', 'Reclamos', 'Asistente', 'Inicio']) {
-      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text(pestana)));
+      await tester.tap(find.descendant(of: find.byType(BarraInferior), matching: find.text(pestana)));
       await tester.pumpAndSettle();
       // Un desborde de diseño se reporta como excepción.
       expect(tester.takeException(), isNull);

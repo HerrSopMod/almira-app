@@ -44,6 +44,8 @@ Future<void> _entrar(WidgetTester tester, SharedPreferences preferencias) async 
   await tester.tap(find.text('Entrar a la demostración'));
   await tester.pumpAndSettle();
   await tester.scrollUntilVisible(find.text('Continuar'), 200);
+  await tester.ensureVisible(find.text('Continuar'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Continuar'));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Ahora no'));
@@ -55,6 +57,9 @@ Future<void> _entrar(WidgetTester tester, SharedPreferences preferencias) async 
   await tester.tap(find.text('Verificar'));
   await tester.pumpAndSettle();
   await tester.scrollUntilVisible(find.text('Continuar'), 200);
+  // Entero en pantalla antes de tocarlo: puede quedar asomando por el borde inferior.
+  await tester.ensureVisible(find.text('Continuar'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Continuar'));
   await tester.pumpAndSettle();
 }

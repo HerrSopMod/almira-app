@@ -49,6 +49,16 @@ abstract final class AppSpacing {
 
   /// Separación entre grupos de una ficha o de una pantalla de detalle.
   static const double grupo = 24;
+
+  /// Botón central del Asistente en la barra inferior: diámetro total con el anillo blanco,
+  /// grosor del anillo y cuánto sobresale por encima de la barra.
+  static const double botonCentral = 56;
+  static const double anilloCentral = 4;
+  static const double salienteCentral = 18;
+
+  /// Línea corta sobre la pestaña activa de la barra inferior.
+  static const double lineaActivaAncho = 24;
+  static const double lineaActivaAlto = 3;
 }
 
 /// Tamaños de ícono. Un solo estilo de línea («regular»); «fill» solo en la pestaña activa.
@@ -59,6 +69,9 @@ abstract final class AppIconos {
   static const double caja = 24;
   static const double insignia = 16;
   static const double vacio = 28;
+
+  /// Ícono del botón central del Asistente.
+  static const double central = 28;
 }
 
 abstract final class AppRadius {

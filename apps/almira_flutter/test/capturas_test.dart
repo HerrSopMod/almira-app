@@ -134,6 +134,8 @@ void main() {
       await tester.tap(find.text('Entrar a la demostración'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('Continuar'), 200);
+      await tester.ensureVisible(find.text('Continuar'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Ahora no'));
@@ -145,6 +147,8 @@ void main() {
       await tester.tap(find.text('Verificar'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('Continuar'), 200);
+      await tester.ensureVisible(find.text('Continuar'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
 

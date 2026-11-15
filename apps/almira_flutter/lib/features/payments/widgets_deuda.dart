@@ -5,7 +5,6 @@ import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 
 import '../../app/theme/app_spacing.dart';
-import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/tributo.dart';
@@ -25,9 +24,10 @@ class InsigniaDeuda extends StatelessWidget {
       };
 }
 
-/// Fila de una obligación. Primera línea: ícono, nombre e importe a la derecha; debajo, el
-/// periodo y el vencimiento, con la insignia de estado alineada a la derecha. Así el nombre
-/// tiene todo el ancho y no se parte a mitad de palabra con letra grande.
+/// Fila de una obligación, como una fila de lista: nombre del tributo en 15/500, periodo y
+/// vencimiento en gris de 13 debajo, monto a la derecha y flecha. El vencimiento es una línea de
+/// texto («Vence el 30 de noviembre»); solo si ya venció va en rojo. La insignia queda para los
+/// estados reales: Vencida y Pagada.
 class FilaDeuda extends StatelessWidget {
   const FilaDeuda({super.key, required this.deuda, required this.hoy, this.alTocar});
 
@@ -39,44 +39,29 @@ class FilaDeuda extends StatelessWidget {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     final estado = deuda.estadoAl(hoy);
-    return Tarjeta(
-      onTap: alTocar,
+    final vencida = estado == EstadoDeuda.vencida;
+    return FilaLista(
+      titulo: deuda.tipo.nombre,
+      monto: soles(deuda.total),
+      alTocar: alTocar,
       semantica: '${deuda.concepto}, ${soles(deuda.total)}, ${estado.etiqueta}. Ver detalle',
-      child: Row(
+      detalle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconoTributo(deuda.tipo, lado: AppSpacing.caja),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          if (deuda.periodo.isNotEmpty) Text(deuda.periodo, style: textos.bodyMedium),
+          if (estado == EstadoDeuda.pagada) ...[
+            const SizedBox(height: AppSpacing.xs),
+            InsigniaDeuda(estado),
+          ] else
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: Text(deuda.tipo.nombre, style: textos.titleMedium)),
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      soles(deuda.total),
-                      style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares),
-                    ),
-                  ],
-                ),
-                if (deuda.periodo.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(deuda.periodo, style: textos.bodyMedium),
-                ],
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(child: Text(vencimientoDe(deuda, hoy), style: textos.bodySmall)),
-                    const SizedBox(width: AppSpacing.sm),
-                    InsigniaDeuda(estado),
-                  ],
-                ),
+                TextoPlazo(vencimientoDe(deuda, hoy), vencido: vencida),
+                if (vencida) InsigniaDeuda(estado),
               ],
             ),
-          ),
         ],
       ),
     );

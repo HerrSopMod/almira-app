@@ -18,6 +18,27 @@ const barraSobreTurquesa = SystemUiOverlayStyle(
   systemNavigationBarContrastEnforced: false,
 );
 
+/// Barra del sistema sobre fondo blanco (íconos oscuros). Se mantiene por compatibilidad para
+/// pantallas sin cabecera turquesa; las pantallas nuevas usan [barraSobreTurquesa].
+const barraSobreBlanco = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.dark,
+  statusBarBrightness: Brightness.light,
+  systemNavigationBarColor: Colors.transparent,
+  systemNavigationBarIconBrightness: Brightness.dark,
+  systemNavigationBarContrastEnforced: false,
+);
+
+/// Barras del sistema durante la carga: todo turquesa, sin franja blanca.
+const barraCarga = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark,
+  systemNavigationBarColor: AppColors.primary,
+  systemNavigationBarIconBrightness: Brightness.light,
+  systemNavigationBarContrastEnforced: false,
+);
+
 /// Rótulo de un grupo o de una ficha («Cuenta y predio», «Fecha límite»): 13 en gris, en tipo
 /// oración. Sin mayúsculas sostenidas.
 TextStyle estiloRotulo(BuildContext context) =>
