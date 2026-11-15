@@ -35,6 +35,11 @@ Monorepo pnpm: app de vecinos en Flutter (`apps/almira_flutter`), app de vecinos
 - Un solo mapa: `MapaAlmira` (`flutter_map` con OpenStreetMap), siempre con atribución.
 - Fechas y plazos con la fecha real del teléfono (`relojProvider`), nunca con una fecha fija.
 - Cada pantalla con datos cubre carga, vacío, error y sin conexión (`CuerpoAsync`).
+- Pestañas raíz (Inicio, Pagar, Reclamos, Obras, Asistente): cabecera turquesa sólida detrás de la barra de estado, con logo blanco y acciones, y el contenido en una hoja blanca de esquinas superiores de 20 montada sobre ella (`CabeceraMarca`, `HojaBlanca`, `CuerpoAsync(cabecera: …)`). Solo Inicio lleva tarjeta flotante, con la carita de `cara_saldo.dart`.
+- Pantallas de detalle: `AppBar` normal; el tema la pinta turquesa compacta con flecha y título en blanco. Ingreso: cabecera turquesa del 40 % con el logo blanco y el formulario en hoja blanca.
+- Barra inferior: Inicio, Pagar, Asistente (botón central turquesa con robot blanco), Reclamos y Obras. El orden visual no cambia las ramas del router.
+- Pantalla de carga: splash nativo y `PantallaCarga` en turquesa con el ícono blanco al centro (112 dp), sin franja blanca al entrar.
+- Plazos en texto gris («Vence el 30 de noviembre»), en rojo solo si venció; insignias solo para estados reales. Fichas con rótulo arriba y valor debajo; solo los montos a la derecha.
 
 ## Reglas de datos
 
