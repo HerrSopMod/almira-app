@@ -3,24 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
+import '../../app/theme/iconos.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
 
 const _claveMinima = 8;
-const _altoCampo = 52.0;
-const _radioPanel = 32.0;
 
-/// Ingreso. Arriba, un encabezado claro con el logo, el nombre y una frase; abajo, un panel
-/// turquesa con esquinas superiores redondeadas que ocupa el resto de la pantalla, con los
-/// campos en píldora blanca, «Ingresar» y Google. Todo del mismo ancho. En modo demostración no
-/// hay cuentas: un solo botón, dicho con claridad.
+/// Ingreso sobre fondo blanco: el logo vertical arriba, los campos del tema, «Ingresar» como
+/// única acción primaria, Google como secundaria y el registro como enlace. En modo
+/// demostración no hay cuentas: un solo botón, dicho con claridad.
 class IngresoScreen extends ConsumerStatefulWidget {
   const IngresoScreen({super.key});
 
@@ -81,11 +78,9 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
     if (correo == null || !mounted) return;
     try {
       await ref.read(servicioAuthProvider).enviarEnlaceClave(correo);
-      if (mounted)
-        mostrarMensaje(
-          context,
-          'Si el correo está registrado, te enviamos un enlace.',
-        );
+      if (mounted) {
+        mostrarMensaje(context, 'Si el correo está registrado, te enviamos un enlace.');
+      }
     } catch (error) {
       if (mounted) mostrarMensaje(context, ErrorApp.de(error).detalle);
     }
@@ -94,37 +89,41 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
   @override
   Widget build(BuildContext context) {
     final esDemo = ref.watch(esDemoProvider);
-    // Con el teclado abierto se oculta el encabezado para que los campos y «Ingresar» se vean.
+    // Con el teclado abierto el logo se achica para que los campos e «Ingresar» se vean.
     final tecladoAbierto = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final bajo = MediaQuery.sizeOf(context).height < 700;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: barraSobreBlanco,
       child: Scaffold(
-        backgroundColor: AppColors.surfaceSubtle,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: true,
-        body: LayoutBuilder(
-          builder: (context, restricciones) => SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        body: SafeArea(
+          child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: restricciones.maxHeight),
-              child: IntrinsicHeight(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: SingleChildScrollView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margen),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // La zona clara toma el espacio que sobra y centra el encabezado.
-                    Expanded(
-                      child: tecladoAbierto
-                          ? SizedBox(height: MediaQuery.paddingOf(context).top)
-                          : const _ZonaClara(),
+                    // Con el teclado abierto el logo se oculta para que los campos e «Ingresar»
+                    // queden a la vista.
+                    if (tecladoAbierto)
+                      const SizedBox(height: AppSpacing.lg)
+                    else ...[
+                      SizedBox(height: bajo ? AppSpacing.xl : AppSpacing.seccion + AppSpacing.lg),
+                      const Center(child: LogoVertical()),
+                      SizedBox(height: bajo ? AppSpacing.xl : AppSpacing.xxxl),
+                    ],
+                    Form(
+                      key: _formulario,
+                      autovalidateMode:
+                          _intentado ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                      child: esDemo ? _demo() : _conCuenta(),
                     ),
-                    _Panel(
-                      child: Form(
-                        key: _formulario,
-                        autovalidateMode: _intentado
-                            ? AutovalidateMode.onUserInteraction
-                            : AutovalidateMode.disabled,
-                        child: esDemo ? _demo() : _conCuenta(),
-                      ),
-                    ),
+                    const SizedBox(height: AppSpacing.xl),
                   ],
                 ),
               ),
@@ -136,32 +135,25 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
   }
 
   Widget _demo() => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const Center(child: EtiquetaDemo()),
-      const SizedBox(height: AppSpacing.md),
-      Text(
-        'Esta versión muestra datos de ejemplo. No necesitas una cuenta.',
-        style: Theme.of(context).textTheme.bodyMedium!
-            .copyWith(color: Colors.white),
-        textAlign: TextAlign.center,
-      ),
-      const SizedBox(height: AppSpacing.xl),
-      _BotonBlanco(
-        texto: 'Entrar a la demostración',
-        alTocar: _ocupado
-            ? null
-            : () => _ejecutar(
-                () => ref.read(servicioAuthProvider).ingresarDemo(),
-              ),
-      ),
-      if (_error != null) ...[
-        const SizedBox(height: AppSpacing.lg),
-        _Error(_error!),
-      ],
-    ],
-  );
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Center(child: EtiquetaDemo()),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Esta versión muestra datos de ejemplo. No necesitas una cuenta.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _Boton(
+            texto: 'Entrar a la demostración',
+            cargando: _ocupado,
+            alTocar: _ocupado ? null : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarDemo()),
+          ),
+          if (_error != null) ...[const SizedBox(height: AppSpacing.lg), Aviso(_error!, tono: Tono.error)],
+        ],
+      );
 
   Widget _conCuenta() {
     final textos = Theme.of(context).textTheme;
@@ -169,129 +161,85 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Inicia sesión',
-          style: textos.titleLarge!.copyWith(color: Colors.white),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        _CampoPildora(
+        TextFormField(
           controller: _usuario,
-          etiqueta: 'Correo o código',
-          icono: Phosphor.user,
-          teclado: TextInputType.emailAddress,
-          autofill: const [AutofillHints.username],
-          accion: TextInputAction.next,
-          validator: (v) => (v ?? '').trim().length >= 4
-              ? null
-              : 'Escribe tu correo o tu código de contribuyente.',
+          keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.username],
+          autocorrect: false,
+          textInputAction: TextInputAction.next,
+          decoration: const InputDecoration(
+            labelText: 'Correo o código de contribuyente',
+            prefixIcon: Icon(Phosphor.user, size: AppIconos.lista),
+          ),
+          validator: (v) =>
+              (v ?? '').trim().length >= 4 ? null : 'Escribe tu correo o tu código de contribuyente.',
         ),
         const SizedBox(height: AppSpacing.lg),
-        _CampoPildora(
+        TextFormField(
           controller: _clave,
-          etiqueta: 'Clave web',
-          icono: Phosphor.lock,
-          oculto: !_verClave,
-          autofill: const [AutofillHints.password],
-          accion: TextInputAction.done,
-          alEnviar: _ingresar,
-          sufijo: IconButton(
-            tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
-            icon: Icon(
-              _verClave
-                  ? Phosphor.eyeSlash
-                  : Phosphor.eye,
+          obscureText: !_verClave,
+          enableSuggestions: false,
+          autocorrect: false,
+          autofillHints: const [AutofillHints.password],
+          textInputAction: TextInputAction.done,
+          onFieldSubmitted: (_) => _ingresar(),
+          decoration: InputDecoration(
+            labelText: 'Clave web',
+            prefixIcon: const Icon(Phosphor.lock, size: AppIconos.lista),
+            suffixIcon: IconButton(
+              tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
+              icon: Icon(_verClave ? Phosphor.eyeSlash : Phosphor.eye, size: AppIconos.lista),
+              onPressed: () => setState(() => _verClave = !_verClave),
             ),
-            onPressed: () => setState(() => _verClave = !_verClave),
           ),
-          validator: (v) => (v ?? '').length >= _claveMinima
-              ? null
-              : 'Usa al menos $_claveMinima caracteres.',
+          validator: (v) => (v ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
         ),
-        Center(
+        const SizedBox(height: AppSpacing.xs),
+        Align(
+          alignment: Alignment.centerRight,
           child: TextButton(
             onPressed: _ocupado ? null : _olvidoClave,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              minimumSize: const Size(48, 44),
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              tapTargetSize: MaterialTapTargetSize.padded,
-            ),
-            child: Text(
-              '¿Olvidaste tu clave?',
-              style: textos.labelMedium!.copyWith(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                decoration: TextDecoration.none,
-              ),
-            ),
+            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm)),
+            child: const Text('¿Olvidaste tu clave?'),
           ),
         ),
-        if (_error != null) ...[
-          _Error(_error!),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        _BotonBlanco(
-          texto: 'Ingresar',
-          cargando: _ocupado,
-          alTocar: _ocupado ? null : _ingresar,
-        ),
+        if (_error != null) ...[Aviso(_error!, tono: Tono.error), const SizedBox(height: AppSpacing.lg)],
+        const SizedBox(height: AppSpacing.sm),
+        _Boton(texto: 'Ingresar', cargando: _ocupado, alTocar: _ocupado ? null : _ingresar),
         const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
-            Expanded(
-              child: Divider(color: Colors.white.withValues(alpha: 0.4)),
-            ),
+            const Expanded(child: Divider()),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Text(
-                'o',
-                style: textos.bodySmall!.copyWith(color: Colors.white),
-              ),
+              child: Text('o', style: textos.bodySmall),
             ),
-            Expanded(
-              child: Divider(color: Colors.white.withValues(alpha: 0.4)),
-            ),
+            const Expanded(child: Divider()),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        _BotonBlanco(
-          texto: 'Continuar con Google',
-          icono: const LogoGoogle(lado: 20),
-          conBorde: true,
-          alTocar: _ocupado
-              ? null
-              : () => _ejecutar(
-                  () => ref.read(servicioAuthProvider).ingresarConGoogle(),
-                ),
+        OutlinedButton.icon(
+          onPressed: _ocupado ? null : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarConGoogle()),
+          // Botón de Google: blanco, borde gris de 1 px y texto oscuro, como pide la guía.
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.textPrimary,
+            side: const BorderSide(color: AppColors.border),
+          ),
+          icon: const LogoGoogle(lado: 20),
+          label: const Text('Continuar con Google'),
         ),
         const SizedBox(height: AppSpacing.lg),
         TextButton(
           onPressed: _ocupado ? null : () => context.push(Rutas.registro),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(48),
-          ),
+          style: TextButton.styleFrom(minimumSize: const Size.fromHeight(AppSpacing.toque)),
           child: Text.rich(
             TextSpan(
-              style: textos.bodyMedium!.copyWith(
-                decoration: TextDecoration.none,
-              ),
-              children: [
+              style: textos.bodyMedium,
+              children: const [
+                TextSpan(text: '¿Primera vez? '),
                 TextSpan(
-                  text: '¿Primera vez? ',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const TextSpan(
                   text: 'Regístrate con tu cuponera',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -303,280 +251,25 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
   }
 }
 
-/// Zona clara: ocupa el espacio que sobra sobre el panel, con detalles suaves, y centra en él el
-/// logo, el nombre y la frase.
-class _ZonaClara extends StatelessWidget {
-  const _ZonaClara();
-
-  @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    // En pantallas bajas el encabezado se compacta para que quepan los campos.
-    final bajo = MediaQuery.sizeOf(context).height < 700;
-    final logo = bajo ? 72.0 : 88.0;
-    return ClipRect(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.xl + AppSpacing.sm,
-              MediaQuery.paddingOf(context).top + AppSpacing.md,
-              AppSpacing.xl + AppSpacing.sm,
-              AppSpacing.md,
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: logo,
-                    height: logo,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(child: LogoAlmira(lado: logo * 0.68)),
-                  ),
-                  SizedBox(height: bajo ? AppSpacing.md : AppSpacing.lg),
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      'Almira',
-                      style: textos.headlineMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    'Tus pagos, reclamos y obras municipales en un solo lugar.',
-                    style: textos.bodyMedium,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Panel turquesa con esquinas superiores de 32, del alto de su contenido y anclado abajo.
-class _Panel extends StatelessWidget {
-  const _Panel({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    decoration: const BoxDecoration(
-      color: AppColors.primary,
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(_radioPanel),
-      ),
-    ),
-    padding: EdgeInsets.fromLTRB(
-      AppSpacing.xl,
-      AppSpacing.xl + AppSpacing.xs,
-      AppSpacing.xl,
-      MediaQuery.paddingOf(context).bottom + AppSpacing.md,
-    ),
-    child: Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440),
-        child: child,
-      ),
-    ),
-  );
-}
-
-/// Campo en píldora blanca de 52 de alto, con ícono a la izquierda y, si hace falta, un
-/// botón a la derecha. El error sale debajo, en blanco sobre el turquesa.
-class _CampoPildora extends StatelessWidget {
-  const _CampoPildora({
-    required this.controller,
-    required this.etiqueta,
-    required this.icono,
-    required this.validator,
-    this.teclado,
-    this.autofill,
-    this.accion,
-    this.oculto = false,
-    this.sufijo,
-    this.alEnviar,
-  });
-
-  final TextEditingController controller;
-  final String etiqueta;
-  final IconData icono;
-  final String? Function(String?) validator;
-  final TextInputType? teclado;
-  final Iterable<String>? autofill;
-  final TextInputAction? accion;
-  final bool oculto;
-  final Widget? sufijo;
-  final VoidCallback? alEnviar;
-
-  @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    OutlineInputBorder borde([
-      Color color = Colors.transparent,
-      double ancho = 0,
-    ]) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(_altoCampo / 2),
-      borderSide: BorderSide(color: color, width: ancho),
-    );
-    return TextFormField(
-      controller: controller,
-      obscureText: oculto,
-      keyboardType: teclado,
-      autofillHints: autofill,
-      autocorrect: false,
-      enableSuggestions: !oculto,
-      textInputAction: accion,
-      onFieldSubmitted: alEnviar == null ? null : (_) => alEnviar!(),
-      style: textos.bodyLarge,
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: etiqueta,
-        hintStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary),
-        filled: true,
-        fillColor: Colors.white,
-        isDense: false,
-        constraints: const BoxConstraints(minHeight: _altoCampo),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        prefixIcon: Icon(icono, size: 22),
-        prefixIconColor: AppColors.primary,
-        suffixIcon: sufijo,
-        suffixIconColor: AppColors.textSecondary,
-        border: borde(),
-        enabledBorder: borde(),
-        focusedBorder: borde(AppColors.foco, 1.5),
-        errorBorder: borde(Colors.white, 2),
-        focusedErrorBorder: borde(Colors.white, 1.5),
-        errorStyle: textos.bodySmall!.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
-        errorMaxLines: 2,
-      ),
-    );
-  }
-}
-
-/// Botón blanco con texto turquesa, de 52 de alto y todo el ancho.
-class _BotonBlanco extends StatelessWidget {
-  const _BotonBlanco({
-    required this.texto,
-    required this.alTocar,
-    this.icono,
-    this.conBorde = false,
-    this.cargando = false,
-  });
+/// Botón primario del ingreso: muestra el avance mientras se espera al servicio.
+class _Boton extends StatelessWidget {
+  const _Boton({required this.texto, required this.alTocar, this.cargando = false});
 
   final String texto;
   final VoidCallback? alTocar;
-  final Widget? icono;
-  final bool conBorde;
   final bool cargando;
 
   @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    return SizedBox(
-      height: _altoCampo,
-      child: FilledButton(
+  Widget build(BuildContext context) => FilledButton(
         onPressed: alTocar,
-        style: FilledButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: conBorde
-              ? AppColors.textPrimary
-              : AppColors.primaryDark,
-          disabledBackgroundColor: Colors.white.withValues(alpha: 0.7),
-          minimumSize: const Size.fromHeight(_altoCampo),
-          shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        ),
         child: cargando
             ? const SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: AppColors.primary,
-                ),
+                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
               )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icono != null) ...[
-                    icono!,
-                    const SizedBox(width: AppSpacing.md),
-                  ],
-                  Flexible(
-                    child: Text(
-                      texto,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textos.labelLarge!.copyWith(
-                        color: conBorde
-                            ? AppColors.textPrimary
-                            : AppColors.primaryDark,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-/// Error general sobre el panel: tarjeta clara, legible sobre el turquesa.
-class _Error extends StatelessWidget {
-  const _Error(this.texto);
-
-  final String texto;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    liveRegion: true,
-    child: Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.errorSoft,
-        borderRadius: BorderRadius.circular(AppRadius.campo),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Phosphor.warningCircle,
-            size: 20,
-            color: AppColors.error,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              texto,
-              style: Theme.of(context).textTheme.bodySmall!
-                  .copyWith(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+            : Text(texto),
+      );
 }
 
 /// Pide el correo para enviar el enlace de recuperación.
@@ -599,29 +292,29 @@ class _DialogoOlvidoState extends State<_DialogoOlvido> {
 
   @override
   Widget build(BuildContext context) => AppConfirmDialog(
-    titulo: 'Recupera tu clave',
-    textoConfirmar: 'Enviar enlace',
-    alConfirmar: () {
-      if (_formulario.currentState!.validate())
-        Navigator.pop(context, _correo.text.trim());
-    },
-    alCancelar: () => Navigator.pop(context),
-    contenido: Form(
-      key: _formulario,
-      child: TextFormField(
-        controller: _correo,
-        keyboardType: TextInputType.emailAddress,
-        autofillHints: const [AutofillHints.email],
-        autocorrect: false,
-        decoration: const InputDecoration(
-          labelText: 'Correo',
-          prefixIcon: Icon(Phosphor.envelope),
+        titulo: 'Recupera tu clave',
+        textoConfirmar: 'Enviar enlace',
+        alConfirmar: () {
+          if (_formulario.currentState!.validate()) {
+            Navigator.pop(context, _correo.text.trim());
+          }
+        },
+        alCancelar: () => Navigator.pop(context),
+        contenido: Form(
+          key: _formulario,
+          child: TextFormField(
+            controller: _correo,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            autocorrect: false,
+            decoration: const InputDecoration(
+              labelText: 'Correo',
+              prefixIcon: Icon(Phosphor.envelope, size: AppIconos.lista),
+            ),
+            validator: (v) => RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
+                ? null
+                : 'Escribe un correo válido.',
+          ),
         ),
-        validator: (v) =>
-            RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
-            ? null
-            : 'Escribe un correo válido.',
-      ),
-    ),
-  );
+      );
 }
