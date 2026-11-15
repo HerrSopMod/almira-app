@@ -46,7 +46,6 @@ class ReclamosScreen extends ConsumerWidget {
     final vista = ref.watch(vistaProvider);
     final hoy = ref.watch(relojProvider)();
     final esDemo = ref.watch(esDemoProvider);
-    final puedeReclamar = vista.valueOrNull?.vecino != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -59,14 +58,6 @@ class ReclamosScreen extends ConsumerWidget {
             ),
         ],
       ),
-      floatingActionButton: puedeReclamar
-          ? FloatingActionButton.extended(
-              onPressed: () => context.push(Rutas.nuevoReclamo),
-              icon: const Icon(Phosphor.plus),
-              label: const Text('Nuevo reclamo'),
-              elevation: 2,
-            )
-          : null,
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
@@ -83,21 +74,27 @@ class ReclamosScreen extends ConsumerWidget {
             ];
           }
           if (v.reclamos.isEmpty) {
-            return const [
+            return [
               VistaVacia(
                 icono: Phosphor.megaphone,
                 titulo: 'Aún no tienes reclamos',
                 detalle: 'Reporta un problema con una foto y su ubicación.',
+                accion: 'Nuevo reclamo',
+                alTocar: () => context.push(Rutas.nuevoReclamo),
               ),
             ];
           }
           return [
+            // Única acción primaria de la pantalla, arriba de la lista.
+            FilledButton(
+              onPressed: () => context.push(Rutas.nuevoReclamo),
+              child: const Text('Nuevo reclamo'),
+            ),
+            espacioGrande,
             for (final reclamo in v.reclamos) ...[
               _TarjetaReclamo(reclamo: reclamo, hoy: hoy),
               espacioChico,
             ],
-            // Deja libre el espacio del botón flotante.
-            const SizedBox(height: 72),
           ];
         },
       ),
@@ -122,7 +119,7 @@ class _TarjetaReclamo extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(reclamo.titulo, style: textos.titleMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             [reclamo.codigo, reclamo.tipo.etiqueta, if (creado != null) fechaCorta(creado)].join(' · '),
             style: textos.bodySmall,
