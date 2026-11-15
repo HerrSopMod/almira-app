@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
@@ -86,7 +87,7 @@ class BurbujaChat extends StatelessWidget {
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(top: 2),
-                    child: Icon(Icons.error_outline_rounded, size: 18, color: AppColors.error),
+                    child: Icon(Phosphor.warningCircle, size: 18, color: AppColors.error),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Flexible(child: Text(mensaje.texto, style: estiloTexto)),
@@ -95,7 +96,7 @@ class BurbujaChat extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               OutlinedButton.icon(
                 onPressed: alReintentar,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
+                icon: const Icon(Phosphor.arrowClockwise, size: 18),
                 label: const Text('Reintentar'),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(48, 40),
@@ -346,7 +347,7 @@ class BotonBajar extends StatelessWidget {
             child: const SizedBox(
               width: 44,
               height: 44,
-              child: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
+              child: Icon(Phosphor.caretDown, color: AppColors.primary),
             ),
           ),
         ),

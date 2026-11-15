@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
@@ -21,18 +22,18 @@ class InsigniaReclamo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (reclamo.resuelto) {
-      return const Insignia('Resuelto', tono: Tono.exito, icono: Icons.check_rounded);
+      return const Insignia('Resuelto', tono: Tono.exito, icono: Phosphor.check);
     }
     final plazo = plazoDe(reclamo, hoy)!;
     return switch (plazo.estado) {
-      EstadoPlazo.dentro => Insignia(plazo.etiqueta, tono: Tono.primario, icono: Icons.schedule_rounded),
+      EstadoPlazo.dentro => Insignia(plazo.etiqueta, tono: Tono.primario, icono: Phosphor.clock),
       EstadoPlazo.porVencer ||
       EstadoPlazo.venceHoy =>
-        Insignia(plazo.etiqueta, tono: Tono.aviso, icono: Icons.schedule_rounded),
+        Insignia(plazo.etiqueta, tono: Tono.aviso, icono: Phosphor.clock),
       EstadoPlazo.vencido =>
-        Insignia(plazo.etiqueta, tono: Tono.error, icono: Icons.error_outline_rounded),
+        Insignia(plazo.etiqueta, tono: Tono.error, icono: Phosphor.warningCircle),
       EstadoPlazo.porConfirmar =>
-        Insignia(plazo.etiqueta, icono: Icons.help_outline_rounded),
+        Insignia(plazo.etiqueta, icono: Phosphor.question),
     };
   }
 }
@@ -61,7 +62,7 @@ class ReclamosScreen extends ConsumerWidget {
       floatingActionButton: puedeReclamar
           ? FloatingActionButton.extended(
               onPressed: () => context.push(Rutas.nuevoReclamo),
-              icon: const Icon(Icons.add_rounded),
+              icon: const Icon(Phosphor.plus),
               label: const Text('Nuevo reclamo'),
               elevation: 2,
             )
@@ -73,7 +74,7 @@ class ReclamosScreen extends ConsumerWidget {
           if (v.vecino == null) {
             return [
               VistaVacia(
-                icono: Icons.badge_outlined,
+                icono: Phosphor.identificationBadge,
                 titulo: 'Vincula tu código de contribuyente',
                 detalle: 'Lo necesitas para enviar reclamos a tu municipalidad.',
                 accion: 'Vincular código',
@@ -84,7 +85,7 @@ class ReclamosScreen extends ConsumerWidget {
           if (v.reclamos.isEmpty) {
             return const [
               VistaVacia(
-                icono: Icons.campaign_outlined,
+                icono: Phosphor.megaphone,
                 titulo: 'Aún no tienes reclamos',
                 detalle: 'Reporta un problema con una foto y su ubicación.',
               ),

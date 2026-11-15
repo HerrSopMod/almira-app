@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -64,7 +65,7 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
           if (v.vecino == null) {
             return [
               VistaVacia(
-                icono: Icons.badge_outlined,
+                icono: Phosphor.identificationBadge,
                 titulo: 'Vincula tu código de contribuyente',
                 accion: 'Vincular código',
                 alTocar: () => context.push(Rutas.vincular),
@@ -120,12 +121,12 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
               )
-            : const Icon(Icons.picture_as_pdf_outlined, size: 20),
+            : const Icon(Phosphor.filePdf, size: 20),
         label: const Text('Descargar PDF'),
       ),
       if (estado.vacio) ...[
         espacio,
-        const VistaVacia(icono: Icons.receipt_long_outlined, titulo: 'Aún no tienes tributos registrados'),
+        const VistaVacia(icono: Phosphor.receipt, titulo: 'Aún no tienes tributos registrados'),
       ] else ...[
         // Impuestos y tasas son tributos distintos: se agrupan con su propio encabezado.
         for (final grupo in _gruposDeTributos(estado.tributos)) ...[
@@ -201,7 +202,7 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
       ),
       espacio,
       if (lista.isEmpty)
-        const VistaVacia(icono: Icons.receipt_long_outlined, titulo: 'No hay pagos con ese filtro')
+        const VistaVacia(icono: Phosphor.receipt, titulo: 'No hay pagos con ese filtro')
       else ...[
         Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
@@ -426,7 +427,7 @@ class _TablaAnio extends StatelessWidget {
                       style: cifra(textos.titleSmall!),
                     ),
                     const SizedBox(width: AppSpacing.xs),
-                    const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textSecondary),
+                    const Icon(Phosphor.caretRight, size: 20, color: AppColors.textSecondary),
                   ],
                 ),
               ),

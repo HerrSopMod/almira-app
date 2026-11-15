@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -164,7 +165,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                           )
-                        : const Icon(Icons.lock_outline_rounded, size: 20),
+                        : const Icon(Phosphor.lock, size: 20),
                     label: Text('Pagar ${soles(total)}'),
                   ),
                 ],
@@ -178,7 +179,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
             const PasosPago(actual: 1),
             espacio,
             if (elegidas.isEmpty)
-              const VistaVacia(icono: Icons.receipt_long_outlined, titulo: 'No hay periodos por pagar')
+              const VistaVacia(icono: Phosphor.receipt, titulo: 'No hay periodos por pagar')
             else
               Form(
                 key: _formulario,
@@ -206,7 +207,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                         for (final m in _medios)
                           ButtonSegment(
                             value: m,
-                            icon: Icon(m == MedioPago.tarjeta ? Icons.credit_card_rounded : Icons.smartphone_rounded),
+                            icon: Icon(m == MedioPago.tarjeta ? Phosphor.creditCard : Phosphor.deviceMobile),
                             label: Text(m == MedioPago.tarjeta ? 'Tarjeta' : 'Yape'),
                           ),
                       ],
@@ -237,7 +238,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           keyboardType: TextInputType.number,
           autofillHints: const [AutofillHints.creditCardNumber],
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(19), _GruposDe4()],
-          decoration: const InputDecoration(labelText: 'Número de tarjeta', prefixIcon: Icon(Icons.credit_card_rounded)),
+          decoration: const InputDecoration(labelText: 'Número de tarjeta', prefixIcon: Icon(Phosphor.creditCard)),
           validator: validarNumeroTarjeta,
         ),
         espacio,
@@ -250,7 +251,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                 keyboardType: TextInputType.number,
                 autofillHints: const [AutofillHints.creditCardExpirationDate],
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(4), _MesAnio()],
-                decoration: const InputDecoration(labelText: 'Vencimiento', hintText: 'MM/AA', prefixIcon: Icon(Icons.event_rounded)),
+                decoration: const InputDecoration(labelText: 'Vencimiento', hintText: 'MM/AA', prefixIcon: Icon(Phosphor.calendarBlank)),
                 validator: (v) => validarVencimiento(v, hoy),
               ),
             ),
@@ -264,7 +265,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                 autocorrect: false,
                 autofillHints: const [AutofillHints.creditCardSecurityCode],
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(4)],
-                decoration: const InputDecoration(labelText: 'CVV', prefixIcon: Icon(Icons.password_rounded)),
+                decoration: const InputDecoration(labelText: 'CVV', prefixIcon: Icon(Phosphor.password)),
                 validator: validarCvv,
               ),
             ),
@@ -275,7 +276,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           controller: _titular,
           textCapitalization: TextCapitalization.characters,
           autofillHints: const [AutofillHints.creditCardName],
-          decoration: const InputDecoration(labelText: 'Titular de la tarjeta', prefixIcon: Icon(Icons.person_outline_rounded)),
+          decoration: const InputDecoration(labelText: 'Titular de la tarjeta', prefixIcon: Icon(Phosphor.user)),
           validator: validarTitular,
         ),
       ];
@@ -285,7 +286,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           controller: _celular,
           keyboardType: TextInputType.phone,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
-          decoration: const InputDecoration(labelText: 'Celular de Yape', prefixText: '+51 ', prefixIcon: Icon(Icons.smartphone_rounded)),
+          decoration: const InputDecoration(labelText: 'Celular de Yape', prefixText: '+51 ', prefixIcon: Icon(Phosphor.deviceMobile)),
           validator: validarCelularYape,
         ),
         espacio,
@@ -295,7 +296,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
           decoration: const InputDecoration(
             labelText: 'Código de aprobación',
-            prefixIcon: Icon(Icons.verified_outlined),
+            prefixIcon: Icon(Phosphor.sealCheck),
             helperText: 'Lo ves en tu app Yape.',
           ),
           validator: validarCodigoAprobacion,
@@ -379,7 +380,7 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
           children: [
             const PasosPago(actual: 2),
             espacioGrande,
-            const Center(child: CajaIcono(Icons.check_rounded, tono: Tono.exito, lado: 72)),
+            const Center(child: CajaIcono(Phosphor.check, tono: Tono.exito, lado: 72)),
             espacio,
             Text('¡Pago realizado!', style: textos.headlineSmall, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.xs),
@@ -410,7 +411,7 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                     )
-                  : const Icon(Icons.picture_as_pdf_outlined, size: 20),
+                  : const Icon(Phosphor.filePdf, size: 20),
               label: const Text('Descargar comprobante'),
             ),
             espacioChico,

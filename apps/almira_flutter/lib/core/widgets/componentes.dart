@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../errors/error_app.dart';
@@ -13,19 +14,64 @@ Duration duracionDe(BuildContext context, [int ms = 200]) =>
         ? Duration.zero
         : Duration(milliseconds: ms);
 
+/// Ícono de la marca (casa con burbuja), en SVG. Solo el dibujo, sin texto.
 class LogoAlmira extends StatelessWidget {
-  const LogoAlmira({super.key, this.lado = 72});
+  const LogoAlmira({super.key, this.lado = 40});
 
   final double lado;
 
   @override
-  Widget build(BuildContext context) => Image.asset(
-        'assets/logo_almira.png',
+  Widget build(BuildContext context) => SvgPicture.asset(
+        'assets/marca/icono.svg',
         width: lado,
         height: lado,
-        fit: BoxFit.contain,
-        semanticLabel: 'Almira',
-        filterQuality: FilterQuality.medium,
+        semanticsLabel: 'Almira',
+      );
+}
+
+/// Logo vertical para el ingreso: el ícono con «Almira» debajo, escrito como texto.
+class LogoVertical extends StatelessWidget {
+  const LogoVertical({super.key, this.altoIcono = 96});
+
+  final double altoIcono;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        header: true,
+        label: 'Almira',
+        child: ExcludeSemantics(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              LogoAlmira(lado: altoIcono),
+              const SizedBox(height: AppSpacing.md),
+              Text('Almira', style: Theme.of(context).textTheme.headlineMedium),
+            ],
+          ),
+        ),
+      );
+}
+
+/// Marca en la barra superior: ícono de 28 con «Almira» al lado, en Inter Bold.
+class MarcaAlmira extends StatelessWidget {
+  const MarcaAlmira({super.key});
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        label: 'Almira',
+        child: ExcludeSemantics(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const LogoAlmira(lado: 28),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Almira',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
       );
 }
 
@@ -275,10 +321,10 @@ class Aviso extends StatelessWidget {
               Icon(
                 icono ??
                     switch (tono) {
-                      Tono.error => Icons.error_outline_rounded,
-                      Tono.aviso => Icons.warning_amber_rounded,
-                      Tono.exito => Icons.check_circle_outline_rounded,
-                      _ => Icons.info_outline_rounded,
+                      Tono.error => Phosphor.warningCircle,
+                      Tono.aviso => Phosphor.warning,
+                      Tono.exito => Phosphor.checkCircle,
+                      _ => Phosphor.info,
                     },
                 size: 20,
                 color: tono.texto,
@@ -357,7 +403,7 @@ class VistaError extends StatelessWidget {
   Widget build(BuildContext context) {
     final e = ErrorApp.de(error);
     return VistaVacia(
-      icono: e.sinConexion ? Icons.wifi_off_rounded : Icons.cloud_off_rounded,
+      icono: e.sinConexion ? Phosphor.wifiSlash : Phosphor.cloudSlash,
       titulo: e.titulo,
       detalle: e.detalle,
       accion: alReintentar == null ? null : 'Reintentar',

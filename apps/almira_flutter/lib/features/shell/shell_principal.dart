@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../core/widgets/componentes.dart';
 
@@ -13,11 +14,11 @@ class _Destino {
 
 // Una sola familia de íconos, redondeada: contorno en reposo, relleno al elegir.
 const _destinos = [
-  _Destino('Inicio', Icons.home_outlined, Icons.home_rounded),
-  _Destino('Pagar', Icons.account_balance_wallet_outlined, Icons.account_balance_wallet_rounded),
-  _Destino('Reclamos', Icons.campaign_outlined, Icons.campaign_rounded),
-  _Destino('Obras', Icons.map_outlined, Icons.map_rounded),
-  _Destino('Asistente', Icons.chat_bubble_outline_rounded, Icons.chat_bubble_rounded),
+  _Destino('Inicio', Phosphor.house, PhosphorFill.house),
+  _Destino('Pagar', Phosphor.wallet, PhosphorFill.wallet),
+  _Destino('Reclamos', Phosphor.megaphone, PhosphorFill.megaphone),
+  _Destino('Obras', Phosphor.mapTrifold, Phosphor.mapTrifold),
+  _Destino('Asistente', Phosphor.chatCircle, PhosphorFill.chatCircle),
 ];
 
 /// Marco de las cinco secciones principales, con la barra inferior.

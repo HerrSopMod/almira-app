@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
@@ -144,7 +145,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
           title: const Text('Crea tu cuenta'),
           leading: IconButton(
             tooltip: 'Volver',
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const Icon(Phosphor.arrowLeft),
             onPressed: _ocupado ? null : _atras,
           ),
         ),
@@ -225,7 +226,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             inputFormatters: [LengthLimitingTextInputFormatter(20)],
             decoration: const InputDecoration(
               labelText: 'Número de cuponera',
-              prefixIcon: Icon(Icons.badge_outlined),
+              prefixIcon: Icon(Phosphor.identificationBadge),
               helperText: 'Es el número privado de tu cuponera impresa.',
             ),
             validator: (v) => RegExp(r'^[A-Za-z0-9-]{4,20}$').hasMatch((v ?? '').trim())
@@ -239,7 +240,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             textInputAction: TextInputAction.done,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(8)],
             onFieldSubmitted: (_) => _paso1(),
-            decoration: const InputDecoration(labelText: 'DNI', prefixIcon: Icon(Icons.credit_card_outlined)),
+            decoration: const InputDecoration(labelText: 'DNI', prefixIcon: Icon(Phosphor.creditCard)),
             validator: (v) => (v ?? '').length == 8 ? null : 'Escribe los 8 dígitos de tu DNI.',
           ),
           if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
@@ -261,7 +262,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               autofillHints: const [AutofillHints.email],
               autocorrect: false,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Correo', prefixIcon: Icon(Icons.mail_outline_rounded)),
+              decoration: const InputDecoration(labelText: 'Correo', prefixIcon: Icon(Phosphor.envelope)),
               validator: (v) =>
                   _correoValido.hasMatch((v ?? '').trim()) ? null : 'Escribe un correo válido.',
             ),
@@ -273,11 +274,11 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 labelText: 'Clave web',
-                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                prefixIcon: const Icon(Phosphor.lock),
                 helperText: 'Mínimo $_claveMinima caracteres.',
                 suffixIcon: IconButton(
                   tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
-                  icon: Icon(_verClave ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+                  icon: Icon(_verClave ? Phosphor.eyeSlash : Phosphor.eye),
                   onPressed: () => setState(() => _verClave = !_verClave),
                 ),
               ),
@@ -290,7 +291,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               obscureText: !_verClave,
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _paso2(),
-              decoration: const InputDecoration(labelText: 'Repite tu clave', prefixIcon: Icon(Icons.lock_reset_rounded)),
+              decoration: const InputDecoration(labelText: 'Repite tu clave', prefixIcon: Icon(Phosphor.lockKey)),
               validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
             ),
             if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
@@ -313,7 +314,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               onChanged: (_) {
                 if (_codigoPedido) setState(() => _codigoPedido = false);
               },
-              decoration: const InputDecoration(labelText: 'Celular', prefixText: '+51 ', prefixIcon: Icon(Icons.smartphone_rounded)),
+              decoration: const InputDecoration(labelText: 'Celular', prefixText: '+51 ', prefixIcon: Icon(Phosphor.deviceMobile)),
               validator: (v) =>
                   _celularValido.hasMatch(v ?? '') ? null : 'Escribe los 9 dígitos de tu celular.',
             ),
@@ -325,7 +326,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
                 autofillHints: const [AutofillHints.oneTimeCode],
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
                 onFieldSubmitted: (_) => _crearCuenta(),
-                decoration: const InputDecoration(labelText: 'Código de 6 dígitos', prefixIcon: Icon(Icons.pin_outlined)),
+                decoration: const InputDecoration(labelText: 'Código de 6 dígitos', prefixIcon: Icon(Phosphor.password)),
                 validator: (v) => (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',
               ),
             ],

@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -64,6 +65,12 @@ Future<void> _cargarFuentes() async {
     cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
   }
   await cargador.load();
+
+  // Íconos de Phosphor (línea «regular» y «fill» de la pestaña activa).
+  for (final (familia, archivo) in [('PhosphorRegular', 'Phosphor'), ('PhosphorFill', 'Phosphor-Fill')]) {
+    final fuente = FontLoader(familia)..addFont(rootBundle.load('assets/fonts/phosphor/$archivo.ttf'));
+    await fuente.load();
+  }
   final raiz = Platform.environment['FLUTTER_ROOT'];
   if (raiz != null) {
     final archivo = File('$raiz/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
@@ -231,7 +238,7 @@ void main() {
       expect((inactivo.shape! as StadiumBorder).side.color, AppColors.bordeControl);
       expect(tester.widget<Text>(find.text('Activo')).style!.color, Colors.white);
       expect(tester.widget<Text>(find.text('Inactivo')).style!.color, AppColors.textPrimary);
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      expect(find.byIcon(Phosphor.check), findsOneWidget);
       // Altura táctil de 44 como mínimo.
       expect(tester.getSize(find.byType(ChipFiltro).first).height, greaterThanOrEqualTo(44));
     });

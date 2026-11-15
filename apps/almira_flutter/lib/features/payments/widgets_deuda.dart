@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 
 import '../../app/theme/app_spacing.dart';
@@ -18,9 +19,9 @@ class InsigniaDeuda extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (estado) {
-        EstadoDeuda.vencida => Insignia(estado.etiqueta, tono: Tono.error, icono: Icons.error_outline_rounded),
-        EstadoDeuda.vigente => Insignia(estado.etiqueta, tono: Tono.aviso, icono: Icons.schedule_rounded),
-        EstadoDeuda.pagada => Insignia(estado.etiqueta, tono: Tono.exito, icono: Icons.check_rounded),
+        EstadoDeuda.vencida => Insignia(estado.etiqueta, tono: Tono.error, icono: Phosphor.warningCircle),
+        EstadoDeuda.vigente => Insignia(estado.etiqueta, tono: Tono.aviso, icono: Phosphor.clock),
+        EstadoDeuda.pagada => Insignia(estado.etiqueta, tono: Tono.exito, icono: Phosphor.check),
       };
 }
 
@@ -90,7 +91,7 @@ class AccionPago extends StatelessWidget {
     }
     return FilledButton.icon(
       onPressed: () => context.push(Rutas.pagoEnLinea),
-      icon: const Icon(Icons.lock_outline_rounded, size: 20),
+      icon: const Icon(Phosphor.lock, size: 20),
       label: const Text('Pagar en línea'),
     );
   }

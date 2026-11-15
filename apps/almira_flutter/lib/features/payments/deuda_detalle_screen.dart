@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
@@ -29,7 +30,7 @@ class DeudaDetalleScreen extends ConsumerWidget {
           if (deuda == null) {
             return const [
               VistaVacia(
-                icono: Icons.search_off_rounded,
+                icono: Phosphor.magnifyingGlass,
                 titulo: 'No encontramos esta obligación',
                 detalle: 'Puede que ya no esté registrada en tu municipalidad.',
               ),

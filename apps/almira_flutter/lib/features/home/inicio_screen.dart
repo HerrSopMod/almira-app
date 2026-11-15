@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -61,12 +62,12 @@ class InicioScreen extends ConsumerWidget {
             const Center(child: EtiquetaDemo(sobreTurquesa: true)),
           IconButton(
             tooltip: 'Avisos',
-            icon: const Icon(Icons.notifications_none_rounded),
+            icon: const Icon(Phosphor.bell),
             onPressed: () => context.push(Rutas.avisos),
           ),
           IconButton(
             tooltip: 'Mi perfil',
-            icon: const Icon(Icons.account_circle_outlined),
+            icon: const Icon(Phosphor.userCircle),
             onPressed: () => context.push(Rutas.perfil),
           ),
           const SizedBox(width: AppSpacing.xs),
@@ -84,7 +85,7 @@ class InicioScreen extends ConsumerWidget {
   /// y no se inventa un "S/ 0.00".
   List<Widget> _sinVinculo(BuildContext context, VistaMunicipal v) => [
         VistaVacia(
-          icono: Icons.badge_outlined,
+          icono: Phosphor.identificationBadge,
           titulo: 'Vincula tu código de contribuyente',
           detalle: 'Así verás tus tributos y podrás enviar reclamos.',
           accion: 'Vincular código',
@@ -217,13 +218,13 @@ class _TarjetaResumen extends StatelessWidget {
                 Insignia(
                   '${plural(resumen.cantidadVencidas, 'vencida', 'vencidas')} · ${soles(resumen.montoVencido)}',
                   tono: Tono.error,
-                  icono: Icons.error_outline_rounded,
+                  icono: Phosphor.warningCircle,
                 ),
                 if (resumen.cantidadPorVencer > 0)
                   Insignia(
                     '${resumen.cantidadPorVencer} por vencer · ${soles(resumen.montoPorVencer)}',
                     tono: Tono.aviso,
-                    icono: Icons.schedule_rounded,
+                    icono: Phosphor.clock,
                   ),
               ],
             ),
@@ -249,7 +250,7 @@ class _TarjetaReclamo extends StatelessWidget {
       semantica: 'Reclamo ${reclamo.titulo}. Ver seguimiento',
       child: Row(
         children: [
-          const CajaIcono(Icons.campaign_outlined),
+          const CajaIcono(Phosphor.megaphone),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -263,7 +264,7 @@ class _TarjetaReclamo extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          const Icon(Phosphor.caretRight, color: AppColors.textSecondary),
         ],
       ),
     );
@@ -283,7 +284,7 @@ class _TarjetaObra extends StatelessWidget {
       semantica: 'Obra ${obra.nombre}. Ver detalle',
       child: Row(
         children: [
-          const CajaIcono(Icons.construction_rounded),
+          const CajaIcono(Phosphor.barricade),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -297,7 +298,7 @@ class _TarjetaObra extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          const Icon(Phosphor.caretRight, color: AppColors.textSecondary),
         ],
       ),
     );
@@ -346,13 +347,13 @@ class _Accesos extends StatelessWidget {
     return Column(
       children: [
         fila(
-          acceso(Icons.lock_outline_rounded, AppColors.primary, 'Pagar en línea', Rutas.pagoEnLinea),
-          acceso(Icons.receipt_long_outlined, AppColors.primary, 'Estado de cuenta', Rutas.estadoCuenta),
+          acceso(Phosphor.lock, AppColors.primary, 'Pagar en línea', Rutas.pagoEnLinea),
+          acceso(Phosphor.receipt, AppColors.primary, 'Estado de cuenta', Rutas.estadoCuenta),
         ),
         const SizedBox(height: AppSpacing.sm),
         fila(
-          acceso(Icons.description_outlined, AppColors.primary, 'Cuponera', Rutas.cuponera),
-          acceso(Icons.history_rounded, AppColors.primary, 'Historial', Rutas.estadoCuenta),
+          acceso(Phosphor.fileText, AppColors.primary, 'Cuponera', Rutas.cuponera),
+          acceso(Phosphor.clockCounterClockwise, AppColors.primary, 'Historial', Rutas.estadoCuenta),
         ),
       ],
     );

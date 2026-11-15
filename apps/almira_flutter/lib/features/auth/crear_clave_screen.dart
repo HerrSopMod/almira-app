@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
@@ -84,10 +85,10 @@ class _CrearClaveScreenState extends ConsumerState<CrearClaveScreen> {
                         decoration: InputDecoration(
                           labelText: 'Clave web',
                           helperText: 'Mínimo $_claveMinima caracteres.',
-                          prefixIcon: const Icon(Icons.lock_outline_rounded),
+                          prefixIcon: const Icon(Phosphor.lock),
                           suffixIcon: IconButton(
                             tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
-                            icon: Icon(_ver ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+                            icon: Icon(_ver ? Phosphor.eyeSlash : Phosphor.eye),
                             onPressed: () => setState(() => _ver = !_ver),
                           ),
                         ),
@@ -102,7 +103,7 @@ class _CrearClaveScreenState extends ConsumerState<CrearClaveScreen> {
                         onFieldSubmitted: (_) => _guardar(),
                         decoration: const InputDecoration(
                           labelText: 'Repite tu clave',
-                          prefixIcon: Icon(Icons.lock_reset_rounded),
+                          prefixIcon: Icon(Phosphor.lockKey),
                         ),
                         validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
                       ),

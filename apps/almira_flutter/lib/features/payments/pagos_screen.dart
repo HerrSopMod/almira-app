@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
@@ -59,7 +60,7 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
           if (v.vecino == null) {
             return [
               VistaVacia(
-                icono: Icons.badge_outlined,
+                icono: Phosphor.identificationBadge,
                 titulo: 'Vincula tu código de contribuyente',
                 detalle: 'Así verás tus tributos de ${v.municipalidad?.nombre ?? 'tu municipalidad'}.',
                 accion: 'Vincular código',
@@ -92,8 +93,8 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
             if (lista.isEmpty)
               VistaVacia(
                 icono: switch (_filtro) {
-                  FiltroDeuda.pagados => Icons.receipt_long_outlined,
-                  _ => Icons.check_circle_outline_rounded,
+                  FiltroDeuda.pagados => Phosphor.receipt,
+                  _ => Phosphor.checkCircle,
                 },
                 titulo: switch (_filtro) {
                   FiltroDeuda.pendientes => 'No tienes obligaciones pendientes',

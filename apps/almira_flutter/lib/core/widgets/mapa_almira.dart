@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 
@@ -28,7 +29,7 @@ class MarcadorMapa {
     required this.punto,
     required this.etiqueta,
     this.color = AppColors.primary,
-    this.icono = Icons.location_on_rounded,
+    this.icono = PhosphorFill.mapPin,
   });
 
   final String id;
@@ -174,7 +175,7 @@ class _MapaAlmiraState extends State<MapaAlmira> {
                   // La punta del pin marca el centro exacto.
                   padding: EdgeInsets.only(bottom: 44),
                   child: Icon(
-                    Icons.location_on_rounded,
+                    PhosphorFill.mapPin,
                     size: 48,
                     color: AppColors.primary,
                     shadows: [Shadow(color: Color(0x4D0F2A2E), blurRadius: 6, offset: Offset(0, 2))],
@@ -262,7 +263,7 @@ class _ErrorMapa extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.map_outlined, color: AppColors.textSecondary, size: 32),
+              const Icon(Phosphor.mapTrifold, color: AppColors.textSecondary, size: 32),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 'No se pudo cargar el mapa',
@@ -271,7 +272,7 @@ class _ErrorMapa extends StatelessWidget {
               ),
               OutlinedButton.icon(
                 onPressed: alReintentar,
-                icon: const Icon(Icons.refresh_rounded, size: 20),
+                icon: const Icon(Phosphor.arrowClockwise, size: 20),
                 label: const Text('Reintentar'),
                 style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
               ),

@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _hoy = DateTime(2026, 11, 11, 10);
@@ -47,6 +48,12 @@ Future<void> _cargarInter() async {
     cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
   }
   await cargador.load();
+
+  // Íconos de Phosphor (línea «regular» y «fill» de la pestaña activa).
+  for (final (familia, archivo) in [('PhosphorRegular', 'Phosphor'), ('PhosphorFill', 'Phosphor-Fill')]) {
+    final fuente = FontLoader(familia)..addFont(rootBundle.load('assets/fonts/phosphor/$archivo.ttf'));
+    await fuente.load();
+  }
 
   // Íconos de Material, para que las capturas muestren los íconos y no cuadros.
   final raiz = Platform.environment['FLUTTER_ROOT'];
@@ -217,11 +224,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Mi último pago');
       await tester.pump();
-      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.tap(find.byIcon(Phosphor.arrowUp));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Gracias, ¿y cuándo vence lo que falta?');
       await tester.pump();
-      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.tap(find.byIcon(Phosphor.arrowUp));
       await tester.pumpAndSettle();
       await _capturar(tester, 'chat-conversacion-$etiqueta');
     });

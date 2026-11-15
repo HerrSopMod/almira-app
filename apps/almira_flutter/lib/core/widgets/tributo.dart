@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../shared/models/modelos.dart';
@@ -27,11 +28,11 @@ extension EstiloTributo on TipoDeuda {
       };
 
   IconData get icono => switch (this) {
-        TipoDeuda.predial => Icons.home_work_outlined,
-        TipoDeuda.arbitrios => Icons.cleaning_services_outlined,
-        TipoDeuda.multa => Icons.gavel_rounded,
-        TipoDeuda.coactivo => Icons.balance_rounded,
-        TipoDeuda.otros => Icons.receipt_long_outlined,
+        TipoDeuda.predial => Phosphor.houseLine,
+        TipoDeuda.arbitrios => Phosphor.broom,
+        TipoDeuda.multa => Phosphor.gavel,
+        TipoDeuda.coactivo => Phosphor.scales,
+        TipoDeuda.otros => Phosphor.receipt,
       };
 
   /// Todos los tributos van en turquesa: el color no distingue, lo hacen el nombre y el ícono.

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -43,8 +44,8 @@ class InsigniaObra extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => estado == EstadoObra.finalizada
-      ? Insignia(estado.etiqueta, tono: Tono.exito, icono: Icons.check_rounded)
-      : Insignia(estado.etiqueta, tono: Tono.primario, icono: Icons.construction_rounded);
+      ? Insignia(estado.etiqueta, tono: Tono.exito, icono: Phosphor.check)
+      : Insignia(estado.etiqueta, tono: Tono.primario, icono: Phosphor.barricade);
 }
 
 /// Avance físico de la obra, rotulado para no confundirlo con el gasto.
@@ -146,7 +147,7 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
           if (hayMapa)
             IconButton(
               tooltip: _mapaVisible ? 'Ver solo la lista' : 'Ver el mapa',
-              icon: Icon(_mapaVisible ? Icons.view_list_rounded : Icons.map_rounded),
+              icon: Icon(_mapaVisible ? Phosphor.listBullets : Phosphor.mapTrifold),
               onPressed: () => setState(() => _mapaVisible = !_mapaVisible),
             ),
           const SizedBox(width: AppSpacing.xs),
@@ -194,7 +195,7 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
                 if (v.obras.isEmpty) {
                   return const [
                     VistaVacia(
-                      icono: Icons.construction_rounded,
+                      icono: Phosphor.barricade,
                       titulo: 'Aún no hay obras publicadas',
                       detalle: 'Tu municipalidad todavía no publicó obras en Almira.',
                     ),
@@ -219,7 +220,7 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
                   espacioChico,
                   if (filtradas.isEmpty)
                     const VistaVacia(
-                      icono: Icons.filter_alt_off_outlined,
+                      icono: Phosphor.funnelSimpleX,
                       titulo: 'No hay obras con este filtro',
                     )
                   else
@@ -292,7 +293,7 @@ class _TarjetaObra extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: OutlinedButton.icon(
                   onPressed: alVerEnMapa,
-                  icon: const Icon(Icons.place_outlined, size: 18),
+                  icon: const Icon(Phosphor.mapPin, size: 18),
                   label: const Text('Ver en el mapa'),
                   style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44), textStyle: textos.labelMedium),
                 ),

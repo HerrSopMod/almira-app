@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
@@ -83,7 +84,7 @@ class OpcionWhatsapp extends ConsumerWidget {
     final textos = Theme.of(context).textTheme;
 
     return ListTile(
-      leading: const Icon(Icons.chat_outlined),
+      leading: const Icon(Phosphor.chatCircle),
       title: const Text('Recordatorios por WhatsApp'),
       subtitle: activo
           ? Text('Activo en ${datos!.numeroEnmascarado}')
@@ -231,7 +232,7 @@ class _HojaActivarWhatsappState extends ConsumerState<HojaActivarWhatsapp> {
               decoration: const InputDecoration(
                 labelText: 'Celular',
                 prefixText: '+51 ',
-                prefixIcon: Icon(Icons.smartphone_rounded),
+                prefixIcon: Icon(Phosphor.deviceMobile),
               ),
             ),
             const SizedBox(height: AppSpacing.md),

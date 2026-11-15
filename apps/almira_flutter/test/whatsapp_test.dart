@@ -74,6 +74,12 @@ Future<void> _cargarFuentes() async {
     cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
   }
   await cargador.load();
+
+  // Íconos de Phosphor (línea «regular» y «fill» de la pestaña activa).
+  for (final (familia, archivo) in [('PhosphorRegular', 'Phosphor'), ('PhosphorFill', 'Phosphor-Fill')]) {
+    final fuente = FontLoader(familia)..addFont(rootBundle.load('assets/fonts/phosphor/$archivo.ttf'));
+    await fuente.load();
+  }
   final raiz = Platform.environment['FLUTTER_ROOT'];
   if (raiz != null) {
     final archivo = File('$raiz/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');

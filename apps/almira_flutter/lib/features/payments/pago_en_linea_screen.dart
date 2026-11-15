@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -66,7 +67,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
           construir: (v) {
             if (v.vecino == null) {
               return VistaVacia(
-                icono: Icons.badge_outlined,
+                icono: Phosphor.identificationBadge,
                 titulo: 'Vincula tu código de contribuyente',
                 accion: 'Vincular código',
                 alTocar: () => context.push(Rutas.vincular),
@@ -103,7 +104,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
                           padding: const EdgeInsets.all(AppSpacing.margen),
                           children: [
                             VistaVacia(
-                              icono: Icons.check_circle_outline_rounded,
+                              icono: Phosphor.checkCircle,
                               titulo: _beneficio
                                   ? 'No tienes pagos del año en curso'
                                   : 'No tienes deuda en ${tributo.etiqueta.toLowerCase()}',
@@ -215,7 +216,7 @@ class _FilaPeriodo extends StatelessWidget {
                 Text(deuda.concepto, style: textos.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis),
                 if (vencida) const Padding(
                   padding: EdgeInsets.only(top: 4),
-                  child: Insignia('Vencida', tono: Tono.error, icono: Icons.error_outline_rounded),
+                  child: Insignia('Vencida', tono: Tono.error, icono: Phosphor.warningCircle),
                 ),
               ],
             ),

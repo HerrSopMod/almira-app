@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -116,7 +117,7 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
         titleSpacing: 0,
         leading: IconButton(
           tooltip: 'Volver',
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(Phosphor.arrowLeft),
           onPressed: () => context.go(Rutas.inicio),
         ),
         title: Row(
@@ -256,7 +257,7 @@ class _BarraEntrada extends StatelessWidget {
                     child: IconButton.filled(
                       tooltip: 'Enviar',
                       onPressed: puede ? () => alEnviar(controlador.text) : null,
-                      icon: const Icon(Icons.arrow_upward_rounded),
+                      icon: const Icon(Phosphor.arrowUp),
                       style: IconButton.styleFrom(
                         minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
                         shape: const CircleBorder(),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
@@ -32,7 +33,7 @@ class ObraDetalleScreen extends ConsumerWidget {
           if (obra == null) {
             return const [
               VistaVacia(
-                icono: Icons.search_off_rounded,
+                icono: Phosphor.magnifyingGlass,
                 titulo: 'No encontramos esta obra',
                 detalle: 'Puede que ya no esté publicada.',
               ),
@@ -59,7 +60,7 @@ class ObraDetalleScreen extends ConsumerWidget {
               children: [
                 const Padding(
                   padding: EdgeInsets.only(top: 1),
-                  child: Icon(Icons.place_outlined, size: 18, color: AppColors.textSecondary),
+                  child: Icon(Phosphor.mapPin, size: 18, color: AppColors.textSecondary),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(child: Text(obra.ubicacion, style: textos.bodyMedium)),
@@ -84,7 +85,7 @@ class ObraDetalleScreen extends ConsumerWidget {
                 ),
               )
             else
-              const Aviso('Esta obra no tiene un punto en el mapa.', icono: Icons.map_outlined),
+              const Aviso('Esta obra no tiene un punto en el mapa.', icono: Phosphor.mapTrifold),
             espacio,
             Tarjeta(child: AvanceFisico(obra)),
             espacio,
@@ -94,9 +95,9 @@ class ObraDetalleScreen extends ConsumerWidget {
                 children: [
                   Text('Presupuesto', style: textos.titleSmall),
                   espacioChico,
-                  _FilaObra(Icons.account_balance_wallet_outlined, 'Asignado', soles(obra.montoAsignado)),
+                  _FilaObra(Phosphor.wallet, 'Asignado', soles(obra.montoAsignado)),
                   _FilaObra(
-                    Icons.payments_outlined,
+                    Phosphor.money,
                     'Gastado',
                     soles(obra.montoEjecutado),
                     avance: gasto == null ? null : gasto / 100,
@@ -104,7 +105,7 @@ class ObraDetalleScreen extends ConsumerWidget {
                   ),
                   if (obra.porcentajeTributos != null)
                     _FilaObra(
-                      Icons.account_balance_outlined,
+                      Phosphor.bank,
                       'Financiado con tributos',
                       '${obra.porcentajeTributos!.round()}$_nbsp%',
                     ),
@@ -115,10 +116,10 @@ class ObraDetalleScreen extends ConsumerWidget {
             Tarjeta(
               child: Column(
                 children: [
-                  if (inicio != null) _FilaObra(Icons.event_outlined, 'Inicio', fechaLarga(inicio)),
-                  if (obra.meta.trim().isNotEmpty) _FilaObra(Icons.flag_outlined, 'Meta', obra.meta, largo: true),
+                  if (inicio != null) _FilaObra(Phosphor.calendarBlank, 'Inicio', fechaLarga(inicio)),
+                  if (obra.meta.trim().isNotEmpty) _FilaObra(Phosphor.flag, 'Meta', obra.meta, largo: true),
                   if (actualizada != null)
-                    _FilaObra(Icons.update_rounded, 'Última actualización', haceDias(actualizada, hoy)),
+                    _FilaObra(Phosphor.clockClockwise, 'Última actualización', haceDias(actualizada, hoy)),
                 ],
               ),
             ),
@@ -134,7 +135,7 @@ class ObraDetalleScreen extends ConsumerWidget {
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(top: 3),
-                        child: Icon(Icons.flag_outlined, size: 20, color: AppColors.textPrimary),
+                        child: Icon(Phosphor.flag, size: 20, color: AppColors.textPrimary),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(child: Text(hito, style: textos.bodyLarge)),

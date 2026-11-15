@@ -11,6 +11,7 @@ import 'package:almira_flutter/shared/services/repositorio_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _hoy = DateTime(2026, 11, 11, 10, 30);
@@ -182,7 +183,7 @@ void main() {
       }
 
       // El botón de enviar está apagado sin texto.
-      expect(tester.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.arrow_upward_rounded)).onPressed, isNull);
+      expect(tester.widget<IconButton>(find.widgetWithIcon(IconButton, Phosphor.arrowUp)).onPressed, isNull);
 
       await tester.tap(find.text('¿Cuánto debo?'));
       await tester.pump();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/ubicacion.dart';
@@ -85,7 +86,7 @@ class _SelectorUbicacionScreenState extends State<SelectorUbicacionScreen> {
                             height: 22,
                             child: CircularProgressIndicator(strokeWidth: 2.5),
                           )
-                        : const Icon(Icons.my_location_rounded),
+                        : const Icon(Phosphor.crosshair),
                   ),
                 ),
               ],

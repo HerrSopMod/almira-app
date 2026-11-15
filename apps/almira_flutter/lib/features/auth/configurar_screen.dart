@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
@@ -41,7 +42,7 @@ class ConfigurarScreen extends ConsumerWidget {
             if (v.municipalidades.isEmpty) {
               return [
                 const VistaVacia(
-                  icono: Icons.location_city_rounded,
+                  icono: Phosphor.buildings,
                   titulo: 'Aún no hay municipalidades disponibles',
                   detalle: 'Vuelve a intentarlo más tarde.',
                 ),

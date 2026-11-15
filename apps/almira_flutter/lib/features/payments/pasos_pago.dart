@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 
@@ -52,7 +53,7 @@ class IndicadorPasos extends StatelessWidget {
                     radius: 14,
                     backgroundColor: i <= actual ? AppColors.primary : AppColors.track,
                     child: i < actual
-                        ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                        ? const Icon(Phosphor.check, size: 16, color: Colors.white)
                         : Text(
                             '${i + 1}',
                             style: textos.labelMedium!.copyWith(

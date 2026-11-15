@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -88,7 +89,7 @@ class PerfilScreen extends ConsumerWidget {
                   ),
                   child: nombre == null
                       ? const Icon(
-                          Icons.person_outline_rounded,
+                          Phosphor.user,
                           color: AppColors.primaryDark,
                         )
                       : ExcludeSemantics(
@@ -123,19 +124,19 @@ class PerfilScreen extends ConsumerWidget {
               hijos: [
                 for (final predio in v?.predios ?? const [])
                   ListTile(
-                    leading: const Icon(Icons.home_outlined),
+                    leading: const Icon(Phosphor.house),
                     title: Text(predio.direccion),
                     subtitle: Text('Predio ${predio.codigo}'),
                   ),
                 _Opcion(
-                  icono: Icons.badge_outlined,
+                  icono: Phosphor.identificationBadge,
                   titulo: vecino == null
                       ? 'Vincular cuponera'
                       : 'Vincular otra cuponera',
                   alTocar: () => context.push(Rutas.vincular),
                 ),
                 _Opcion(
-                  icono: Icons.location_city_outlined,
+                  icono: Phosphor.buildings,
                   titulo: 'Municipalidad',
                   detalle: v?.municipalidad?.nombre,
                   alTocar: () => context.push(Rutas.municipalidad),
@@ -147,27 +148,27 @@ class PerfilScreen extends ConsumerWidget {
               hijos: [
                 if (!esDemo)
                   _Opcion(
-                    icono: Icons.key_rounded,
+                    icono: Phosphor.key,
                     titulo: 'Crear o cambiar clave web',
                     detalle: 'Para entrar con tu correo o tu cuponera',
                     alTocar: () => _crearClave(context, ref),
                   ),
                 _Opcion(
-                  icono: Icons.notifications_none_rounded,
+                  icono: Phosphor.bell,
                   titulo: 'Avisos y canales',
                   alTocar: () => context.push(Rutas.avisos),
                 ),
                 // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
                 if (!esDemo && vecino != null) const OpcionWhatsapp(),
                 _Opcion(
-                  icono: Icons.shield_outlined,
+                  icono: Phosphor.shieldCheck,
                   titulo: 'Privacidad',
                   alTocar: () => context.push(Rutas.privacidad),
                 ),
                 SwitchListTile(
                   value: textoGrande,
                   onChanged: ref.read(textoGrandeProvider.notifier).cambiar,
-                  secondary: const Icon(Icons.format_size_rounded),
+                  secondary: const Icon(Phosphor.textAa),
                   title: const Text('Texto más grande'),
                 ),
               ],
@@ -176,14 +177,14 @@ class PerfilScreen extends ConsumerWidget {
               titulo: 'Trámites y ayuda',
               hijos: [
                 _Opcion(
-                  icono: Icons.receipt_long_outlined,
+                  icono: Phosphor.receipt,
                   titulo: 'Constancias de pago',
                   alTocar: () => context.go(
                     '${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}',
                   ),
                 ),
                 _Opcion(
-                  icono: Icons.support_agent_rounded,
+                  icono: Phosphor.headset,
                   titulo: 'Atención',
                   alTocar: () => context.push(Rutas.atencion),
                 ),
@@ -191,7 +192,7 @@ class PerfilScreen extends ConsumerWidget {
             ),
             OutlinedButton.icon(
               onPressed: () => _cerrarSesion(context, ref),
-              icon: const Icon(Icons.logout_rounded, size: 20),
+              icon: const Icon(Phosphor.signOut, size: 20),
               label: Text(
                 esDemo ? 'Salir de la demostración' : 'Cerrar sesión',
               ),
@@ -258,7 +259,7 @@ class _Opcion extends StatelessWidget {
     title: Text(titulo),
     subtitle: detalle == null ? null : Text(detalle!),
     trailing: const Icon(
-      Icons.chevron_right_rounded,
+      Phosphor.caretRight,
       color: AppColors.textSecondary,
     ),
     onTap: alTocar,
@@ -310,8 +311,8 @@ class _DialogoClaveState extends State<_DialogoClave> {
                 tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
                 icon: Icon(
                   _ver
-                      ? Icons.visibility_off_rounded
-                      : Icons.visibility_rounded,
+                      ? Phosphor.eyeSlash
+                      : Phosphor.eye,
                 ),
                 onPressed: () => setState(() => _ver = !_ver),
               ),

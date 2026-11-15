@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -177,7 +178,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
         _CampoPildora(
           controller: _usuario,
           etiqueta: 'Correo o código',
-          icono: Icons.person_outline_rounded,
+          icono: Phosphor.user,
           teclado: TextInputType.emailAddress,
           autofill: const [AutofillHints.username],
           accion: TextInputAction.next,
@@ -189,7 +190,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
         _CampoPildora(
           controller: _clave,
           etiqueta: 'Clave web',
-          icono: Icons.lock_outline_rounded,
+          icono: Phosphor.lock,
           oculto: !_verClave,
           autofill: const [AutofillHints.password],
           accion: TextInputAction.done,
@@ -198,8 +199,8 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
             tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
             icon: Icon(
               _verClave
-                  ? Icons.visibility_off_rounded
-                  : Icons.visibility_rounded,
+                  ? Phosphor.eyeSlash
+                  : Phosphor.eye,
             ),
             onPressed: () => setState(() => _verClave = !_verClave),
           ),
@@ -560,7 +561,7 @@ class _Error extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
-            Icons.error_outline_rounded,
+            Phosphor.warningCircle,
             size: 20,
             color: AppColors.error,
           ),
@@ -614,7 +615,7 @@ class _DialogoOlvidoState extends State<_DialogoOlvido> {
         autocorrect: false,
         decoration: const InputDecoration(
           labelText: 'Correo',
-          prefixIcon: Icon(Icons.mail_outline_rounded),
+          prefixIcon: Icon(Phosphor.envelope),
         ),
         validator: (v) =>
             RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())

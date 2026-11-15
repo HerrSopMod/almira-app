@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
@@ -88,7 +89,7 @@ class _VerificarCelularScreenState extends ConsumerState<VerificarCelularScreen>
                         decoration: const InputDecoration(
                           labelText: 'Celular',
                           prefixText: '+51 ',
-                          prefixIcon: Icon(Icons.smartphone_rounded),
+                          prefixIcon: Icon(Phosphor.deviceMobile),
                         ),
                         validator: (v) => _celularValido.hasMatch(v ?? '')
                             ? null
@@ -107,7 +108,7 @@ class _VerificarCelularScreenState extends ConsumerState<VerificarCelularScreen>
                           onFieldSubmitted: (_) => _verificar(),
                           decoration: const InputDecoration(
                             labelText: 'Código de 6 dígitos',
-                            prefixIcon: Icon(Icons.pin_outlined),
+                            prefixIcon: Icon(Phosphor.password),
                           ),
                           validator: (v) =>
                               (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',

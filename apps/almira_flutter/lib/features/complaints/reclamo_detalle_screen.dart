@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
@@ -40,7 +41,7 @@ class ReclamoDetalleScreen extends ConsumerWidget {
           if (reclamo == null) {
             return const [
               VistaVacia(
-                icono: Icons.search_off_rounded,
+                icono: Phosphor.magnifyingGlass,
                 titulo: 'No encontramos este reclamo',
                 detalle: 'Puede que pertenezca a otra municipalidad.',
               ),
@@ -55,7 +56,7 @@ class ReclamoDetalleScreen extends ConsumerWidget {
                 Insignia(
                   reclamo.estado.etiqueta,
                   tono: reclamo.resuelto ? Tono.exito : Tono.primario,
-                  icono: reclamo.resuelto ? Icons.check_rounded : null,
+                  icono: reclamo.resuelto ? Phosphor.check : null,
                 ),
               ],
             ),
@@ -267,7 +268,7 @@ class _SinFoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Aviso(
         'Sin fotografía adjunta',
-        icono: Icons.no_photography_outlined,
+        icono: Phosphor.cameraSlash,
       );
 }
 
@@ -286,7 +287,7 @@ class _ErrorFoto extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 32),
+            const Icon(Phosphor.imageBroken, color: AppColors.textSecondary, size: 32),
             const SizedBox(height: AppSpacing.sm),
             Text(
               sinConexion ? 'Sin conexión para cargar la foto' : 'No se pudo cargar la foto',
@@ -295,7 +296,7 @@ class _ErrorFoto extends StatelessWidget {
             ),
             OutlinedButton.icon(
               onPressed: alReintentar,
-              icon: const Icon(Icons.refresh_rounded, size: 20),
+              icon: const Icon(Phosphor.arrowClockwise, size: 20),
               label: const Text('Reintentar'),
               style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
             ),
@@ -323,7 +324,7 @@ class _Ubicacion extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.place_outlined, size: 20, color: AppColors.textSecondary),
+            const Icon(Phosphor.mapPin, size: 20, color: AppColors.textSecondary),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
@@ -355,7 +356,7 @@ class _Ubicacion extends StatelessWidget {
         else
           const Aviso(
             'Este reclamo no tiene un punto en el mapa. La municipalidad usará la dirección.',
-            icono: Icons.map_outlined,
+            icono: Phosphor.mapTrifold,
           ),
       ],
     );
@@ -452,7 +453,7 @@ class _Punto extends StatelessWidget {
           ),
         ),
         child: switch (estado) {
-          EstadoPaso.hecho => const Icon(Icons.check_rounded, size: 14, color: Colors.white),
+          EstadoPaso.hecho => const Icon(Phosphor.check, size: 14, color: Colors.white),
           EstadoPaso.actual => const Center(
               child: SizedBox(
                 width: 8,

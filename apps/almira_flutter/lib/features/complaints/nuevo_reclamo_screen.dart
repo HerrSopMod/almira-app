@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -157,7 +158,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
+              leading: const Icon(Phosphor.camera),
               title: const Text('Tomar foto'),
               onTap: () {
                 Navigator.pop(hoja);
@@ -165,7 +166,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
+              leading: const Icon(Phosphor.images),
               title: const Text('Elegir de la galería'),
               onTap: () {
                 Navigator.pop(hoja);
@@ -174,7 +175,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
             ),
             if (_foto != null)
               ListTile(
-                leading: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+                leading: const Icon(Phosphor.trash, color: AppColors.error),
                 title: const Text('Quitar foto'),
                 onTap: () {
                   Navigator.pop(hoja);
@@ -290,7 +291,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
       return Scaffold(
         appBar: AppBar(title: const Text('Nuevo reclamo')),
         body: VistaVacia(
-          icono: Icons.badge_outlined,
+          icono: Phosphor.identificationBadge,
           titulo: 'Vincula tu código de contribuyente',
           detalle: 'Lo necesitas para enviar reclamos a tu municipalidad.',
           accion: 'Vincular código',
@@ -308,7 +309,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
         title: const Text('Nuevo reclamo'),
         leading: IconButton(
           tooltip: 'Cerrar',
-          icon: const Icon(Icons.close_rounded),
+          icon: const Icon(Phosphor.x),
           onPressed: _enviando ? null : () => context.pop(),
         ),
       ),
@@ -459,7 +460,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _enviando ? null : () => _elegirEnMapa(vista),
-                      icon: const Icon(Icons.place_outlined, size: 20),
+                      icon: const Icon(Phosphor.mapPin, size: 20),
                       label: Text(_punto == null ? 'Elegir en mapa' : 'Mover pin'),
                     ),
                   ),
@@ -473,7 +474,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.my_location_rounded, size: 20),
+                          : const Icon(Phosphor.crosshair, size: 20),
                       label: const Text('Mi ubicación'),
                     ),
                   ),
@@ -507,7 +508,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                       ? null
                       : IconButton(
                           tooltip: 'Usar la dirección de mi predio',
-                          icon: const Icon(Icons.home_outlined),
+                          icon: const Icon(Phosphor.house),
                           onPressed: _enviando
                               ? null
                               : () => setState(() => _direccion.text = vista.predios.first.direccion),
@@ -580,9 +581,9 @@ class _EstadoFoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (texto, tono, icono) = switch (resultado.estado) {
-      EstadoFoto.valida => ('Foto válida', Tono.exito, Icons.check_rounded),
-      EstadoFoto.noValida => ('Foto no válida', Tono.error, Icons.error_outline_rounded),
-      EstadoFoto.enRevision => ('En revisión', Tono.aviso, Icons.schedule_rounded),
+      EstadoFoto.valida => ('Foto válida', Tono.exito, Phosphor.check),
+      EstadoFoto.noValida => ('Foto no válida', Tono.error, Phosphor.warningCircle),
+      EstadoFoto.enRevision => ('En revisión', Tono.aviso, Phosphor.clock),
     };
     return Semantics(
       liveRegion: true,
@@ -678,7 +679,7 @@ class _CampoFoto extends StatelessWidget {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.add_a_photo_outlined, size: 32, color: AppColors.primary),
+                          const Icon(Phosphor.cameraPlus, size: 32, color: AppColors.primary),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
                             'Adjuntar foto',
@@ -702,7 +703,7 @@ class _CampoFoto extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.edit_outlined, size: 16, color: AppColors.primaryDark),
+                                  const Icon(Phosphor.pencilSimple, size: 16, color: AppColors.primaryDark),
                                   const SizedBox(width: 6),
                                   Text(
                                     'Cambiar',
