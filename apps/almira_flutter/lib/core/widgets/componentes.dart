@@ -671,13 +671,17 @@ class FilaDato extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
+          // El monto va pegado al borde derecho, alineado con los de las demás filas.
           Flexible(
-            child: Text(
-              valor,
-              textAlign: TextAlign.end,
-              style: (destacado ? textos.titleLarge : textos.bodyLarge)!.copyWith(
-                fontWeight: destacado ? FontWeight.w700 : FontWeight.w500,
-                fontFeatures: cifrasTabulares,
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Text(
+                valor,
+                textAlign: TextAlign.end,
+                style: (destacado ? textos.titleLarge : textos.bodyLarge)!.copyWith(
+                  fontWeight: destacado ? FontWeight.w700 : FontWeight.w500,
+                  fontFeatures: cifrasTabulares,
+                ),
               ),
             ),
           ),

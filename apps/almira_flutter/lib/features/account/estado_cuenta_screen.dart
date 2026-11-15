@@ -18,7 +18,7 @@ import 'pdf_documentos.dart';
 
 enum _Vista { estado, historial }
 
-/// Estado de cuenta corriente por tributo y año, con su PDF, y el historial de pagos.
+/// Estado de cuenta por tributo y año, con su PDF, y el historial de pagos, en dos pestañas.
 class EstadoCuentaScreen extends ConsumerStatefulWidget {
   const EstadoCuentaScreen({super.key});
 
@@ -26,8 +26,16 @@ class EstadoCuentaScreen extends ConsumerStatefulWidget {
   ConsumerState<EstadoCuentaScreen> createState() => _EstadoCuentaScreenState();
 }
 
-class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
+class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen>
+    with SingleTickerProviderStateMixin {
   _Vista _vista = _Vista.estado;
+  late final TabController _pestanas = TabController(length: _Vista.values.length, vsync: this);
+
+  @override
+  void dispose() {
+    _pestanas.dispose();
+    super.dispose();
+  }
   int? _anio;
   TipoDeuda? _tributo;
   bool _generando = false;
@@ -73,17 +81,17 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
             ];
           }
           return [
-            SegmentedButton<_Vista>(
-              segments: const [
-                ButtonSegment(value: _Vista.estado, label: Text('Estado de cuenta')),
-                ButtonSegment(value: _Vista.historial, label: Text('Historial de pagos')),
-              ],
-              selected: {_vista},
-              showSelectedIcon: false,
-              style: SegmentedButton.styleFrom(textStyle: Theme.of(context).textTheme.labelMedium),
-              onSelectionChanged: (s) => setState(() => _vista = s.first),
+            // Dos vistas: pestañas con subrayado.
+            TabBar(
+              controller: _pestanas,
+              // Con letra grande las etiquetas no entran a la mitad del ancho: se desplazan en vez
+              // de cortarse.
+              isScrollable: MediaQuery.textScalerOf(context).scale(1) > 1.15,
+              tabAlignment: MediaQuery.textScalerOf(context).scale(1) > 1.15 ? TabAlignment.start : null,
+              onTap: (i) => setState(() => _vista = _Vista.values[i]),
+              tabs: const [Tab(text: 'Estado de cuenta'), Tab(text: 'Historial de pagos')],
             ),
-            espacio,
+            espacioGrande,
             if (_vista == _Vista.estado) ..._estado(v, hoy) else ..._historial(v),
           ];
         },
@@ -96,32 +104,25 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
     final estado = construirEstadoCuenta(v.deudas);
     final textos = Theme.of(context).textTheme;
     return [
-      Tarjeta(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(v.municipalidad?.nombre ?? '', style: textos.titleSmall!.copyWith(color: AppColors.primary)),
-            const SizedBox(height: AppSpacing.xs),
-            Text('ESTADO DE CUENTA CORRIENTE', style: textos.titleMedium),
-            Text('Al ${fechaLarga(hoy)}', style: textos.bodyMedium),
-            const Divider(height: AppSpacing.xl),
-            FilaDato('Código', vecino.codigoContribuyente ?? '-'),
-            if (vecino.dni != null) FilaDato('DNI/RUC', vecino.dni!),
-            FilaDato('Contribuyente', vecino.nombreCompleto),
-            if (vecino.domicilioFiscal != null) FilaDato('Domicilio fiscal', vecino.domicilioFiscal!),
-          ],
-        ),
+      Text(
+        [if (v.municipalidad != null) v.municipalidad!.nombre, 'al ${fechaLarga(hoy)}'].join(' · '),
+        style: textos.bodyMedium,
       ),
+      espacioChico,
+      Ficha('Contribuyente', tipoTitulo(vecino.nombreCompleto)),
+      Ficha('Código', vecino.codigoContribuyente ?? '-'),
+      if (vecino.dni != null) Ficha('DNI o RUC', vecino.dni!),
+      if (vecino.domicilioFiscal != null) Ficha('Domicilio fiscal', vecino.domicilioFiscal!),
       espacio,
       FilledButton.icon(
         onPressed: _generando ? null : () => _descargar(v, hoy),
         icon: _generando
             ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                width: AppIconos.boton,
+                height: AppIconos.boton,
+                child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.onPrimary),
               )
-            : const Icon(Phosphor.filePdf, size: 20),
+            : const Icon(Phosphor.filePdf, size: AppIconos.boton),
         label: const Text('Descargar PDF'),
       ),
       if (estado.vacio) ...[
@@ -130,35 +131,23 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
       ] else ...[
         // Impuestos y tasas son tributos distintos: se agrupan con su propio encabezado.
         for (final grupo in _gruposDeTributos(estado.tributos)) ...[
-          espacioGrande,
-          Semantics(
-            header: true,
-            child: Text(grupo.titulo, style: textos.titleLarge),
-          ),
+          espacioSeccion,
+          TituloSeccion(grupo.titulo),
           for (final tributo in grupo.tributos) ...[
             espacio,
-            Row(
-              children: [
-                IconoTributo(tributo.tipo, lado: 32),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    tributo.tipo.nombre,
-                    style: textos.titleMedium!.copyWith(color: tributo.tipo.color),
-                  ),
-                ),
-              ],
-            ),
-            espacioChico,
+            Text(tributo.tipo.nombre, style: textos.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
             for (final anio in tributo.anios) ...[
-              _TablaAnio(anio: anio),
               espacioChico,
+              _TablaAnio(anio: anio, hoy: hoy),
             ],
-            _FilaResumen('Total acumulado', tributo.acumulado, tono: Tono.primario),
+            espacioChico,
+            const Divider(),
+            FilaDato('Total acumulado', soles(tributo.acumulado.saldo), destacado: true),
+            Text('Pagado ${soles(tributo.acumulado.pagos)}', style: textos.bodyMedium),
           ],
         ],
-        espacioGrande,
-        _FilaResumen('Total general', estado.general, tono: Tono.neutro, grande: true),
+        espacioSeccion,
+        _TotalGeneral(estado.general),
       ],
     ];
   }
@@ -174,7 +163,6 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
         if (p.tributo != null) p.tributo!,
     }.toList();
     final lista = historialDePagos(v.pagos, v.deudas, anio: _anio, tributo: _tributo);
-    final textos = Theme.of(context).textTheme;
     final total = lista.fold<double>(0, (s, p) => s + p.pago.monto);
 
     return [
@@ -204,31 +192,12 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> {
       if (lista.isEmpty)
         const VistaVacia(icono: Phosphor.receipt, titulo: 'No hay pagos con ese filtro')
       else ...[
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(AppRadius.campo),
-          ),
-          child: Row(
-            children: [
-              Expanded(child: Text(plural(lista.length, 'pago', 'pagos'), style: textos.titleSmall)),
-              Text(soles(total), style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares)),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Tarjeta(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-          child: Column(
-            children: [
-              for (final (i, p) in lista.indexed) ...[
-                if (i > 0) const Divider(),
-                _FilaHistorial(pago: p),
-              ],
-            ],
-          ),
-        ),
+        FilaDato(plural(lista.length, 'pago', 'pagos'), soles(total), destacado: true),
+        const Divider(),
+        for (final (i, p) in lista.indexed) ...[
+          if (i > 0) const Divider(),
+          _FilaHistorial(pago: p),
+        ],
       ],
     ];
   }
@@ -241,92 +210,53 @@ class _FilaHistorial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
     final d = pago.deuda;
     final fecha = pago.pago.creadoEn;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (d != null) ...[IconoTributo(d.tipo, lado: 36), const SizedBox(width: AppSpacing.md)],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  d?.tipo.nombre ?? 'Pago',
-                  style: textos.titleSmall!.copyWith(fontSize: 15),
-                ),
-                if (d != null)
-                  Text(
-                    _periodoConAnio(d),
-                    style: textos.bodySmall!.copyWith(fontSize: 13),
-                  ),
-                Text(
-                  [
-                    if (fecha != null) fechaCorta(fecha),
-                    pago.pago.etiquetaMedio,
-                    if (pago.pago.referencia != null) pago.pago.referencia!,
-                  ].join(' · '),
-                  style: textos.bodySmall!.copyWith(fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Text(
-            soles(pago.pago.monto),
-            textAlign: TextAlign.right,
-            style: textos.titleSmall!.copyWith(fontSize: 15, fontFeatures: cifrasTabulares),
-          ),
-        ],
+    return FilaLista(
+      titulo: d?.tipo.nombre ?? 'Pago',
+      monto: soles(pago.pago.monto),
+      detalle: Text(
+        [
+          if (d != null) _periodoConAnio(d),
+          if (fecha != null) fechaCorta(fecha),
+          pago.pago.etiquetaMedio,
+          if (pago.pago.referencia != null) pago.pago.referencia!,
+        ].join(' · '),
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
     );
   }
 }
 
-class _FilaResumen extends StatelessWidget {
-  const _FilaResumen(this.etiqueta, this.totales, {this.tono = Tono.neutro, this.grande = false});
+/// Total general: el único bloque Destacado de la pantalla, con el saldo y su desglose.
+class _TotalGeneral extends StatelessWidget {
+  const _TotalGeneral(this.totales);
 
-  final String etiqueta;
   final Totales totales;
-  final Tono tono;
-  final bool grande;
 
   @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    return Tarjeta(
-      color: tono.fondo,
-      conBorde: false,
-      child: Column(
-        children: [
-          FilaDato(etiqueta, soles(totales.saldo), destacado: true),
-          if (grande) ...[
+  Widget build(BuildContext context) => Destacado(
+        child: Column(
+          children: [
+            FilaDato('Total general', soles(totales.saldo), destacado: true),
             FilaDato('Insoluto', soles(totales.insoluto)),
             FilaDato('Gastos de emisión', soles(totales.gastos)),
             FilaDato('Intereses', soles(totales.interes)),
             FilaDato('Descuentos', '- ${soles(totales.descuento)}'),
             FilaDato('Pagos', soles(totales.pagos)),
-          ] else
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Pagado ${soles(totales.pagos)}', style: textos.bodySmall),
-            ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }
 
-/// Un año de un tributo, en tarjetas que caben en el ancho del teléfono (sin desplazarse hacia
-/// los lados): cada periodo muestra su estado, sus fechas y su saldo, y al tocarlo se abre el
-/// detalle con todas las columnas del estado de cuenta.
+/// Un año de un tributo, sin cajas: el año como rótulo, una fila por periodo (nombre, fecha en
+/// gris y saldo a la derecha) y el total del año. Al tocar un periodo se abre el detalle con
+/// todas las columnas del estado de cuenta.
 class _TablaAnio extends StatelessWidget {
-  const _TablaAnio({required this.anio});
+  const _TablaAnio({required this.anio, required this.hoy});
 
   final GrupoAnio anio;
+  final DateTime hoy;
 
   static String _f(DateTime? d) => d == null ? '' : fechaCorta(d);
 
@@ -345,9 +275,11 @@ class _TablaAnio extends StatelessWidget {
               Text('${etiquetaPeriodo(d)} ${d.anioTributo}', style: Theme.of(context).textTheme.titleLarge),
               Text(d.concepto, style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: AppSpacing.md),
-              FilaDato('Estado', d.pendiente ? 'Pendiente' : 'Pagado'),
-              FilaDato('Vencimiento', _f(d.vencimiento)),
-              if (d.fechaPago != null) FilaDato('Fecha de pago', _f(d.fechaPago)),
+              Ficha('Estado', d.pendiente ? 'Pendiente' : 'Pagado'),
+              Ficha('Vencimiento', _f(d.vencimiento)),
+              if (d.fechaPago != null) Ficha('Fecha de pago', _f(d.fechaPago)),
+              if (d.nroValor != null) Ficha('Nro. de valor', d.nroValor!),
+              if (d.expCoactivo != null) Ficha('Exp. coactivo', d.expCoactivo!),
               const Divider(height: AppSpacing.xl),
               FilaDato('Insoluto', soles(d.montoInsoluto)),
               FilaDato('Gastos de emisión', soles(d.gastosEmision)),
@@ -355,11 +287,6 @@ class _TablaAnio extends StatelessWidget {
               FilaDato('Descuento', '- ${soles(d.descuento)}'),
               FilaDato('Pagos', soles(d.pagosAplicados)),
               FilaDato('Saldo', soles(d.saldo), destacado: true),
-              if (d.nroValor != null) ...[
-                const Divider(height: AppSpacing.xl),
-                FilaDato('Nro. de valor', d.nroValor!),
-              ],
-              if (d.expCoactivo != null) FilaDato('Exp. coactivo', d.expCoactivo!),
             ],
           ),
         ),
@@ -371,92 +298,44 @@ class _TablaAnio extends StatelessWidget {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     final t = anio.subtotal;
-    TextStyle cifra(TextStyle base) => base.copyWith(fontFeatures: cifrasTabulares);
-
-    return Tarjeta(
-      padding: EdgeInsets.zero,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
-            child: Row(
-              children: [
-                Expanded(child: Text('Año ${anio.anio}', style: textos.titleSmall)),
-                Text('Saldo', style: textos.bodySmall),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Año ${anio.anio}', style: estiloRotulo(context)),
+        for (final d in anio.filas) ...[
+          FilaLista(
+            titulo: etiquetaPeriodo(d),
+            monto: soles(d.saldo),
+            alTocar: () => _detalle(context, d),
+            semantica: '${etiquetaPeriodo(d)} ${anio.anio}, saldo ${soles(d.saldo)}. Ver detalle',
+            detalle: _lineaPeriodo(context, d),
           ),
           const Divider(),
-          for (final d in anio.filas) ...[
-            InkWell(
-              onTap: () => _detalle(context, d),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            etiquetaPeriodo(d),
-                            style: textos.titleSmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            d.pendiente
-                                ? 'Pendiente · vence ${_f(d.vencimiento)}'
-                                : 'Pagado · ${_f(d.fechaPago ?? d.vencimiento)}',
-                            style: textos.bodySmall!.copyWith(
-                              color: d.pendiente ? AppColors.error : AppColors.textSecondary,
-                            ),
-                            maxLines: 2,
-                          ),
-                          if (d.nroValor != null)
-                            Text('Valor ${d.nroValor}', style: textos.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      soles(d.saldo),
-                      textAlign: TextAlign.right,
-                      style: cifra(textos.titleSmall!),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    const Icon(Phosphor.caretRight, size: 20, color: AppColors.textSecondary),
-                  ],
-                ),
-              ),
-            ),
-            const Divider(),
-          ],
-          Container(
-            color: AppColors.primarySoft,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: Text('Total ${anio.anio}', style: textos.titleSmall)),
-                    Text(soles(t.saldo), style: cifra(textos.titleSmall!)),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  children: [
-                    Expanded(child: Text('Insoluto ${soles(t.insoluto)}', style: textos.bodySmall)),
-                    Text('Pagos ${soles(t.pagos)}', style: cifra(textos.bodySmall!)),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ],
-      ),
+        FilaDato('Total ${anio.anio}', soles(t.saldo)),
+        Text('Insoluto ${soles(t.insoluto)} · Pagos ${soles(t.pagos)}', style: textos.bodyMedium),
+      ],
+    );
+  }
+
+  /// «Vence el 30 nov 2026», «Venció el 15 oct 2026» (en rojo) o «Pagado el 28 oct 2026».
+  Widget _lineaPeriodo(BuildContext context, Deuda d) {
+    final vencida = d.estadoAl(hoy) == EstadoDeuda.vencida;
+    final texto = !d.pendiente
+        ? 'Pagado el ${_f(d.fechaPago ?? d.vencimiento)}'
+        : (vencida ? 'Venció el ${_f(d.vencimiento)}' : 'Vence el ${_f(d.vencimiento)}');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextoPlazo(texto, vencido: vencida),
+        if (d.nroValor != null)
+          Text(
+            'Valor ${d.nroValor}',
+            style: Theme.of(context).textTheme.bodyMedium,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+      ],
     );
   }
 }

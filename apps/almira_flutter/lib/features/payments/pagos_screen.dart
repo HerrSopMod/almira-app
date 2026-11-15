@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
-import '../../app/theme/app_spacing.dart';
-import '../../app/theme/app_theme.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/filtros.dart';
@@ -14,7 +13,8 @@ import '../../shared/services/proveedores.dart';
 import 'pagos_logica.dart';
 import 'widgets_deuda.dart';
 
-/// Pagar: obligaciones por estado y, en «Pagados», los pagos registrados.
+/// Pagar: cabecera turquesa con el total pendiente; debajo, en la hoja blanca, las obligaciones
+/// por estado y, en «Pagados», los pagos registrados.
 class PagosScreen extends ConsumerStatefulWidget {
   const PagosScreen({super.key, this.filtroInicial});
 
@@ -40,22 +40,16 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
     final vista = ref.watch(vistaProvider);
     final esDemo = ref.watch(esDemoProvider);
     final hoy = ref.watch(relojProvider)();
-    final textos = Theme.of(context).textTheme;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pagar'),
-        actions: [
-          if (esDemo)
-            const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.lg),
-              child: Center(child: EtiquetaDemo()),
-            ),
-        ],
-      ),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
+        // Cabecera turquesa con el total pendiente en blanco.
+        cabecera: (v) => CabeceraMarca(
+          titulo: 'Pagar',
+          esDemo: esDemo,
+          hijo: v?.vecino == null ? null : _TotalCabecera(total: resumirDeuda(v!.deudas, hoy).total),
+        ),
         construir: (v) {
           if (v.vecino == null) {
             return [
@@ -71,14 +65,6 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
           final resumen = resumirDeuda(v.deudas, hoy);
           final lista = filtrarDeudas(v.deudas, _filtro, hoy);
           return [
-            Text('Total pendiente', style: textos.bodyMedium),
-            const SizedBox(height: AppSpacing.xs),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(soles(resumen.total), style: textos.displaySmall),
-            ),
-            espacio,
             GrupoFiltros(
               chips: [
                 for (final filtro in FiltroDeuda.values)
@@ -89,7 +75,7 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
                   ),
               ],
             ),
-            espacio,
+            espacioChico,
             if (lista.isEmpty)
               VistaVacia(
                 icono: switch (_filtro) {
@@ -103,61 +89,71 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
                 },
               )
             else
-              for (final deuda in lista) ...[
+              for (final (i, deuda) in lista.indexed) ...[
+                if (i > 0) const Divider(),
                 FilaDeuda(
                   deuda: deuda,
                   hoy: hoy,
                   alTocar: () => context.go(Rutas.deuda(deuda.id)),
                 ),
-                espacioChico,
               ],
             if (_filtro == FiltroDeuda.pagados && v.pagos.isNotEmpty) ...[
-              espacio,
-              TituloSeccion('Constancias'),
+              espacioGrande,
+              const TituloSeccion('Constancias'),
               espacioChico,
-              Tarjeta(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-                child: Column(
-                  children: [
-                    for (final (i, pago) in v.pagos.indexed) ...[
-                      if (i > 0) const Divider(),
-                      _FilaPago(
-                        pago: pago,
-                        deuda: v.deudas.where((d) => d.id == pago.deudaId).firstOrNull,
-                      ),
-                    ],
-                  ],
+              for (final (i, pago) in v.pagos.indexed) ...[
+                if (i > 0) const Divider(),
+                _FilaPago(
+                  pago: pago,
+                  deuda: v.deudas.where((d) => d.id == pago.deudaId).firstOrNull,
                 ),
-              ),
+              ],
             ],
             if (_filtro != FiltroDeuda.pagados && resumen.cantidad > 0) ...[
-              espacio,
+              espacioGrande,
               AccionPago(municipalidad: v.municipalidad, esDemo: esDemo),
             ],
-            espacioSeccion,
+            espacioGrande,
             const TituloSeccion('Documentos'),
-            espacio,
-            Tarjeta(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  FilaAccion(
-                    icono: Phosphor.receipt,
-                    titulo: 'Estado de cuenta',
-                    alTocar: () => context.push(Rutas.estadoCuenta),
-                  ),
-                  const Divider(indent: AppSpacing.lg, endIndent: AppSpacing.lg),
-                  FilaAccion(
-                    icono: Phosphor.fileText,
-                    titulo: 'Cuponera',
-                    alTocar: () => context.push(Rutas.cuponera),
-                  ),
-                ],
-              ),
+            espacioChico,
+            FilaAccion(
+              icono: Phosphor.receipt,
+              titulo: 'Estado de cuenta',
+              alTocar: () => context.push(Rutas.estadoCuenta),
+            ),
+            const Divider(),
+            FilaAccion(
+              icono: Phosphor.fileText,
+              titulo: 'Cuponera',
+              alTocar: () => context.push(Rutas.cuponera),
             ),
           ];
         },
       ),
+    );
+  }
+}
+
+/// «Total pendiente» y el monto, en blanco dentro de la cabecera.
+class _TotalCabecera extends StatelessWidget {
+  const _TotalCabecera({required this.total});
+
+  final double total;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Total pendiente', style: textos.bodyLarge!.copyWith(color: AppColors.onPrimary)),
+        // El monto se achica antes que partirse en dos líneas.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(soles(total), style: textos.displayMedium!.copyWith(color: AppColors.onPrimary)),
+        ),
+      ],
     );
   }
 }
@@ -170,34 +166,17 @@ class _FilaPago extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
     final fecha = pago.creadoEn;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(deuda?.concepto ?? 'Pago', style: textos.titleSmall),
-                Text(
-                  [
-                    if (fecha != null) fechaCorta(fecha),
-                    if (pago.referencia != null) pago.referencia!,
-                    pago.estado.etiqueta,
-                  ].join(' · '),
-                  style: textos.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Text(
-            soles(pago.monto),
-            style: textos.titleSmall!.copyWith(fontFeatures: cifrasTabulares),
-          ),
-        ],
+    return FilaLista(
+      titulo: deuda?.concepto ?? 'Pago',
+      monto: soles(pago.monto),
+      detalle: Text(
+        [
+          if (fecha != null) fechaCorta(fecha),
+          if (pago.referencia != null) pago.referencia!,
+          pago.estado.etiqueta,
+        ].join(' · '),
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
     );
   }

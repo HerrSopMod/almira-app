@@ -19,7 +19,8 @@ class InsigniaDeuda extends StatelessWidget {
   @override
   Widget build(BuildContext context) => switch (estado) {
         EstadoDeuda.vencida => Insignia(estado.etiqueta, tono: Tono.error, icono: Phosphor.warningCircle),
-        EstadoDeuda.vigente => Insignia(estado.etiqueta, tono: Tono.aviso, icono: Phosphor.clock),
+        // Sin reloj: el plazo se dice en texto («Vence el 30 de noviembre»).
+        EstadoDeuda.vigente => Insignia(estado.etiqueta, tono: Tono.aviso),
         EstadoDeuda.pagada => Insignia(estado.etiqueta, tono: Tono.exito, icono: Phosphor.check),
       };
 }
