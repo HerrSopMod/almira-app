@@ -30,6 +30,25 @@ abstract final class AppSpacing {
 
   /// Barra inferior, sin el área segura.
   static const double barraInferior = 64;
+
+  /// Barra superior (sin la barra de estado): también la fila de marca de la cabecera.
+  static const double barraSuperior = 56;
+
+  /// Cuánto se monta la hoja blanca sobre el color de la cabecera.
+  static const double solapeHoja = 20;
+
+  /// Parte de la pantalla que ocupa la cabecera del ingreso (40 %; 34 % en pantallas bajas).
+  static const double cabeceraIngreso = 0.40;
+  static const double cabeceraIngresoBaja = 0.34;
+
+  /// Logo en la cabecera de marca.
+  static const double logoCabecera = 28;
+
+  /// Círculo de un acceso rápido de Inicio.
+  static const double acceso = 56;
+
+  /// Separación entre grupos de una ficha o de una pantalla de detalle.
+  static const double grupo = 24;
 }
 
 /// Tamaños de ícono. Un solo estilo de línea («regular»); «fill» solo en la pestaña activa.
@@ -49,8 +68,11 @@ abstract final class AppRadius {
   static const double boton = 12;
   static const double tarjeta = 12;
 
-  /// Bloque Destacado, mapa y tarjeta grande.
+  /// Bloque Destacado, mapa, tarjeta grande y tarjeta flotante.
   static const double destacado = 16;
+
+  /// Esquinas superiores de la hoja blanca que se monta sobre la cabecera.
+  static const double hoja = 20;
   static const double dialogo = 20;
   static const double pastilla = 999;
 }

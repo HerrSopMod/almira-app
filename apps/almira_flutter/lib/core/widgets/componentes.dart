@@ -15,22 +15,24 @@ Duration duracionDe(BuildContext context, [int ms = 200]) =>
         ? Duration.zero
         : Duration(milliseconds: ms);
 
-/// Ícono de la marca (casa con burbuja), en SVG. Solo el dibujo, sin texto.
+/// Ícono de la marca (casa con burbuja), en SVG. Solo el dibujo, sin texto. En [blanco] va la
+/// versión para la cabecera turquesa.
 class LogoAlmira extends StatelessWidget {
-  const LogoAlmira({super.key, this.lado = 40});
+  const LogoAlmira({super.key, this.lado = 40, this.blanco = false});
 
   final double lado;
+  final bool blanco;
 
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
-        'assets/marca/icono.svg',
+        blanco ? 'assets/marca/icono-blanco.svg' : 'assets/marca/icono.svg',
         width: lado,
         height: lado,
         semanticsLabel: 'Almira',
       );
 }
 
-/// Logo vertical para el ingreso: el ícono con «Almira» debajo, escrito como texto.
+/// Logo vertical del ingreso: el ícono en blanco con «Almira» debajo, escrito como texto.
 class LogoVertical extends StatelessWidget {
   const LogoVertical({super.key, this.altoIcono = 96});
 
@@ -44,35 +46,11 @@ class LogoVertical extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              LogoAlmira(lado: altoIcono),
+              LogoAlmira(lado: altoIcono, blanco: true),
               const SizedBox(height: AppSpacing.md),
-              Text('Almira', style: Theme.of(context).textTheme.headlineMedium),
-            ],
-          ),
-        ),
-      );
-}
-
-/// Marca en la barra superior: ícono de 28 con «Almira» al lado, en Inter Bold.
-class MarcaAlmira extends StatelessWidget {
-  const MarcaAlmira({super.key});
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-        label: 'Almira',
-        child: ExcludeSemantics(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const LogoAlmira(lado: 28),
-              const SizedBox(width: AppSpacing.sm),
-              Flexible(
-                child: Text(
-                  'Almira',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w700),
-                ),
+              Text(
+                'Almira',
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.onPrimary),
               ),
             ],
           ),
@@ -100,6 +78,201 @@ class LogoGoogle extends StatelessWidget {
       );
 }
 
+// ---------------------------------------------------------------------------------------
+// Cabecera de marca y hoja blanca
+// ---------------------------------------------------------------------------------------
+
+/// Bloque superior turquesa de las pestañas raíz. Empieza detrás de la barra de estado; lleva
+/// el logo en blanco y el título a la izquierda y las acciones a la derecha. [hijo] va debajo,
+/// también en blanco (el saludo de Inicio, el total de Pagar). Debajo de la cabecera siempre
+/// va una [HojaBlanca].
+class CabeceraMarca extends StatelessWidget {
+  const CabeceraMarca({
+    super.key,
+    required this.titulo,
+    this.acciones = const [],
+    this.hijo,
+    this.esDemo = false,
+    this.rellenoInferior = AppSpacing.solapeHoja + AppSpacing.lg,
+  });
+
+  final String titulo;
+  final List<Widget> acciones;
+  final Widget? hijo;
+  final bool esDemo;
+
+  /// Espacio turquesa bajo el contenido: la hoja blanca se monta sobre él.
+  final double rellenoInferior;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final arriba = MediaQuery.paddingOf(context).top;
+    return ColoredBox(
+      color: AppColors.primary,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.margen, arriba, AppSpacing.sm, rellenoInferior),
+        child: SobreTurquesa(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: AppSpacing.barraSuperior,
+                child: Row(
+                  children: [
+                    const LogoAlmira(lado: AppSpacing.logoCabecera, blanco: true),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Semantics(
+                        header: true,
+                        child: Text(
+                          titulo,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
+                        ),
+                      ),
+                    ),
+                    // Con letra muy grande la etiqueta no entra junto al título.
+                    if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15) ...[
+                      const EtiquetaDemo(),
+                      const SizedBox(width: AppSpacing.xs),
+                    ],
+                    ...acciones,
+                  ],
+                ),
+              ),
+              if (hijo != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.sm, right: AppSpacing.md),
+                  child: hijo,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Todo lo que va dentro de la cabecera turquesa se dibuja en blanco: texto, íconos y botones.
+class SobreTurquesa extends StatelessWidget {
+  const SobreTurquesa({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => IconTheme(
+        data: const IconThemeData(color: AppColors.onPrimary, size: AppIconos.navegacion),
+        child: IconButtonTheme(
+          data: IconButtonThemeData(
+            style: IconButton.styleFrom(
+              foregroundColor: AppColors.onPrimary,
+              minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
+            ),
+          ),
+          child: TextButtonTheme(
+            data: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: AppColors.onPrimary),
+            ),
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(color: AppColors.onPrimary),
+              child: child,
+            ),
+          ),
+        ),
+      );
+}
+
+/// Hoja blanca con las esquinas superiores redondeadas, que se monta sobre el color de la
+/// cabecera. Con [flotante], esa tarjeta queda a caballo entre el color y la hoja, con una
+/// sombra muy suave: la hoja empieza a la mitad de su altura.
+class HojaBlanca extends StatelessWidget {
+  const HojaBlanca({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.fromLTRB(
+      AppSpacing.margen,
+      AppSpacing.xl,
+      AppSpacing.margen,
+      AppSpacing.xxl,
+    ),
+    this.flotante,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final Widget? flotante;
+
+  static const _forma = BorderRadius.vertical(top: Radius.circular(AppRadius.hoja));
+
+  @override
+  Widget build(BuildContext context) {
+    if (flotante == null) {
+      return Container(
+        width: double.infinity,
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: _forma),
+        padding: padding,
+        child: child,
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Stack(
+          children: [
+            // Fondo de la unión: turquesa en la mitad de arriba, hoja blanca desde la mitad.
+            const Positioned.fill(
+              child: Column(
+                children: [
+                  Expanded(child: ColoredBox(color: AppColors.primary)),
+                  Expanded(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: _forma),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margen),
+              child: TarjetaFlotante(child: flotante!),
+            ),
+          ],
+        ),
+        Container(width: double.infinity, color: AppColors.surface, padding: padding, child: child),
+      ],
+    );
+  }
+}
+
+/// Tarjeta blanca de radio 16 con la única sombra de la app, muy suave. Flota sobre la unión
+/// entre la cabecera y la hoja.
+class TarjetaFlotante extends StatelessWidget {
+  const TarjetaFlotante({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.margen),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.destacado),
+          boxShadow: const [
+            BoxShadow(color: AppColors.sombraTarjeta, blurRadius: 16, offset: Offset(0, 6)),
+          ],
+        ),
+        child: child,
+      );
+}
+
+// ---------------------------------------------------------------------------------------
+// Insignias, tarjetas y fichas
+// ---------------------------------------------------------------------------------------
+
 enum Tono { neutro, primario, exito, aviso, error }
 
 extension ColoresTono on Tono {
@@ -120,8 +293,8 @@ extension ColoresTono on Tono {
       };
 }
 
-/// Estado en una insignia de 24: siempre con texto, y con ícono cuando aclara.
-/// Nunca depende solo del color.
+/// Estado real en una insignia de 24 («En atención», «Resuelto», «Vencida», «Pagada»). Siempre
+/// con texto, y con ícono cuando aclara. Los plazos y fechas no van en insignia: van en texto.
 class Insignia extends StatelessWidget {
   const Insignia(this.texto, {super.key, this.tono = Tono.neutro, this.icono});
 
@@ -172,7 +345,26 @@ class EtiquetaDemo extends StatelessWidget {
       );
 }
 
-/// Tarjeta blanca y ligera: borde de 1 px, radio de 12, sin sombra.
+/// Línea de plazo o vencimiento, en texto de 13: «Vence el 30 de noviembre», «Respuesta hasta
+/// el 27 de noviembre». Solo cuando ya venció va en rojo de estado.
+class TextoPlazo extends StatelessWidget {
+  const TextoPlazo(this.texto, {super.key, this.vencido = false});
+
+  final String texto;
+  final bool vencido;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        texto,
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              color: vencido ? AppColors.error : AppColors.textSecondary,
+              fontWeight: vencido ? FontWeight.w500 : FontWeight.w400,
+            ),
+      );
+}
+
+/// Tarjeta blanca y ligera: borde de 1 px, radio de 12, sin sombra. Para agrupar; nunca una
+/// tarjeta dentro de otra.
 class Tarjeta extends StatelessWidget {
   const Tarjeta({
     super.key,
@@ -263,7 +455,51 @@ class CajaIcono extends StatelessWidget {
   }
 }
 
-/// Título de sección (18) con una acción opcional a la derecha.
+/// Acceso rápido de Inicio: círculo turquesa claro con el ícono turquesa y una etiqueta de
+/// hasta dos líneas, centrada. Toda la columna es táctil.
+class Acceso extends StatelessWidget {
+  const Acceso({super.key, required this.icono, required this.texto, required this.alTocar});
+
+  final IconData icono;
+  final String texto;
+  final VoidCallback alTocar;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        label: texto,
+        child: ExcludeSemantics(
+          child: InkWell(
+            onTap: alTocar,
+            borderRadius: BorderRadius.circular(AppRadius.campo),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: AppSpacing.acceso,
+                    height: AppSpacing.acceso,
+                    decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+                    child: Icon(icono, size: AppIconos.caja, color: AppColors.primary),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    texto,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Título de sección (20) con una acción opcional a la derecha.
 class TituloSeccion extends StatelessWidget {
   const TituloSeccion(this.texto, {super.key, this.accion});
 
@@ -284,7 +520,7 @@ class TituloSeccion extends StatelessWidget {
       );
 }
 
-/// Rótulo de grupo en mayúsculas pequeñas («CUENTA Y PREDIO»).
+/// Rótulo de grupo en gris y tipo oración («Cuenta y predio»).
 class RotuloSeccion extends StatelessWidget {
   const RotuloSeccion(this.texto, {super.key});
 
@@ -293,12 +529,37 @@ class RotuloSeccion extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
         header: true,
-        child: Text(texto.toUpperCase(), style: estiloRotulo(context)),
+        child: Text(texto, style: estiloRotulo(context)),
       );
 }
 
-/// "Etiqueta ........ valor", con el valor a la derecha en 500 y cifras tabulares.
-/// [destacado] es la fila Total: etiqueta de 16 y monto de 18 en negrita.
+/// Ficha de un dato: rótulo pequeño en gris arriba y el valor debajo, a todo el ancho. Para
+/// textos (fechas, direcciones, nombres), no para montos: esos van en [FilaDato].
+class Ficha extends StatelessWidget {
+  const Ficha(this.rotulo, this.valor, {super.key});
+
+  final String rotulo;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(rotulo, style: estiloRotulo(context)),
+          const SizedBox(height: 2),
+          Text(valor, style: textos.bodyLarge),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Etiqueta ........ monto": solo para montos, que van a la derecha en 500 y cifras tabulares.
+/// [destacado] es la fila Total: etiqueta de 15 y monto de 20 en negrita.
 class FilaDato extends StatelessWidget {
   const FilaDato(this.etiqueta, this.valor, {super.key, this.destacado = false});
 
@@ -317,9 +578,7 @@ class FilaDato extends StatelessWidget {
           Expanded(
             child: Text(
               etiqueta,
-              style: destacado
-                  ? textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500)
-                  : textos.bodyMedium,
+              style: destacado ? textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500) : textos.bodyMedium,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -339,8 +598,82 @@ class FilaDato extends StatelessWidget {
   }
 }
 
-/// Fila táctil: ícono opcional, título, detalle opcional y flecha. Mínimo 56 de alto.
-/// Para agrupar varias, van dentro de una sola [Tarjeta] separadas con [Divider].
+/// Fila de lista: nombre a la izquierda en 15/500, línea secundaria en gris de 13, el monto
+/// a la derecha y la flecha. Mínimo 56 de alto. Entre filas va un [Divider].
+class FilaLista extends StatelessWidget {
+  const FilaLista({
+    super.key,
+    required this.titulo,
+    this.detalle,
+    this.monto,
+    this.inicio,
+    this.final_,
+    this.alTocar,
+    this.semantica,
+    this.padding = const EdgeInsets.symmetric(vertical: AppSpacing.md),
+  });
+
+  final String titulo;
+
+  /// Línea secundaria, o varias líneas si se pasa un widget en [detalle].
+  final Widget? detalle;
+  final String? monto;
+  final Widget? inicio;
+
+  /// Reemplaza la flecha.
+  final Widget? final_;
+  final VoidCallback? alTocar;
+  final String? semantica;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final fila = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: AppSpacing.cajaGrande),
+      child: Padding(
+        padding: padding,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (inicio != null) ...[inicio!, const SizedBox(width: AppSpacing.md)],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(titulo, style: textos.titleMedium),
+                  if (detalle != null) ...[const SizedBox(height: 2), detalle!],
+                ],
+              ),
+            ),
+            if (monto != null) ...[
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                monto!,
+                textAlign: TextAlign.end,
+                style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares),
+              ),
+            ],
+            if (alTocar != null || final_ != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              final_ ?? const Icon(Phosphor.caretRight, size: AppIconos.lista, color: AppColors.textSecondary),
+            ],
+          ],
+        ),
+      ),
+    );
+    if (alTocar == null) return fila;
+    return Semantics(
+      button: true,
+      label: semantica,
+      child: InkWell(onTap: alTocar, child: fila),
+    );
+  }
+}
+
+/// Fila táctil con ícono, título, detalle opcional y flecha. Mínimo 56 de alto. Para agrupar
+/// varias, van separadas con [Divider].
 class FilaAccion extends StatelessWidget {
   const FilaAccion({
     super.key,
@@ -367,11 +700,11 @@ class FilaAccion extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSpacing.cajaGrande),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           child: Row(
             children: [
               if (icono != null) ...[
-                Icon(icono, size: AppIconos.lista, color: AppColors.primary),
+                Icon(icono, size: AppIconos.caja, color: AppColors.primary),
                 const SizedBox(width: AppSpacing.md),
               ],
               Expanded(
@@ -379,7 +712,7 @@ class FilaAccion extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(titulo, style: textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500)),
+                    Text(titulo, style: textos.titleMedium),
                     if (detalle != null) Text(detalle!, style: textos.bodyMedium),
                   ],
                 ),
@@ -439,7 +772,7 @@ class Aviso extends StatelessWidget {
                 children: [
                   Text(
                     texto,
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                           color: neutro ? AppColors.textSecondary : tono.texto,
                         ),
                   ),
@@ -481,7 +814,7 @@ class VistaVacia extends StatelessWidget {
         children: [
           CajaIcono(icono, lado: AppSpacing.cajaGrande, tono: Tono.neutro),
           const SizedBox(height: AppSpacing.lg),
-          Text(titulo, style: textos.titleMedium, textAlign: TextAlign.center),
+          Text(titulo, style: textos.titleMedium!.copyWith(fontWeight: FontWeight.w600), textAlign: TextAlign.center),
           if (detalle != null) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(detalle!, style: textos.bodyMedium, textAlign: TextAlign.center),
@@ -580,17 +913,25 @@ class _VistaCargandoState extends State<VistaCargando> with SingleTickerProvider
 
 /// Cuerpo de una pantalla conectada a datos: carga, error con reintento o
 /// contenido. Al recargar conserva lo que ya se veía, sin parpadeos.
+///
+/// Con [cabecera], la pantalla es una pestaña raíz: la cabecera turquesa va primero y el
+/// contenido dentro de una [HojaBlanca], todo en un mismo desplazamiento. [flotante] es la
+/// tarjeta que queda a caballo entre la cabecera y la hoja (solo cuando hay datos).
 class CuerpoAsync<T> extends StatelessWidget {
   const CuerpoAsync({
     super.key,
     required this.valor,
     required this.alRecargar,
     required this.construir,
+    this.cabecera,
+    this.flotante,
   });
 
   final AsyncValue<T> valor;
   final Future<void> Function() alRecargar;
   final List<Widget> Function(T datos) construir;
+  final Widget Function(T? datos)? cabecera;
+  final Widget? Function(T datos)? flotante;
 
   @override
   Widget build(BuildContext context) {
@@ -604,31 +945,40 @@ class CuerpoAsync<T> extends StatelessWidget {
     } else {
       hijos = construir(datos);
     }
+    final progreso = AnimatedSize(
+      duration: duracionDe(context),
+      alignment: Alignment.topCenter,
+      child: valor.isLoading && datos != null
+          ? const Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.md),
+              child: LinearProgressIndicator(minHeight: 2),
+            )
+          : const SizedBox(width: double.infinity),
+    );
+    final encabezado = cabecera;
+    final lista = ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: encabezado == null
+          ? const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, AppSpacing.xxl)
+          : EdgeInsets.zero,
+      children: encabezado == null
+          ? [progreso, ...hijos]
+          : [
+              encabezado(datos),
+              HojaBlanca(
+                flotante: datos == null ? null : flotante?.call(datos),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [progreso, ...hijos],
+                ),
+              ),
+            ],
+    );
     return RefreshIndicator(
       onRefresh: alRecargar,
       color: AppColors.primary,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.margen,
-          AppSpacing.xl,
-          AppSpacing.margen,
-          AppSpacing.xxl,
-        ),
-        children: [
-          AnimatedSize(
-            duration: duracionDe(context),
-            alignment: Alignment.topCenter,
-            child: valor.isLoading && datos != null
-                ? const Padding(
-                    padding: EdgeInsets.only(bottom: AppSpacing.md),
-                    child: LinearProgressIndicator(minHeight: 2),
-                  )
-                : const SizedBox(width: double.infinity),
-          ),
-          ...hijos,
-        ],
-      ),
+      // La hoja blanca sigue hasta el final aunque el contenido sea corto.
+      child: encabezado == null ? lista : ColoredBox(color: AppColors.surface, child: lista),
     );
   }
 }
