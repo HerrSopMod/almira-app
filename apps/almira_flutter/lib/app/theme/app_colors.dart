@@ -58,9 +58,7 @@ abstract final class AppColors {
   static const acentoAmbar = Color(0xFFB45309);
   static const acentoRosa = Color(0xFFBE185D);
 
-  /// Colores de las marcas de pago de `marcas_pago.dart` (Yape, Visa, Mastercard). Solo se usan ahí.
-  static const marcaYape = Color(0xFF742284);
-  static const marcaVisa = Color(0xFF1A1F71);
+  /// Colores de Mastercard, dibujada en `marcas_pago.dart`. Solo se usan ahí.
   static const marcaMastercardRojo = Color(0xFFEB001B);
   static const marcaMastercardNaranja = Color(0xFFF79E1B);
 

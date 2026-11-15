@@ -21,7 +21,7 @@ import 'payment_gateway.dart';
 import 'validadores_pago.dart';
 
 /// Medios con los que se paga en la app.
-const _medios = [MedioPago.tarjeta, MedioPago.yape];
+const _medios = [MedioPago.tarjeta, MedioPago.yape, MedioPago.plin];
 
 /// Pasos 2 y 3 del pago: medio de pago (tarjeta o Yape) y comprobante. El servidor
 /// confirma el pago con el importe de la base; los datos de la tarjeta o de Yape solo
@@ -73,7 +73,10 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           cvv: _cvv.text,
           titular: _titular.text.trim(),
         )
-      : DatosYape(celular: _celular.text, codigoAprobacion: _aprobacion.text);
+      : switch (_medio) {
+          MedioPago.plin => DatosPlin(celular: _celular.text, codigoAprobacion: _aprobacion.text),
+          _ => DatosYape(celular: _celular.text, codigoAprobacion: _aprobacion.text),
+        };
 
   Future<void> _pagar(List<Deuda> elegidas) async {
     if (_ocupado || !_formulario.currentState!.validate()) return;
@@ -221,7 +224,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                       espacioChico,
                     ],
                     espacio,
-                    if (_medio == MedioPago.tarjeta) ..._camposTarjeta(hoy) else ..._camposYape(),
+                    if (_medio == MedioPago.tarjeta) ..._camposTarjeta(hoy) else ..._camposBilletera(_medio.etiqueta),
                     if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
                   ],
                 ),
@@ -294,12 +297,12 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
         ),
       ];
 
-  List<Widget> _camposYape() => [
+  List<Widget> _camposBilletera(String nombre) => [
         TextFormField(
           controller: _celular,
           keyboardType: TextInputType.phone,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
-          decoration: const InputDecoration(labelText: 'Celular de Yape', prefixText: '+51 ', prefixIcon: Icon(Phosphor.deviceMobile)),
+          decoration: InputDecoration(labelText: 'Celular de $nombre', prefixText: '+51 ', prefixIcon: Icon(Phosphor.deviceMobile)),
           validator: validarCelularYape,
         ),
         espacio,
@@ -307,10 +310,10 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           controller: _aprobacion,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Código de aprobación',
             prefixIcon: Icon(Phosphor.sealCheck),
-            helperText: 'Lo ves en tu app Yape.',
+            helperText: 'Lo ves en tu app $nombre.',
           ),
           validator: validarCodigoAprobacion,
         ),
@@ -371,6 +374,7 @@ class _TarjetaMedio extends StatelessWidget {
     };
     final inicio = switch (medio) {
       MedioPago.tarjeta => const IconoColor(PhosphorFill.creditCard, color: AppColors.acentoAzul, lado: 44),
+      MedioPago.plin => const LogoMarca(MarcaPago.plin, alto: 36),
       _ => const LogoMarca(MarcaPago.yape, alto: 36),
     };
     return Semantics(

@@ -11,6 +11,7 @@ import '../../core/utils/formato.dart';
 import '../../core/utils/plazos.dart';
 import '../../core/widgets/cara_saldo.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/escudo_municipal.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import '../complaints/reclamos_logica.dart';
@@ -53,7 +54,7 @@ class InicioScreen extends ConsumerWidget {
           ],
           hijo: _Saludo(
             nombre: v?.vecino?.nombre ?? sesion.cuenta?.nombre,
-            municipalidad: v?.municipalidad?.nombre,
+            municipalidad: v?.municipalidad,
           ),
           // Con la tarjeta flotante, el turquesa baja un poco más para que la tarjeta lo monte.
           rellenoInferior: v?.vecino == null ? AppSpacing.solapeHoja + AppSpacing.lg : AppSpacing.xl,
@@ -141,11 +142,12 @@ class _Saludo extends StatelessWidget {
   const _Saludo({this.nombre, this.municipalidad});
 
   final String? nombre;
-  final String? municipalidad;
+  final Municipalidad? municipalidad;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
+    final conEscudo = rutaEscudo(municipalidad) != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,11 +162,29 @@ class _Saludo extends StatelessWidget {
         ),
         if (municipalidad != null) ...[
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            municipalidad!,
-            style: textos.bodyLarge!.copyWith(color: AppColors.onPrimary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              // El escudo solo aparece en las municipalidades que lo tienen.
+              if (conEscudo) ...[
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.insignia),
+                  ),
+                  child: EscudoMunicipal(municipalidad, alto: 26),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Expanded(
+                child: Text(
+                  municipalidad!.nombre,
+                  style: textos.bodyLarge!.copyWith(color: AppColors.onPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ],

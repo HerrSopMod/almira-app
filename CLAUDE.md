@@ -36,6 +36,8 @@ Monorepo pnpm: app de vecinos en Flutter (`apps/almira_flutter`), app de vecinos
 - Fechas y plazos con la fecha real del teléfono (`relojProvider`), nunca con una fecha fija.
 - Cada pantalla con datos cubre carga, vacío, error y sin conexión (`CuerpoAsync`).
 - Íconos: paquete Iconsax (diseñados a mano, no generados con IA), siempre desde `lib/app/theme/iconos.dart` (no uses otros paquetes de íconos ni logos de marcas de terceros sin permiso). Los accesos y las filas de datos llevan el ícono en un círculo tintado (`IconoColor`) con los acentos de `app_colors.dart`; los colores de estado siguen reservados a insignias y estados.
+- Marcas de pago: Yape, Plin y Visa salen de `assets/marcas_pago/` (imágenes entregadas por el equipo; `marcas_pago.dart`). Mastercard va dibujada.
+- Escudo municipal: `assets/escudos/<distrito>.png`, registrado en `escudo_municipal.dart` y mostrado solo en la municipalidad a la que pertenece; sin imagen registrada, no se muestra nada.
 - Filtros por fecha: `GrupoFiltroFechas` (periodos rápidos y calendario) con `FiltroFechas`; la fecha de hoy sale de `relojProvider`.
 - La foto de perfil se guarda en el bucket privado `avatares` de Supabase (`foto_perfil.dart`); en modo demostración no se puede cambiar.
 - Pestañas raíz (Inicio, Pagar, Reclamos, Obras, Asistente): cabecera turquesa sólida y baja detrás de la barra de estado, con el título y las acciones (sin logo ni «Almira»: ya se sabe en qué app estás), y el contenido en una hoja blanca de esquinas superiores de 20 montada sobre ella (`CabeceraMarca`, `HojaBlanca`, `CuerpoAsync(cabecera: …)`). Solo Inicio lleva tarjeta flotante, con la carita de `cara_saldo.dart`.

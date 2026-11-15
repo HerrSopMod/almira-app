@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 
-/// Marcas de los medios de pago, dibujadas en código: el color y el nombre de cada una, no sus
-/// logos oficiales. Para usar los oficiales, cambia el contenido de estos widgets por la imagen
-/// que entregue cada marca.
-enum MarcaPago { yape, visa, mastercard }
+/// Marcas de los medios de pago. Yape, Plin y Visa son las imágenes de `assets/marcas_pago/`;
+/// Mastercard va dibujada con sus dos círculos, porque no hay imagen suya en el proyecto.
+enum MarcaPago { yape, plin, visa, mastercard }
 
-/// Marca de un medio de pago en una ficha de [alto] de alto.
+/// Marca de un medio de pago, de [alto] de alto.
 class LogoMarca extends StatelessWidget {
   const LogoMarca(this.marca, {super.key, this.alto = 28});
 
@@ -19,93 +18,77 @@ class LogoMarca extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     label: switch (marca) {
       MarcaPago.yape => 'Yape',
+      MarcaPago.plin => 'Plin',
       MarcaPago.visa => 'Visa',
       MarcaPago.mastercard => 'Mastercard',
     },
     excludeSemantics: true,
     child: switch (marca) {
-      MarcaPago.yape => _FichaYape(alto: alto),
-      MarcaPago.visa => _FichaBlanca(
-        alto: alto,
-        child: Text(
-          'VISA',
-          style: TextStyle(
-            color: AppColors.marcaVisa,
-            fontSize: alto * 0.42,
-            fontWeight: FontWeight.w800,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 0.4,
-            height: 1,
-          ),
-        ),
-      ),
-      MarcaPago.mastercard => _FichaBlanca(alto: alto, child: _CirculosMastercard(lado: alto * 0.5)),
+      MarcaPago.yape => _Imagen('assets/marcas_pago/yape.png', ancho: alto, alto: alto, radio: alto * 0.24),
+      MarcaPago.plin => _Imagen('assets/marcas_pago/plin.png', ancho: alto, alto: alto, radio: alto * 0.24),
+      // La imagen de Visa es una tarjeta de 561 × 356.
+      MarcaPago.visa => _Imagen('assets/marcas_pago/visa.png', ancho: alto * 561 / 356, alto: alto, radio: alto * 0.12, borde: true),
+      MarcaPago.mastercard => _FichaMastercard(alto: alto),
     },
   );
 }
 
-/// Ficha cuadrada morada con «yape» en blanco.
-class _FichaYape extends StatelessWidget {
-  const _FichaYape({required this.alto});
+class _Imagen extends StatelessWidget {
+  const _Imagen(this.ruta, {required this.ancho, required this.alto, required this.radio, this.borde = false});
 
+  final String ruta;
+  final double ancho;
   final double alto;
+  final double radio;
+  final bool borde;
 
   @override
   Widget build(BuildContext context) => Container(
-    width: alto * 1.4,
+    width: ancho,
     height: alto,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: AppColors.marcaYape,
-      borderRadius: BorderRadius.circular(alto * 0.28),
-    ),
-    child: Text(
-      'yape',
-      style: TextStyle(color: AppColors.onPrimary, fontSize: alto * 0.42, fontWeight: FontWeight.w800, height: 1),
+    decoration: borde
+        ? BoxDecoration(
+            borderRadius: BorderRadius.circular(radio),
+            border: Border.all(color: AppColors.border),
+          )
+        : null,
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(radio),
+      child: Image.asset(ruta, fit: BoxFit.cover, filterQuality: FilterQuality.medium, cacheHeight: 160),
     ),
   );
 }
 
-/// Ficha blanca con borde fino, para las marcas que van sobre fondo claro.
-class _FichaBlanca extends StatelessWidget {
-  const _FichaBlanca({required this.alto, required this.child});
+/// Ficha blanca con los dos círculos de Mastercard.
+class _FichaMastercard extends StatelessWidget {
+  const _FichaMastercard({required this.alto});
 
   final double alto;
-  final Widget child;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: alto * 1.4,
-    height: alto,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(alto * 0.22),
-      border: Border.all(color: AppColors.border),
-    ),
-    child: child,
-  );
-}
-
-class _CirculosMastercard extends StatelessWidget {
-  const _CirculosMastercard({required this.lado});
-
-  final double lado;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: lado * 1.6,
-    height: lado,
-    child: Stack(
-      children: [
-        Positioned(left: 0, child: _Circulo(lado, AppColors.marcaMastercardRojo)),
-        Positioned(
-          right: 0,
-          child: _Circulo(lado, AppColors.marcaMastercardNaranja.withValues(alpha: 0.9)),
+  Widget build(BuildContext context) {
+    final lado = alto * 0.5;
+    return Container(
+      width: alto * 561 / 356,
+      height: alto,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(alto * 0.12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: SizedBox(
+        width: lado * 1.6,
+        height: lado,
+        child: Stack(
+          children: [
+            Positioned(left: 0, child: _Circulo(lado, AppColors.marcaMastercardRojo)),
+            Positioned(right: 0, child: _Circulo(lado, AppColors.marcaMastercardNaranja.withValues(alpha: 0.9))),
+          ],
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 class _Circulo extends StatelessWidget {
@@ -137,7 +120,7 @@ class FilaMarcasTarjeta extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       LogoMarca(MarcaPago.visa, alto: 22),
-      SizedBox(width: AppSpacing.xs),
+      SizedBox(width: AppSpacing.sm),
       LogoMarca(MarcaPago.mastercard, alto: 22),
     ],
   );
