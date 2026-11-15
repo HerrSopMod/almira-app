@@ -1,7 +1,7 @@
 name: almira_flutter
 description: "Almira: app de vecinos"
 publish_to: 'none'
-version: 1.7.0+7
+version: 1.8.0+8
 
 environment:
   sdk: ^3.13.7
