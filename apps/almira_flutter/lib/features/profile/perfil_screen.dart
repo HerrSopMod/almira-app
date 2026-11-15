@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -11,6 +12,7 @@ import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pagos_logica.dart';
+import '../complaints/piezas_lista.dart';
 import 'whatsapp_opcion.dart';
 
 /// Mi perfil: cabecera compacta y opciones agrupadas. Solo muestra el nombre
@@ -38,8 +40,7 @@ class PerfilScreen extends ConsumerWidget {
     if (clave == null || !context.mounted) return;
     try {
       await ref.read(servicioAuthProvider).crearClaveWeb(clave);
-      if (context.mounted)
-        mostrarMensaje(context, 'Tu clave web quedó guardada.');
+      if (context.mounted) mostrarMensaje(context, 'Tu clave web quedó guardada.');
     } catch (error) {
       if (context.mounted) mostrarMensaje(context, ErrorApp.de(error).detalle);
     }
@@ -54,9 +55,14 @@ class PerfilScreen extends ConsumerWidget {
     final textos = Theme.of(context).textTheme;
     final vecino = v?.vecino;
     final nombre = vecino?.nombre ?? sesion.cuenta?.nombre;
+    final codigo = vecino?.codigoContribuyente;
 
+    // Barra compacta turquesa (con la flecha atrás), la identidad del vecino en el mismo color y
+    // las opciones en la hoja blanca que se monta encima.
     return Scaffold(
       appBar: AppBar(
+        // Sin pantalla anterior no hay flecha: el título toma el margen de la pantalla.
+        titleSpacing: context.canPop() ? null : AppSpacing.margen,
         title: const Text('Mi perfil'),
         actions: [
           if (esDemo)
@@ -66,138 +72,125 @@ class PerfilScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: SafeArea(
-        top: false,
+      body: ColoredBox(
+        color: AppColors.surface,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.margen,
-            AppSpacing.lg,
-            AppSpacing.margen,
-            AppSpacing.xl,
-          ),
+          padding: EdgeInsets.zero,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primarySoft,
-                    shape: BoxShape.circle,
-                  ),
-                  child: nombre == null
-                      ? const Icon(
-                          Icons.person_outline_rounded,
-                          color: AppColors.primaryDark,
-                        )
-                      : ExcludeSemantics(
-                          child: Text(
-                            iniciales(nombre),
-                            style: textos.titleMedium!.copyWith(
-                              color: AppColors.primaryDark,
-                            ),
-                          ),
-                        ),
+            ColoredBox(
+              color: AppColors.primary,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.margen,
+                  AppSpacing.sm,
+                  AppSpacing.margen,
+                  AppSpacing.solapeHoja + AppSpacing.lg,
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: SobreTurquesa(
+                  child: Row(
                     children: [
-                      Text(nombre ?? 'Tu cuenta', style: textos.titleLarge),
-                      Text(
-                        vecino?.codigoContribuyente == null
-                            ? (vecino == null ? 'Sin código vinculado' : '')
-                            : 'Contribuyente ${vecino!.codigoContribuyente}',
-                        style: textos.bodyMedium,
+                      Container(
+                        width: AppSpacing.cajaGrande,
+                        height: AppSpacing.cajaGrande,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(color: AppColors.onPrimary, shape: BoxShape.circle),
+                        child: nombre == null
+                            ? const Icon(Phosphor.user, color: AppColors.primaryDark)
+                            : ExcludeSemantics(
+                                child: Text(
+                                  iniciales(nombre),
+                                  style: textos.titleMedium!.copyWith(color: AppColors.primaryDark),
+                                ),
+                              ),
+                      ),
+                      const SizedBox(width: AppSpacing.lg),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nombre == null ? 'Tu cuenta' : tipoTitulo(nombre),
+                              style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
+                            ),
+                            if (codigo != null || vecino == null)
+                              Text(
+                                codigo == null ? 'Sin código vinculado' : 'Contribuyente $codigo',
+                                style: textos.bodyMedium!.copyWith(color: AppColors.onPrimary),
+                              ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-            espacioGrande,
-            _Grupo(
-              titulo: 'Cuenta y predio',
-              hijos: [
-                for (final predio in v?.predios ?? const [])
-                  ListTile(
-                    leading: const Icon(Icons.home_outlined),
-                    title: Text(predio.direccion),
-                    subtitle: Text('Predio ${predio.codigo}'),
-                  ),
-                _Opcion(
-                  icono: Icons.badge_outlined,
-                  titulo: vecino == null
-                      ? 'Vincular cuponera'
-                      : 'Vincular otra cuponera',
-                  alTocar: () => context.push(Rutas.vincular),
-                ),
-                _Opcion(
-                  icono: Icons.location_city_outlined,
-                  titulo: 'Municipalidad',
-                  detalle: v?.municipalidad?.nombre,
-                  alTocar: () => context.push(Rutas.municipalidad),
-                ),
-              ],
-            ),
-            _Grupo(
-              titulo: 'Preferencias',
-              hijos: [
-                if (!esDemo)
-                  _Opcion(
-                    icono: Icons.key_rounded,
-                    titulo: 'Crear o cambiar clave web',
-                    detalle: 'Para entrar con tu correo o tu cuponera',
-                    alTocar: () => _crearClave(context, ref),
-                  ),
-                _Opcion(
-                  icono: Icons.notifications_none_rounded,
-                  titulo: 'Avisos y canales',
-                  alTocar: () => context.push(Rutas.avisos),
-                ),
-                // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
-                if (!esDemo && vecino != null) const OpcionWhatsapp(),
-                _Opcion(
-                  icono: Icons.shield_outlined,
-                  titulo: 'Privacidad',
-                  alTocar: () => context.push(Rutas.privacidad),
-                ),
-                SwitchListTile(
-                  value: textoGrande,
-                  onChanged: ref.read(textoGrandeProvider.notifier).cambiar,
-                  secondary: const Icon(Icons.format_size_rounded),
-                  title: const Text('Texto más grande'),
-                ),
-              ],
-            ),
-            _Grupo(
-              titulo: 'Trámites y ayuda',
-              hijos: [
-                _Opcion(
-                  icono: Icons.receipt_long_outlined,
-                  titulo: 'Constancias de pago',
-                  alTocar: () => context.go(
-                    '${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}',
-                  ),
-                ),
-                _Opcion(
-                  icono: Icons.support_agent_rounded,
-                  titulo: 'Atención',
-                  alTocar: () => context.push(Rutas.atencion),
-                ),
-              ],
-            ),
-            OutlinedButton.icon(
-              onPressed: () => _cerrarSesion(context, ref),
-              icon: const Icon(Icons.logout_rounded, size: 20),
-              label: Text(
-                esDemo ? 'Salir de la demostración' : 'Cerrar sesión',
               ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.error, width: 1.2),
+            ),
+            HojaBlanca(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.margen,
+                AppSpacing.xl,
+                AppSpacing.margen,
+                AppSpacing.xxl + MediaQuery.paddingOf(context).bottom,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                        _Grupo(
+                          titulo: 'Cuenta y predio',
+                          filas: [
+                            for (final predio in v?.predios ?? const [])
+                              FilaLista(titulo: predio.direccion, detalle: DetalleFila('Predio ${predio.codigo}')),
+                            FilaLista(
+                              titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
+                              alTocar: () => context.push(Rutas.vincular),
+                            ),
+                            FilaLista(
+                              titulo: 'Municipalidad',
+                              detalle: v?.municipalidad == null ? null : DetalleFila(v!.municipalidad!.nombre),
+                              alTocar: () => context.push(Rutas.municipalidad),
+                            ),
+                          ],
+                        ),
+                        _Grupo(
+                          titulo: 'Preferencias',
+                          filas: [
+                            if (!esDemo)
+                              FilaLista(
+                                titulo: 'Clave web',
+                                detalle: DetalleFila('Para entrar con tu correo o tu cuponera'),
+                                alTocar: () => _crearClave(context, ref),
+                              ),
+                            FilaLista(titulo: 'Avisos y canales', alTocar: () => context.push(Rutas.avisos)),
+                            // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
+                            if (!esDemo && vecino != null) const OpcionWhatsapp(),
+                            FilaLista(titulo: 'Privacidad', alTocar: () => context.push(Rutas.privacidad)),
+                            FilaInterruptor(
+                              titulo: 'Texto más grande',
+                              valor: textoGrande,
+                              alCambiar: ref.read(textoGrandeProvider.notifier).cambiar,
+                            ),
+                          ],
+                        ),
+                        _Grupo(
+                          titulo: 'Trámites y ayuda',
+                          filas: [
+                            FilaLista(
+                              titulo: 'Constancias de pago',
+                              alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
+                            ),
+                            FilaLista(titulo: 'Atención', alTocar: () => context.push(Rutas.atencion)),
+                          ],
+                        ),
+                        // Peligro suave, según la guía: borde gris y texto en rojo oscuro.
+                        OutlinedButton(
+                          onPressed: () => _cerrarSesion(context, ref),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.error,
+                            side: const BorderSide(color: AppColors.border),
+                          ),
+                          child: Text(esDemo ? 'Salir de la demostración' : 'Cerrar sesión'),
+                        ),
+                ],
               ),
             ),
           ],
@@ -207,62 +200,25 @@ class PerfilScreen extends ConsumerWidget {
   }
 }
 
-/// Grupo de opciones: un rótulo y una sola tarjeta, sin bordes por fila.
+/// Grupo de opciones: rótulo en mayúsculas pequeñas y filas con divisor, sin caja.
 class _Grupo extends StatelessWidget {
-  const _Grupo({required this.titulo, required this.hijos});
+  const _Grupo({required this.titulo, required this.filas});
 
   final String titulo;
-  final List<Widget> hijos;
+  final List<Widget> filas;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            left: AppSpacing.xs,
-            bottom: AppSpacing.sm,
-          ),
-          child: Semantics(
-            header: true,
-            child: Text(titulo, style: Theme.of(context).textTheme.labelMedium),
-          ),
+        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            RotuloSeccion(titulo),
+            const SizedBox(height: AppSpacing.xs),
+            ListaFilas(filas: filas),
+          ],
         ),
-        Tarjeta(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-          child: Column(children: hijos),
-        ),
-      ],
-    ),
-  );
-}
-
-class _Opcion extends StatelessWidget {
-  const _Opcion({
-    required this.icono,
-    required this.titulo,
-    required this.alTocar,
-    this.detalle,
-  });
-
-  final IconData icono;
-  final String titulo;
-  final String? detalle;
-  final VoidCallback alTocar;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-    leading: Icon(icono),
-    title: Text(titulo),
-    subtitle: detalle == null ? null : Text(detalle!),
-    trailing: const Icon(
-      Icons.chevron_right_rounded,
-      color: AppColors.textSecondary,
-    ),
-    onTap: alTocar,
-  );
+      );
 }
 
 /// Pide la clave web dos veces. La clave no se guarda en el teléfono.
@@ -291,8 +247,7 @@ class _DialogoClaveState extends State<_DialogoClave> {
     titulo: 'Clave web',
     textoConfirmar: 'Guardar',
     alConfirmar: () {
-      if (_formulario.currentState!.validate())
-        Navigator.pop(context, _clave.text);
+      if (_formulario.currentState!.validate()) Navigator.pop(context, _clave.text);
     },
     alCancelar: () => Navigator.pop(context),
     contenido: Form(
@@ -310,8 +265,8 @@ class _DialogoClaveState extends State<_DialogoClave> {
                 tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
                 icon: Icon(
                   _ver
-                      ? Icons.visibility_off_rounded
-                      : Icons.visibility_rounded,
+                      ? Phosphor.eyeSlash
+                      : Phosphor.eye,
                 ),
                 onPressed: () => setState(() => _ver = !_ver),
               ),

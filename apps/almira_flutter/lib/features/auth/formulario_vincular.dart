@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/datos_demo.dart';
 import '../../shared/services/proveedores.dart';
@@ -75,7 +76,7 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
             inputFormatters: [LengthLimitingTextInputFormatter(20)],
             decoration: InputDecoration(
               labelText: 'Número de cuponera',
-              prefixIcon: const Icon(Icons.badge_outlined),
+              prefixIcon: const Icon(Phosphor.identificationBadge),
               helperText: esDemo
                   ? 'Demostración: usa ${DatosDemo.numeroCuponera}'
                   : 'Es el número privado de tu cuponera impresa.',
@@ -93,7 +94,7 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
             onFieldSubmitted: (_) => _vincular(),
             decoration: InputDecoration(
               labelText: 'DNI o carné de extranjería',
-              prefixIcon: const Icon(Icons.credit_card_outlined),
+              prefixIcon: const Icon(Phosphor.creditCard),
               helperText: esDemo ? 'Demostración: usa ${DatosDemo.dni}' : null,
             ),
             validator: (valor) => _documentoValido.hasMatch((valor ?? '').trim())

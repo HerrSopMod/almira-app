@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
@@ -74,7 +75,7 @@ class _AvisosScreenState extends ConsumerState<AvisosScreen> {
             if (vecino == null) {
               return [
                 VistaVacia(
-                  icono: Icons.badge_outlined,
+                  icono: Phosphor.identificationBadge,
                   titulo: 'Vincula tu código de contribuyente',
                   detalle: 'Así recibirás los avisos de tu municipalidad.',
                   accion: 'Vincular código',
@@ -89,7 +90,7 @@ class _AvisosScreenState extends ConsumerState<AvisosScreen> {
               espacioChico,
               if (recibidos.isEmpty)
                 const VistaVacia(
-                  icono: Icons.notifications_none_rounded,
+                  icono: Phosphor.bell,
                   titulo: 'Aún no tienes avisos',
                 )
               else
@@ -153,8 +154,8 @@ class _TarjetaAviso extends StatelessWidget {
         children: [
           CajaIcono(
             aviso.tipo == TipoRecordatorio.preventivo
-                ? Icons.notifications_none_rounded
-                : Icons.error_outline_rounded,
+                ? Phosphor.bell
+                : Phosphor.warningCircle,
             tono: aviso.tipo == TipoRecordatorio.preventivo ? Tono.primario : Tono.aviso,
           ),
           const SizedBox(width: AppSpacing.md),

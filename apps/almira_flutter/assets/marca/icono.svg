@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Almira</title>
+  <!-- Casa: polígono con esquinas redondeadas por el trazo -->
+  <path d="M256 92 L436 246 L404 246 L404 420 L108 420 L108 246 L76 246 Z"
+        fill="#0B7F86" stroke="#0B7F86" stroke-width="36" stroke-linejoin="round"/>
+  <!-- Burbuja de chat -->
+  <path d="M256 214
+           C315 214 360 252 360 302
+           C360 352 315 390 256 390
+           C240 390 225 387 211 382
+           L166 400
+           L178 360
+           C162 344 152 324 152 302
+           C152 252 197 214 256 214 Z"
+        fill="#FFFFFF"/>
+  <!-- Tres puntos -->
+  <circle cx="214" cy="302" r="15" fill="#0B7F86"/>
+  <circle cx="256" cy="302" r="15" fill="#0B7F86"/>
+  <circle cx="298" cy="302" r="15" fill="#0B7F86"/>
+</svg>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
@@ -26,7 +27,7 @@ class VincularScreen extends ConsumerWidget {
             if (municipalidad == null) {
               return const [
                 VistaVacia(
-                  icono: Icons.location_city_rounded,
+                  icono: Phosphor.buildings,
                   titulo: 'Aún no hay municipalidades disponibles',
                 ),
               ];

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
@@ -32,16 +33,16 @@ class AtencionScreen extends ConsumerWidget {
               if (telefono.isEmpty)
                 const Aviso(
                   'Tu municipalidad aún no publicó un teléfono de atención en Almira.',
-                  icono: Icons.phone_disabled_outlined,
+                  icono: Phosphor.phoneSlash,
                 )
               else
                 Tarjeta(
                   padding: EdgeInsets.zero,
                   child: ListTile(
-                    leading: const Icon(Icons.phone_outlined),
+                    leading: const Icon(Phosphor.phone),
                     title: Text(telefono),
                     subtitle: const Text('Teléfono de ayuda'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: const Icon(Phosphor.caretRight),
                     onTap: () async {
                       final abierto = await launchUrl(Uri(scheme: 'tel', path: telefono))
                           .catchError((_) => false);
@@ -59,18 +60,18 @@ class AtencionScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.campaign_outlined),
+                      leading: const Icon(Phosphor.megaphone),
                       title: const Text('Enviar un reclamo'),
                       subtitle: const Text('Con foto y ubicación, y seguir su atención.'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      trailing: const Icon(Phosphor.caretRight),
                       onTap: () => context.push(Rutas.nuevoReclamo),
                     ),
                     const Divider(indent: 56),
                     ListTile(
-                      leading: const Icon(Icons.chat_bubble_outline_rounded),
+                      leading: const Icon(Phosphor.chatCircle),
                       title: const Text('Preguntar al asistente'),
                       subtitle: const Text('Respuestas automáticas sobre tus datos.'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      trailing: const Icon(Phosphor.caretRight),
                       onTap: () => context.go(Rutas.asistente),
                     ),
                   ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
@@ -26,7 +27,7 @@ class InterruptoresPrivacidad extends StatelessWidget {
             SwitchListTile(
               value: valor.asistente,
               onChanged: habilitado ? (v) => alCambiar(valor.con(asistente: v)) : null,
-              secondary: const Icon(Icons.chat_bubble_outline_rounded),
+              secondary: const Icon(Phosphor.chatCircle),
               title: const Text('Guardar mis consultas al asistente'),
               subtitle: const Text('En este teléfono, para retomarlas. Apagado, se borran al salir.'),
             ),
@@ -34,7 +35,7 @@ class InterruptoresPrivacidad extends StatelessWidget {
             SwitchListTile(
               value: valor.whatsapp,
               onChanged: habilitado ? (v) => alCambiar(valor.con(whatsapp: v)) : null,
-              secondary: const Icon(Icons.forum_outlined),
+              secondary: const Icon(Phosphor.chatsCircle),
               title: const Text('Avisos por WhatsApp'),
               subtitle: const Text('Recordatorios de vencimiento de tus tributos.'),
             ),
@@ -42,7 +43,7 @@ class InterruptoresPrivacidad extends StatelessWidget {
             SwitchListTile(
               value: valor.sms,
               onChanged: habilitado ? (v) => alCambiar(valor.con(sms: v)) : null,
-              secondary: const Icon(Icons.sms_outlined),
+              secondary: const Icon(Phosphor.chatText),
               title: const Text('Avisos por SMS'),
               subtitle: const Text('Los mismos recordatorios, por mensaje de texto.'),
             ),

@@ -2,39 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
-import '../../app/theme/app_spacing.dart';
-import '../../core/utils/formato.dart';
-import '../../core/utils/plazos.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
+import 'piezas_lista.dart';
 import 'reclamos_logica.dart';
 
-/// Insignia del reclamo: «Resuelto» o la situación de su plazo.
+/// Insignia del reclamo: solo su estado real (En atención, Derivado, Resuelto).
+/// El plazo va aparte, como una línea de texto.
 class InsigniaReclamo extends StatelessWidget {
-  const InsigniaReclamo({super.key, required this.reclamo, required this.hoy});
+  const InsigniaReclamo({super.key, required this.reclamo});
 
   final Reclamo reclamo;
-  final DateTime hoy;
 
   @override
-  Widget build(BuildContext context) {
-    if (reclamo.resuelto) {
-      return const Insignia('Resuelto', tono: Tono.exito, icono: Icons.check_rounded);
-    }
-    final plazo = plazoDe(reclamo, hoy)!;
-    return switch (plazo.estado) {
-      EstadoPlazo.dentro => Insignia(plazo.etiqueta, tono: Tono.primario, icono: Icons.schedule_rounded),
-      EstadoPlazo.porVencer ||
-      EstadoPlazo.venceHoy =>
-        Insignia(plazo.etiqueta, tono: Tono.aviso, icono: Icons.schedule_rounded),
-      EstadoPlazo.vencido =>
-        Insignia(plazo.etiqueta, tono: Tono.error, icono: Icons.error_outline_rounded),
-      EstadoPlazo.porConfirmar =>
-        Insignia(plazo.etiqueta, icono: Icons.help_outline_rounded),
-    };
-  }
+  Widget build(BuildContext context) => reclamo.resuelto
+      ? const Insignia('Resuelto', tono: Tono.exito, icono: Phosphor.check)
+      : Insignia(reclamo.estado.etiqueta, tono: Tono.primario);
 }
 
 class ReclamosScreen extends ConsumerWidget {
@@ -45,58 +31,45 @@ class ReclamosScreen extends ConsumerWidget {
     final vista = ref.watch(vistaProvider);
     final hoy = ref.watch(relojProvider)();
     final esDemo = ref.watch(esDemoProvider);
-    final puedeReclamar = vista.valueOrNull?.vecino != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reclamos'),
-        actions: [
-          if (esDemo)
-            const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.lg),
-              child: Center(child: EtiquetaDemo(sobreTurquesa: true)),
-            ),
-        ],
-      ),
-      floatingActionButton: puedeReclamar
-          ? FloatingActionButton.extended(
-              onPressed: () => context.push(Rutas.nuevoReclamo),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Nuevo reclamo'),
-              elevation: 2,
-            )
-          : null,
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
+        cabecera: (_) => CabeceraMarca(titulo: 'Reclamos', esDemo: esDemo),
         construir: (v) {
           if (v.vecino == null) {
             return [
               VistaVacia(
-                icono: Icons.badge_outlined,
+                icono: Phosphor.identificationBadge,
                 titulo: 'Vincula tu código de contribuyente',
-                detalle: 'Lo necesitas para enviar reclamos a tu municipalidad.',
+                detalle: 'Lo necesitas para enviar reclamos.',
                 accion: 'Vincular código',
                 alTocar: () => context.push(Rutas.vincular),
               ),
             ];
           }
           if (v.reclamos.isEmpty) {
-            return const [
+            return [
               VistaVacia(
-                icono: Icons.campaign_outlined,
+                icono: Phosphor.megaphone,
                 titulo: 'Aún no tienes reclamos',
                 detalle: 'Reporta un problema con una foto y su ubicación.',
+                accion: 'Nuevo reclamo',
+                alTocar: () => context.push(Rutas.nuevoReclamo),
               ),
             ];
           }
           return [
-            for (final reclamo in v.reclamos) ...[
-              _TarjetaReclamo(reclamo: reclamo, hoy: hoy),
-              espacioChico,
-            ],
-            // Deja libre el espacio del botón flotante.
-            const SizedBox(height: 72),
+            // Única acción primaria de la pantalla, arriba de la lista.
+            FilledButton(
+              onPressed: () => context.push(Rutas.nuevoReclamo),
+              child: const Text('Nuevo reclamo'),
+            ),
+            espacioGrande,
+            ListaFilas(
+              filas: [for (final reclamo in v.reclamos) _FilaReclamo(reclamo: reclamo, hoy: hoy)],
+            ),
           ];
         },
       ),
@@ -104,32 +77,29 @@ class ReclamosScreen extends ConsumerWidget {
   }
 }
 
-class _TarjetaReclamo extends StatelessWidget {
-  const _TarjetaReclamo({required this.reclamo, required this.hoy});
+class _FilaReclamo extends StatelessWidget {
+  const _FilaReclamo({required this.reclamo, required this.hoy});
 
   final Reclamo reclamo;
   final DateTime hoy;
 
   @override
   Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    final creado = reclamo.creadoEn;
-    return Tarjeta(
-      onTap: () => context.go(Rutas.reclamo(reclamo.id)),
-      semantica: 'Reclamo ${reclamo.codigo}, ${reclamo.titulo}. Ver seguimiento',
-      child: Column(
+    final plazo = plazoDe(reclamo, hoy);
+    final detalle = plazo == null ? '${reclamo.codigo} · ${reclamo.tipo.etiqueta}' : textoPlazo(plazo);
+    return FilaLista(
+      titulo: reclamo.titulo,
+      detalle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(reclamo.titulo, style: textos.titleMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 2),
-          Text(
-            [reclamo.codigo, reclamo.tipo.etiqueta, if (creado != null) fechaCorta(creado)].join(' · '),
-            style: textos.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          InsigniaReclamo(reclamo: reclamo, hoy: hoy),
+          plazo == null ? DetalleFila(detalle) : PlazoReclamo(plazo),
+          espacioChico,
+          InsigniaReclamo(reclamo: reclamo),
         ],
       ),
+      alTocar: () => context.go(Rutas.reclamo(reclamo.id)),
+      semantica: '${reclamo.titulo}. ${reclamo.resuelto ? 'Resuelto' : reclamo.estado.etiqueta}. $detalle. '
+          'Ver seguimiento',
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:almira_flutter/app/app.dart';
 import 'package:almira_flutter/app/router.dart';
+import 'package:almira_flutter/core/widgets/componentes.dart';
 import 'package:almira_flutter/features/assistant/chat_asistente.dart';
 import 'package:almira_flutter/features/assistant/chat_modelo.dart';
 import 'package:almira_flutter/features/assistant/servicio_asistente.dart';
@@ -11,6 +12,7 @@ import 'package:almira_flutter/shared/services/repositorio_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _hoy = DateTime(2026, 11, 11, 10, 30);
@@ -174,15 +176,16 @@ void main() {
       ProviderScope.containerOf(tester.element(find.byType(AlmiraApp))).read(routerProvider).go(Rutas.asistente);
       await tester.pumpAndSettle();
 
-      expect(find.text('Asistente Almira'), findsOneWidget);
-      expect(find.text('En línea'), findsOneWidget);
+      expect(find.descendant(of: find.byType(CabeceraMarca), matching: find.text('Asistente')), findsOneWidget);
+      // No se afirma una presencia «en línea» que la app no puede garantizar.
+      expect(find.text('En línea'), findsNothing);
       expect(find.textContaining('Soy Almira'), findsOneWidget);
       for (final s in ['¿Cuánto debo?', 'Mi último pago', '¿Cómo pago?', 'Mi estado de cuenta']) {
         expect(find.text(s), findsOneWidget);
       }
 
       // El botón de enviar está apagado sin texto.
-      expect(tester.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.arrow_upward_rounded)).onPressed, isNull);
+      expect(tester.widget<IconButton>(find.widgetWithIcon(IconButton, Phosphor.arrowUp)).onPressed, isNull);
 
       await tester.tap(find.text('¿Cuánto debo?'));
       await tester.pump();

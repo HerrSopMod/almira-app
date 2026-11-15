@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
@@ -49,7 +50,7 @@ class _CuponeraScreenState extends ConsumerState<CuponeraScreen> {
           if (vecino == null) {
             return [
               VistaVacia(
-                icono: Icons.badge_outlined,
+                icono: Phosphor.identificationBadge,
                 titulo: 'Vincula tu código de contribuyente',
                 accion: 'Vincular código',
                 alTocar: () => context.push(Rutas.vincular),
@@ -60,7 +61,7 @@ class _CuponeraScreenState extends ConsumerState<CuponeraScreen> {
             TituloSeccion('Hoja de Resumen · $anio'),
             espacioChico,
             _Documento(
-              icono: Icons.summarize_outlined,
+              icono: Phosphor.listChecks,
               titulo: 'Hoja de Resumen (HR)',
               detalle: 'Resumen de tus tributos del ejercicio',
               ocupado: _generando == 'hr',
@@ -81,7 +82,7 @@ class _CuponeraScreenState extends ConsumerState<CuponeraScreen> {
               TituloSeccion(predio.direccion),
               espacioChico,
               _Documento(
-                icono: Icons.home_work_outlined,
+                icono: Phosphor.houseLine,
                 titulo: 'Liquidación Predial (HLP)',
                 detalle: 'Impuesto predial $anio',
                 ocupado: _generando == 'hlp-${predio.id}',
@@ -100,7 +101,7 @@ class _CuponeraScreenState extends ConsumerState<CuponeraScreen> {
               ),
               espacioChico,
               _Documento(
-                icono: Icons.cleaning_services_outlined,
+                icono: Phosphor.broom,
                 titulo: 'Liquidación de Arbitrios (HLA)',
                 detalle: 'Arbitrios municipales $anio',
                 ocupado: _generando == 'hla-${predio.id}',
@@ -120,7 +121,7 @@ class _CuponeraScreenState extends ConsumerState<CuponeraScreen> {
             ],
             if (v.predios.isEmpty) ...[
               espacio,
-              const VistaVacia(icono: Icons.home_work_outlined, titulo: 'No tienes predios registrados'),
+              const VistaVacia(icono: Phosphor.houseLine, titulo: 'No tienes predios registrados'),
             ],
           ];
         },
@@ -166,7 +167,7 @@ class _Documento extends StatelessWidget {
           if (ocupado)
             const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
           else
-            const Icon(Icons.download_rounded),
+            const Icon(Phosphor.downloadSimple),
         ],
       ),
     );

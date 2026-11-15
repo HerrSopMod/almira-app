@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
@@ -70,9 +71,8 @@ class BurbujaChat extends StatelessWidget {
             bottomLeft: r(posicion.ultimo),
           );
 
-    final estiloTexto = textos.bodyMedium!.copyWith(
-      color: mio ? Colors.white : AppColors.textPrimary,
-      height: 1.4,
+    final estiloTexto = textos.bodyLarge!.copyWith(
+      color: mio ? AppColors.onPrimary : AppColors.textPrimary,
     );
 
     final contenido = mensaje.fallo
@@ -86,7 +86,7 @@ class BurbujaChat extends StatelessWidget {
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(top: 2),
-                    child: Icon(Icons.error_outline_rounded, size: 18, color: AppColors.error),
+                    child: Icon(Phosphor.warningCircle, size: 18, color: AppColors.error),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Flexible(child: Text(mensaje.texto, style: estiloTexto)),
@@ -95,7 +95,7 @@ class BurbujaChat extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               OutlinedButton.icon(
                 onPressed: alReintentar,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
+                icon: const Icon(Phosphor.arrowClockwise, size: 18),
                 label: const Text('Reintentar'),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(48, 40),
@@ -115,7 +115,7 @@ class BurbujaChat extends StatelessWidget {
         decoration: BoxDecoration(
           color: mio
               ? AppColors.primary
-              : (mensaje.fallo ? AppColors.errorSoft : const Color(0xFFF0F4F4)),
+              : (mensaje.fallo ? AppColors.errorSoft : AppColors.surfaceSubtle),
           borderRadius: borde,
         ),
         child: contenido,
@@ -141,7 +141,8 @@ class BurbujaChat extends StatelessWidget {
                       minimumSize: const Size(0, 40),
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                       shape: const StadiumBorder(),
-                      textStyle: textos.labelMedium,
+                      side: const BorderSide(color: AppColors.primary),
+                      textStyle: textos.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
                     ),
                     child: Text(a.etiqueta),
                   ),
@@ -152,7 +153,7 @@ class BurbujaChat extends StatelessWidget {
         if (posicion.ultimo)
           Padding(
             padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
-            child: Text(hora(mensaje.hora), style: textos.bodySmall),
+            child: Text(hora(mensaje.hora), style: textos.bodyMedium!),
           ),
       ],
     );
@@ -219,7 +220,7 @@ class _IndicadorEscrituraState extends State<IndicadorEscritura> with SingleTick
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
-                color: Color(0xFFF0F4F4),
+                color: AppColors.surfaceSubtle,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(_radioChico),
                   topRight: Radius.circular(_radioGrande),
@@ -288,40 +289,19 @@ class SugerenciasRapidas extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             for (final p in preguntas)
+              // Sugerencias con borde fino: blancas, texto turquesa.
               ActionChip(
                 label: Text(p),
                 onPressed: () => alElegir(p),
-                backgroundColor: AppColors.primarySoft,
-                side: BorderSide.none,
-                labelStyle: Theme.of(context).textTheme.labelMedium!.copyWith(color: AppColors.primaryDark),
+                backgroundColor: AppColors.surface,
+                side: const BorderSide(color: AppColors.border),
+                labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primary),
                 shape: const StadiumBorder(),
                 visualDensity: VisualDensity.standard,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
               ),
           ],
         ),
-      );
-}
-
-/// Estado del asistente bajo su nombre, con un punto verde.
-class EstadoEnLinea extends StatelessWidget {
-  const EstadoEnLinea({super.key});
-
-  @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(color: Color(0xFF7BE0A8), shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'En línea',
-            style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white.withValues(alpha: 0.92)),
-          ),
-        ],
       );
 }
 
@@ -338,15 +318,13 @@ class BotonBajar extends StatelessWidget {
         child: Material(
           color: AppColors.surface,
           shape: const CircleBorder(side: BorderSide(color: AppColors.border)),
-          elevation: 2,
-          shadowColor: Colors.black26,
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: alTocar,
             child: const SizedBox(
               width: 44,
               height: 44,
-              child: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
+              child: Icon(Phosphor.caretDown, color: AppColors.primary),
             ),
           ),
         ),

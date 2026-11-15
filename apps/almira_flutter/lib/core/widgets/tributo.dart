@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_spacing.dart';
 import '../../shared/models/modelos.dart';
 
 /// Cómo se ve cada tributo en toda la app: nombre, ícono y color propios.
@@ -26,26 +28,21 @@ extension EstiloTributo on TipoDeuda {
       };
 
   IconData get icono => switch (this) {
-        TipoDeuda.predial => Icons.home_work_outlined,
-        TipoDeuda.arbitrios => Icons.cleaning_services_outlined,
-        TipoDeuda.multa => Icons.gavel_rounded,
-        TipoDeuda.coactivo => Icons.balance_rounded,
-        TipoDeuda.otros => Icons.receipt_long_outlined,
+        TipoDeuda.predial => Phosphor.houseLine,
+        TipoDeuda.arbitrios => Phosphor.broom,
+        TipoDeuda.multa => Phosphor.gavel,
+        TipoDeuda.coactivo => Phosphor.scales,
+        TipoDeuda.otros => Phosphor.receipt,
       };
 
-  Color get color => switch (this) {
-        TipoDeuda.predial => AppColors.tributoPredial,
-        TipoDeuda.arbitrios => AppColors.tributoArbitrios,
-        TipoDeuda.multa => AppColors.tributoMulta,
-        TipoDeuda.coactivo => AppColors.tributoCoactivo,
-        TipoDeuda.otros => AppColors.tributoOtros,
-      };
+  /// Todos los tributos van en turquesa: el color no distingue, lo hacen el nombre y el ícono.
+  Color get color => AppColors.primary;
 
   /// Los impuestos y las tasas se agrupan por separado en el estado de cuenta.
   bool get esTasa => this == TipoDeuda.arbitrios;
 }
 
-/// Ícono del tributo en un círculo tintado (color al 12 %).
+/// Ícono del tributo en una caja gris claro.
 class IconoTributo extends StatelessWidget {
   const IconoTributo(this.tipo, {super.key, this.lado = 32});
 
@@ -58,8 +55,8 @@ class IconoTributo extends StatelessWidget {
           width: lado,
           height: lado,
           decoration: BoxDecoration(
-            color: tipo.color.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
+            color: AppColors.surfaceSubtle,
+            borderRadius: BorderRadius.circular(AppRadius.caja),
           ),
           child: Icon(tipo.icono, size: lado * 0.55, color: tipo.color),
         ),

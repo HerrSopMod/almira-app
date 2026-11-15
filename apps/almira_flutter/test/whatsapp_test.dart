@@ -74,6 +74,12 @@ Future<void> _cargarFuentes() async {
     cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
   }
   await cargador.load();
+
+  // Íconos de Phosphor (línea «regular» y «fill» de la pestaña activa).
+  for (final (familia, archivo) in [('PhosphorRegular', 'Phosphor'), ('PhosphorFill', 'Phosphor-Fill')]) {
+    final fuente = FontLoader(familia)..addFont(rootBundle.load('assets/fonts/phosphor/$archivo.ttf'));
+    await fuente.load();
+  }
   final raiz = Platform.environment['FLUTTER_ROOT'];
   if (raiz != null) {
     final archivo = File('$raiz/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
@@ -116,7 +122,7 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     await _cargarFuentes();
-    Directory('docs/capturas/rediseno').createSync(recursive: true);
+    Directory('docs/capturas/pulido-ui/despues').createSync(recursive: true);
     goldenFileComparator = _GuardarCapturas(Uri.parse('test/whatsapp_test.dart'));
   });
 
@@ -331,7 +337,7 @@ void main() {
         expect(r.bottom, lessThanOrEqualTo(visible), reason: 'queda tapado por el teclado');
       }
       expect(tester.takeException(), isNull);
-      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/whatsapp-hoja-teclado-360x640.png'));
+      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/whatsapp-hoja-teclado-360x640.png'));
     });
 
     testWidgets('360x640 con letra al 130 %: se puede llegar a «Activar» deslizando la hoja', (tester) async {
@@ -349,7 +355,7 @@ void main() {
       final r = tester.getRect(find.widgetWithText(FilledButton, 'Activar'));
       expect(r.bottom, lessThanOrEqualTo(640 - _alturaTeclado));
       expect(tester.takeException(), isNull);
-      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/whatsapp-hoja-teclado-360x640-letra130.png'));
+      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/whatsapp-hoja-teclado-360x640-letra130.png'));
     });
 
     testWidgets('393x852 sin teclado y con un error amable', (tester) async {
@@ -365,7 +371,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('No pudimos enviar el mensaje a ese número'), findsOneWidget);
       expect(tester.takeException(), isNull);
-      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/whatsapp-hoja-error-393x852.png'));
+      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/whatsapp-hoja-error-393x852.png'));
     });
 
     testWidgets('activo: la fila de Mi perfil muestra el número enmascarado', (tester) async {
@@ -375,7 +381,7 @@ void main() {
       ProviderScope.containerOf(tester.element(find.byType(AlmiraApp))).invalidate(preferenciaWhatsappProvider);
       await tester.pumpAndSettle();
       expect(find.text('Activo en +51 9** *** 123'), findsOneWidget);
-      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/whatsapp-perfil-activo-360x640.png'));
+      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/whatsapp-perfil-activo-360x640.png'));
     });
   });
 

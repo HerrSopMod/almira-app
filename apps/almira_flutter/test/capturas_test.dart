@@ -1,7 +1,7 @@
 // Capturas de las pantallas principales para revisar el diseño a simple vista, en dos tamaños
 // de teléfono (360×640 y 393×852) y con el texto del sistema al 100 % y al 130 %.
 //
-// Cada corrida vuelve a escribir las capturas en docs/capturas/rediseno/ (no se comparan píxel
+// Cada corrida vuelve a escribir las capturas en docs/capturas/pulido-ui/despues/ (no se comparan píxel
 // a píxel: sirven para revisar a simple vista). Si una pantalla se desborda, el test falla.
 import 'dart:async';
 import 'dart:io';
@@ -12,12 +12,14 @@ import 'package:almira_flutter/app/router.dart';
 import 'package:almira_flutter/features/assistant/chat_modelo.dart';
 import 'package:almira_flutter/features/assistant/servicio_asistente.dart';
 import 'package:almira_flutter/features/auth/servicio_auth.dart';
+import 'package:almira_flutter/features/carga/pantalla_carga.dart';
 import 'package:almira_flutter/shared/services/proveedores.dart';
 import 'package:almira_flutter/shared/services/repositorio_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _hoy = DateTime(2026, 11, 11, 10);
@@ -47,6 +49,12 @@ Future<void> _cargarInter() async {
     cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
   }
   await cargador.load();
+
+  // Íconos de Phosphor (línea «regular» y «fill» de la pestaña activa).
+  for (final (familia, archivo) in [('PhosphorRegular', 'Phosphor'), ('PhosphorFill', 'Phosphor-Fill')]) {
+    final fuente = FontLoader(familia)..addFont(rootBundle.load('assets/fonts/phosphor/$archivo.ttf'));
+    await fuente.load();
+  }
 
   // Íconos de Material, para que las capturas muestren los íconos y no cuadros.
   final raiz = Platform.environment['FLUTTER_ROOT'];
@@ -88,14 +96,20 @@ void _pantalla(WidgetTester tester, double ancho, double alto, double escala) {
 Future<void> _capturar(WidgetTester tester, String nombre) async {
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull, reason: 'se desborda: $nombre');
-  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/$nombre.png'));
+  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/$nombre.png'));
 }
 
 void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     await _cargarInter();
-    Directory('docs/capturas/rediseno').createSync(recursive: true);
+    // Las fotos de los reclamos de ejemplo se guardan en una carpeta del teléfono; en el test
+    // basta con una temporal.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (_) async => Directory.systemTemp.path,
+    );
+    Directory('docs/capturas/pulido-ui/despues').createSync(recursive: true);
     goldenFileComparator = _GuardarCapturas(Uri.parse('test/capturas_test.dart'));
   });
 
@@ -106,6 +120,14 @@ void main() {
   ];
 
   for (final (etiqueta, ancho, alto, escala) in tamanos) {
+    testWidgets('pantalla de carga $etiqueta', (tester) async {
+      _pantalla(tester, ancho, alto, escala);
+      await tester.pumpWidget(const PantallaCarga());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await expectLater(find.byType(PantallaCarga), matchesGoldenFile('../docs/capturas/pulido-ui/despues/carga-$etiqueta.png'));
+    });
+
     testWidgets('ingreso con cuenta $etiqueta', (tester) async {
       _pantalla(tester, ancho, alto, escala);
       await tester.pumpWidget(_app(await _preferencias(), conectado: true));
@@ -121,6 +143,8 @@ void main() {
       await tester.tap(find.text('Entrar a la demostración'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('Continuar'), 200);
+      await tester.ensureVisible(find.text('Continuar'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Ahora no'));
@@ -132,6 +156,8 @@ void main() {
       await tester.tap(find.text('Verificar'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('Continuar'), 200);
+      await tester.ensureVisible(find.text('Continuar'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
 
@@ -139,14 +165,23 @@ void main() {
       await _capturar(tester, 'inicio-$etiqueta');
       for (final (nombre, ruta) in [
         ('pagar', Rutas.pagos),
+        ('deuda-detalle', Rutas.deuda('demo-arbitrios')),
         ('pago-en-linea', Rutas.pagoEnLinea),
         ('estado-de-cuenta', Rutas.estadoCuenta),
         ('cuponera', Rutas.cuponera),
+        ('reclamos', Rutas.reclamos),
+        ('reclamo-detalle', Rutas.reclamo('demo-reclamo-1842')),
+        ('nuevo-reclamo', Rutas.nuevoReclamo),
+        ('obras', Rutas.obras),
+        ('obra-detalle', Rutas.obra('demo-obra-pistas')),
         ('perfil', Rutas.perfil),
       ]) {
         router.go(ruta);
         await _capturar(tester, '$nombre-$etiqueta');
       }
+      // Confirmar pago recibe las deudas elegidas como extra.
+      router.go(Rutas.confirmarPago, extra: ['demo-multa', 'demo-arbitrios']);
+      await _capturar(tester, 'pago-confirmar-$etiqueta');
     });
   }
 
@@ -217,11 +252,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Mi último pago');
       await tester.pump();
-      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.tap(find.byIcon(Phosphor.arrowUp));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Gracias, ¿y cuándo vence lo que falta?');
       await tester.pump();
-      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.tap(find.byIcon(Phosphor.arrowUp));
       await tester.pumpAndSettle();
       await _capturar(tester, 'chat-conversacion-$etiqueta');
     });
@@ -234,7 +269,7 @@ void main() {
       await tester.tap(find.text('¿Cómo pago?'));
       await tester.pump(const Duration(milliseconds: 450));
       expect(tester.takeException(), isNull);
-      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/chat-escribiendo-$etiqueta.png'));
+      await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/chat-escribiendo-$etiqueta.png'));
       espera.complete(const RespuestaAsistente('Listo.'));
       await tester.pumpAndSettle();
     });

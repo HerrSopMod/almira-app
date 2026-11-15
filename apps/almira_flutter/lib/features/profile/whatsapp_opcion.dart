@@ -9,6 +9,7 @@ import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/preferencia_whatsapp.dart';
 import '../../shared/services/proveedores.dart';
+import '../complaints/piezas_lista.dart';
 
 /// Estado de los recordatorios por WhatsApp de la cuenta. Se vuelve a leer al cambiarlos.
 final preferenciaWhatsappProvider = FutureProvider.autoDispose<PreferenciaWhatsapp?>((ref) async {
@@ -80,22 +81,18 @@ class OpcionWhatsapp extends ConsumerWidget {
     final preferencia = ref.watch(preferenciaWhatsappProvider);
     final datos = preferencia.valueOrNull;
     final activo = datos?.activo == true;
-    final textos = Theme.of(context).textTheme;
 
-    return ListTile(
-      leading: const Icon(Icons.chat_outlined),
-      title: const Text('Recordatorios por WhatsApp'),
-      subtitle: activo
-          ? Text('Activo en ${datos!.numeroEnmascarado}')
-          : (preferencia.hasError ? Text('No pudimos leer el estado', style: textos.bodySmall) : null),
-      trailing: Switch(
-        value: activo,
-        // Mientras carga, el interruptor espera.
-        onChanged: preferencia.isLoading && datos == null
-            ? null
-            : (quiere) => quiere ? _activar(context, ref) : _desactivar(context, ref),
-      ),
-      onTap: activo ? () => _gestionar(context, ref, datos!) : null,
+    return FilaInterruptor(
+      titulo: 'Recordatorios por WhatsApp',
+      detalle: activo
+          ? 'Activo en ${datos!.numeroEnmascarado}'
+          : (preferencia.hasError ? 'No pudimos leer el estado' : null),
+      valor: activo,
+      // Mientras carga, el interruptor espera.
+      alCambiar: preferencia.isLoading && datos == null
+          ? null
+          : (quiere) => quiere ? _activar(context, ref) : _desactivar(context, ref),
+      alTocar: activo ? () => _gestionar(context, ref, datos!) : null,
     );
   }
 }
@@ -117,20 +114,21 @@ class _HojaGestion extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Recordatorios por WhatsApp', style: textos.titleLarge, textAlign: TextAlign.center),
+          Text('Recordatorios por WhatsApp', style: textos.titleLarge!),
           const SizedBox(height: AppSpacing.xs),
-          Text('Activo en $numero', style: textos.bodyMedium, textAlign: TextAlign.center),
+          Text('Activo en $numero', style: textos.bodyMedium!),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
             onPressed: () => Navigator.pop(context, _AccionGestion.cambiar),
             child: const Text('Cambiar número'),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
+          // Peligro suave: borde gris y texto rojo, como «Cerrar sesión».
           OutlinedButton(
             onPressed: () => Navigator.pop(context, _AccionGestion.desactivar),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.error,
-              side: const BorderSide(color: AppColors.error, width: 1.2),
+              side: const BorderSide(color: AppColors.border),
             ),
             child: const Text('Desactivar'),
           ),
@@ -216,9 +214,9 @@ class _HojaActivarWhatsappState extends ConsumerState<HojaActivarWhatsapp> {
           children: [
             Semantics(
               header: true,
-              child: Text('Recordatorios por WhatsApp', style: textos.titleLarge, textAlign: TextAlign.center),
+              child: Text('Recordatorios por WhatsApp', style: textos.titleLarge!),
             ),
-            const SizedBox(height: AppSpacing.md),
+            espacio,
             TextFormField(
               controller: _celular,
               keyboardType: TextInputType.phone,
@@ -228,11 +226,7 @@ class _HojaActivarWhatsappState extends ConsumerState<HojaActivarWhatsapp> {
               onChanged: (_) => setState(() => _tocado = true),
               onFieldSubmitted: (_) => _activar(),
               validator: validarCelularWhatsapp,
-              decoration: const InputDecoration(
-                labelText: 'Celular',
-                prefixText: '+51 ',
-                prefixIcon: Icon(Icons.smartphone_rounded),
-              ),
+              decoration: const InputDecoration(labelText: 'Celular', prefixText: '+51 '),
             ),
             const SizedBox(height: AppSpacing.md),
             CheckboxListTile(

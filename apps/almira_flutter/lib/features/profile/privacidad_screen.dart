@@ -6,6 +6,7 @@ import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
+import '../complaints/piezas_lista.dart';
 import '../onboarding/privacidad_widgets.dart';
 
 /// Privacidad: las mismas preferencias opcionales del ingreso, que se guardan
@@ -38,38 +39,47 @@ class _PrivacidadScreenState extends ConsumerState<PrivacidadScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final guardados = ref.watch(sesionProvider).consentimientos;
-    final textos = Theme.of(context).textTheme;
+    final valor = _pendiente ?? ref.watch(sesionProvider).consentimientos;
+    final habilitado = _pendiente == null;
     return Scaffold(
       appBar: AppBar(title: const Text('Privacidad')),
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.lg, AppSpacing.margen, AppSpacing.xl),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, AppSpacing.xl),
           children: [
-            const TituloSeccion('Preferencias opcionales'),
-            espacioChico,
-            InterruptoresPrivacidad(
-              valor: _pendiente ?? guardados,
-              habilitado: _pendiente == null,
-              alCambiar: _cambiar,
+            const RotuloSeccion('Preferencias opcionales'),
+            const SizedBox(height: AppSpacing.xs),
+            ListaFilas(
+              filas: [
+                FilaInterruptor(
+                  titulo: 'Guardar mis consultas al asistente',
+                  detalle: 'En este teléfono, para retomarlas. Apagado, se borran al salir.',
+                  valor: valor.asistente,
+                  alCambiar: habilitado ? (v) => _cambiar(valor.con(asistente: v)) : null,
+                ),
+                FilaInterruptor(
+                  titulo: 'Avisos por WhatsApp',
+                  detalle: 'Recordatorios de vencimiento de tus tributos.',
+                  valor: valor.whatsapp,
+                  alCambiar: habilitado ? (v) => _cambiar(valor.con(whatsapp: v)) : null,
+                ),
+                FilaInterruptor(
+                  titulo: 'Avisos por SMS',
+                  detalle: 'Los mismos recordatorios, por mensaje de texto.',
+                  valor: valor.sms,
+                  alCambiar: habilitado ? (v) => _cambiar(valor.con(sms: v)) : null,
+                ),
+              ],
             ),
             if (_error != null) ...[espacio, Aviso('No se guardó el cambio. ${_error!}', tono: Tono.error)],
             espacioGrande,
-            const TituloSeccion('Tus datos'),
-            espacioChico,
-            Text(
-              'Almira usa los datos de tu cuenta y los que registra tu municipalidad para '
-              'mostrarte tus tributos y atender tus reclamos.',
-              style: textos.bodyMedium,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton(
-                onPressed: () => mostrarInformacionPrivacidad(context),
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
-                child: const Text('Leer la información completa'),
-              ),
+            const RotuloSeccion('Tus datos'),
+            const SizedBox(height: AppSpacing.xs),
+            FilaLista(
+              titulo: 'Cómo se usan tus datos',
+              detalle: DetalleFila('Qué datos usa Almira, para qué y tus derechos.'),
+              alTocar: () => mostrarInformacionPrivacidad(context),
             ),
           ],
         ),

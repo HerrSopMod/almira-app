@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/iconos.dart';
 import '../../core/utils/formato.dart';
+import '../../core/utils/plazos.dart';
 import '../../core/widgets/cara_saldo.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
@@ -17,8 +19,8 @@ import '../payments/widgets_deuda.dart';
 /// Cuántas obligaciones se listan en Inicio; el resto está en Pagar.
 const _maximoEnInicio = 3;
 
-/// Inicio: primero lo que se debe y cuándo vence, con una sola acción
-/// principal; después, accesos breves a lo que está en curso.
+/// Inicio: cabecera turquesa con el saludo, la tarjeta del total flotando sobre la unión con
+/// la hoja blanca, una sola acción principal, los accesos rápidos y lo que está en curso.
 class InicioScreen extends ConsumerWidget {
   const InicioScreen({super.key});
 
@@ -28,53 +30,34 @@ class InicioScreen extends ConsumerWidget {
     final sesion = ref.watch(sesionProvider);
     final esDemo = ref.watch(esDemoProvider);
     final hoy = ref.watch(relojProvider)();
-    final v = vista.valueOrNull;
-    final nombre = v?.vecino?.nombre ?? sesion.cuenta?.nombre;
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 68,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              nombre == null ? 'Hola' : 'Hola, ${primerNombre(nombre)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (v?.municipalidad != null)
-              Text(
-                v!.municipalidad!.nombre,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall!
-                    .copyWith(color: Colors.white.withValues(alpha: 0.86)),
-              ),
-          ],
-        ),
-        actions: [
-          // Con letra muy grande no entra junto al saludo.
-          if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15)
-            const Center(child: EtiquetaDemo(sobreTurquesa: true)),
-          IconButton(
-            tooltip: 'Avisos',
-            icon: const Icon(Icons.notifications_none_rounded),
-            onPressed: () => context.push(Rutas.avisos),
-          ),
-          IconButton(
-            tooltip: 'Mi perfil',
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () => context.push(Rutas.perfil),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-        ],
-      ),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
+        cabecera: (v) => CabeceraMarca(
+          titulo: 'Almira',
+          esDemo: esDemo,
+          acciones: [
+            IconButton(
+              tooltip: 'Avisos',
+              icon: const Icon(Phosphor.bell),
+              onPressed: () => context.push(Rutas.avisos),
+            ),
+            IconButton(
+              tooltip: 'Mi perfil',
+              icon: const Icon(Phosphor.userCircle),
+              onPressed: () => context.push(Rutas.perfil),
+            ),
+          ],
+          hijo: _Saludo(
+            nombre: v?.vecino?.nombre ?? sesion.cuenta?.nombre,
+            municipalidad: v?.municipalidad?.nombre,
+          ),
+          // Con la tarjeta flotante, el turquesa baja un poco más para que la tarjeta lo monte.
+          rellenoInferior: v?.vecino == null ? AppSpacing.solapeHoja + AppSpacing.lg : AppSpacing.xl,
+        ),
+        flotante: (v) => v.vecino == null ? null : _Resumen(resumen: resumirDeuda(v.deudas, hoy)),
         construir: (v) => v.vecino == null ? _sinVinculo(context, v) : _contenido(context, v, hoy),
       ),
     );
@@ -84,16 +67,16 @@ class InicioScreen extends ConsumerWidget {
   /// y no se inventa un "S/ 0.00".
   List<Widget> _sinVinculo(BuildContext context, VistaMunicipal v) => [
         VistaVacia(
-          icono: Icons.badge_outlined,
+          icono: Phosphor.identificationBadge,
           titulo: 'Vincula tu código de contribuyente',
           detalle: 'Así verás tus tributos y podrás enviar reclamos.',
           accion: 'Vincular código',
           alTocar: () => context.push(Rutas.vincular),
         ),
         if (v.obras.isNotEmpty) ...[
-          TituloSeccion('En tu distrito'),
+          const TituloSeccion('En tu distrito'),
           espacioChico,
-          _TarjetaObra(obra: v.obras.first),
+          _FilaObra(obra: v.obras.first),
         ],
       ];
 
@@ -102,12 +85,12 @@ class InicioScreen extends ConsumerWidget {
     final pendientes = filtrarDeudas(v.deudas, FiltroDeuda.pendientes, hoy);
     final reclamo = v.reclamos.where((r) => !r.resuelto).firstOrNull;
     final obra = v.obras.where((o) => o.estado == EstadoObra.enEjecucion).firstOrNull;
+    final enCurso = [
+      if (reclamo != null) _FilaReclamo(reclamo: reclamo, hoy: hoy),
+      if (obra != null) _FilaObra(obra: obra),
+    ];
 
     return [
-      _TarjetaResumen(resumen: resumen, hoy: hoy, codigo: v.vecino?.codigoContribuyente),
-      espacio,
-      const _Accesos(),
-      espacio,
       if (resumen.alDia)
         OutlinedButton(
           onPressed: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
@@ -118,6 +101,8 @@ class InicioScreen extends ConsumerWidget {
           onPressed: () => context.go(Rutas.pagos),
           child: const Text('Ver detalle y pagar'),
         ),
+      espacioGrande,
+      const _Accesos(),
       if (pendientes.isNotEmpty) ...[
         espacioGrande,
         TituloSeccion(
@@ -130,230 +115,191 @@ class InicioScreen extends ConsumerWidget {
               : null,
         ),
         espacioChico,
-        for (final deuda in pendientes.take(_maximoEnInicio)) ...[
-          FilaDeuda(
-            deuda: deuda,
-            hoy: hoy,
-            alTocar: () => context.go(Rutas.deuda(deuda.id)),
-          ),
-          espacioChico,
-        ],
+        ..._separadas([
+          for (final deuda in pendientes.take(_maximoEnInicio))
+            FilaDeuda(deuda: deuda, hoy: hoy, alTocar: () => context.go(Rutas.deuda(deuda.id))),
+        ]),
       ],
-      if (reclamo != null || obra != null) ...[
-        espacio,
-        TituloSeccion('En curso'),
+      if (enCurso.isNotEmpty) ...[
+        espacioGrande,
+        const TituloSeccion('En curso'),
         espacioChico,
-        if (reclamo != null) ...[_TarjetaReclamo(reclamo: reclamo, hoy: hoy), espacioChico],
-        if (obra != null) _TarjetaObra(obra: obra),
+        ..._separadas(enCurso),
       ],
     ];
   }
 }
 
-class _TarjetaResumen extends StatelessWidget {
-  const _TarjetaResumen({required this.resumen, required this.hoy, this.codigo});
+/// Filas separadas por una línea fina, sin cajas.
+List<Widget> _separadas(List<Widget> filas) => [
+      for (final (i, f) in filas.indexed) ...[if (i > 0) const Divider(), f],
+    ];
 
-  final ResumenDeuda resumen;
-  final DateTime hoy;
-  final String? codigo;
+/// «Hola, Rosa», en blanco y grande, con la municipalidad debajo (viene de los datos).
+class _Saludo extends StatelessWidget {
+  const _Saludo({this.nombre, this.municipalidad});
+
+  final String? nombre;
+  final String? municipalidad;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    final alDia = resumen.alDia;
-    final vence = resumen.proximoVencimiento;
-    final estado = alDia
-        ? '¡Estás al día con tus tributos!'
-        : [
-            plural(resumen.cantidad, 'obligación', 'obligaciones'),
-            if (vence != null) 'próximo vencimiento: ${diaYMes(vence)}',
-          ].join(' · ');
-
-    return Tarjeta(
-      color: alDia ? AppColors.successSoft : AppColors.primarySoft,
-      conBorde: false,
-      padding: const EdgeInsets.all(AppSpacing.xl - AppSpacing.xs),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CaraSaldo(alDia: alDia, lado: 64),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Total pendiente', style: textos.bodySmall),
-                    // El monto se achica antes que partirse en dos líneas.
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(soles(resumen.total), style: textos.displaySmall),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            estado,
-            style: textos.bodyMedium!.copyWith(color: AppColors.textPrimary),
-            maxLines: 3,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            nombre == null ? 'Hola' : 'Hola, ${primerNombre(nombre!)}',
+            style: textos.headlineSmall!.copyWith(color: AppColors.onPrimary),
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          if (codigo != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text('Código de contribuyente $codigo', style: textos.bodySmall),
-          ],
-          if (resumen.cantidadVencidas > 0) ...[
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                Insignia(
-                  '${plural(resumen.cantidadVencidas, 'vencida', 'vencidas')} · ${soles(resumen.montoVencido)}',
-                  tono: Tono.error,
-                  icono: Icons.error_outline_rounded,
-                ),
-                if (resumen.cantidadPorVencer > 0)
-                  Insignia(
-                    '${resumen.cantidadPorVencer} por vencer · ${soles(resumen.montoPorVencer)}',
-                    tono: Tono.aviso,
-                    icono: Icons.schedule_rounded,
-                  ),
-              ],
-            ),
-          ],
+        ),
+        if (municipalidad != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            municipalidad!,
+            style: textos.bodyLarge!.copyWith(color: AppColors.onPrimary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
-      ),
+      ],
     );
   }
 }
 
-class _TarjetaReclamo extends StatelessWidget {
-  const _TarjetaReclamo({required this.reclamo, required this.hoy});
+/// Tarjeta del total pendiente que flota sobre la unión: la carita (feliz sin deuda, triste con
+/// deuda) junto al monto, una línea con cuántas obligaciones hay y cuándo vence la próxima, y una
+/// insignia solo si algo ya venció.
+class _Resumen extends StatelessWidget {
+  const _Resumen({required this.resumen});
+
+  final ResumenDeuda resumen;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final vence = resumen.proximoVencimiento;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            CaraSaldo(alDia: resumen.alDia, lado: 64),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Total pendiente', style: textos.bodyMedium),
+                  // El monto se achica antes que partirse en dos líneas.
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(soles(resumen.total), style: textos.displaySmall),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        if (resumen.alDia)
+          const Insignia('Estás al día', tono: Tono.exito, icono: Phosphor.check)
+        else ...[
+          Text(
+            [
+              plural(resumen.cantidad, 'obligación', 'obligaciones'),
+              if (vence != null) 'vence el ${diaYMes(vence)}',
+            ].join(' · '),
+            style: textos.bodyMedium,
+          ),
+          if (resumen.cantidadVencidas > 0) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Insignia(
+              '${plural(resumen.cantidadVencidas, 'vencida', 'vencidas')} · ${soles(resumen.montoVencido)}',
+              tono: Tono.error,
+              icono: Phosphor.warningCircle,
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+/// Reclamo en curso: título, estado real en insignia y la fecha de respuesta en texto.
+class _FilaReclamo extends StatelessWidget {
+  const _FilaReclamo({required this.reclamo, required this.hoy});
 
   final Reclamo reclamo;
   final DateTime hoy;
 
   @override
   Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
     final plazo = plazoDe(reclamo, hoy);
-    return Tarjeta(
-      onTap: () => context.go(Rutas.reclamo(reclamo.id)),
+    final limite = plazo?.limite;
+    final vencido = plazo?.estado == EstadoPlazo.vencido;
+    final texto = switch (plazo?.estado) {
+      null => null,
+      EstadoPlazo.porConfirmar => 'Plazo por confirmar',
+      EstadoPlazo.vencido => limite == null ? 'Plazo vencido' : 'Plazo vencido el ${diaYMes(limite)}',
+      _ => limite == null ? null : 'Respuesta hasta el ${diaYMes(limite)}',
+    };
+    return FilaLista(
+      titulo: reclamo.titulo,
+      alTocar: () => context.go(Rutas.reclamo(reclamo.id)),
       semantica: 'Reclamo ${reclamo.titulo}. Ver seguimiento',
-      child: Row(
+      detalle: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          const CajaIcono(Icons.campaign_outlined),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(reclamo.titulo, style: textos.titleSmall, maxLines: 2, overflow: TextOverflow.ellipsis),
-                Text(
-                  plazo == null ? reclamo.estado.etiqueta : '${reclamo.estado.etiqueta} · ${plazo.etiqueta}',
-                  style: textos.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          Insignia(reclamo.estado.etiqueta, tono: Tono.primario),
+          if (texto != null) TextoPlazo(texto, vencido: vencido),
         ],
       ),
     );
   }
 }
 
-class _TarjetaObra extends StatelessWidget {
-  const _TarjetaObra({required this.obra});
+/// Obra en ejecución: nombre y avance en una línea gris.
+class _FilaObra extends StatelessWidget {
+  const _FilaObra({required this.obra});
 
   final Obra obra;
 
   @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    return Tarjeta(
-      onTap: () => context.go(Rutas.obra(obra.id)),
-      semantica: 'Obra ${obra.nombre}. Ver detalle',
-      child: Row(
-        children: [
-          const CajaIcono(Icons.construction_rounded),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(obra.nombre, style: textos.titleSmall, maxLines: 2, overflow: TextOverflow.ellipsis),
-                Text(
-                  '${obra.estado.etiqueta} · avance físico ${obra.avancePct.round()} %',
-                  style: textos.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => FilaLista(
+        titulo: obra.nombre,
+        alTocar: () => context.go(Rutas.obra(obra.id)),
+        semantica: 'Obra ${obra.nombre}. Ver detalle',
+        detalle: Text(
+          '${obra.estado.etiqueta} · avance ${obra.avancePct.round()} %',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
 }
 
-/// Accesos rápidos a lo que más se usa, en dos filas. Cada uno lleva un círculo tintado (su
-/// color al 12 %) con el ícono en su color; la tarjeta sigue blanca y de borde suave.
+/// Accesos rápidos: una fila de cuatro círculos turquesa claro con su etiqueta debajo.
 class _Accesos extends StatelessWidget {
   const _Accesos();
 
   @override
   Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    Widget acceso(IconData icono, Color color, String texto, String ruta) => Expanded(
-          child: Tarjeta(
-            onTap: () => context.go(ruta),
-            semantica: texto,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm),
-            child: Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
-                  child: Icon(icono, size: 22, color: color),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  width: double.infinity,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(texto, style: textos.titleSmall!.copyWith(fontSize: 15), maxLines: 1, softWrap: false),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    Widget acceso(IconData icono, String texto, String ruta) => Expanded(
+          child: Acceso(icono: icono, texto: texto, alTocar: () => context.go(ruta)),
         );
-    Widget fila(Widget a, Widget b) => IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [a, const SizedBox(width: AppSpacing.sm), b],
-          ),
-        );
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        fila(
-          acceso(Icons.lock_outline_rounded, AppColors.accesoPagar, 'Pagar en línea', Rutas.pagoEnLinea),
-          acceso(Icons.receipt_long_outlined, AppColors.accesoEstado, 'Estado de cuenta', Rutas.estadoCuenta),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        fila(
-          acceso(Icons.description_outlined, AppColors.accesoCuponera, 'Cuponera', Rutas.cuponera),
-          acceso(Icons.history_rounded, AppColors.accesoHistorial, 'Historial', Rutas.estadoCuenta),
-        ),
+        acceso(Phosphor.creditCard, 'Pagar en línea', Rutas.pagoEnLinea),
+        acceso(Phosphor.receipt, 'Estado de cuenta', Rutas.estadoCuenta),
+        acceso(Phosphor.fileText, 'Cuponera', Rutas.cuponera),
+        acceso(Phosphor.clockCounterClockwise, 'Historial', Rutas.estadoCuenta),
       ],
     );
   }

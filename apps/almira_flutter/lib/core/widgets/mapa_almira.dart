@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 
@@ -28,7 +29,7 @@ class MarcadorMapa {
     required this.punto,
     required this.etiqueta,
     this.color = AppColors.primary,
-    this.icono = Icons.location_on_rounded,
+    this.icono = PhosphorFill.mapPin,
   });
 
   final String id;
@@ -96,9 +97,9 @@ class _MapaAlmiraState extends State<MapaAlmira> {
   }
 
   void _reintentar() => setState(() {
-        _fallas = 0;
-        _intento++;
-      });
+    _fallas = 0;
+    _intento++;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -174,10 +175,12 @@ class _MapaAlmiraState extends State<MapaAlmira> {
                   // La punta del pin marca el centro exacto.
                   padding: EdgeInsets.only(bottom: 44),
                   child: Icon(
-                    Icons.location_on_rounded,
+                    PhosphorFill.mapPin,
                     size: 48,
                     color: AppColors.primary,
-                    shadows: [Shadow(color: Color(0x4D0F2A2E), blurRadius: 6, offset: Offset(0, 2))],
+                    shadows: [
+                      Shadow(color: Color(0x4D0F2A2E), blurRadius: 6, offset: Offset(0, 2)),
+                    ],
                   ),
                 ),
               ),
@@ -227,25 +230,32 @@ class _Atribucion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        link: true,
-        label: 'Mapa de OpenStreetMap. Ver derechos',
-        child: GestureDetector(
-          onTap: () => launchUrl(ConfigMapa.derechos, mode: LaunchMode.externalApplication),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.88),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const ExcludeSemantics(
-              child: Text(
-                '© OpenStreetMap',
-                style: TextStyle(fontSize: 11, color: AppColors.textPrimary, fontFamily: 'Inter'),
-              ),
+    link: true,
+    label: 'Mapa de OpenStreetMap. Ver derechos',
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => launchUrl(ConfigMapa.derechos, mode: LaunchMode.externalApplication),
+      // Zona táctil de 44 de alto aunque la etiqueta sea pequeña.
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 44),
+        alignment: Alignment.bottomRight,
+        padding: const EdgeInsets.only(left: AppSpacing.md, top: AppSpacing.md),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.88),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const ExcludeSemantics(
+            child: Text(
+              '© OpenStreetMap',
+              style: TextStyle(fontSize: 11, color: AppColors.textPrimary, fontFamily: 'Inter'),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _ErrorMapa extends StatelessWidget {
@@ -255,30 +265,30 @@ class _ErrorMapa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: AppColors.surfaceSubtle,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.map_outlined, color: AppColors.textSecondary, size: 32),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'No se pudo cargar el mapa',
-                style: Theme.of(context).textTheme.titleSmall,
-                textAlign: TextAlign.center,
-              ),
-              OutlinedButton.icon(
-                onPressed: alReintentar,
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-                label: const Text('Reintentar'),
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
-              ),
-            ],
+    color: AppColors.surfaceSubtle,
+    alignment: Alignment.center,
+    padding: const EdgeInsets.all(AppSpacing.lg),
+    child: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Phosphor.mapTrifold, color: AppColors.textSecondary, size: AppIconos.vacio),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'No se pudo cargar el mapa',
+            style: Theme.of(context).textTheme.titleSmall,
+            textAlign: TextAlign.center,
           ),
-        ),
-      );
+          const SizedBox(height: AppSpacing.sm),
+          TextButton.icon(
+            onPressed: alReintentar,
+            icon: const Icon(Phosphor.arrowClockwise, size: AppIconos.boton),
+            label: const Text('Reintentar'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Marco redondeado para un mapa dentro de una pantalla.
@@ -290,14 +300,14 @@ class MarcoMapa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.tarjeta),
-        child: DecoratedBox(
-          position: DecorationPosition.foreground,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.tarjeta),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: SizedBox(height: alto, width: double.infinity, child: child),
-        ),
-      );
+    borderRadius: BorderRadius.circular(AppRadius.destacado),
+    child: DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.destacado),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: SizedBox(height: alto, width: double.infinity, child: child),
+    ),
+  );
 }

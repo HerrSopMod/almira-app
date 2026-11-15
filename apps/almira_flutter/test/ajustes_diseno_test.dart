@@ -1,11 +1,12 @@
 // Ajustes de diseño, ronda 2: diálogo de confirmación, chips de filtro, teclado abierto y
-// capturas de las pantallas tocadas (docs/capturas/rediseno/).
+// capturas de las pantallas tocadas (docs/capturas/pulido-ui/despues/).
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:almira_flutter/app/app.dart';
 import 'package:almira_flutter/app/router.dart';
 import 'package:almira_flutter/app/theme/app_colors.dart';
+import 'package:almira_flutter/app/theme/app_spacing.dart';
 import 'package:almira_flutter/app/theme/app_theme.dart';
 import 'package:almira_flutter/core/widgets/app_confirm_dialog.dart';
 import 'package:almira_flutter/core/widgets/filtros.dart';
@@ -19,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -64,6 +66,12 @@ Future<void> _cargarFuentes() async {
     cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
   }
   await cargador.load();
+
+  // Íconos de Phosphor (línea «regular» y «fill» de la pestaña activa).
+  for (final (familia, archivo) in [('PhosphorRegular', 'Phosphor'), ('PhosphorFill', 'Phosphor-Fill')]) {
+    final fuente = FontLoader(familia)..addFont(rootBundle.load('assets/fonts/phosphor/$archivo.ttf'));
+    await fuente.load();
+  }
   final raiz = Platform.environment['FLUTTER_ROOT'];
   if (raiz != null) {
     final archivo = File('$raiz/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
@@ -112,7 +120,7 @@ void _abrirTeclado(WidgetTester tester) {
 Future<void> _capturar(WidgetTester tester, String nombre) async {
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull, reason: 'se desborda: $nombre');
-  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/rediseno/$nombre.png'));
+  await expectLater(find.byType(AlmiraApp), matchesGoldenFile('../docs/capturas/pulido-ui/despues/$nombre.png'));
 }
 
 /// El elemento está entero en la zona que deja libre el teclado.
@@ -134,7 +142,7 @@ void main() {
       const MethodChannel('plugins.flutter.io/path_provider'),
       (_) async => Directory.systemTemp.path,
     );
-    Directory('docs/capturas/rediseno').createSync(recursive: true);
+    Directory('docs/capturas/pulido-ui/despues').createSync(recursive: true);
     goldenFileComparator = _GuardarCapturas(Uri.parse('test/ajustes_diseno_test.dart'));
   });
 
@@ -180,9 +188,9 @@ void main() {
       expect(cancelar.width, aceptar.width);
       expect(cancelar.height, 48);
       expect(aceptar.height, 48);
-      // Esquinas del diálogo de 24.
+      // Esquinas del diálogo según el tema.
       final forma = tester.widget<Dialog>(find.byType(Dialog)).shape! as RoundedRectangleBorder;
-      expect(forma.borderRadius, BorderRadius.circular(24));
+      expect(forma.borderRadius, BorderRadius.circular(AppRadius.dialogo));
     });
 
     testWidgets('la acción destructiva va en rojo con texto blanco; «Cancelar» con borde turquesa', (tester) async {
@@ -231,7 +239,7 @@ void main() {
       expect((inactivo.shape! as StadiumBorder).side.color, AppColors.bordeControl);
       expect(tester.widget<Text>(find.text('Activo')).style!.color, Colors.white);
       expect(tester.widget<Text>(find.text('Inactivo')).style!.color, AppColors.textPrimary);
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      expect(find.byIcon(Phosphor.check), findsOneWidget);
       // Altura táctil de 44 como mínimo.
       expect(tester.getSize(find.byType(ChipFiltro).first).height, greaterThanOrEqualTo(44));
     });
@@ -331,6 +339,8 @@ void main() {
       await tester.tap(find.text('Entrar a la demostración'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('Continuar'), 200);
+      await tester.ensureVisible(find.text('Continuar'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
 

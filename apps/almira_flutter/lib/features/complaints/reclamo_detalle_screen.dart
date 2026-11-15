@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
-import '../../core/utils/plazos.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import '../../shared/services/repositorio.dart';
 import 'reclamos_logica.dart';
+import 'piezas_lista.dart';
 import 'reclamos_screen.dart';
 
 /// Seguimiento de un reclamo: estado, plazo, foto, ubicación y cronología.
@@ -40,7 +41,7 @@ class ReclamoDetalleScreen extends ConsumerWidget {
           if (reclamo == null) {
             return const [
               VistaVacia(
-                icono: Icons.search_off_rounded,
+                icono: Phosphor.magnifyingGlass,
                 titulo: 'No encontramos este reclamo',
                 detalle: 'Puede que pertenezca a otra municipalidad.',
               ),
@@ -48,33 +49,31 @@ class ReclamoDetalleScreen extends ConsumerWidget {
           }
           final creado = reclamo.creadoEn;
           final plazo = plazoDe(reclamo, hoy);
+          final descripcion = (reclamo.descripcion ?? '').trim();
+          final area = (reclamo.area ?? '').trim();
           return [
-            Row(
-              children: [
-                Expanded(child: Text('Reclamo ${reclamo.codigo}', style: textos.labelMedium)),
-                Insignia(
-                  reclamo.estado.etiqueta,
-                  tono: reclamo.resuelto ? Tono.exito : Tono.primario,
-                  icono: reclamo.resuelto ? Icons.check_rounded : null,
-                ),
-              ],
-            ),
-            espacioChico,
+            Text('Reclamo ${reclamo.codigo}', style: textos.bodyMedium!),
+            const SizedBox(height: AppSpacing.xs),
             Semantics(
               header: true,
-              child: Text(reclamo.titulo, style: textos.headlineSmall),
+              child: Text(reclamo.titulo, style: textos.titleLarge!),
             ),
-            if (creado != null) ...[
+            espacioChico,
+            Align(alignment: Alignment.centerLeft, child: InsigniaReclamo(reclamo: reclamo)),
+            if (plazo != null) ...[
               const SizedBox(height: AppSpacing.xs),
-              Text('Enviado el ${fechaLarga(creado)}', style: textos.bodyMedium),
+              PlazoReclamo(plazo),
             ],
-            if (plazo != null) ...[espacio, _TarjetaPlazo(reclamo: reclamo, plazo: plazo, hoy: hoy)],
-            espacio,
+            espacioGrande,
             _Foto(reclamoId: reclamo.id, tieneFoto: reclamo.tieneFoto),
-            if ((reclamo.descripcion ?? '').trim().isNotEmpty) ...[
+            if (descripcion.isNotEmpty) ...[
               espacio,
-              Text(reclamo.descripcion!.trim(), style: textos.bodyLarge),
+              Text(descripcion, style: textos.bodyLarge!),
             ],
+            espacioGrande,
+            Ficha('Categoría', reclamo.tipo.etiqueta),
+            Ficha('Área a cargo', area.isEmpty ? 'Por asignar' : area),
+            if (creado != null) Ficha('Enviado el', fechaLarga(creado)),
             espacioGrande,
             const TituloSeccion('Ubicación'),
             espacioChico,
@@ -83,78 +82,8 @@ class ReclamoDetalleScreen extends ConsumerWidget {
             const TituloSeccion('Seguimiento'),
             espacio,
             _LineaTiempo(pasos: pasosDe(reclamo)),
-            espacio,
-            Tarjeta(
-              child: Column(
-                children: [
-                  FilaDato('Categoría', reclamo.tipo.etiqueta),
-                  FilaDato('Área a cargo', (reclamo.area ?? '').trim().isEmpty ? 'Por asignar' : reclamo.area!),
-                ],
-              ),
-            ),
           ];
         },
-      ),
-    );
-  }
-}
-
-class _TarjetaPlazo extends StatelessWidget {
-  const _TarjetaPlazo({required this.reclamo, required this.plazo, required this.hoy});
-
-  final Reclamo reclamo;
-  final Plazo plazo;
-  final DateTime hoy;
-
-  @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    final limite = plazo.limite;
-    final transcurrido = plazo.transcurrido;
-    final color = switch (plazo.estado) {
-      EstadoPlazo.vencido => AppColors.error,
-      EstadoPlazo.porVencer || EstadoPlazo.venceHoy => AppColors.warning,
-      _ => AppColors.primary,
-    };
-    return Tarjeta(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text('Plazo de atención', style: textos.titleSmall)),
-              InsigniaReclamo(reclamo: reclamo, hoy: hoy),
-            ],
-          ),
-          if (plazo.estado == EstadoPlazo.porConfirmar) ...[
-            espacioChico,
-            Text('La municipalidad aún no confirma el plazo de este reclamo.', style: textos.bodyMedium),
-          ] else ...[
-            if (transcurrido != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.pastilla),
-                child: LinearProgressIndicator(
-                  value: plazo.estado == EstadoPlazo.vencido ? 1 : transcurrido,
-                  minHeight: 8,
-                  color: color,
-                  semanticsLabel: 'Tiempo transcurrido del plazo',
-                ),
-              ),
-            ],
-            espacioChico,
-            Text(
-              [
-                plural(plazo.total!, 'día hábil', 'días hábiles'),
-                if (limite != null)
-                  plazo.estado == EstadoPlazo.vencido
-                      ? 'venció el ${diaYMes(limite)}'
-                      : 'hasta el ${diaYMes(limite)}',
-              ].join(' · '),
-              style: textos.bodyMedium,
-            ),
-          ],
-        ],
       ),
     );
   }
@@ -267,7 +196,7 @@ class _SinFoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Aviso(
         'Sin fotografía adjunta',
-        icono: Icons.no_photography_outlined,
+        icono: Phosphor.cameraSlash,
       );
 }
 
@@ -286,7 +215,7 @@ class _ErrorFoto extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 32),
+            const Icon(Phosphor.imageBroken, color: AppColors.textSecondary, size: 32),
             const SizedBox(height: AppSpacing.sm),
             Text(
               sinConexion ? 'Sin conexión para cargar la foto' : 'No se pudo cargar la foto',
@@ -295,7 +224,7 @@ class _ErrorFoto extends StatelessWidget {
             ),
             OutlinedButton.icon(
               onPressed: alReintentar,
-              icon: const Icon(Icons.refresh_rounded, size: 20),
+              icon: const Icon(Phosphor.arrowClockwise, size: 20),
               label: const Text('Reintentar'),
               style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
             ),
@@ -321,17 +250,9 @@ class _Ubicacion extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            const Icon(Icons.place_outlined, size: 20, color: AppColors.textSecondary),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                direccion.isEmpty ? 'Sin dirección registrada' : direccion,
-                style: textos.bodyLarge,
-              ),
-            ),
-          ],
+        Text(
+          direccion.isEmpty ? 'Sin dirección registrada' : direccion,
+          style: textos.bodyLarge!,
         ),
         espacioChico,
         if (reclamo.tieneUbicacion)
@@ -353,10 +274,7 @@ class _Ubicacion extends StatelessWidget {
             ),
           )
         else
-          const Aviso(
-            'Este reclamo no tiene un punto en el mapa. La municipalidad usará la dirección.',
-            icono: Icons.map_outlined,
-          ),
+          Text('Sin punto en el mapa: se atenderá con la dirección.', style: textos.bodyMedium!),
       ],
     );
   }
@@ -408,14 +326,12 @@ class _LineaTiempo extends StatelessWidget {
                           children: [
                             Text(
                               paso.titulo,
-                              style: textos.titleSmall!.copyWith(
+                              style: textos.titleMedium!.copyWith(
                                 color: paso.estado == EstadoPaso.pendiente ? AppColors.textSecondary : null,
-                                fontWeight: paso.estado == EstadoPaso.pendiente ? FontWeight.w500 : null,
+                                fontWeight: paso.estado == EstadoPaso.pendiente ? FontWeight.w400 : null,
                               ),
                             ),
-                            if (paso.estado == EstadoPaso.actual)
-                              Text('Etapa actual', style: textos.bodySmall!.copyWith(color: AppColors.primaryDark)),
-                            if (paso.detalle != null) Text(paso.detalle!, style: textos.bodySmall),
+                            if (paso.detalle != null) Text(paso.detalle!, style: textos.bodyMedium!),
                           ],
                         ),
                       ),
@@ -452,7 +368,7 @@ class _Punto extends StatelessWidget {
           ),
         ),
         child: switch (estado) {
-          EstadoPaso.hecho => const Icon(Icons.check_rounded, size: 14, color: Colors.white),
+          EstadoPaso.hecho => const Icon(Phosphor.check, size: 14, color: Colors.white),
           EstadoPaso.actual => const Center(
               child: SizedBox(
                 width: 8,

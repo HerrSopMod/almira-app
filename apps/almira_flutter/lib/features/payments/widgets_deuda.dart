@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 
 import '../../app/theme/app_spacing.dart';
-import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/tributo.dart';
@@ -18,13 +18,17 @@ class InsigniaDeuda extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (estado) {
-        EstadoDeuda.vencida => Insignia(estado.etiqueta, tono: Tono.error, icono: Icons.error_outline_rounded),
-        EstadoDeuda.vigente => Insignia(estado.etiqueta, tono: Tono.aviso, icono: Icons.schedule_rounded),
-        EstadoDeuda.pagada => Insignia(estado.etiqueta, tono: Tono.exito, icono: Icons.check_rounded),
+        EstadoDeuda.vencida => Insignia(estado.etiqueta, tono: Tono.error, icono: Phosphor.warningCircle),
+        // Sin reloj: el plazo se dice en texto («Vence el 30 de noviembre»).
+        EstadoDeuda.vigente => Insignia(estado.etiqueta, tono: Tono.aviso),
+        EstadoDeuda.pagada => Insignia(estado.etiqueta, tono: Tono.exito, icono: Phosphor.check),
       };
 }
 
-/// Fila de una obligación: concepto, periodo, vencimiento, importe y estado.
+/// Fila de una obligación, como una fila de lista: nombre del tributo en 15/500, periodo y
+/// vencimiento en gris de 13 debajo, monto a la derecha y flecha. El vencimiento es una línea de
+/// texto («Vence el 30 de noviembre»); solo si ya venció va en rojo. La insignia queda para los
+/// estados reales: Vencida y Pagada.
 class FilaDeuda extends StatelessWidget {
   const FilaDeuda({super.key, required this.deuda, required this.hoy, this.alTocar});
 
@@ -36,37 +40,29 @@ class FilaDeuda extends StatelessWidget {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     final estado = deuda.estadoAl(hoy);
-    return Tarjeta(
-      onTap: alTocar,
+    final vencida = estado == EstadoDeuda.vencida;
+    return FilaLista(
+      titulo: deuda.tipo.nombre,
+      monto: soles(deuda.total),
+      alTocar: alTocar,
       semantica: '${deuda.concepto}, ${soles(deuda.total)}, ${estado.etiqueta}. Ver detalle',
-      child: Row(
+      detalle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconoTributo(deuda.tipo, lado: 36),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          if (deuda.periodo.isNotEmpty) Text(deuda.periodo, style: textos.bodyMedium),
+          if (estado == EstadoDeuda.pagada) ...[
+            const SizedBox(height: AppSpacing.xs),
+            InsigniaDeuda(estado),
+          ] else
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(deuda.tipo.nombre, style: textos.titleMedium),
-                if (deuda.periodo.isNotEmpty) Text(deuda.periodo, style: textos.bodyMedium),
-                const SizedBox(height: AppSpacing.sm),
-                Text(vencimientoDe(deuda, hoy), style: textos.bodySmall),
+                TextoPlazo(vencimientoDe(deuda, hoy), vencido: vencida),
+                if (vencida) InsigniaDeuda(estado),
               ],
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                soles(deuda.total),
-                style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              InsigniaDeuda(estado),
-            ],
-          ),
         ],
       ),
     );
@@ -88,10 +84,9 @@ class AccionPago extends StatelessWidget {
         tono: Tono.aviso,
       );
     }
-    return FilledButton.icon(
+    return FilledButton(
       onPressed: () => context.push(Rutas.pagoEnLinea),
-      icon: const Icon(Icons.lock_outline_rounded, size: 20),
-      label: const Text('Pagar en línea'),
+      child: const Text('Pagar en línea'),
     );
   }
 }
