@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 
 import 'clasificador_foto.dart';
@@ -9,6 +10,11 @@ import 'regla_foto.dart';
 /// teléfono (Android e iOS) y la imagen no sale del dispositivo.
 /// No registra la foto ni las etiquetas.
 class ClasificadorMlKit implements ClasificadorFoto {
+  ClasificadorMlKit({this.diagnostico = diagnosticoFotoActivo});
+
+  /// Adjunta al resultado los datos del modo diagnóstico.
+  final bool diagnostico;
+
   ImageLabeler? _etiquetador;
 
   static const _tiempoMaximo = Duration(seconds: 10);
@@ -18,17 +24,34 @@ class ClasificadorMlKit implements ClasificadorFoto {
 
   @override
   Future<ResultadoFoto> clasificar(ImagenReclamo imagen) async {
-    if (!_soportado) return ResultadoFoto.enRevision;
+    if (!_soportado) {
+      return _conDiagnostico(ResultadoFoto.enRevision, error: 'Plataforma sin soporte: ${defaultTargetPlatform.name}');
+    }
     try {
       final etiquetador =
           _etiquetador ??= ImageLabeler(options: ImageLabelerOptions(confidenceThreshold: umbralModelo));
       final etiquetas =
           await etiquetador.processImage(InputImage.fromFilePath(imagen.ruta)).timeout(_tiempoMaximo);
-      return decidirFoto([for (final e in etiquetas) EtiquetaDetectada(e.label, e.confidence)]);
-    } catch (_) {
-      return ResultadoFoto.enRevision;
+      final detectadas = [for (final e in etiquetas) EtiquetaDetectada(e.label, e.confidence)];
+      return _conDiagnostico(decidirFoto(detectadas), etiquetas: detectadas);
+    } catch (error) {
+      return _conDiagnostico(ResultadoFoto.enRevision, error: describirError(error));
     }
   }
+
+  ResultadoFoto _conDiagnostico(
+    ResultadoFoto resultado, {
+    List<EtiquetaDetectada> etiquetas = const [],
+    String? error,
+  }) =>
+      diagnostico
+          ? resultado.conDiagnostico(DiagnosticoFoto(
+              implementacion: 'mlkit',
+              etiquetas: mejoresEtiquetas(etiquetas),
+              error: error,
+              umbralModelo: umbralModelo,
+            ))
+          : resultado;
 
   Future<void> cerrar() async {
     try {
@@ -39,6 +62,12 @@ class ClasificadorMlKit implements ClasificadorFoto {
     _etiquetador = null;
   }
 }
+
+/// Tipo y mensaje de una excepción, para el modo diagnóstico.
+String describirError(Object error) => switch (error) {
+      PlatformException(:final code, :final message) => 'PlatformException [$code]: ${message ?? ''}',
+      _ => '${error.runtimeType}: $error',
+    };
 
 ClasificadorFoto crearClasificadorFoto(void Function(Future<void> Function()) alCerrar) {
   final clasificador = ClasificadorMlKit();

@@ -25,3 +25,9 @@ ResultadoFoto decidirFoto(Iterable<EtiquetaDetectada> etiquetas) {
   if (hay(_validas, umbralValida)) return ResultadoFoto.valida;
   return ResultadoFoto.enRevision;
 }
+
+/// Las [cantidad] etiquetas con mayor confianza, de mayor a menor (modo diagnóstico).
+List<(String, double)> mejoresEtiquetas(Iterable<EtiquetaDetectada> etiquetas, {int cantidad = 5}) {
+  final ordenadas = etiquetas.toList()..sort((a, b) => b.confianza.compareTo(a.confianza));
+  return [for (final e in ordenadas.take(cantidad)) (e.nombre, e.confianza)];
+}

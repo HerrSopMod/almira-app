@@ -1,11 +1,14 @@
-import 'dart:typed_data';
-
 import 'package:almira_flutter/features/complaints/clasificacion_foto/clasificador_foto.dart';
+import 'package:almira_flutter/features/complaints/clasificacion_foto/clasificador_mlkit.dart';
 import 'package:almira_flutter/features/complaints/clasificacion_foto/clasificador_web.dart';
 import 'package:almira_flutter/features/complaints/clasificacion_foto/regla_foto.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('decidirFoto', () {
     test('una selfie no es válida', () {
       final r = decidirFoto(const [
@@ -65,5 +68,55 @@ void main() {
   test('en web la foto queda en revisión', () async {
     final r = await ClasificadorWeb().clasificar(ImagenReclamo(ruta: 'x', bytes: Uint8List(0)));
     expect(r, ResultadoFoto.enRevision);
+  });
+
+  group('modo diagnóstico', () {
+    final imagen = ImagenReclamo(ruta: 'x', bytes: Uint8List(0));
+
+    test('sin la bandera no hay datos de diagnóstico', () async {
+      expect(diagnosticoFotoActivo, isFalse);
+      expect((await ClasificadorWeb().clasificar(imagen)).diagnostico, isNull);
+      expect((await ClasificadorMlKit().clasificar(imagen)).diagnostico, isNull);
+    });
+
+    test('web informa su implementación', () async {
+      final r = await ClasificadorWeb(diagnostico: true).clasificar(imagen);
+      expect(r, ResultadoFoto.enRevision);
+      expect(r.diagnostico!.implementacion, 'web');
+    });
+
+    test('ML Kit fuera de Android e iOS informa la implementación y el motivo', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      final r = await ClasificadorMlKit(diagnostico: true).clasificar(imagen);
+      expect(r.estado, EstadoFoto.enRevision);
+      expect(r.diagnostico!.implementacion, 'mlkit');
+      expect(r.diagnostico!.error, contains('windows'));
+    });
+
+    test('ML Kit sin el plugin informa el tipo de la excepción', () async {
+      // En la VM de pruebas no hay plugin nativo: falla como fallaría en el teléfono.
+      final r = await ClasificadorMlKit(diagnostico: true).clasificar(imagen);
+      expect(r.estado, EstadoFoto.enRevision);
+      expect(r.diagnostico!.error, startsWith('MissingPluginException'));
+      expect(r.diagnostico!.umbralModelo, 0.5);
+    });
+
+    test('las cinco etiquetas con mayor confianza, de mayor a menor', () {
+      final mejores = mejoresEtiquetas(const [
+        EtiquetaDetectada('Sky', 0.55),
+        EtiquetaDetectada('Road', 0.91),
+        EtiquetaDetectada('Tree', 0.62),
+        EtiquetaDetectada('Car', 0.77),
+        EtiquetaDetectada('Wall', 0.51),
+        EtiquetaDetectada('Asphalt', 0.83),
+      ]);
+      expect(mejores, [('Road', 0.91), ('Asphalt', 0.83), ('Car', 0.77), ('Tree', 0.62), ('Sky', 0.55)]);
+    });
+
+    test('describe una PlatformException con su código y mensaje', () {
+      final texto = describirError(PlatformException(code: 'ImageLabelDetectorError', message: 'falló'));
+      expect(texto, 'PlatformException [ImageLabelDetectorError]: falló');
+    });
   });
 }
