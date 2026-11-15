@@ -66,9 +66,13 @@ class MarcaAlmira extends StatelessWidget {
             children: [
               const LogoAlmira(lado: 28),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                'Almira',
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w700),
+              Flexible(
+                child: Text(
+                  'Almira',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),

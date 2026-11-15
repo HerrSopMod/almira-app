@@ -111,7 +111,8 @@ void main() {
         ('Pagar', 'Pagar'),
         ('Reclamos', 'Nuevo reclamo'),
         ('Asistente', 'Escribe tu pregunta'),
-        ('Inicio', 'Hola, Rosa'),
+        // El saludo va en el cuerpo y puede quedar fuera de pantalla: Inicio se reconoce por la marca.
+        ('Inicio', 'Almira'),
       ]) {
         await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text(pestana)));
         await tester.pumpAndSettle();

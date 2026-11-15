@@ -7,7 +7,6 @@ import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
-import '../../core/widgets/cara_saldo.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
@@ -34,30 +33,9 @@ class InicioScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 68,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              nombre == null ? 'Hola' : 'Hola, ${primerNombre(nombre)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (v?.municipalidad != null)
-              Text(
-                v!.municipalidad!.nombre,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall!
-                    .copyWith(color: Colors.white.withValues(alpha: 0.86)),
-              ),
-          ],
-        ),
+        title: const MarcaAlmira(),
         actions: [
-          // Con letra muy grande no entra junto al saludo.
+          // Con letra muy grande no entra junto a la marca.
           if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15)
             const Center(child: EtiquetaDemo()),
           IconButton(
@@ -76,7 +54,11 @@ class InicioScreen extends ConsumerWidget {
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
-        construir: (v) => v.vecino == null ? _sinVinculo(context, v) : _contenido(context, v, hoy),
+        construir: (v) => [
+          _Saludo(nombre: nombre, municipalidad: v.municipalidad?.nombre),
+          espacioGrande,
+          ...v.vecino == null ? _sinVinculo(context, v) : _contenido(context, v, hoy),
+        ],
       ),
     );
   }
@@ -92,8 +74,8 @@ class InicioScreen extends ConsumerWidget {
           alTocar: () => context.push(Rutas.vincular),
         ),
         if (v.obras.isNotEmpty) ...[
-          TituloSeccion('En tu distrito'),
-          espacioChico,
+          const TituloSeccion('En tu distrito'),
+          espacio,
           _TarjetaObra(obra: v.obras.first),
         ],
       ];
@@ -105,9 +87,7 @@ class InicioScreen extends ConsumerWidget {
     final obra = v.obras.where((o) => o.estado == EstadoObra.enEjecucion).firstOrNull;
 
     return [
-      _TarjetaResumen(resumen: resumen, hoy: hoy, codigo: v.vecino?.codigoContribuyente),
-      espacio,
-      const _Accesos(),
+      _Resumen(resumen: resumen),
       espacio,
       if (resumen.alDia)
         OutlinedButton(
@@ -119,8 +99,10 @@ class InicioScreen extends ConsumerWidget {
           onPressed: () => context.go(Rutas.pagos),
           child: const Text('Ver detalle y pagar'),
         ),
+      espacioSeccion,
+      const _Accesos(),
       if (pendientes.isNotEmpty) ...[
-        espacioGrande,
+        espacioSeccion,
         TituloSeccion(
           'Tus obligaciones',
           accion: pendientes.length > _maximoEnInicio
@@ -130,7 +112,7 @@ class InicioScreen extends ConsumerWidget {
                 )
               : null,
         ),
-        espacioChico,
+        espacio,
         for (final deuda in pendientes.take(_maximoEnInicio)) ...[
           FilaDeuda(
             deuda: deuda,
@@ -141,9 +123,9 @@ class InicioScreen extends ConsumerWidget {
         ],
       ],
       if (reclamo != null || obra != null) ...[
+        espacioSeccion,
+        const TituloSeccion('En curso'),
         espacio,
-        TituloSeccion('En curso'),
-        espacioChico,
         if (reclamo != null) ...[_TarjetaReclamo(reclamo: reclamo, hoy: hoy), espacioChico],
         if (obra != null) _TarjetaObra(obra: obra),
       ],
@@ -151,83 +133,82 @@ class InicioScreen extends ConsumerWidget {
   }
 }
 
-class _TarjetaResumen extends StatelessWidget {
-  const _TarjetaResumen({required this.resumen, required this.hoy, this.codigo});
+/// «Hola, Rosa» y la municipalidad, que viene de los datos.
+class _Saludo extends StatelessWidget {
+  const _Saludo({this.nombre, this.municipalidad});
 
-  final ResumenDeuda resumen;
-  final DateTime hoy;
-  final String? codigo;
+  final String? nombre;
+  final String? municipalidad;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    final alDia = resumen.alDia;
-    final vence = resumen.proximoVencimiento;
-    final estado = alDia
-        ? '¡Estás al día con tus tributos!'
-        : [
-            plural(resumen.cantidad, 'obligación', 'obligaciones'),
-            if (vence != null) 'próximo vencimiento: ${diaYMes(vence)}',
-          ].join(' · ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            nombre == null ? 'Hola' : 'Hola, ${primerNombre(nombre!)}',
+            style: textos.headlineSmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (municipalidad != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(municipalidad!, style: textos.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ],
+      ],
+    );
+  }
+}
 
-    return Tarjeta(
-      color: alDia ? AppColors.successSoft : AppColors.primarySoft,
-      conBorde: false,
-      padding: const EdgeInsets.all(AppSpacing.xl - AppSpacing.xs),
+/// Bloque Destacado del inicio: el monto pendiente, grande y con aire, una línea con cuántas
+/// obligaciones hay y cuándo vence la próxima, y una sola insignia si algo ya venció.
+class _Resumen extends StatelessWidget {
+  const _Resumen({required this.resumen});
+
+  final ResumenDeuda resumen;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final vence = resumen.proximoVencimiento;
+    return Destacado(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CaraSaldo(alDia: alDia, lado: 64),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Total pendiente', style: textos.bodySmall),
-                    // El monto se achica antes que partirse en dos líneas.
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(soles(resumen.total), style: textos.displaySmall),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Text('Total pendiente', style: textos.bodyMedium),
+          const SizedBox(height: AppSpacing.xs),
+          // El monto se achica antes que partirse en dos líneas.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(soles(resumen.total), style: textos.displaySmall),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            estado,
-            style: textos.bodyMedium!.copyWith(color: AppColors.textPrimary),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (codigo != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text('Código de contribuyente $codigo', style: textos.bodySmall),
-          ],
-          if (resumen.cantidadVencidas > 0) ...[
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                Insignia(
+          if (resumen.alDia)
+            const Insignia('Estás al día', tono: Tono.exito, icono: Phosphor.check)
+          else ...[
+            Text(
+              [
+                plural(resumen.cantidad, 'obligación', 'obligaciones'),
+                if (vence != null) 'próximo vencimiento ${diaYMes(vence)}',
+              ].join(' · '),
+              style: textos.bodyMedium!.copyWith(color: AppColors.textPrimary),
+            ),
+            if (resumen.cantidadVencidas > 0) ...[
+              const SizedBox(height: AppSpacing.md),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Insignia(
                   '${plural(resumen.cantidadVencidas, 'vencida', 'vencidas')} · ${soles(resumen.montoVencido)}',
                   tono: Tono.error,
                   icono: Phosphor.warningCircle,
                 ),
-                if (resumen.cantidadPorVencer > 0)
-                  Insignia(
-                    '${resumen.cantidadPorVencer} por vencer · ${soles(resumen.montoPorVencer)}',
-                    tono: Tono.aviso,
-                    icono: Phosphor.clock,
-                  ),
-              ],
-            ),
+              ),
+            ],
           ],
         ],
       ),
@@ -305,34 +286,25 @@ class _TarjetaObra extends StatelessWidget {
   }
 }
 
-/// Accesos rápidos a lo que más se usa, en dos filas. Cada uno lleva un círculo tintado (su
-/// color al 12 %) con el ícono en su color; la tarjeta sigue blanca y de borde suave.
+/// Accesos rápidos a lo que más se usa, en dos filas: caja de ícono turquesa sobre gris claro y
+/// el nombre al lado, en una tarjeta blanca con borde.
 class _Accesos extends StatelessWidget {
   const _Accesos();
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    Widget acceso(IconData icono, Color color, String texto, String ruta) => Expanded(
+    Widget acceso(IconData icono, String texto, String ruta) => Expanded(
           child: Tarjeta(
             onTap: () => context.go(ruta),
             semantica: texto,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm),
-            child: Column(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(color: AppColors.surfaceSubtle, borderRadius: BorderRadius.circular(AppRadius.caja)),
-                  child: Icon(icono, size: 22, color: color),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  width: double.infinity,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(texto, style: textos.titleSmall!.copyWith(fontSize: 15), maxLines: 1, softWrap: false),
-                  ),
+                CajaIcono(icono),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(texto, style: textos.titleSmall, maxLines: 3, overflow: TextOverflow.ellipsis),
                 ),
               ],
             ),
@@ -347,13 +319,13 @@ class _Accesos extends StatelessWidget {
     return Column(
       children: [
         fila(
-          acceso(Phosphor.lock, AppColors.primary, 'Pagar en línea', Rutas.pagoEnLinea),
-          acceso(Phosphor.receipt, AppColors.primary, 'Estado de cuenta', Rutas.estadoCuenta),
+          acceso(Phosphor.lock, 'Pagar en línea', Rutas.pagoEnLinea),
+          acceso(Phosphor.receipt, 'Estado de cuenta', Rutas.estadoCuenta),
         ),
         const SizedBox(height: AppSpacing.sm),
         fila(
-          acceso(Phosphor.fileText, AppColors.primary, 'Cuponera', Rutas.cuponera),
-          acceso(Phosphor.clockCounterClockwise, AppColors.primary, 'Historial', Rutas.estadoCuenta),
+          acceso(Phosphor.fileText, 'Cuponera', Rutas.cuponera),
+          acceso(Phosphor.clockCounterClockwise, 'Historial', Rutas.estadoCuenta),
         ),
       ],
     );
