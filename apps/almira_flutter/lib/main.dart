@@ -24,6 +24,9 @@ Future<void> main() async {
   // Mientras se inicia el servicio y se recupera la sesión, la pantalla de carga (turquesa,
   // como el splash nativo) y las barras del sistema en el mismo color.
   SystemChrome.setSystemUIOverlayStyle(barraCarga);
+  // El ícono grande se decodifica antes del primer cuadro: así la carga y la entrada al ingreso
+  // lo muestran sin parpadear (el splash nativo sigue en pantalla mientras tanto).
+  await precargarIconoCarga();
   runApp(const PantallaCarga());
 
   final preferencias = await SharedPreferences.getInstance();

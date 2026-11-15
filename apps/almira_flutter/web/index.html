@@ -90,6 +90,29 @@
       bottom: 0;
       right: 0;
     }
+    /* «Almira» bajo el ícono, en el mismo lugar y con la misma letra que la pantalla de Flutter
+       que sigue: ícono de 112 centrado, 16 de separación y el nombre en Inter Bold de 28. */
+    @font-face {
+      font-family: 'Inter';
+      font-weight: 700;
+      src: url('assets/assets/fonts/Inter_700Bold.ttf') format('truetype');
+      font-display: block;
+    }
+
+    #splash-branding {
+      position: absolute;
+      top: calc(50% + 72px);
+      left: 0;
+      right: 0;
+      margin: 0;
+      text-align: center;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 34px;
+      letter-spacing: -0.56px;
+      color: #FFFFFF;
+    }
   </style>
   <script id="splash-screen-script">
     function removeSplashFromWeb() {
@@ -105,6 +128,7 @@
       <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
       <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
   </picture>
+  <p id="splash-branding" aria-hidden="true">Almira</p>
   
   <!--
     You can customize the "flutter_bootstrap.js" script.
