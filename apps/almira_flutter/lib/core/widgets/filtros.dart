@@ -5,6 +5,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../utils/formato.dart';
 import '../utils/rango_fechas.dart';
+import 'selector_rango_fechas.dart';
 
 /// Chip de filtro. Activo: relleno turquesa, texto blanco y un check pequeño. Inactivo: blanco,
 /// borde gris visible (3:1) y texto oscuro. Mínimo 44 de alto para tocarlo bien.
@@ -119,17 +120,12 @@ class GrupoFiltroFechas extends StatelessWidget {
 
   Future<void> _elegirEnCalendario(BuildContext context) async {
     final dia = DateUtils.dateOnly(hoy);
-    final rango = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(dia.year - 5),
-      lastDate: DateTime(dia.year + 1, 12, 31),
-      initialDateRange: filtro.elegido,
-      currentDate: dia,
-      locale: const Locale('es', 'PE'),
-      helpText: 'Elige las fechas',
-      saveText: 'Aplicar',
-      cancelText: 'Cancelar',
-      confirmText: 'Aplicar',
+    final rango = await elegirRangoFechas(
+      context,
+      hoy: dia,
+      primera: DateTime(dia.year - 5),
+      ultima: DateTime(dia.year + 1, 12, 31),
+      inicial: filtro.elegido,
     );
     if (rango != null) alCambiar(filtro.conRango(rango));
   }
