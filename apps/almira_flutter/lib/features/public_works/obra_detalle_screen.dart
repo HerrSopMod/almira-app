@@ -47,22 +47,19 @@ class ObraDetalleScreen extends ConsumerWidget {
           return [
             Semantics(
               header: true,
-              child: Text(
-                obra.nombre,
-                style: textos.headlineSmall!.copyWith(fontSize: 21, fontWeight: FontWeight.w600),
-              ),
+              child: Text(obra.nombre, style: textos.headlineSmall),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             Align(alignment: Alignment.centerLeft, child: InsigniaObra(obra.estado)),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Padding(
                   padding: EdgeInsets.only(top: 1),
-                  child: Icon(Phosphor.mapPin, size: 18, color: AppColors.textSecondary),
+                  child: Icon(Phosphor.mapPin, size: AppIconos.lista, color: AppColors.textSecondary),
                 ),
-                const SizedBox(width: AppSpacing.xs),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(child: Text(obra.ubicacion, style: textos.bodyMedium)),
               ],
             ),
@@ -86,14 +83,14 @@ class ObraDetalleScreen extends ConsumerWidget {
               )
             else
               const Aviso('Esta obra no tiene un punto en el mapa.', icono: Phosphor.mapTrifold),
-            espacio,
+            espacioGrande,
             Tarjeta(child: AvanceFisico(obra)),
             espacio,
             Tarjeta(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Presupuesto', style: textos.titleSmall),
+                  Text('Presupuesto', style: textos.titleMedium),
                   espacioChico,
                   _FilaObra(Phosphor.wallet, 'Asignado', soles(obra.montoAsignado)),
                   _FilaObra(
@@ -135,7 +132,7 @@ class ObraDetalleScreen extends ConsumerWidget {
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(top: 3),
-                        child: Icon(Phosphor.flag, size: 20, color: AppColors.textPrimary),
+                        child: Icon(Phosphor.flag, size: AppIconos.lista, color: AppColors.textSecondary),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(child: Text(hito, style: textos.bodyLarge)),
@@ -238,7 +235,7 @@ class _FilaObra extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1),
-            child: Icon(icono, size: 20, color: AppColors.textPrimary),
+            child: Icon(icono, size: AppIconos.lista, color: AppColors.textSecondary),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: cuerpo),

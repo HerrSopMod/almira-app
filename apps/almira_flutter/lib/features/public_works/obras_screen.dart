@@ -67,12 +67,12 @@ class AvanceFisico extends StatelessWidget {
             Text('${pct.round()} %', style: textos.labelMedium),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.sm),
         ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.pastilla),
           child: LinearProgressIndicator(
             value: pct / 100,
-            minHeight: 8,
+            minHeight: 6,
             color: colorObra(obra),
             semanticsLabel: 'Avance físico ${pct.round()} por ciento',
           ),
@@ -215,7 +215,7 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
                         ),
                     ],
                   ),
-                  espacioChico,
+                  espacio,
                   Text(plural(filtradas.length, 'obra', 'obras'), style: textos.bodySmall),
                   espacioChico,
                   if (filtradas.isEmpty)
@@ -284,24 +284,39 @@ class _TarjetaObra extends StatelessWidget {
                 InsigniaObra(obra.estado),
               ],
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.xs),
             Text(obra.ubicacion, style: textos.bodyMedium),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
             AvanceFisico(obra),
+            const SizedBox(height: AppSpacing.md),
             if (alVerEnMapa != null)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton.icon(
-                  onPressed: alVerEnMapa,
-                  icon: const Icon(Phosphor.mapPin, size: 18),
-                  label: const Text('Ver en el mapa'),
-                  style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44), textStyle: textos.labelMedium),
+              // Acción secundaria como texto: los botones no van dentro de tarjetas.
+              Semantics(
+                button: true,
+                label: 'Ver en el mapa',
+                child: InkWell(
+                  onTap: alVerEnMapa,
+                  borderRadius: BorderRadius.circular(AppRadius.caja),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: AppSpacing.toque),
+                    child: Row(
+                      children: [
+                        const Icon(Phosphor.mapPin, size: AppIconos.lista, color: AppColors.primary),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            'Ver en el mapa',
+                            style: textos.titleSmall!.copyWith(color: AppColors.primary),
+                          ),
+                        ),
+                        const Icon(Phosphor.caretRight, size: AppIconos.lista, color: AppColors.primary),
+                      ],
+                    ),
+                  ),
                 ),
               )
-            else ...[
-              espacioChico,
+            else
               Text('Sin ubicación en el mapa', style: textos.bodySmall),
-            ],
           ],
         ),
       ),
