@@ -322,13 +322,13 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.margen,
-              AppSpacing.lg,
-              AppSpacing.margen,
               AppSpacing.xl,
+              AppSpacing.margen,
+              AppSpacing.xxl,
             ),
             children: [
               TituloSeccion(fotoObligatoria ? 'Foto del problema' : 'Foto del problema (opcional)'),
-              espacioChico,
+              espacio,
               _CampoFoto(
                 foto: _foto,
                 cargando: _cargandoFoto,
@@ -418,9 +418,9 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                         }),
                 validator: (tipo) => tipo == null ? 'Elige una categoría.' : null,
               ),
-              espacioGrande,
+              espacioSeccion,
               const TituloSeccion('Ubicación'),
-              espacioChico,
+              espacio,
               MarcoMapa(
                 alto: 170,
                 child: Stack(
@@ -460,7 +460,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _enviando ? null : () => _elegirEnMapa(vista),
-                      icon: const Icon(Phosphor.mapPin, size: 20),
+                      icon: const Icon(Phosphor.mapPin, size: AppIconos.boton),
                       label: Text(_punto == null ? 'Elegir en mapa' : 'Mover pin'),
                     ),
                   ),
@@ -474,7 +474,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Phosphor.crosshair, size: 20),
+                          : const Icon(Phosphor.crosshair, size: AppIconos.boton),
                       label: const Text('Mi ubicación'),
                     ),
                   ),
@@ -486,9 +486,8 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                   _fallaGps!.mensaje,
                   tono: Tono.aviso,
                   accion: _fallaGps!.ofrecerAjustes
-                      ? OutlinedButton(
+                      ? TextButton(
                           onPressed: abrirAjustesDeUbicacion,
-                          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                           child: const Text('Abrir ajustes'),
                         )
                       : null,
@@ -520,7 +519,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 espacio,
                 Aviso('No se envió el reclamo. ${_errorEnvio!} Tus datos siguen aquí.', tono: Tono.error),
               ],
-              espacioGrande,
+              espacioSeccion,
               FilledButton(
                 onPressed: _enviando ? null : () => _enviar(vista, fotoObligatoria),
                 child: _enviando
@@ -679,7 +678,7 @@ class _CampoFoto extends StatelessWidget {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Phosphor.cameraPlus, size: 32, color: AppColors.primary),
+                          const Icon(Phosphor.cameraPlus, size: AppIconos.vacio, color: AppColors.primary),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
                             'Adjuntar foto',
@@ -703,7 +702,7 @@ class _CampoFoto extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Phosphor.pencilSimple, size: 16, color: AppColors.primaryDark),
+                                  const Icon(Phosphor.pencilSimple, size: AppIconos.insignia, color: AppColors.primaryDark),
                                   const SizedBox(width: 6),
                                   Text(
                                     'Cambiar',
