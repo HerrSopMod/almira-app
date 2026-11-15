@@ -7,7 +7,6 @@ import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
-import '../../app/theme/app_theme.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
@@ -151,22 +150,29 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(child: Text('Total a pagar', style: textos.bodyMedium)),
-                      Text(soles(total), style: textos.titleLarge!.copyWith(fontFeatures: cifrasTabulares)),
+                      const SizedBox(width: AppSpacing.md),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(soles(total), style: textos.headlineSmall),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  FilledButton.icon(
+                  FilledButton(
                     onPressed: _ocupado || total <= 0 ? null : () => _pagar(elegidas),
-                    icon: _ocupado
+                    child: _ocupado
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
+                            width: 22,
+                            height: 22,
                             child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                           )
-                        : const Icon(Phosphor.lock, size: 20),
-                    label: Text('Pagar ${soles(total)}'),
+                        : Text('Pagar ${soles(total)}'),
                   ),
                 ],
               ),
@@ -174,10 +180,10 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.margen),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, AppSpacing.xl),
           children: [
             const PasosPago(actual: 1),
-            espacio,
+            espacioGrande,
             if (elegidas.isEmpty)
               const VistaVacia(icono: Phosphor.receipt, titulo: 'No hay periodos por pagar')
             else
@@ -199,27 +205,22 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                         ],
                       ),
                     ),
-                    espacioGrande,
-                    TituloSeccion('Medio de pago'),
-                    espacioChico,
-                    SegmentedButton<MedioPago>(
-                      segments: [
-                        for (final m in _medios)
-                          ButtonSegment(
-                            value: m,
-                            icon: Icon(m == MedioPago.tarjeta ? Phosphor.creditCard : Phosphor.deviceMobile),
-                            label: Text(m == MedioPago.tarjeta ? 'Tarjeta' : 'Yape'),
-                          ),
-                      ],
-                      selected: {_medio},
-                      showSelectedIcon: false,
-                      onSelectionChanged: _ocupado
-                          ? null
-                          : (s) => setState(() {
-                                _medio = s.first;
-                                _error = null;
-                              }),
-                    ),
+                    espacioSeccion,
+                    const TituloSeccion('Medio de pago'),
+                    espacio,
+                    for (final m in _medios) ...[
+                      _TarjetaMedio(
+                        medio: m,
+                        elegido: _medio == m,
+                        alElegir: _ocupado
+                            ? null
+                            : () => setState(() {
+                                  _medio = m;
+                                  _error = null;
+                                }),
+                      ),
+                      espacioChico,
+                    ],
                     espacio,
                     if (_medio == MedioPago.tarjeta) ..._camposTarjeta(hoy) else ..._camposYape(),
                     if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
@@ -304,6 +305,76 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
       ];
 }
 
+/// Medio de pago como tarjeta con borde: caja de ícono neutra a la izquierda, nombre y
+/// detalle; el elegido lleva borde turquesa de 1.5 y un check a la derecha.
+class _TarjetaMedio extends StatelessWidget {
+  const _TarjetaMedio({required this.medio, required this.elegido, required this.alElegir});
+
+  final MedioPago medio;
+  final bool elegido;
+  final VoidCallback? alElegir;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final (nombre, detalle, icono) = switch (medio) {
+      MedioPago.tarjeta => ('Tarjeta', 'Débito o crédito', Phosphor.creditCard),
+      _ => (medio.etiqueta, 'Con tu celular y el código de aprobación', Phosphor.deviceMobile),
+    };
+    return Semantics(
+      button: true,
+      selected: elegido,
+      label: '$nombre, $detalle',
+      excludeSemantics: true,
+      child: Material(
+        color: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.tarjeta),
+          side: BorderSide(
+            color: elegido ? AppColors.primary : AppColors.border,
+            width: elegido ? 1.5 : 1,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: alElegir,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                CajaIcono(icono, tono: Tono.neutro),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(nombre, style: textos.titleMedium),
+                      Text(detalle, style: textos.bodyMedium),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Container(
+                  width: AppIconos.navegacion,
+                  height: AppIconos.navegacion,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: elegido ? AppColors.primary : AppColors.surface,
+                    border: Border.all(color: elegido ? AppColors.primary : AppColors.bordeControl, width: 1.5),
+                  ),
+                  child: elegido
+                      ? const Icon(Phosphor.check, size: AppIconos.insignia, color: Colors.white)
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Agrupa los dígitos de la tarjeta de a cuatro.
 class _GruposDe4 extends TextInputFormatter {
   @override
@@ -379,17 +450,13 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
           padding: const EdgeInsets.all(AppSpacing.margen),
           children: [
             const PasosPago(actual: 2),
-            espacioGrande,
-            const Center(child: CajaIcono(Phosphor.check, tono: Tono.exito, lado: 72)),
+            espacioSeccion,
+            const Center(child: CajaIcono(Phosphor.check, tono: Tono.exito, lado: AppSpacing.cajaGrande)),
             espacio,
-            Text('¡Pago realizado!', style: textos.headlineSmall, textAlign: TextAlign.center),
+            Text('Pago realizado', style: textos.titleLarge, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.xs),
-            Text(
-              soles(total),
-              style: textos.displaySmall!.copyWith(fontFeatures: cifrasTabulares),
-              textAlign: TextAlign.center,
-            ),
-            espacio,
+            Text(soles(total), style: textos.displayMedium, textAlign: TextAlign.center),
+            espacioGrande,
             Tarjeta(
               child: Column(
                 children: [
@@ -402,7 +469,7 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
                 ],
               ),
             ),
-            espacioGrande,
+            espacioSeccion,
             FilledButton.icon(
               onPressed: _generando ? null : _descargar,
               icon: _generando
@@ -411,7 +478,7 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                     )
-                  : const Icon(Phosphor.filePdf, size: 20),
+                  : const Icon(Phosphor.filePdf, size: AppIconos.boton),
               label: const Text('Descargar comprobante'),
             ),
             espacioChico,
@@ -420,7 +487,7 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
               child: const Text('Ver estado de cuenta'),
             ),
             espacioChico,
-            OutlinedButton(onPressed: () => context.go(Rutas.inicio), child: const Text('Volver al inicio')),
+            TextButton(onPressed: () => context.go(Rutas.inicio), child: const Text('Volver al inicio')),
           ],
         ),
       ),
