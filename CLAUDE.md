@@ -22,7 +22,7 @@ Monorepo pnpm: app de vecinos en Flutter (`apps/almira_flutter`), app de vecinos
 
 - El aspecto lo manda `docs/design/turquesa`: lee `LEEME.md` y sigue la imagen que indica `PANTALLAS.md` para cada pantalla. Los textos y recorridos salen de `docs/design/prototipo/TEXTOS.md`, con los cambios de `PANTALLAS.md`. De Stitch se toma el estilo, nunca sus textos.
 - Usa los tokens de `@almira/shared`. No escribas colores ni medidas sueltas.
-- Fondo `#FFFFFF`, color principal `#0B7F86` y texto `#0F2A2E`. Solo Inter, con cifras tabulares en montos.
+- Fondo `#FFFFFF`, color principal `#0B7F86` y texto `#0F2A2E`. Solo Inter, con cifras tabulares en montos (la app Flutter usa Plus Jakarta Sans, que también las tiene).
 - App móvil: botones de 52 px y ancho completo, con márgenes de 20 px. No los pongas dentro de tarjetas.
 - Panel web: se permiten botones pequeños dentro de tablas y tarjetas, como en las maquetas `docs/design/turquesa/web` (medidas en `LEEME.md` → Panel web).
 - Máximo un bloque `Destacado` por pantalla. Los colores de estado solo van en insignias y estados.
@@ -35,7 +35,7 @@ Monorepo pnpm: app de vecinos en Flutter (`apps/almira_flutter`), app de vecinos
 - Un solo mapa: `MapaAlmira` (`flutter_map` con OpenStreetMap), siempre con atribución.
 - Fechas y plazos con la fecha real del teléfono (`relojProvider`), nunca con una fecha fija.
 - Cada pantalla con datos cubre carga, vacío, error y sin conexión (`CuerpoAsync`).
-- Íconos: Material Icons de Google, siempre desde `lib/app/theme/iconos.dart` (no uses otros paquetes de íconos ni logos de marcas de terceros sin permiso).
+- Íconos: paquete Iconsax (diseñados a mano, no generados con IA), siempre desde `lib/app/theme/iconos.dart` (no uses otros paquetes de íconos ni logos de marcas de terceros sin permiso). Los accesos y las filas de datos llevan el ícono en un círculo tintado (`IconoColor`) con los acentos de `app_colors.dart`; los colores de estado siguen reservados a insignias y estados.
 - Filtros por fecha: `GrupoFiltroFechas` (periodos rápidos y calendario) con `FiltroFechas`; la fecha de hoy sale de `relojProvider`.
 - La foto de perfil se guarda en el bucket privado `avatares` de Supabase (`foto_perfil.dart`); en modo demostración no se puede cambiar.
 - Pestañas raíz (Inicio, Pagar, Reclamos, Obras, Asistente): cabecera turquesa sólida y baja detrás de la barra de estado, con el título y las acciones (sin logo ni «Almira»: ya se sabe en qué app estás), y el contenido en una hoja blanca de esquinas superiores de 20 montada sobre ella (`CabeceraMarca`, `HojaBlanca`, `CuerpoAsync(cabecera: …)`). Solo Inicio lleva tarjeta flotante, con la carita de `cara_saldo.dart`.

@@ -49,6 +49,15 @@ abstract final class AppColors {
   /// 3,4:1 sobre blanco.
   static const bordeControl = Color(0xFF7F8E92);
 
+  /// Colores de acento para los íconos con color (accesos de Inicio, filas del perfil): solo van
+  /// en el ícono y en su círculo al 12 %, nunca en toda una tarjeta. Contraste del ícono sobre su
+  /// círculo: 4,2:1 o más.
+  static const acentoVerde = Color(0xFF15803D);
+  static const acentoAzul = Color(0xFF2563EB);
+  static const acentoVioleta = Color(0xFF7C3AED);
+  static const acentoAmbar = Color(0xFFB45309);
+  static const acentoRosa = Color(0xFFBE185D);
+
   static const success = Color(0xFF1F7A50);
   static const successSoft = Color(0xFFEAF6F0);
   static const warning = Color(0xFF8A5E00);

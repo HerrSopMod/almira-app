@@ -61,17 +61,13 @@ class _Respondedor implements ServicioAsistente {
 }
 
 Future<void> _cargarFuentes() async {
-  final cargador = FontLoader('Inter');
-  for (final peso in ['400Regular', '500Medium', '600SemiBold', '700Bold']) {
-    cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
-  }
+  final cargador = FontLoader('PlusJakartaSans')..addFont(rootBundle.load('assets/fonts/PlusJakartaSans.ttf'));
   await cargador.load();
 
-  // Íconos de Phosphor (línea «regular» y «fill» de la pestaña activa).
-  for (final (familia, archivo) in [('PhosphorRegular', 'Phosphor'), ('PhosphorFill', 'Phosphor-Fill')]) {
-    final fuente = FontLoader(familia)..addFont(rootBundle.load('assets/fonts/phosphor/$archivo.ttf'));
-    await fuente.load();
-  }
+  // Íconos Iconsax de la app (línea y rellenos).
+  await (FontLoader('packages/iconsax_flutter/FlutterIconsax')
+        ..addFont(rootBundle.load('packages/iconsax_flutter/fonts/FlutterIconsax.ttf')))
+      .load();
   final raiz = Platform.environment['FLUTTER_ROOT'];
   if (raiz != null) {
     final archivo = File('$raiz/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');

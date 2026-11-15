@@ -56,7 +56,7 @@ class LogoVertical extends StatelessWidget {
   );
 }
 
-/// Marca en una fila: ícono de 28 con «Almira» al lado, en Inter Bold. En [blanco] va sobre
+/// Marca en una fila: ícono de 28 con «Almira» al lado, en Plus Jakarta Sans Bold. En [blanco] va sobre
 /// turquesa. Se mantiene por compatibilidad: las pestañas raíz ya la traen en [CabeceraMarca].
 class MarcaAlmira extends StatelessWidget {
   const MarcaAlmira({super.key, this.blanco = false});
@@ -508,6 +508,37 @@ class Destacado extends StatelessWidget {
   );
 }
 
+/// Ícono relleno en su color sobre un fondo del mismo color al 12 %: da vida a los accesos y a las
+/// filas sin llenar la pantalla de color. Cuadrado de esquinas redondas, o círculo con [circulo].
+class IconoColor extends StatelessWidget {
+  const IconoColor(
+    this.icono, {
+    super.key,
+    this.color = AppColors.primary,
+    this.lado = AppSpacing.caja,
+    this.circulo = false,
+  });
+
+  final IconData icono;
+  final Color color;
+  final double lado;
+  final bool circulo;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Container(
+      width: lado,
+      height: lado,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: AppColors.alfaFondoInsignia),
+        shape: circulo ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: circulo ? null : BorderRadius.circular(AppRadius.caja + 2),
+      ),
+      child: Icon(icono, size: lado * 0.5, color: color),
+    ),
+  );
+}
+
 /// Ícono dentro de un cuadrado de 40 con radio de 10. Neutro y primario van sobre gris claro
 /// con el ícono turquesa; los tonos de estado, sobre su fondo suave.
 class CajaIcono extends StatelessWidget {
@@ -539,9 +570,16 @@ class CajaIcono extends StatelessWidget {
 /// Acceso rápido de Inicio: círculo turquesa claro con el ícono turquesa y una etiqueta de
 /// hasta dos líneas, centrada. Toda la columna es táctil.
 class Acceso extends StatelessWidget {
-  const Acceso({super.key, required this.icono, required this.texto, required this.alTocar});
+  const Acceso({
+    super.key,
+    required this.icono,
+    required this.texto,
+    required this.alTocar,
+    this.color = AppColors.primary,
+  });
 
   final IconData icono;
+  final Color color;
   final String texto;
   final VoidCallback alTocar;
 
@@ -560,12 +598,7 @@ class Acceso extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: AppSpacing.acceso,
-                  height: AppSpacing.acceso,
-                  decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                  child: Icon(icono, size: AppIconos.caja, color: AppColors.primary),
-                ),
+                IconoColor(icono, color: color, lado: AppSpacing.acceso, circulo: true),
                 const SizedBox(height: AppSpacing.sm),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),

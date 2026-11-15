@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/iconos.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
@@ -83,6 +84,7 @@ class OpcionWhatsapp extends ConsumerWidget {
     final activo = datos?.activo == true;
 
     return FilaInterruptor(
+      inicio: const IconoColor(PhosphorFill.chatText, color: AppColors.acentoVerde),
       titulo: 'Recordatorios por WhatsApp',
       detalle: activo
           ? 'Activo en ${datos!.numeroEnmascarado}'

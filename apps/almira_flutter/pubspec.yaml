@@ -1,7 +1,7 @@
 name: almira_flutter
 description: "Almira: app de vecinos"
 publish_to: 'none'
-version: 1.9.0+9
+version: 2.0.0+10
 
 environment:
   sdk: ^3.13.7
@@ -27,6 +27,7 @@ dependencies:
   printing: ^5.15.1
   flutter_svg: ^2.3.4
   google_mlkit_image_labeling: ^1.0.3
+  iconsax_flutter: ^1.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -42,47 +43,13 @@ flutter:
     - assets/marca/
     - assets/bot_avatar.svg
   fonts:
-    - family: Inter
+    - family: PlusJakartaSans
       fonts:
-        - asset: assets/fonts/Inter_400Regular.ttf
+        - asset: assets/fonts/PlusJakartaSans.ttf
           weight: 400
-        - asset: assets/fonts/Inter_500Medium.ttf
+        - asset: assets/fonts/PlusJakartaSans.ttf
           weight: 500
-        - asset: assets/fonts/Inter_600SemiBold.ttf
+        - asset: assets/fonts/PlusJakartaSans.ttf
           weight: 600
-        - asset: assets/fonts/Inter_700Bold.ttf
+        - asset: assets/fonts/PlusJakartaSans.ttf
           weight: 700
-    # Íconos de Phosphor (MIT). Ver lib/app/theme/iconos.dart.
-    - family: PhosphorRegular
-      fonts:
-        - asset: assets/fonts/phosphor/Phosphor.ttf
-    - family: PhosphorFill
-      fonts:
-        - asset: assets/fonts/phosphor/Phosphor-Fill.ttf
-
-# Ícono del lanzador (Android y web), generado desde el ícono de la marca:
-# `dart run flutter_launcher_icons`.
-flutter_launcher_icons:
-  android: true
-  ios: false
-  image_path: assets/marca/icono-1024.png
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: assets/marca/icono-1024.png
-  web:
-    generate: true
-    image_path: assets/marca/icono-1024.png
-    background_color: "#0B7F86"
-    theme_color: "#0B7F86"
-
-# Splash nativo de Android y web: fondo turquesa completo y el ícono blanco centrado
-# (Android 12+ solo admite color de fondo e ícono, sin texto). Después sigue la pantalla de
-# carga de Flutter con el mismo fondo. `dart run flutter_native_splash:create`.
-flutter_native_splash:
-  color: "#0B7F86"
-  image: assets/marca/splash.png
-  android_12:
-    color: "#0B7F86"
-    image: assets/marca/splash-android12.png
-  ios: false
-  web: true
-  web_image_mode: center

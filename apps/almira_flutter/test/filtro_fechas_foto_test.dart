@@ -1,5 +1,6 @@
 // Filtro por fechas con calendario y foto de perfil.
 import 'package:almira_flutter/app/theme/app_theme.dart';
+import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:almira_flutter/core/utils/rango_fechas.dart';
 import 'package:almira_flutter/core/widgets/filtros.dart';
 import 'package:almira_flutter/features/profile/foto_perfil.dart';
@@ -71,7 +72,7 @@ void main() {
       for (final t in ['Todas', 'Elegir fechas', 'Este mes']) {
         expect(find.text(t), findsOneWidget);
       }
-      expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
+      expect(find.byIcon(Phosphor.calendarBlank), findsOneWidget);
 
       await tester.tap(find.text('Este mes'));
       expect(ultimo?.periodo, PeriodoFecha.esteMes);
@@ -130,7 +131,7 @@ void main() {
         overrides: [fotoPerfilProvider.overrideWith((ref) async => null)],
       ));
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.photo_camera_outlined), findsOneWidget);
+      expect(find.byIcon(Phosphor.camera), findsOneWidget);
       await tester.tap(find.byType(AvatarEditable));
       await tester.pumpAndSettle();
       expect(find.text('Tomar foto'), findsOneWidget);
@@ -156,7 +157,7 @@ void main() {
         overrides: [fotoPerfilProvider.overrideWith((ref) async => null)],
       ));
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.photo_camera_outlined), findsNothing);
+      expect(find.byIcon(Phosphor.camera), findsNothing);
     });
   });
 }

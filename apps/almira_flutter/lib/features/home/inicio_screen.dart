@@ -284,22 +284,22 @@ class _FilaObra extends StatelessWidget {
       );
 }
 
-/// Accesos rápidos: una fila de cuatro círculos turquesa claro con su etiqueta debajo.
+/// Accesos rápidos: una fila de cuatro círculos, cada uno con su color, y su etiqueta debajo.
 class _Accesos extends StatelessWidget {
   const _Accesos();
 
   @override
   Widget build(BuildContext context) {
-    Widget acceso(IconData icono, String texto, String ruta) => Expanded(
-          child: Acceso(icono: icono, texto: texto, alTocar: () => context.go(ruta)),
+    Widget acceso(IconData icono, Color color, String texto, String ruta) => Expanded(
+          child: Acceso(icono: icono, color: color, texto: texto, alTocar: () => context.go(ruta)),
         );
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        acceso(Phosphor.creditCard, 'Pagar en línea', Rutas.pagoEnLinea),
-        acceso(Phosphor.receipt, 'Estado de cuenta', Rutas.estadoCuenta),
-        acceso(Phosphor.fileText, 'Cuponera', Rutas.cuponera),
-        acceso(Phosphor.clockCounterClockwise, 'Historial', Rutas.estadoCuenta),
+        acceso(PhosphorFill.creditCard, AppColors.acentoVerde, 'Pagar en línea', Rutas.pagoEnLinea),
+        acceso(PhosphorFill.receipt, AppColors.acentoAzul, 'Estado de cuenta', Rutas.estadoCuenta),
+        acceso(PhosphorFill.fileText, AppColors.acentoVioleta, 'Cuponera', Rutas.cuponera),
+        acceso(PhosphorFill.clockCounterClockwise, AppColors.acentoAmbar, 'Historial', Rutas.estadoCuenta),
       ],
     );
   }
