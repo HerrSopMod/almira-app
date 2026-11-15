@@ -62,12 +62,16 @@ flutter:
 
 # Ícono del lanzador (Android y web), generado desde el ícono de la marca:
 # `dart run flutter_launcher_icons`.
+# En Android: casa blanca con el mensaje sobre fondo turquesa, como el splash (sin el cuadro
+# blanco de antes). `icono-lanzador.png` es el ícono completo para Android 7 o menos y
+# `icono-lanzador-frente.png` la capa delantera del ícono adaptativo, sin fondo.
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: assets/marca/icono-1024.png
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: assets/marca/icono-1024.png
+  image_path: assets/marca/icono-lanzador.png
+  adaptive_icon_background: "#0B7F86"
+  adaptive_icon_foreground: assets/marca/icono-lanzador-frente.png
+  adaptive_icon_foreground_inset: 8
   web:
     generate: true
     image_path: assets/marca/icono-1024.png
