@@ -3,7 +3,7 @@
     "short_name": "almira_flutter",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFFFFF",
+    "background_color": "#0B7F86",
     "theme_color": "#0B7F86",
     "description": "Almira: app de vecinos",
     "orientation": "portrait-primary",

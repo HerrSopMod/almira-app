@@ -12,6 +12,7 @@ import 'package:almira_flutter/app/router.dart';
 import 'package:almira_flutter/features/assistant/chat_modelo.dart';
 import 'package:almira_flutter/features/assistant/servicio_asistente.dart';
 import 'package:almira_flutter/features/auth/servicio_auth.dart';
+import 'package:almira_flutter/features/carga/pantalla_carga.dart';
 import 'package:almira_flutter/shared/services/proveedores.dart';
 import 'package:almira_flutter/shared/services/repositorio_demo.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +120,14 @@ void main() {
   ];
 
   for (final (etiqueta, ancho, alto, escala) in tamanos) {
+    testWidgets('pantalla de carga $etiqueta', (tester) async {
+      _pantalla(tester, ancho, alto, escala);
+      await tester.pumpWidget(const PantallaCarga());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await expectLater(find.byType(PantallaCarga), matchesGoldenFile('../docs/capturas/pulido-ui/despues/carga-$etiqueta.png'));
+    });
+
     testWidgets('ingreso con cuenta $etiqueta', (tester) async {
       _pantalla(tester, ancho, alto, escala);
       await tester.pumpWidget(_app(await _preferencias(), conectado: true));

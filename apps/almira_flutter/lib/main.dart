@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/app.dart';
 import 'app/theme/app_theme.dart';
 import 'core/config/env.dart';
+import 'features/carga/pantalla_carga.dart';
 import 'features/assistant/servicio_asistente.dart';
 import 'features/auth/servicio_auth.dart';
 import 'shared/services/proveedores.dart';
@@ -20,7 +21,10 @@ Future<void> main() async {
   // La app dibuja detrás de las barras del sistema (Android 15 ya lo hace
   // siempre): cada pantalla pinta su franja superior y respeta el área segura.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(barraSobreTurquesa);
+  // Mientras se inicia el servicio y se recupera la sesión, la pantalla de carga (turquesa,
+  // como el splash nativo) y las barras del sistema en el mismo color.
+  SystemChrome.setSystemUIOverlayStyle(barraCarga);
+  runApp(const PantallaCarga());
 
   final preferencias = await SharedPreferences.getInstance();
   final Repositorio repositorio;
@@ -48,6 +52,7 @@ Future<void> main() async {
     auth = ServicioAuthDemo(preferencias);
   }
 
+  SystemChrome.setSystemUIOverlayStyle(barraSobreTurquesa);
   runApp(
     ProviderScope(
       overrides: [

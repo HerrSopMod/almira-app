@@ -44,6 +44,10 @@ abstract final class AppSpacing {
   /// Logo en la cabecera de marca.
   static const double logoCabecera = 28;
 
+  /// Logo de la pantalla de carga: mismo tamaño que el ícono del splash nativo (112 dp), para
+  /// que no salte al pasar de uno a otra.
+  static const double logoCarga = 112;
+
   /// Círculo de un acceso rápido de Inicio.
   static const double acceso = 56;
 

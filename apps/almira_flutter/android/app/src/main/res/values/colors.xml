@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- Turquesa de Almira: fondo de la ventana mientras Flutter dibuja su primera pantalla,
+         para que no aparezca una franja blanca entre el splash y la pantalla de carga. -->
+    <color name="almira_turquesa">#0B7F86</color>
 </resources>
