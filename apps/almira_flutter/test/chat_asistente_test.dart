@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:almira_flutter/app/app.dart';
 import 'package:almira_flutter/app/router.dart';
+import 'package:almira_flutter/core/widgets/componentes.dart';
 import 'package:almira_flutter/features/assistant/chat_asistente.dart';
 import 'package:almira_flutter/features/assistant/chat_modelo.dart';
 import 'package:almira_flutter/features/assistant/servicio_asistente.dart';
@@ -175,7 +176,7 @@ void main() {
       ProviderScope.containerOf(tester.element(find.byType(AlmiraApp))).read(routerProvider).go(Rutas.asistente);
       await tester.pumpAndSettle();
 
-      expect(find.text('Asistente Almira'), findsOneWidget);
+      expect(find.descendant(of: find.byType(CabeceraMarca), matching: find.text('Asistente')), findsOneWidget);
       // No se afirma una presencia «en línea» que la app no puede garantizar.
       expect(find.text('En línea'), findsNothing);
       expect(find.textContaining('Soy Almira'), findsOneWidget);

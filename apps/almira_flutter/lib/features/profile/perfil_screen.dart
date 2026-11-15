@@ -57,117 +57,141 @@ class PerfilScreen extends ConsumerWidget {
     final nombre = vecino?.nombre ?? sesion.cuenta?.nombre;
     final codigo = vecino?.codigoContribuyente;
 
+    // Barra compacta turquesa (con la flecha atrás), la identidad del vecino en el mismo color y
+    // las opciones en la hoja blanca que se monta encima.
     return Scaffold(
       appBar: AppBar(
+        // Sin pantalla anterior no hay flecha: el título toma el margen de la pantalla.
+        titleSpacing: context.canPop() ? null : AppSpacing.margen,
         title: const Text('Mi perfil'),
         actions: [
           if (esDemo)
             const Padding(
               padding: EdgeInsets.only(right: AppSpacing.lg),
-              child: Center(child: EtiquetaDemo()),
+              child: Center(child: EtiquetaDemo(sobreTurquesa: true)),
             ),
         ],
       ),
-      body: SafeArea(
-        top: false,
+      body: ColoredBox(
+        color: AppColors.surface,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.margen,
-            AppSpacing.xl,
-            AppSpacing.margen,
-            AppSpacing.xxl,
-          ),
+          padding: EdgeInsets.zero,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: AppSpacing.cajaGrande,
-                  height: AppSpacing.cajaGrande,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primarySoft,
-                    shape: BoxShape.circle,
-                  ),
-                  child: nombre == null
-                      ? const Icon(Phosphor.user, color: AppColors.primaryDark)
-                      : ExcludeSemantics(
-                          child: Text(
-                            iniciales(nombre),
-                            style: textos.titleMedium!.copyWith(color: AppColors.primaryDark),
-                          ),
-                        ),
+            ColoredBox(
+              color: AppColors.primary,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.margen,
+                  AppSpacing.sm,
+                  AppSpacing.margen,
+                  AppSpacing.solapeHoja + AppSpacing.lg,
                 ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: SobreTurquesa(
+                  child: Row(
                     children: [
-                      Text(nombre == null ? 'Tu cuenta' : tipoTitulo(nombre), style: textos.titleLarge!),
-                      if (codigo != null || vecino == null)
-                        Text(
-                          codigo == null ? 'Sin código vinculado' : 'Contribuyente $codigo',
-                          style: textos.bodyMedium!,
+                      Container(
+                        width: AppSpacing.cajaGrande,
+                        height: AppSpacing.cajaGrande,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(color: AppColors.onPrimary, shape: BoxShape.circle),
+                        child: nombre == null
+                            ? const Icon(Phosphor.user, color: AppColors.primaryDark)
+                            : ExcludeSemantics(
+                                child: Text(
+                                  iniciales(nombre),
+                                  style: textos.titleMedium!.copyWith(color: AppColors.primaryDark),
+                                ),
+                              ),
+                      ),
+                      const SizedBox(width: AppSpacing.lg),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nombre == null ? 'Tu cuenta' : tipoTitulo(nombre),
+                              style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
+                            ),
+                            if (codigo != null || vecino == null)
+                              Text(
+                                codigo == null ? 'Sin código vinculado' : 'Contribuyente $codigo',
+                                style: textos.bodyMedium!.copyWith(color: AppColors.onPrimary),
+                              ),
+                          ],
                         ),
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
-            espacioGrande,
-            _Grupo(
-              titulo: 'Cuenta y predio',
-              filas: [
-                for (final predio in v?.predios ?? const [])
-                  FilaLista(titulo: predio.direccion, detalle: DetalleFila('Predio ${predio.codigo}')),
-                FilaLista(
-                  titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
-                  alTocar: () => context.push(Rutas.vincular),
-                ),
-                FilaLista(
-                  titulo: 'Municipalidad',
-                  detalle: v?.municipalidad == null ? null : DetalleFila(v!.municipalidad!.nombre),
-                  alTocar: () => context.push(Rutas.municipalidad),
-                ),
-              ],
-            ),
-            _Grupo(
-              titulo: 'Preferencias',
-              filas: [
-                if (!esDemo)
-                  FilaLista(
-                    titulo: 'Clave web',
-                    detalle: DetalleFila('Para entrar con tu correo o tu cuponera'),
-                    alTocar: () => _crearClave(context, ref),
-                  ),
-                FilaLista(titulo: 'Avisos y canales', alTocar: () => context.push(Rutas.avisos)),
-                // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
-                if (!esDemo && vecino != null) const OpcionWhatsapp(),
-                FilaLista(titulo: 'Privacidad', alTocar: () => context.push(Rutas.privacidad)),
-                FilaInterruptor(
-                  titulo: 'Texto más grande',
-                  valor: textoGrande,
-                  alCambiar: ref.read(textoGrandeProvider.notifier).cambiar,
-                ),
-              ],
-            ),
-            _Grupo(
-              titulo: 'Trámites y ayuda',
-              filas: [
-                FilaLista(
-                  titulo: 'Constancias de pago',
-                  alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
-                ),
-                FilaLista(titulo: 'Atención', alTocar: () => context.push(Rutas.atencion)),
-              ],
-            ),
-            // Peligro suave, según la guía: borde gris y texto en rojo oscuro.
-            OutlinedButton(
-              onPressed: () => _cerrarSesion(context, ref),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.border),
               ),
-              child: Text(esDemo ? 'Salir de la demostración' : 'Cerrar sesión'),
+            ),
+            HojaBlanca(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.margen,
+                AppSpacing.xl,
+                AppSpacing.margen,
+                AppSpacing.xxl + MediaQuery.paddingOf(context).bottom,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                        _Grupo(
+                          titulo: 'Cuenta y predio',
+                          filas: [
+                            for (final predio in v?.predios ?? const [])
+                              FilaLista(titulo: predio.direccion, detalle: DetalleFila('Predio ${predio.codigo}')),
+                            FilaLista(
+                              titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
+                              alTocar: () => context.push(Rutas.vincular),
+                            ),
+                            FilaLista(
+                              titulo: 'Municipalidad',
+                              detalle: v?.municipalidad == null ? null : DetalleFila(v!.municipalidad!.nombre),
+                              alTocar: () => context.push(Rutas.municipalidad),
+                            ),
+                          ],
+                        ),
+                        _Grupo(
+                          titulo: 'Preferencias',
+                          filas: [
+                            if (!esDemo)
+                              FilaLista(
+                                titulo: 'Clave web',
+                                detalle: DetalleFila('Para entrar con tu correo o tu cuponera'),
+                                alTocar: () => _crearClave(context, ref),
+                              ),
+                            FilaLista(titulo: 'Avisos y canales', alTocar: () => context.push(Rutas.avisos)),
+                            // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
+                            if (!esDemo && vecino != null) const OpcionWhatsapp(),
+                            FilaLista(titulo: 'Privacidad', alTocar: () => context.push(Rutas.privacidad)),
+                            FilaInterruptor(
+                              titulo: 'Texto más grande',
+                              valor: textoGrande,
+                              alCambiar: ref.read(textoGrandeProvider.notifier).cambiar,
+                            ),
+                          ],
+                        ),
+                        _Grupo(
+                          titulo: 'Trámites y ayuda',
+                          filas: [
+                            FilaLista(
+                              titulo: 'Constancias de pago',
+                              alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
+                            ),
+                            FilaLista(titulo: 'Atención', alTocar: () => context.push(Rutas.atencion)),
+                          ],
+                        ),
+                        // Peligro suave, según la guía: borde gris y texto en rojo oscuro.
+                        OutlinedButton(
+                          onPressed: () => _cerrarSesion(context, ref),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.error,
+                            side: const BorderSide(color: AppColors.border),
+                          ),
+                          child: Text(esDemo ? 'Salir de la demostración' : 'Cerrar sesión'),
+                        ),
+                ],
+              ),
             ),
           ],
         ),

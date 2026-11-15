@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
-import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
@@ -34,19 +33,10 @@ class ReclamosScreen extends ConsumerWidget {
     final esDemo = ref.watch(esDemoProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reclamos'),
-        actions: [
-          if (esDemo)
-            const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.lg),
-              child: Center(child: EtiquetaDemo()),
-            ),
-        ],
-      ),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
+        cabecera: (_) => CabeceraMarca(titulo: 'Reclamos', esDemo: esDemo),
         construir: (v) {
           if (v.vecino == null) {
             return [
