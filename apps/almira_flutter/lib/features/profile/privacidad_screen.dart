@@ -78,7 +78,7 @@ class _PrivacidadScreenState extends ConsumerState<PrivacidadScreen> {
             const SizedBox(height: AppSpacing.xs),
             FilaLista(
               titulo: 'Cómo se usan tus datos',
-              detalle: 'Qué datos usa Almira, para qué y tus derechos.',
+              detalle: DetalleFila('Qué datos usa Almira, para qué y tus derechos.'),
               alTocar: () => mostrarInformacionPrivacidad(context),
             ),
           ],

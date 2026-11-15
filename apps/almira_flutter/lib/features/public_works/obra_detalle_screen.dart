@@ -8,7 +8,6 @@ import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/services/proveedores.dart';
-import '../complaints/piezas_lista.dart';
 import 'obras_screen.dart';
 
 class ObraDetalleScreen extends ConsumerWidget {
@@ -46,10 +45,10 @@ class ObraDetalleScreen extends ConsumerWidget {
           return [
             Semantics(
               header: true,
-              child: Text(obra.nombre, style: textos.titulo20),
+              child: Text(obra.nombre, style: textos.titleLarge!),
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(obra.ubicacion, style: textos.secundario13),
+            Text(obra.ubicacion, style: textos.bodyMedium!),
             espacioChico,
             Align(alignment: Alignment.centerLeft, child: InsigniaObra(obra.estado)),
             espacio,
@@ -72,26 +71,21 @@ class ObraDetalleScreen extends ConsumerWidget {
                 ),
               )
             else
-              Text('Sin punto en el mapa.', style: textos.secundario13),
+              Text('Sin punto en el mapa.', style: textos.bodyMedium!),
             espacioGrande,
             AvanceFisico(obra),
             espacioGrande,
             const TituloSeccion('Presupuesto'),
             const SizedBox(height: AppSpacing.xs),
-            FilaMonto('Asignado', soles(obra.montoAsignado)),
-            FilaMonto(
-              'Gastado',
-              soles(obra.montoEjecutado),
-              nota: gasto == null ? null : '$gasto$_nbsp% del presupuesto',
-            ),
+            FilaDato('Asignado', soles(obra.montoAsignado)),
+            FilaDato('Gastado', soles(obra.montoEjecutado)),
+            if (gasto != null) FilaDato('Gastado del presupuesto', '$gasto$_nbsp%'),
             if (obra.porcentajeTributos != null)
-              FilaMonto('Financiado con tributos', '${obra.porcentajeTributos!.round()}$_nbsp%'),
+              FilaDato('Financiado con tributos', '${obra.porcentajeTributos!.round()}$_nbsp%'),
             espacioGrande,
-            FichaDatos([
-              if (inicio != null) ('Inicio', fechaLarga(inicio)),
-              if (obra.meta.trim().isNotEmpty) ('Meta', obra.meta.trim()),
-              if (actualizada != null) ('Última actualización', haceDias(actualizada, hoy)),
-            ]),
+            if (inicio != null) Ficha('Inicio', fechaLarga(inicio)),
+            if (obra.meta.trim().isNotEmpty) Ficha('Meta', obra.meta.trim()),
+            if (actualizada != null) Ficha('Última actualización', haceDias(actualizada, hoy)),
             if (obra.hitos.isNotEmpty) ...[
               espacioGrande,
               const TituloSeccion('Hitos'),
@@ -100,7 +94,7 @@ class ObraDetalleScreen extends ConsumerWidget {
                 if (i > 0) const Divider(),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  child: Text(hito, style: textos.cuerpo15),
+                  child: Text(hito, style: textos.bodyLarge!),
                 ),
               ],
             ],

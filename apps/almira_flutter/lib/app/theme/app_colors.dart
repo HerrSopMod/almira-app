@@ -13,9 +13,16 @@ abstract final class AppColors {
   /// Botón primario deshabilitado (texto blanco).
   static const primaryDisabled = Color(0xFFA9D2D4);
 
-  /// Fondo del bloque Destacado: máximo uno por pantalla.
+  /// Fondo del bloque Destacado y de los círculos de los accesos rápidos: máximo un Destacado
+  /// por pantalla.
   static const primarySoft = Color(0xFFE3F6F5);
+
+  /// Todo lo que va sobre la cabecera turquesa (texto, íconos, logo): blanco, 5,1:1 (AA).
   static const onPrimary = Color(0xFFFFFFFF);
+
+  /// Sombra de la tarjeta que flota sobre la unión entre la cabecera y la hoja blanca: la única
+  /// sombra de la app, muy suave (texto al 8 %).
+  static const sombraTarjeta = Color(0x140F2A2E);
 
   static const background = Color(0xFFFFFFFF);
   static const surface = Color(0xFFFFFFFF);

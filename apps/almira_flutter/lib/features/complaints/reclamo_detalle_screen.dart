@@ -52,30 +52,28 @@ class ReclamoDetalleScreen extends ConsumerWidget {
           final descripcion = (reclamo.descripcion ?? '').trim();
           final area = (reclamo.area ?? '').trim();
           return [
-            Text('Reclamo ${reclamo.codigo}', style: textos.secundario13),
+            Text('Reclamo ${reclamo.codigo}', style: textos.bodyMedium!),
             const SizedBox(height: AppSpacing.xs),
             Semantics(
               header: true,
-              child: Text(reclamo.titulo, style: textos.titulo20),
+              child: Text(reclamo.titulo, style: textos.titleLarge!),
             ),
             espacioChico,
             Align(alignment: Alignment.centerLeft, child: InsigniaReclamo(reclamo: reclamo)),
             if (plazo != null) ...[
               const SizedBox(height: AppSpacing.xs),
-              LineaPlazo(plazo),
+              PlazoReclamo(plazo),
             ],
             espacioGrande,
             _Foto(reclamoId: reclamo.id, tieneFoto: reclamo.tieneFoto),
             if (descripcion.isNotEmpty) ...[
               espacio,
-              Text(descripcion, style: textos.cuerpo15),
+              Text(descripcion, style: textos.bodyLarge!),
             ],
             espacioGrande,
-            FichaDatos([
-              ('Categoría', reclamo.tipo.etiqueta),
-              ('Área a cargo', area.isEmpty ? 'Por asignar' : area),
-              if (creado != null) ('Enviado el', fechaLarga(creado)),
-            ]),
+            Ficha('Categoría', reclamo.tipo.etiqueta),
+            Ficha('Área a cargo', area.isEmpty ? 'Por asignar' : area),
+            if (creado != null) Ficha('Enviado el', fechaLarga(creado)),
             espacioGrande,
             const TituloSeccion('Ubicación'),
             espacioChico,
@@ -254,7 +252,7 @@ class _Ubicacion extends StatelessWidget {
       children: [
         Text(
           direccion.isEmpty ? 'Sin dirección registrada' : direccion,
-          style: textos.cuerpo15,
+          style: textos.bodyLarge!,
         ),
         espacioChico,
         if (reclamo.tieneUbicacion)
@@ -276,7 +274,7 @@ class _Ubicacion extends StatelessWidget {
             ),
           )
         else
-          Text('Sin punto en el mapa: se atenderá con la dirección.', style: textos.secundario13),
+          Text('Sin punto en el mapa: se atenderá con la dirección.', style: textos.bodyMedium!),
       ],
     );
   }
@@ -328,12 +326,12 @@ class _LineaTiempo extends StatelessWidget {
                           children: [
                             Text(
                               paso.titulo,
-                              style: textos.fila15.copyWith(
+                              style: textos.titleMedium!.copyWith(
                                 color: paso.estado == EstadoPaso.pendiente ? AppColors.textSecondary : null,
                                 fontWeight: paso.estado == EstadoPaso.pendiente ? FontWeight.w400 : null,
                               ),
                             ),
-                            if (paso.detalle != null) Text(paso.detalle!, style: textos.secundario13),
+                            if (paso.detalle != null) Text(paso.detalle!, style: textos.bodyMedium!),
                           ],
                         ),
                       ),

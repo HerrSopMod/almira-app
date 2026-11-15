@@ -6,7 +6,6 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
-import '../complaints/piezas_lista.dart';
 import 'chat_modelo.dart';
 
 /// Avatar del asistente: un robot amable, ilustración original en `assets/bot_avatar.svg`.
@@ -72,7 +71,7 @@ class BurbujaChat extends StatelessWidget {
             bottomLeft: r(posicion.ultimo),
           );
 
-    final estiloTexto = textos.cuerpo15.copyWith(
+    final estiloTexto = textos.bodyLarge!.copyWith(
       color: mio ? AppColors.onPrimary : AppColors.textPrimary,
     );
 
@@ -143,7 +142,7 @@ class BurbujaChat extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                       shape: const StadiumBorder(),
                       side: const BorderSide(color: AppColors.primary),
-                      textStyle: textos.secundario13.copyWith(fontWeight: FontWeight.w600),
+                      textStyle: textos.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
                     ),
                     child: Text(a.etiqueta),
                   ),
@@ -154,7 +153,7 @@ class BurbujaChat extends StatelessWidget {
         if (posicion.ultimo)
           Padding(
             padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
-            child: Text(hora(mensaje.hora), style: textos.secundario13),
+            child: Text(hora(mensaje.hora), style: textos.bodyMedium!),
           ),
       ],
     );
@@ -296,7 +295,7 @@ class SugerenciasRapidas extends StatelessWidget {
                 onPressed: () => alElegir(p),
                 backgroundColor: AppColors.surface,
                 side: const BorderSide(color: AppColors.border),
-                labelStyle: Theme.of(context).textTheme.fila15.copyWith(color: AppColors.primary),
+                labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primary),
                 shape: const StadiumBorder(),
                 visualDensity: VisualDensity.standard,
                 materialTapTargetSize: MaterialTapTargetSize.padded,

@@ -21,7 +21,6 @@ import '../../shared/services/repositorio.dart';
 import 'clasificacion_foto/clasificador_foto.dart';
 import 'clasificacion_foto/proveedor_clasificador.dart';
 import 'reclamos_logica.dart';
-import 'piezas_lista.dart';
 import 'selector_ubicacion_screen.dart';
 
 /// Nuevo reclamo: foto, categoría, asunto, descripción y ubicación en una
@@ -359,7 +358,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                   _intentado && fotoObligatoria
                       ? 'Adjunta una foto para enviar el reclamo.'
                       : 'De la cámara o la galería.',
-                  style: textos.secundario13.copyWith(
+                  style: textos.bodyMedium!.copyWith(
                     color: _intentado && fotoObligatoria ? AppColors.error : null,
                   ),
                 ),
@@ -585,7 +584,7 @@ class _EstadoFoto extends StatelessWidget {
         children: [
           Insignia(texto, tono: tono, icono: icono),
           const SizedBox(height: AppSpacing.xs),
-          Text(resultado.motivo, style: Theme.of(context).textTheme.secundario13),
+          Text(resultado.motivo, style: Theme.of(context).textTheme.bodyMedium!),
           if (diagnosticoFotoActivo && resultado.diagnostico != null) ...[
             espacioChico,
             _PanelDiagnostico(resultado.diagnostico!),

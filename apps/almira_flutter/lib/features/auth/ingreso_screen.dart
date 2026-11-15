@@ -15,8 +15,9 @@ import '../../shared/services/proveedores.dart';
 
 const _claveMinima = 8;
 
-/// Ingreso sobre fondo blanco: el logo vertical arriba, los campos del tema, «Ingresar» como
-/// única acción primaria, Google como secundaria y el registro como enlace. En modo
+/// Ingreso: cabecera turquesa alta con el logo blanco al centro y el formulario en una hoja
+/// blanca que sube sobre ella. «Ingresar» es la única acción primaria, Google la secundaria y el
+/// registro un enlace. En modo
 /// demostración no hay cuentas: un solo botón, dicho con claridad.
 class IngresoScreen extends ConsumerStatefulWidget {
   const IngresoScreen({super.key});
@@ -89,46 +90,79 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
   @override
   Widget build(BuildContext context) {
     final esDemo = ref.watch(esDemoProvider);
-    // Con el teclado abierto el logo se achica para que los campos e «Ingresar» se vean.
     final tecladoAbierto = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final bajo = MediaQuery.sizeOf(context).height < 700;
+    final arriba = MediaQuery.paddingOf(context).top;
+    final abajo = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: barraSobreBlanco,
+      value: barraSobreTurquesa,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.primary,
         resizeToAvoidBottomInset: true,
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: SingleChildScrollView(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margen),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Con el teclado abierto el logo se oculta para que los campos e «Ingresar»
-                    // queden a la vista.
-                    if (tecladoAbierto)
-                      const SizedBox(height: AppSpacing.lg)
-                    else ...[
-                      SizedBox(height: bajo ? AppSpacing.xl : AppSpacing.seccion + AppSpacing.lg),
-                      const Center(child: LogoVertical()),
-                      SizedBox(height: bajo ? AppSpacing.xl : AppSpacing.xxxl),
-                    ],
-                    Form(
-                      key: _formulario,
-                      autovalidateMode:
-                          _intentado ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                      child: esDemo ? _demo() : _conCuenta(),
+        body: LayoutBuilder(
+          builder: (context, caja) {
+            final alto = caja.maxHeight;
+            final bajo = MediaQuery.sizeOf(context).height < 700;
+            // Cabecera turquesa alta (40 % de la pantalla, 34 % si es baja) con el logo blanco al
+            // centro. Con el teclado abierto se reduce a la barra de estado para que los campos e
+            // «Ingresar» queden a la vista.
+            final cabecera = tecladoAbierto
+                ? arriba + AppSpacing.lg
+                : alto * (bajo ? AppSpacing.cabeceraIngresoBaja : AppSpacing.cabeceraIngreso);
+            return SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: cabecera,
+                    child: tecladoAbierto
+                        ? null
+                        : Padding(
+                            padding: EdgeInsets.only(top: arriba, bottom: AppSpacing.solapeHoja),
+                            child: Center(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: LogoVertical(altoIcono: bajo ? AppSpacing.logoIngresoBajo : AppSpacing.logoIngreso),
+                              ),
+                            ),
+                          ),
+                  ),
+                  // Hoja blanca que sube sobre la cabecera y llega hasta el borde inferior.
+                  ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: (alto - cabecera).clamp(0, double.infinity)),
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.hoja)),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          AppSpacing.margen,
+                          AppSpacing.xl,
+                          AppSpacing.margen,
+                          AppSpacing.xl + abajo,
+                        ),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 440),
+                            child: Form(
+                              key: _formulario,
+                              autovalidateMode: _intentado
+                                  ? AutovalidateMode.onUserInteraction
+                                  : AutovalidateMode.disabled,
+                              child: esDemo ? _demo() : _conCuenta(),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

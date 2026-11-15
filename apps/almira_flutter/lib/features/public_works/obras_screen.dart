@@ -65,8 +65,8 @@ class AvanceFisico extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: Text('Avance físico', style: textos.secundario13)),
-            Text('${pct.round()} %', style: textos.fila15.copyWith(fontFeatures: cifrasTabulares)),
+            Expanded(child: Text('Avance físico', style: textos.bodyMedium!)),
+            Text('${pct.round()} %', style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares)),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -217,7 +217,7 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
                     ],
                   ),
                   espacio,
-                  Text(plural(filtradas.length, 'obra', 'obras'), style: textos.secundario13),
+                  Text(plural(filtradas.length, 'obra', 'obras'), style: textos.bodyMedium!),
                   if (filtradas.isEmpty)
                     const VistaVacia(
                       icono: Phosphor.funnelSimpleX,
@@ -268,11 +268,15 @@ class _FilaObra extends StatelessWidget {
       color: seleccionada ? AppColors.surfaceSubtle : AppColors.surface,
       child: FilaLista(
         titulo: obra.nombre,
-        detalle: obra.ubicacion,
         monto: '$pct$_nbsp%',
         alTocar: () => context.go(Rutas.obra(obra.id)),
         semantica: 'Obra ${obra.nombre}, ${obra.estado.etiqueta}, avance físico $pct por ciento. Ver detalle',
-        debajo: Wrap(
+        detalle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DetalleFila(obra.ubicacion),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
           spacing: AppSpacing.md,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
@@ -283,12 +287,14 @@ class _FilaObra extends StatelessWidget {
                 style: TextButton.styleFrom(
                   minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
                   padding: EdgeInsets.zero,
-                  textStyle: textos.secundario13.copyWith(fontWeight: FontWeight.w600),
+                  textStyle: textos.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
                 ),
                 child: const Text('Ver en el mapa'),
               )
             else
-              Text('Sin ubicación en el mapa', style: textos.secundario13),
+              Text('Sin ubicación en el mapa', style: textos.bodyMedium!),
+          ],
+        ),
           ],
         ),
       ),

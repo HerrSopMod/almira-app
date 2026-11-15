@@ -7,7 +7,19 @@ import 'app_spacing.dart';
 /// Cifras tabulares para montos y fechas alineadas.
 const cifrasTabulares = [FontFeature.tabularFigures()];
 
-/// Barra del sistema sobre fondo blanco: íconos oscuros. Toda la app va sobre blanco.
+/// Barra del sistema: la cabecera turquesa empieza detrás de la barra de estado, así que sus
+/// íconos van claros. La barra de navegación del sistema sigue sobre blanco, con íconos oscuros.
+const barraSobreTurquesa = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark,
+  systemNavigationBarColor: Colors.transparent,
+  systemNavigationBarIconBrightness: Brightness.dark,
+  systemNavigationBarContrastEnforced: false,
+);
+
+/// Barra del sistema sobre fondo blanco (íconos oscuros). Se mantiene por compatibilidad para
+/// pantallas sin cabecera turquesa; las pantallas nuevas usan [barraSobreTurquesa].
 const barraSobreBlanco = SystemUiOverlayStyle(
   statusBarColor: Colors.transparent,
   statusBarIconBrightness: Brightness.dark,
@@ -17,11 +29,20 @@ const barraSobreBlanco = SystemUiOverlayStyle(
   systemNavigationBarContrastEnforced: false,
 );
 
-/// Rótulo de sección en mayúsculas pequeñas («MIS DERECHOS»).
-TextStyle estiloRotulo(BuildContext context) => Theme.of(context)
-    .textTheme
-    .labelMedium!
-    .copyWith(letterSpacing: 0.72, color: AppColors.textSecondary);
+/// Barras del sistema durante la carga: todo turquesa, sin franja blanca.
+const barraCarga = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark,
+  systemNavigationBarColor: AppColors.primary,
+  systemNavigationBarIconBrightness: Brightness.light,
+  systemNavigationBarContrastEnforced: false,
+);
+
+/// Rótulo de un grupo o de una ficha («Cuenta y predio», «Fecha límite»): 13 en gris, en tipo
+/// oración. Sin mayúsculas sostenidas.
+TextStyle estiloRotulo(BuildContext context) =>
+    Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w500);
 
 abstract final class AppTheme {
   static ThemeData get claro {
@@ -57,16 +78,18 @@ abstract final class AppTheme {
       color: AppColors.textPrimary,
       letterSpacing: 0,
     );
+    // Escala corta: monto principal 32, título 20, cuerpo 15 y secundario 13. Dentro de una
+    // tarjeta se usan como máximo dos tamaños.
     final textos = TextTheme(
-      // Monto principal de una pantalla (detalle, comprobante): 36.
+      // Monto principal de una pantalla (cabecera, detalle, comprobante): 32.
       displayMedium: base.copyWith(
-        fontSize: 36,
-        height: 42 / 36,
-        letterSpacing: -0.72,
+        fontSize: 32,
+        height: 38 / 32,
+        letterSpacing: -0.64,
         fontWeight: FontWeight.w700,
         fontFeatures: cifrasTabulares,
       ),
-      // Monto destacado dentro de un bloque (inicio, pagar): 32.
+      // Monto destacado dentro de una tarjeta: 32, igual que el principal.
       displaySmall: base.copyWith(
         fontSize: 32,
         height: 38 / 32,
@@ -81,28 +104,29 @@ abstract final class AppTheme {
         letterSpacing: -0.56,
         fontWeight: FontWeight.w700,
       ),
-      // Título de pantalla: 24.
+      // Saludo de la cabecera: 24.
       headlineSmall: base.copyWith(
         fontSize: 24,
-        height: 32 / 24,
+        height: 30 / 24,
         letterSpacing: -0.24,
         fontWeight: FontWeight.w700,
       ),
-      // Título de la barra superior y de sección: 18.
-      titleLarge: base.copyWith(fontSize: 18, height: 24 / 18, fontWeight: FontWeight.w600),
-      // Título de tarjeta y de fila: 16.
-      titleMedium: base.copyWith(fontSize: 16, height: 24 / 16, fontWeight: FontWeight.w600),
-      titleSmall: base.copyWith(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600),
-      // Texto de trámite e instrucciones, y lo que se escribe en un campo: 16.
-      bodyLarge: base.copyWith(fontSize: 16, height: 24 / 16, fontWeight: FontWeight.w400),
-      // Texto de lectura y descripciones: 14, en gris.
+      // Título de pantalla, de la barra superior y de sección: 20.
+      titleLarge: base.copyWith(fontSize: 20, height: 26 / 20, fontWeight: FontWeight.w600),
+      // Nombre en una fila o tarjeta: 15 en peso medio.
+      titleMedium: base.copyWith(fontSize: 15, height: 22 / 15, fontWeight: FontWeight.w500),
+      // Rótulos cortos con peso (pestañas, etiquetas de acceso): 13.
+      titleSmall: base.copyWith(fontSize: 13, height: 18 / 13, fontWeight: FontWeight.w600),
+      // Cuerpo: texto de trámite, valores de ficha y lo que se escribe en un campo: 15.
+      bodyLarge: base.copyWith(fontSize: 15, height: 22 / 15, fontWeight: FontWeight.w400),
+      // Secundario: rótulos, fechas y descripciones: 13, en gris.
       bodyMedium: base.copyWith(
-        fontSize: 14,
-        height: 20 / 14,
+        fontSize: 13,
+        height: 18 / 13,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
       ),
-      // Ayudas y pies: 12, en gris.
+      // Pies y ayudas: 12, en gris.
       bodySmall: base.copyWith(
         fontSize: 12,
         height: 16 / 12,
@@ -135,30 +159,31 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       splashFactory: InkSparkle.splashFactory,
       iconTheme: const IconThemeData(color: AppColors.textPrimary, size: AppIconos.navegacion),
-      // Barra superior blanca, con texto oscuro y una línea inferior de 1 px.
+      // Barra superior de las pantallas de detalle: turquesa compacta, flecha y título en
+      // blanco, sin línea. Las pestañas raíz usan [CabeceraMarca] en vez de esta barra.
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleSpacing: AppSpacing.margen,
-        toolbarHeight: 56,
-        shape: const Border(bottom: BorderSide(color: AppColors.border)),
-        systemOverlayStyle: barraSobreBlanco,
-        titleTextStyle: textos.titleLarge,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary, size: AppIconos.navegacion),
-        actionsIconTheme: const IconThemeData(color: AppColors.textPrimary, size: AppIconos.navegacion),
+        titleSpacing: 0,
+        toolbarHeight: AppSpacing.barraSuperior,
+        systemOverlayStyle: barraSobreTurquesa,
+        titleTextStyle: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
+        iconTheme: const IconThemeData(color: AppColors.onPrimary, size: AppIconos.navegacion),
+        actionsIconTheme: const IconThemeData(color: AppColors.onPrimary, size: AppIconos.navegacion),
       ),
+      // Pestañas con subrayado, para pantallas con dos vistas (Estado de cuenta / Historial).
       tabBarTheme: TabBarThemeData(
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textSecondary,
         indicatorColor: AppColors.primary,
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: AppColors.border,
-        labelStyle: textos.titleSmall,
-        unselectedLabelStyle: textos.titleSmall!.copyWith(fontWeight: FontWeight.w500),
+        labelStyle: textos.titleMedium!.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: textos.titleMedium,
         splashFactory: NoSplash.splashFactory,
       ),
       filledButtonTheme: FilledButtonThemeData(

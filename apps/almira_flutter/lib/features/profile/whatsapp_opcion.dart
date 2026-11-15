@@ -114,9 +114,9 @@ class _HojaGestion extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Recordatorios por WhatsApp', style: textos.titulo20),
+          Text('Recordatorios por WhatsApp', style: textos.titleLarge!),
           const SizedBox(height: AppSpacing.xs),
-          Text('Activo en $numero', style: textos.secundario13),
+          Text('Activo en $numero', style: textos.bodyMedium!),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
             onPressed: () => Navigator.pop(context, _AccionGestion.cambiar),
@@ -214,7 +214,7 @@ class _HojaActivarWhatsappState extends ConsumerState<HojaActivarWhatsapp> {
           children: [
             Semantics(
               header: true,
-              child: Text('Recordatorios por WhatsApp', style: textos.titulo20),
+              child: Text('Recordatorios por WhatsApp', style: textos.titleLarge!),
             ),
             espacio,
             TextFormField(
@@ -234,7 +234,7 @@ class _HojaActivarWhatsappState extends ConsumerState<HojaActivarWhatsapp> {
               onChanged: _ocupado ? null : (v) => setState(() => _acepta = v ?? false),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
-              title: Text(textoConsentimientoWhatsapp, style: textos.secundario13.copyWith(color: AppColors.textPrimary)),
+              title: Text(textoConsentimientoWhatsapp, style: textos.bodyMedium!.copyWith(color: AppColors.textPrimary)),
             ),
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.sm),

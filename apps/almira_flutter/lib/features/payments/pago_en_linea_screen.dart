@@ -6,7 +6,6 @@ import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
-import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
@@ -45,14 +44,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pagos en línea'),
-        bottom: TabBar(
-          controller: _pestanasControl,
-          labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          tabs: [for (final t in _pestanas) Tab(text: t.etiqueta)],
-        ),
-      ),
+      appBar: AppBar(title: const Text('Pagos en línea')),
       body: SafeArea(
         top: false,
         child: CuerpoAsyncSinLista<VistaMunicipal>(
@@ -75,6 +67,16 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
 
             return Column(
               children: [
+                // Pestañas por tributo, sobre blanco y con subrayado.
+                TabBar(
+                  controller: _pestanasControl,
+                  // Se desplaza si con letra grande no entran: ninguna etiqueta se corta.
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  tabs: [for (final t in _pestanas) Tab(text: t.etiqueta)],
+                ),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, 0),
                   child: PasosPago(actual: 0),
@@ -122,6 +124,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
                               contentPadding: EdgeInsets.zero,
                               title: const Text('Seleccionar todo'),
                             ),
+                            const Divider(),
                             for (final d in lista) ...[
                               _FilaPeriodo(
                                 deuda: d,
@@ -131,7 +134,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
                                   () => marcar ? _elegidas.add(d.id) : _elegidas.remove(d.id),
                                 ),
                               ),
-                              espacioChico,
+                              const Divider(),
                             ],
                           ],
                         ),
@@ -151,7 +154,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
                         children: [
                           Expanded(child: Text('Importe total', style: textos.bodyMedium)),
                           const SizedBox(width: AppSpacing.md),
-                          Flexible(
+                          Expanded(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerRight,
@@ -185,6 +188,8 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
   }
 }
 
+/// Periodo a pagar: casilla, periodo en 15/500 con el concepto en gris debajo, y el saldo a la
+/// derecha. Si ya venció, la insignia «Vencida» (estado real).
 class _FilaPeriodo extends StatelessWidget {
   const _FilaPeriodo({
     required this.deuda,
@@ -202,28 +207,22 @@ class _FilaPeriodo extends StatelessWidget {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     final vencida = deuda.estadoAl(hoy) == EstadoDeuda.vencida;
-    return Tarjeta(
-      onTap: () => alCambiar(!marcada),
-      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+    return FilaLista(
+      titulo: deuda.periodo.isEmpty ? deuda.concepto : deuda.periodo,
+      monto: soles(deuda.saldo),
+      alTocar: () => alCambiar(!marcada),
+      final_: const SizedBox.shrink(),
       semantica: '${deuda.concepto} ${deuda.periodo}, ${soles(deuda.saldo)}',
-      child: Row(
+      inicio: Checkbox(value: marcada, onChanged: (m) => alCambiar(m ?? false)),
+      detalle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Checkbox(value: marcada, onChanged: (m) => alCambiar(m ?? false)),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(deuda.periodo.isEmpty ? deuda.concepto : deuda.periodo, style: textos.titleSmall),
-                Text(deuda.concepto, style: textos.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis),
-                if (vencida) const Padding(
-                  padding: EdgeInsets.only(top: 4),
-                  child: Insignia('Vencida', tono: Tono.error, icono: Phosphor.warningCircle),
-                ),
-              ],
+          Text(deuda.concepto, style: textos.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+          if (vencida)
+            const Padding(
+              padding: EdgeInsets.only(top: AppSpacing.xs),
+              child: Insignia('Vencida', tono: Tono.error, icono: Phosphor.warningCircle),
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Text(soles(deuda.saldo), style: textos.titleSmall!.copyWith(fontFeatures: cifrasTabulares)),
         ],
       ),
     );

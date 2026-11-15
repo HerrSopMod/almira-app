@@ -99,9 +99,14 @@ class _FilaReclamo extends StatelessWidget {
     final detalle = plazo == null ? '${reclamo.codigo} · ${reclamo.tipo.etiqueta}' : textoPlazo(plazo);
     return FilaLista(
       titulo: reclamo.titulo,
-      detalle: detalle,
-      estiloDetalle: plazo == null ? null : estiloPlazo(context, plazo),
-      debajo: InsigniaReclamo(reclamo: reclamo),
+      detalle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          plazo == null ? DetalleFila(detalle) : PlazoReclamo(plazo),
+          espacioChico,
+          InsigniaReclamo(reclamo: reclamo),
+        ],
+      ),
       alTocar: () => context.go(Rutas.reclamo(reclamo.id)),
       semantica: '${reclamo.titulo}. ${reclamo.resuelto ? 'Resuelto' : reclamo.estado.etiqueta}. $detalle. '
           'Ver seguimiento',

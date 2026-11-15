@@ -67,6 +67,8 @@ abstract final class Phosphor {
   static const plus = IconData(0xe3d4, fontFamily: 'PhosphorRegular');
   static const question = IconData(0xe3e8, fontFamily: 'PhosphorRegular');
   static const receipt = IconData(0xe3ec, fontFamily: 'PhosphorRegular');
+  /// Robot de líneas limpias, sin cara sonriente: botón central del Asistente.
+  static const robot = IconData(0xe762, fontFamily: 'PhosphorRegular');
   static const scales = IconData(0xe750, fontFamily: 'PhosphorRegular');
   static const sealCheck = IconData(0xe606, fontFamily: 'PhosphorRegular');
   static const shieldCheck = IconData(0xe40c, fontFamily: 'PhosphorRegular');

@@ -83,6 +83,19 @@ String iniciales(String nombre) {
 /// "Rosa Quispe Huamán" -> "Rosa".
 String primerNombre(String nombre) => nombre.trim().split(RegExp(r'\s+')).first;
 
+/// Nombre de persona en tipo título, para la pantalla: "CÁRDENAS TELLO MARIO" -> "Cárdenas Tello
+/// Mario". Las partículas ("de", "la", "del", "y") van en minúscula, salvo al inicio.
+String tipoTitulo(String texto) {
+  const particulas = {'de', 'la', 'las', 'los', 'del', 'y', 'e'};
+  final palabras = texto.trim().toLowerCase().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+  var primera = true;
+  return palabras.map((p) {
+    final enMinuscula = !primera && particulas.contains(p);
+    primera = false;
+    return enMinuscula ? p : '${p[0].toUpperCase()}${p.substring(1)}';
+  }).join(' ');
+}
+
 /// "1 obligación", "2 obligaciones".
 String plural(int cantidad, String singular, String plural) =>
     '$cantidad ${cantidad == 1 ? singular : plural}';

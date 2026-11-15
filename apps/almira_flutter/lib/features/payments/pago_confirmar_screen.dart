@@ -155,7 +155,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                     children: [
                       Expanded(child: Text('Total a pagar', style: textos.bodyMedium)),
                       const SizedBox(width: AppSpacing.md),
-                      Flexible(
+                      Expanded(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerRight,
@@ -493,10 +493,11 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
             espacioGrande,
             Tarjeta(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FilaDato('Operación', widget.resultado.operacion),
-                  FilaDato('Fecha', fechaLarga(widget.resultado.fecha)),
-                  FilaDato('Medio de pago', widget.medio.etiqueta),
+                  Ficha('Operación', widget.resultado.operacion),
+                  Ficha('Fecha', fechaLarga(widget.resultado.fecha)),
+                  Ficha('Medio de pago', widget.medio.etiqueta),
                   const Divider(height: AppSpacing.xl),
                   for (final l in widget.lineas)
                     _LineaResumen(concepto: l.concepto, periodo: l.periodo, monto: l.monto),

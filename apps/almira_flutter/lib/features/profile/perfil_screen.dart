@@ -102,11 +102,11 @@ class PerfilScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(nombre == null ? 'Tu cuenta' : nombrePropio(nombre), style: textos.titulo20),
+                      Text(nombre == null ? 'Tu cuenta' : tipoTitulo(nombre), style: textos.titleLarge!),
                       if (codigo != null || vecino == null)
                         Text(
                           codigo == null ? 'Sin código vinculado' : 'Contribuyente $codigo',
-                          style: textos.secundario13,
+                          style: textos.bodyMedium!,
                         ),
                     ],
                   ),
@@ -118,14 +118,14 @@ class PerfilScreen extends ConsumerWidget {
               titulo: 'Cuenta y predio',
               filas: [
                 for (final predio in v?.predios ?? const [])
-                  FilaLista(titulo: predio.direccion, detalle: 'Predio ${predio.codigo}'),
+                  FilaLista(titulo: predio.direccion, detalle: DetalleFila('Predio ${predio.codigo}')),
                 FilaLista(
                   titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
                   alTocar: () => context.push(Rutas.vincular),
                 ),
                 FilaLista(
                   titulo: 'Municipalidad',
-                  detalle: v?.municipalidad?.nombre,
+                  detalle: v?.municipalidad == null ? null : DetalleFila(v!.municipalidad!.nombre),
                   alTocar: () => context.push(Rutas.municipalidad),
                 ),
               ],
@@ -136,7 +136,7 @@ class PerfilScreen extends ConsumerWidget {
                 if (!esDemo)
                   FilaLista(
                     titulo: 'Clave web',
-                    detalle: 'Para entrar con tu correo o tu cuponera',
+                    detalle: DetalleFila('Para entrar con tu correo o tu cuponera'),
                     alTocar: () => _crearClave(context, ref),
                   ),
                 FilaLista(titulo: 'Avisos y canales', alTocar: () => context.push(Rutas.avisos)),

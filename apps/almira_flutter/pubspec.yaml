@@ -71,16 +71,18 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: assets/marca/icono-1024.png
-    background_color: "#FFFFFF"
+    background_color: "#0B7F86"
     theme_color: "#0B7F86"
 
-# Splash nativo de Android: solo el ícono sobre blanco (Android 12+ no admite texto):
-# `dart run flutter_native_splash:create`.
+# Splash nativo de Android y web: fondo turquesa completo y el ícono blanco centrado
+# (Android 12+ solo admite color de fondo e ícono, sin texto). Después sigue la pantalla de
+# carga de Flutter con el mismo fondo. `dart run flutter_native_splash:create`.
 flutter_native_splash:
-  color: "#FFFFFF"
+  color: "#0B7F86"
   image: assets/marca/splash.png
   android_12:
-    color: "#FFFFFF"
+    color: "#0B7F86"
     image: assets/marca/splash-android12.png
   ios: false
-  web: false
+  web: true
+  web_image_mode: center

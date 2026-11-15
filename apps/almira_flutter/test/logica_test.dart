@@ -312,4 +312,10 @@ void main() {
       expect(responder('¿Cuánto debo?', ajena, hoy).ruta, Rutas.vincular);
     });
   });
+
+  test('tipoTitulo: nombres en tipo título, con partículas en minúscula', () {
+    expect(tipoTitulo('CÁRDENAS TELLO MARIO ALBERTO'), 'Cárdenas Tello Mario Alberto');
+    expect(tipoTitulo('DE LA CRUZ  ROSA'), 'De la Cruz Rosa');
+    expect(tipoTitulo('quispe y huamán'), 'Quispe y Huamán');
+  });
 }

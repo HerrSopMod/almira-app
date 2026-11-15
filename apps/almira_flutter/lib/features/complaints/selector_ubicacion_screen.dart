@@ -8,7 +8,6 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/utils/ubicacion.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/mapa_almira.dart';
-import 'piezas_lista.dart';
 
 /// Selector de ubicación del reclamo: el vecino mueve el mapa bajo un pin
 /// fijo y confirma. El GPS es opcional; sin permiso, se ubica a mano.
@@ -131,7 +130,7 @@ class _SelectorUbicacionScreenState extends State<SelectorUbicacionScreen> {
                     ] else ...[
                       Text(
                         'Mueve el mapa hasta que el pin marque el lugar.',
-                        style: textos.secundario13,
+                        style: textos.bodyMedium!,
                         textAlign: TextAlign.center,
                       ),
                       espacio,
