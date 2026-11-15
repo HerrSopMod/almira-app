@@ -48,6 +48,10 @@ abstract final class AppSpacing {
   /// que no salte al pasar de uno a otra.
   static const double logoCarga = 112;
 
+  /// Logo de la cabecera del ingreso (más chico en pantallas bajas).
+  static const double logoIngreso = 88;
+  static const double logoIngresoBajo = 72;
+
   /// Círculo de un acceso rápido de Inicio.
   static const double acceso = 56;
 
