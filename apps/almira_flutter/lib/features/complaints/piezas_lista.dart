@@ -178,3 +178,37 @@ class LineaPlazo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(textoPlazo(plazo), style: estiloPlazo(context, plazo));
 }
+
+/// Monto en una fila: rótulo 15 a la izquierda y el monto a la derecha, en cifras tabulares.
+/// [nota] va en gris bajo el monto.
+class FilaMonto extends StatelessWidget {
+  const FilaMonto(this.rotulo, this.monto, {super.key, this.nota});
+
+  final String rotulo;
+  final String monto;
+  final String? nota;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return MergeSemantics(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: Text(rotulo, style: textos.cuerpo15.copyWith(color: AppColors.textSecondary))),
+            const SizedBox(width: AppSpacing.md),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(monto, style: textos.fila15.copyWith(fontWeight: FontWeight.w600, fontFeatures: cifrasTabulares)),
+                if (nota != null) Text(nota!, style: textos.secundario13),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

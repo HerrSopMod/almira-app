@@ -14,6 +14,8 @@ import '../../core/widgets/filtros.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
+import '../../app/theme/app_theme.dart';
+import '../complaints/piezas_lista.dart';
 import '../complaints/reclamos_logica.dart';
 
 enum FiltroObra {
@@ -45,7 +47,7 @@ class InsigniaObra extends StatelessWidget {
   @override
   Widget build(BuildContext context) => estado == EstadoObra.finalizada
       ? Insignia(estado.etiqueta, tono: Tono.exito, icono: Phosphor.check)
-      : Insignia(estado.etiqueta, tono: Tono.primario, icono: Phosphor.barricade);
+      : Insignia(estado.etiqueta, tono: Tono.primario);
 }
 
 /// Avance físico de la obra, rotulado para no confundirlo con el gasto.
@@ -63,8 +65,8 @@ class AvanceFisico extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: Text('Avance físico', style: textos.bodySmall)),
-            Text('${pct.round()} %', style: textos.labelMedium),
+            Expanded(child: Text('Avance físico', style: textos.secundario13)),
+            Text('${pct.round()} %', style: textos.fila15.copyWith(fontFeatures: cifrasTabulares)),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -129,7 +131,6 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
   @override
   Widget build(BuildContext context) {
     final vista = ref.watch(vistaProvider);
-    final hoy = ref.watch(relojProvider)();
     final esDemo = ref.watch(esDemoProvider);
     final v = vista.valueOrNull;
     final textos = Theme.of(context).textTheme;
@@ -216,24 +217,24 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
                     ],
                   ),
                   espacio,
-                  Text(plural(filtradas.length, 'obra', 'obras'), style: textos.bodySmall),
-                  espacioChico,
+                  Text(plural(filtradas.length, 'obra', 'obras'), style: textos.secundario13),
                   if (filtradas.isEmpty)
                     const VistaVacia(
                       icono: Phosphor.funnelSimpleX,
                       titulo: 'No hay obras con este filtro',
                     )
                   else
-                    for (final obra in filtradas) ...[
-                      _TarjetaObra(
-                        key: _claves.putIfAbsent(obra.id, GlobalKey.new),
-                        obra: obra,
-                        hoy: hoy,
-                        seleccionada: obra.id == _seleccionada,
-                        alVerEnMapa: obra.tieneUbicacion ? () => _verEnMapa(obra) : null,
-                      ),
-                      espacioChico,
-                    ],
+                    ListaFilas(
+                      filas: [
+                        for (final obra in filtradas)
+                          _FilaObra(
+                            key: _claves.putIfAbsent(obra.id, GlobalKey.new),
+                            obra: obra,
+                            seleccionada: obra.id == _seleccionada,
+                            alVerEnMapa: obra.tieneUbicacion ? () => _verEnMapa(obra) : null,
+                          ),
+                      ],
+                    ),
                 ];
               },
             ),
@@ -244,82 +245,56 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
   }
 }
 
-class _TarjetaObra extends StatelessWidget {
-  const _TarjetaObra({
+/// Fila de obra: nombre, ubicación en gris, avance a la derecha y flecha. Debajo, su estado y
+/// el enlace al mapa. La obra elegida en el mapa se marca con fondo gris claro.
+class _FilaObra extends StatelessWidget {
+  const _FilaObra({
     super.key,
     required this.obra,
-    required this.hoy,
     required this.seleccionada,
     this.alVerEnMapa,
   });
 
   final Obra obra;
-  final DateTime hoy;
   final bool seleccionada;
   final VoidCallback? alVerEnMapa;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
+    final pct = obra.avancePct.clamp(0, 100).round();
     return AnimatedContainer(
       duration: duracionDe(context),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.tarjeta),
-        border: Border.all(
-          color: seleccionada ? AppColors.primary : Colors.transparent,
-          width: 2,
-        ),
-      ),
-      child: Tarjeta(
-        onTap: () => context.go(Rutas.obra(obra.id)),
-        semantica: 'Obra ${obra.nombre}, ${obra.estado.etiqueta}. Ver detalle',
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      color: seleccionada ? AppColors.surfaceSubtle : AppColors.surface,
+      child: FilaLista(
+        titulo: obra.nombre,
+        detalle: obra.ubicacion,
+        monto: '$pct$_nbsp%',
+        alTocar: () => context.go(Rutas.obra(obra.id)),
+        semantica: 'Obra ${obra.nombre}, ${obra.estado.etiqueta}, avance físico $pct por ciento. Ver detalle',
+        debajo: Wrap(
+          spacing: AppSpacing.md,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: Text(obra.nombre, style: textos.titleMedium)),
-                const SizedBox(width: AppSpacing.sm),
-                InsigniaObra(obra.estado),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(obra.ubicacion, style: textos.bodyMedium),
-            const SizedBox(height: AppSpacing.lg),
-            AvanceFisico(obra),
-            const SizedBox(height: AppSpacing.md),
+            InsigniaObra(obra.estado),
             if (alVerEnMapa != null)
-              // Acción secundaria como texto: los botones no van dentro de tarjetas.
-              Semantics(
-                button: true,
-                label: 'Ver en el mapa',
-                child: InkWell(
-                  onTap: alVerEnMapa,
-                  borderRadius: BorderRadius.circular(AppRadius.caja),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: AppSpacing.toque),
-                    child: Row(
-                      children: [
-                        const Icon(Phosphor.mapPin, size: AppIconos.lista, color: AppColors.primary),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Text(
-                            'Ver en el mapa',
-                            style: textos.titleSmall!.copyWith(color: AppColors.primary),
-                          ),
-                        ),
-                        const Icon(Phosphor.caretRight, size: AppIconos.lista, color: AppColors.primary),
-                      ],
-                    ),
-                  ),
+              TextButton(
+                onPressed: alVerEnMapa,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
+                  padding: EdgeInsets.zero,
+                  textStyle: textos.secundario13.copyWith(fontWeight: FontWeight.w600),
                 ),
+                child: const Text('Ver en el mapa'),
               )
             else
-              Text('Sin ubicación en el mapa', style: textos.bodySmall),
+              Text('Sin ubicación en el mapa', style: textos.secundario13),
           ],
         ),
       ),
     );
   }
 }
+
+/// Espacio no separable: evita que «66 %» se parta en dos líneas.
+const _nbsp = ' ';

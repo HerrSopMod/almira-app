@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../app/theme/iconos.dart';
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
-import '../../app/theme/app_theme.dart';
+import '../../app/theme/iconos.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/services/proveedores.dart';
+import '../complaints/piezas_lista.dart';
 import 'obras_screen.dart';
 
 class ObraDetalleScreen extends ConsumerWidget {
@@ -47,23 +46,14 @@ class ObraDetalleScreen extends ConsumerWidget {
           return [
             Semantics(
               header: true,
-              child: Text(obra.nombre, style: textos.headlineSmall),
+              child: Text(obra.nombre, style: textos.titulo20),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.xs),
+            Text(obra.ubicacion, style: textos.secundario13),
+            espacioChico,
             Align(alignment: Alignment.centerLeft, child: InsigniaObra(obra.estado)),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 1),
-                  child: Icon(Phosphor.mapPin, size: AppIconos.lista, color: AppColors.textSecondary),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: Text(obra.ubicacion, style: textos.bodyMedium)),
-              ],
-            ),
             espacio,
+            // El mapa siempre lleva su atribución (la dibuja MapaAlmira).
             if (obra.tieneUbicacion)
               MarcoMapa(
                 child: MapaAlmira(
@@ -82,63 +72,37 @@ class ObraDetalleScreen extends ConsumerWidget {
                 ),
               )
             else
-              const Aviso('Esta obra no tiene un punto en el mapa.', icono: Phosphor.mapTrifold),
+              Text('Sin punto en el mapa.', style: textos.secundario13),
             espacioGrande,
-            Tarjeta(child: AvanceFisico(obra)),
-            espacio,
-            Tarjeta(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Presupuesto', style: textos.titleMedium),
-                  espacioChico,
-                  _FilaObra(Phosphor.wallet, 'Asignado', soles(obra.montoAsignado)),
-                  _FilaObra(
-                    Phosphor.money,
-                    'Gastado',
-                    soles(obra.montoEjecutado),
-                    avance: gasto == null ? null : gasto / 100,
-                    nota: gasto == null ? null : '$gasto${_nbsp}% del presupuesto',
-                  ),
-                  if (obra.porcentajeTributos != null)
-                    _FilaObra(
-                      Phosphor.bank,
-                      'Financiado con tributos',
-                      '${obra.porcentajeTributos!.round()}$_nbsp%',
-                    ),
-                ],
-              ),
+            AvanceFisico(obra),
+            espacioGrande,
+            const TituloSeccion('Presupuesto'),
+            const SizedBox(height: AppSpacing.xs),
+            FilaMonto('Asignado', soles(obra.montoAsignado)),
+            FilaMonto(
+              'Gastado',
+              soles(obra.montoEjecutado),
+              nota: gasto == null ? null : '$gasto$_nbsp% del presupuesto',
             ),
-            espacio,
-            Tarjeta(
-              child: Column(
-                children: [
-                  if (inicio != null) _FilaObra(Phosphor.calendarBlank, 'Inicio', fechaLarga(inicio)),
-                  if (obra.meta.trim().isNotEmpty) _FilaObra(Phosphor.flag, 'Meta', obra.meta, largo: true),
-                  if (actualizada != null)
-                    _FilaObra(Phosphor.clockClockwise, 'Última actualización', haceDias(actualizada, hoy)),
-                ],
-              ),
-            ),
+            if (obra.porcentajeTributos != null)
+              FilaMonto('Financiado con tributos', '${obra.porcentajeTributos!.round()}$_nbsp%'),
+            espacioGrande,
+            FichaDatos([
+              if (inicio != null) ('Inicio', fechaLarga(inicio)),
+              if (obra.meta.trim().isNotEmpty) ('Meta', obra.meta.trim()),
+              if (actualizada != null) ('Última actualización', haceDias(actualizada, hoy)),
+            ]),
             if (obra.hitos.isNotEmpty) ...[
               espacioGrande,
               const TituloSeccion('Hitos'),
-              espacioChico,
-              for (final hito in obra.hitos)
+              const SizedBox(height: AppSpacing.xs),
+              for (final (i, hito) in obra.hitos.indexed) ...[
+                if (i > 0) const Divider(),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 3),
-                        child: Icon(Phosphor.flag, size: AppIconos.lista, color: AppColors.textSecondary),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(child: Text(hito, style: textos.bodyLarge)),
-                    ],
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  child: Text(hito, style: textos.cuerpo15),
                 ),
+              ],
             ],
           ];
         },
@@ -149,98 +113,3 @@ class ObraDetalleScreen extends ConsumerWidget {
 
 /// Espacio no separable: evita que «66 %» se parta en dos líneas.
 const _nbsp = ' ';
-
-/// Fila de una tarjeta de la obra: ícono oscuro a la izquierda, etiqueta y valor alineado a la
-/// derecha en una sola línea. Con [avance] y [nota] muestra debajo una mini barra y su texto.
-/// Con [largo] el valor va bajo la etiqueta, para textos que no caben en una línea.
-class _FilaObra extends StatelessWidget {
-  const _FilaObra(this.icono, this.etiqueta, this.valor, {this.avance, this.nota, this.largo = false});
-
-  final IconData icono;
-  final String etiqueta;
-  final String valor;
-  final double? avance;
-  final String? nota;
-  final bool largo;
-
-  @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    final cifras = textos.titleSmall!.copyWith(fontFeatures: cifrasTabulares);
-    final Widget cuerpo;
-    if (largo) {
-      cuerpo = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(etiqueta, style: textos.bodyMedium),
-          const SizedBox(height: 2),
-          Text(valor, style: textos.bodyLarge),
-        ],
-      );
-    } else {
-      // La etiqueta ocupa lo que necesita (hasta el 55 % del ancho) y el valor se alinea a la
-      // derecha en el resto, de modo que todos los valores quedan en la misma columna.
-      cuerpo = LayoutBuilder(
-        builder: (context, caja) => Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: caja.maxWidth * 0.55),
-              child: Text(etiqueta, style: textos.bodyMedium),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(valor, style: cifras, maxLines: 1, softWrap: false),
-                  ),
-                  if (nota != null) ...[
-                    const SizedBox(height: 2),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerRight,
-                      child: Text(nota!, style: textos.bodySmall, maxLines: 1, softWrap: false),
-                    ),
-                  ],
-                  if (avance != null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    SizedBox(
-                      width: 104,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppRadius.pastilla),
-                        child: LinearProgressIndicator(
-                          value: avance!.clamp(0, 1),
-                          minHeight: 4,
-                          color: AppColors.textPrimary,
-                          semanticsLabel: 'Presupuesto gastado',
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 1),
-            child: Icon(icono, size: AppIconos.lista, color: AppColors.textSecondary),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(child: cuerpo),
-        ],
-      ),
-    );
-  }
-}
