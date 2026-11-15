@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_theme.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/ubicacion.dart';
 import '../../core/widgets/componentes.dart';
@@ -123,8 +124,12 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
     ResultadoFoto resultado;
     try {
       resultado = await ref.read(clasificadorFotoProvider).clasificar(imagen);
-    } catch (_) {
-      resultado = ResultadoFoto.enRevision;
+    } catch (error) {
+      resultado = diagnosticoFotoActivo
+          ? ResultadoFoto.enRevision.conDiagnostico(
+              DiagnosticoFoto(implementacion: '?', error: '${error.runtimeType}: $error'),
+            )
+          : ResultadoFoto.enRevision;
     }
     if (!mounted || turno != _turnoFoto) return;
     setState(() {
@@ -587,6 +592,52 @@ class _EstadoFoto extends StatelessWidget {
           Insignia(texto, tono: tono, icono: icono),
           const SizedBox(height: AppSpacing.xs),
           Text(resultado.motivo, style: Theme.of(context).textTheme.bodyMedium),
+          if (diagnosticoFotoActivo && resultado.diagnostico != null) ...[
+            espacioChico,
+            _PanelDiagnostico(resultado.diagnostico!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Solo con `--dart-define=DIAGNOSTICO_FOTO=true`: lo que devolvió el modelo.
+class _PanelDiagnostico extends StatelessWidget {
+  const _PanelDiagnostico(this.diagnostico);
+
+  final DiagnosticoFoto diagnostico;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final estilo = textos.bodySmall!.copyWith(fontFeatures: cifrasTabulares);
+    final umbral = diagnostico.umbralModelo;
+    final lineas = [
+      'Implementación: ${diagnostico.implementacion}',
+      if (umbral != null) 'Umbral del modelo: ${umbral.toStringAsFixed(2)}',
+      if (diagnostico.etiquetas.isEmpty)
+        'Etiquetas: ninguna'
+      else ...[
+        'Etiquetas:',
+        for (final (nombre, confianza) in diagnostico.etiquetas) '  ${confianza.toStringAsFixed(2)}  $nombre',
+      ],
+      if (diagnostico.error != null) 'Error: ${diagnostico.error}',
+    ];
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceSubtle,
+        borderRadius: BorderRadius.circular(AppRadius.campo),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Diagnóstico de la foto', style: textos.labelMedium),
+          const SizedBox(height: AppSpacing.xs),
+          SelectableText(lineas.join('\n'), style: estilo),
         ],
       ),
     );
