@@ -11,6 +11,7 @@ import '../../app/theme/app_theme.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/marcas_pago.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import '../account/estado_cuenta_logica.dart';
@@ -237,7 +238,20 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           keyboardType: TextInputType.number,
           autofillHints: const [AutofillHints.creditCardNumber],
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(19), _GruposDe4()],
-          decoration: const InputDecoration(labelText: 'Número de tarjeta', prefixIcon: Icon(Phosphor.creditCard)),
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: 'Número de tarjeta',
+            prefixIcon: const Icon(Phosphor.creditCard),
+            // Al escribir, aparece la marca de la tarjeta.
+            suffixIcon: switch (marcaDeTarjeta(_numero.text)) {
+              null => null,
+              final marca => Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.md),
+                child: LogoMarca(marca, alto: 24),
+              ),
+            },
+            suffixIconConstraints: const BoxConstraints(minHeight: 24, minWidth: 24),
+          ),
           validator: validarNumeroTarjeta,
         ),
         espacio,
@@ -351,9 +365,13 @@ class _TarjetaMedio extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    final (nombre, detalle, icono) = switch (medio) {
-      MedioPago.tarjeta => ('Tarjeta', 'Débito o crédito', Phosphor.creditCard),
-      _ => (medio.etiqueta, 'Con tu celular y el código de aprobación', Phosphor.deviceMobile),
+    final (nombre, detalle) = switch (medio) {
+      MedioPago.tarjeta => ('Tarjeta', 'Débito o crédito'),
+      _ => (medio.etiqueta, 'Con tu celular y el código de aprobación'),
+    };
+    final inicio = switch (medio) {
+      MedioPago.tarjeta => const IconoColor(PhosphorFill.creditCard, color: AppColors.acentoAzul, lado: 44),
+      _ => const LogoMarca(MarcaPago.yape, alto: 36),
     };
     return Semantics(
       button: true,
@@ -376,7 +394,7 @@ class _TarjetaMedio extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Row(
               children: [
-                CajaIcono(icono, tono: Tono.neutro),
+                SizedBox(width: 52, child: Center(child: inicio)),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -384,6 +402,10 @@ class _TarjetaMedio extends StatelessWidget {
                     children: [
                       Text(nombre, style: textos.titleMedium),
                       Text(detalle, style: textos.bodyMedium),
+                      if (medio == MedioPago.tarjeta) ...const [
+                        SizedBox(height: AppSpacing.sm),
+                        FilaMarcasTarjeta(),
+                      ],
                     ],
                   ),
                 ),
@@ -477,7 +499,12 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
     final textos = Theme.of(context).textTheme;
     final total = widget.lineas.fold<double>(0, (s, l) => s + l.monto);
     return Scaffold(
-      appBar: AppBar(title: const Text('Pagos en línea'), automaticallyImplyLeading: false),
+      // Sin flecha (el pago ya se hizo): el título conserva el margen de siempre.
+      appBar: AppBar(
+        title: const Text('Pagos en línea'),
+        automaticallyImplyLeading: false,
+        titleSpacing: AppSpacing.margen,
+      ),
       body: SafeArea(
         top: false,
         child: ListView(

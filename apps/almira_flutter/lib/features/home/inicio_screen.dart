@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_theme.dart';
 import '../../app/theme/iconos.dart';
 import '../../core/utils/formato.dart';
 import '../../core/utils/plazos.dart';
@@ -219,14 +220,66 @@ class _Resumen extends StatelessWidget {
           ),
           if (resumen.cantidadVencidas > 0) ...[
             const SizedBox(height: AppSpacing.sm),
-            Insignia(
-              '${plural(resumen.cantidadVencidas, 'vencida', 'vencidas')} · ${soles(resumen.montoVencido)}',
-              tono: Tono.error,
-              icono: Phosphor.warningCircle,
+            _AvisoVencidas(
+              texto: plural(resumen.cantidadVencidas, 'vencida', 'vencidas'),
+              monto: resumen.montoVencido,
             ),
           ],
         ],
       ],
+    );
+  }
+}
+
+/// Franja roja suave de lo ya vencido: ícono en círculo blanco, la cantidad y el monto a la derecha.
+class _AvisoVencidas extends StatelessWidget {
+  const _AvisoVencidas({required this.texto, required this.monto});
+
+  final String texto;
+  final double monto;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Semantics(
+      label: '$texto, ${soles(monto)}',
+      excludeSemantics: true,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: AppColors.errorSoft,
+          borderRadius: BorderRadius.circular(AppRadius.tarjeta),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.surface),
+              child: const Icon(PhosphorFill.warningCircle, size: AppIconos.insignia + 2, color: AppColors.error),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                texto,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textos.titleSmall!.copyWith(color: AppColors.error),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              soles(monto),
+              style: textos.titleSmall!.copyWith(
+                color: AppColors.error,
+                fontWeight: FontWeight.w700,
+                fontFeatures: cifrasTabulares,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -107,10 +107,11 @@ void main() {
     expect(find.text('Total pendiente'), findsOneWidget);
     expect(find.text('S/ 120.50'), findsOneWidget);
     expect(find.textContaining('2 obligaciones'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('S/ 40.00'), 200);
-    expect(find.text('S/ 40.00'), findsOneWidget);
+    // Los S/ 40.00 vencidos salen en el aviso rojo y en su fila de la lista.
+    expect(find.text('S/ 40.00'), findsWidgets);
     await tester.scrollUntilVisible(find.text('S/ 80.50'), 200);
     expect(find.text('S/ 80.50'), findsOneWidget);
+    expect(find.text('S/ 40.00'), findsNWidgets(2));
     expect(find.byType(BarraInferior), findsOneWidget);
 
     // Las cinco pestañas, ida y vuelta, sin errores ni pantallas superpuestas.

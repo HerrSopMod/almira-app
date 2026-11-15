@@ -70,7 +70,7 @@ abstract final class Phosphor {
   static const plus = Iconsax.add_copy;
   static const question = Iconsax.message_question_copy;
   static const receipt = Iconsax.receipt_item_copy;
-  static const robot = Iconsax.magicpen_copy;
+  static const robot = Icons.smart_toy_outlined;
   static const scales = Iconsax.judge_copy;
   static const sealCheck = Iconsax.verify_copy;
   static const shieldCheck = Iconsax.shield_tick_copy;
@@ -147,7 +147,7 @@ abstract final class PhosphorFill {
   static const plus = Iconsax.add;
   static const question = Iconsax.message_question;
   static const receipt = Iconsax.receipt_item;
-  static const robot = Iconsax.magicpen;
+  static const robot = Icons.smart_toy_rounded;
   static const scales = Iconsax.judge;
   static const sealCheck = Iconsax.verify;
   static const shieldCheck = Iconsax.shield_tick;
