@@ -23,7 +23,9 @@ Almira no cumple (ver «Lo que no se copia de Stitch», al final).
 ## Principios
 
 1. **Claridad cívica.** Fondo blanco, líneas finas y texto de alto contraste. Nada de
-   degradados, sombras de adorno ni tarjetas dentro de tarjetas.
+   degradados, sombras de adorno ni tarjetas dentro de tarjetas. En la app móvil, las
+   pestañas y el ingreso llevan arriba una cabecera turquesa sólida con una hoja blanca
+   montada sobre ella (ver «Cabecera turquesa y hoja blanca»).
 2. **Pensada para adultos mayores.** El texto de lectura mide como mínimo 14 px y el de
    trámites 16 px. Las zonas de toque miden 48 px o más.
 3. **Un solo bloque Destacado por pantalla.** Va con fondo `highlight`, para lo más
@@ -89,6 +91,11 @@ Solo **Inter** (400, 500, 600 y 700). Poppins sale del proyecto. Montos y tablas
 | `caption` | 12 / 16 | 400 | Ayudas y pies |
 | `tabLabel` | 11 / 14 | 500 | Etiquetas de la barra inferior |
 
+**App móvil (Flutter):** escala corta de cuatro tamaños: monto principal 32 / 38 (700),
+título 20 / 26 (600), cuerpo 15 / 22 y secundario 13 / 18 en `textSecondary`. El saludo de la
+cabecera mide 24 y las etiquetas de la barra inferior, 11. Dentro de una tarjeta se usan como
+máximo dos tamaños.
+
 **Panel web (densidad compacta):** título de página 20 / 26 (700) con su subtítulo de
 13 / 18, título de tarjeta 15 / 20 (600) con su subtítulo de 12 / 16, rótulo de indicador
 12 / 16 (500), cifra de indicador 24 / 30 (700), texto de tabla 13 / 18, encabezado de
@@ -107,26 +114,78 @@ activo). Las notas y textos de lectura siguen en 14 px.
   56), insignia 24 px, chip 36 px (web 32), barra de avance 6 px, interruptor 44 × 26,
   radio y casilla 22 px, mapa móvil 300 px de alto.
 - **Bordes:** 1 px `border`. Foco y selección: 1.5 px `primary`. No hay sombras, salvo el
-  marcador del mapa.
+  marcador del mapa y, en la app móvil, la tarjeta flotante de Inicio, la barra inferior y su
+  botón central (sombra muy suave: `text` al 8 %, desenfoque de 16 px).
 - Al final de cada lista con barra inferior, agrega un relleno igual al alto de la barra
   más el área segura más 20 px.
 
 ## Componentes
 
 **Barra superior.** Hay dos variantes:
-- *Raíz de pestaña* (Inicio, Pagar, Reclamos, Obras, Asistente): logo de 32 px, el rótulo
-  "ALMIRA" (11 px, 600, `primary`) sobre el nombre de la pestaña (18 px, 600), y a la
-  derecha la campana (lleva a Recordatorios) y el avatar con iniciales (lleva a Mi perfil).
-- *Detalle:* flecha atrás (zona de 48 px) y título de 18 px, alineado a la izquierda. A la
-  derecha puede ir una acción opcional, o "Paso N de M" en `caption`.
+- *Raíz de pestaña* (Inicio, Pagar, Reclamos, Obras, Asistente): en la app móvil es la
+  cabecera turquesa (ver «Cabecera turquesa y hoja blanca»). En la app Expo de referencia:
+  logo de 32 px, el rótulo "ALMIRA" sobre el nombre de la pestaña, campana y avatar, en blanco.
+- *Detalle* (deuda, reclamo, obra, pago y demás pantallas que se abren encima): barra
+  turquesa compacta de 56 px, sin línea, con la flecha atrás (zona de 48 px) y el título de
+  20 px en blanco, alineado a la izquierda. A la derecha puede ir una acción opcional.
 
-Las dos van en blanco, con una línea inferior de 1 px. La barra vino del prototipo
-desaparece.
+La barra vino del prototipo desaparece.
 
-**Barra inferior.** Cinco pestañas, en este orden: **Inicio** (`home`), **Pagar**
-(`payments`), **Reclamos** (`report`), **Obras** (`construction`) y **Asistente**
-(`support_agent`). La activa va en `primary` con el ícono relleno; las inactivas, en
-`textSecondary`. Lleva una línea superior de 1 px.
+**Barra inferior.** Blanca, con esquinas superiores de 20 px, sombra muy suave y el área
+segura respetada. Cinco destinos, en este orden: **Inicio**, **Pagar**, **Asistente** (al
+centro), **Reclamos** y **Obras**. Las rutas no cambian, solo el orden en pantalla.
+- *Asistente:* botón circular `primary` de 56 px con anillo blanco de 4 px, que sobresale
+  18 px de la barra. Lleva un robot blanco de líneas limpias de la misma familia de íconos,
+  sin cara sonriente. Activo: `primaryPressed`. Su etiqueta va alineada con las demás.
+- *Resto:* ícono redondeado de 24 px y etiqueta de 11 px. La activa va en `primary`, con el
+  ícono relleno y una línea corta de 24 × 3 px arriba; las inactivas, en `textSecondary`.
+- Animación de 200 ms, que se apaga con «reducir movimiento». Cada destino lleva su etiqueta
+  accesible y una zona de toque de 48 px o más.
+
+**Cabecera turquesa y hoja blanca (app móvil).** Es el patrón principal de las pestañas:
+- *Cabecera:* bloque `primary` sólido que empieza detrás de la barra de estado (íconos del
+  sistema claros). Arriba, el logo blanco de 28 px y el título de la pestaña en blanco, de
+  20 px; a la derecha, la campana o el perfil. Debajo puede ir contenido en blanco: el saludo
+  «Hola, {nombre}» de 24 px en Inicio o el total pendiente de 32 px en Pagar. Todo lo que va
+  sobre turquesa es blanco (5,1:1, AA); la etiqueta «Demostración» va en blanco con texto
+  `warningText`.
+- *Hoja blanca:* el contenido va en una hoja `surface` con esquinas superiores de 20 px que
+  se monta unos 20 px sobre el color. Nunca hay una hoja dentro de otra.
+- *Tarjeta flotante:* solo en Inicio, la tarjeta del total pendiente queda a caballo entre
+  la cabecera y la hoja, con radio de 16 px y la sombra muy suave. Lleva la carita feliz (sin
+  deuda) o triste (con deuda) junto al monto.
+- *Ingreso:* cabecera turquesa alta (40 % de la pantalla; 34 % en pantallas de menos de
+  700 px) con el logo vertical blanco al centro, y el formulario en una hoja blanca que sube
+  sobre ella. Con el teclado abierto la cabecera se reduce a la barra de estado.
+- En Flutter se arma con `CabeceraMarca`, `HojaBlanca` y `TarjetaFlotante`
+  (`lib/core/widgets/componentes.dart`), o con `CuerpoAsync(cabecera: …)`.
+
+**Pantalla de carga (app móvil).** El splash nativo de Android y de la web es turquesa
+completo con el ícono blanco al centro (Android 12 o superior solo admite color de fondo e
+ícono). Después sigue la pantalla de carga de Flutter con el mismo fondo, el ícono en el
+mismo lugar y tamaño (112 dp) y «Almira» debajo, mientras se recupera la sesión. Las barras
+del sistema van en el mismo turquesa y la ventana de Android también, para que no aparezca
+una franja blanca.
+
+**Fichas de datos.** Rótulo de 13 px en `textSecondary` arriba y el valor de 15 px debajo,
+a todo el ancho (no en dos columnas). Solo los montos van en filas con el valor alineado a
+la derecha. Los grupos se separan con 24 px o con una línea fina, no con cajas.
+
+**Filas de lista.** Nombre a la izquierda en 15 px 500, línea secundaria en 13 px
+`textSecondary`, monto a la derecha y flecha. Mínimo 56 px de alto, separadas por una línea
+de 1 px.
+
+**Accesos rápidos de Inicio.** Una fila de cuatro círculos `highlight` de 56 px con el ícono
+`primary` de 24 px y la etiqueta debajo, centrada, en hasta dos líneas.
+
+**Plazos y vencimientos.** Van en una línea de texto de 13 px en `textSecondary`: «Vence el
+30 de noviembre», «Respuesta hasta el 27 de noviembre». Si ya venció, esa línea va en
+`dangerText`, sin píldora ni reloj. Las insignias quedan para estados reales: En atención,
+Resuelto, Vencida y Pagada.
+
+**Pestañas.** Donde una pantalla tiene dos vistas (Estado de cuenta / Historial de pagos) se
+usan pestañas con subrayado `primary`, no un control segmentado. Con letra grande se
+desplazan en vez de cortarse.
 
 **Botones.** Siempre de ancho completo, con márgenes de 20 px, y nunca dentro de tarjetas.
 - *Primario:* relleno `primary`, texto blanco.
