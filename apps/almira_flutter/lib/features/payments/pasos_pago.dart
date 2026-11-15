@@ -16,9 +16,9 @@ class PasosPago extends StatelessWidget {
       IndicadorPasos(titulos: const ['Deuda', 'Medio de pago', 'Comprobante'], actual: actual);
 }
 
-/// A partir de esta escala de letra los nombres no entran en tres columnas: se muestra solo
-/// el paso en curso.
-const _escalaCompacta = 1.5;
+/// A partir de esta escala de letra los nombres no entran en tres columnas sin partirse: se
+/// muestra solo el paso en curso.
+const _escalaCompacta = 1.2;
 
 /// Indicador de pasos: círculos numerados unidos por una línea, con el nombre de cada paso
 /// debajo en columnas del mismo ancho. Con letra muy grande se reduce a una línea.
