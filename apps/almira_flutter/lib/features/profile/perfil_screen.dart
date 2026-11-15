@@ -213,7 +213,7 @@ class _Grupo extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            RotuloSeccion(titulo),
+            TituloSeccion(titulo),
             const SizedBox(height: AppSpacing.xs),
             ListaFilas(filas: filas),
           ],

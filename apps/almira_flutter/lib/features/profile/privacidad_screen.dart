@@ -48,7 +48,7 @@ class _PrivacidadScreenState extends ConsumerState<PrivacidadScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, AppSpacing.xl),
           children: [
-            const RotuloSeccion('Preferencias opcionales'),
+            const TituloSeccion('Preferencias opcionales'),
             const SizedBox(height: AppSpacing.xs),
             ListaFilas(
               filas: [
@@ -74,7 +74,7 @@ class _PrivacidadScreenState extends ConsumerState<PrivacidadScreen> {
             ),
             if (_error != null) ...[espacio, Aviso('No se guardó el cambio. ${_error!}', tono: Tono.error)],
             espacioGrande,
-            const RotuloSeccion('Tus datos'),
+            const TituloSeccion('Tus datos'),
             const SizedBox(height: AppSpacing.xs),
             FilaLista(
               titulo: 'Cómo se usan tus datos',
