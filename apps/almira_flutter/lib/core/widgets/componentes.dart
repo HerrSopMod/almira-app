@@ -150,21 +150,21 @@ class LogoGoogle extends StatelessWidget {
 // Dentro de la cabecera todo se dibuja en blanco (SobreTurquesa): no pongas colores a mano.
 // ---------------------------------------------------------------------------------------
 
-/// Bloque superior turquesa de las pestañas raíz. Empieza detrás de la barra de estado; lleva
-/// el logo en blanco y el título a la izquierda y las acciones a la derecha. [hijo] va debajo,
-/// también en blanco (el saludo de Inicio, el total de Pagar). Debajo de la cabecera siempre
-/// va una [HojaBlanca].
+/// Bloque superior turquesa de las pestañas raíz. Empieza detrás de la barra de estado; lleva el
+/// título de la pantalla a la izquierda y las acciones a la derecha (sin logo: ya se sabe en qué
+/// app estás). Sin [titulo], solo quedan las acciones. [hijo] va debajo, también en blanco (el
+/// saludo de Inicio). Debajo de la cabecera siempre va una [HojaBlanca].
 class CabeceraMarca extends StatelessWidget {
   const CabeceraMarca({
     super.key,
-    required this.titulo,
+    this.titulo,
     this.acciones = const [],
     this.hijo,
     this.esDemo = false,
-    this.rellenoInferior = AppSpacing.solapeHoja + AppSpacing.lg,
+    this.rellenoInferior = AppSpacing.solapeHoja,
   });
 
-  final String titulo;
+  final String? titulo;
   final List<Widget> acciones;
   final Widget? hijo;
   final bool esDemo;
@@ -188,18 +188,18 @@ class CabeceraMarca extends StatelessWidget {
                 height: AppSpacing.barraSuperior,
                 child: Row(
                   children: [
-                    const LogoAlmira(lado: AppSpacing.logoCabecera, blanco: true),
-                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: Semantics(
-                        header: true,
-                        child: Text(
-                          titulo,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
-                        ),
-                      ),
+                      child: titulo == null
+                          ? const SizedBox.shrink()
+                          : Semantics(
+                              header: true,
+                              child: Text(
+                                titulo!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
+                              ),
+                            ),
                     ),
                     // Con letra muy grande la etiqueta no entra junto al título.
                     if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15) ...[
@@ -212,7 +212,7 @@ class CabeceraMarca extends StatelessWidget {
               ),
               if (hijo != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm, right: AppSpacing.md),
+                  padding: const EdgeInsets.only(right: AppSpacing.md),
                   child: hijo,
                 ),
             ],

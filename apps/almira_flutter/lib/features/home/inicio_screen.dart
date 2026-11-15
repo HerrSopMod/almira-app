@@ -15,6 +15,7 @@ import '../../shared/services/proveedores.dart';
 import '../complaints/reclamos_logica.dart';
 import '../payments/pagos_logica.dart';
 import '../payments/widgets_deuda.dart';
+import '../profile/foto_perfil.dart';
 
 /// Cuántas obligaciones se listan en Inicio; el resto está en Pagar.
 const _maximoEnInicio = 3;
@@ -36,7 +37,6 @@ class InicioScreen extends ConsumerWidget {
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
         cabecera: (v) => CabeceraMarca(
-          titulo: 'Almira',
           esDemo: esDemo,
           acciones: [
             IconButton(
@@ -46,7 +46,7 @@ class InicioScreen extends ConsumerWidget {
             ),
             IconButton(
               tooltip: 'Mi perfil',
-              icon: const Icon(Phosphor.userCircle),
+              icon: const IconoPerfil(),
               onPressed: () => context.push(Rutas.perfil),
             ),
           ],

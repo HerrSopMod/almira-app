@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
-import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
+import '../../core/utils/rango_fechas.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/filtros.dart';
 import '../../shared/models/modelos.dart';
@@ -26,6 +27,7 @@ class PagosScreen extends ConsumerStatefulWidget {
 
 class _PagosScreenState extends ConsumerState<PagosScreen> {
   late FiltroDeuda _filtro = FiltroDeuda.de(widget.filtroInicial);
+  FiltroFechas _fechas = FiltroFechas.todas;
 
   @override
   void didUpdateWidget(PagosScreen anterior) {
@@ -44,12 +46,8 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
-        // Cabecera turquesa con el total pendiente en blanco.
-        cabecera: (v) => CabeceraMarca(
-          titulo: 'Pagar',
-          esDemo: esDemo,
-          hijo: v?.vecino == null ? null : _TotalCabecera(total: resumirDeuda(v!.deudas, hoy).total),
-        ),
+        // Cabecera baja: solo el título. El total pendiente va en la hoja, en un bloque.
+        cabecera: (v) => CabeceraMarca(titulo: 'Pagar', esDemo: esDemo),
         construir: (v) {
           if (v.vecino == null) {
             return [
@@ -63,9 +61,20 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
             ];
           }
           final resumen = resumirDeuda(v.deudas, hoy);
-          final lista = filtrarDeudas(v.deudas, _filtro, hoy);
+          // El filtro por fechas mira el vencimiento (o el día de pago, en «Pagados»).
+          final lista = [
+            for (final d in filtrarDeudas(v.deudas, _filtro, hoy))
+              if (_fechas.contiene(
+                _filtro == FiltroDeuda.pagados ? (d.fechaPago ?? d.vencimiento) : d.vencimiento,
+                hoy,
+              ))
+                d,
+          ];
           return [
+            _TotalPendiente(total: resumen.total),
+            espacio,
             GrupoFiltros(
+              titulo: 'Estado',
               chips: [
                 for (final filtro in FiltroDeuda.values)
                   ChipFiltro(
@@ -75,7 +84,13 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
                   ),
               ],
             ),
-            espacioChico,
+            espacio,
+            GrupoFiltroFechas(
+              filtro: _fechas,
+              hoy: hoy,
+              alCambiar: (f) => setState(() => _fechas = f),
+            ),
+            espacio,
             if (lista.isEmpty)
               VistaVacia(
                 icono: switch (_filtro) {
@@ -134,26 +149,29 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
   }
 }
 
-/// «Total pendiente» y el monto, en blanco dentro de la cabecera.
-class _TotalCabecera extends StatelessWidget {
-  const _TotalCabecera({required this.total});
+/// «Total pendiente» y el monto, en el único bloque Destacado de la pantalla.
+class _TotalPendiente extends StatelessWidget {
+  const _TotalPendiente({required this.total});
 
   final double total;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Total pendiente', style: textos.bodyLarge!.copyWith(color: AppColors.onPrimary)),
-        // El monto se achica antes que partirse en dos líneas.
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(soles(total), style: textos.displayMedium!.copyWith(color: AppColors.onPrimary)),
-        ),
-      ],
+    return Destacado(
+      child: Row(
+        children: [
+          Expanded(child: Text('Total pendiente', style: textos.bodyLarge)),
+          // El monto se achica antes que partirse en dos líneas.
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(soles(total), style: textos.headlineSmall!.copyWith(fontFeatures: cifrasTabulares)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

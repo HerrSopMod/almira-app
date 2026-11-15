@@ -175,6 +175,54 @@ class RepositorioSupabase implements Repositorio {
     }
   }
 
+  // --- Foto de perfil: bucket privado `avatares`, un archivo por cuenta ({user_id}/perfil.jpg) ---
+
+  static const _bucketAvatares = 'avatares';
+
+  String? get _carpetaAvatar => _cliente.auth.currentUser?.id;
+
+  @override
+  Future<String?> urlFotoPerfil() async {
+    final carpeta = _carpetaAvatar;
+    if (carpeta == null) return null;
+    try {
+      final archivos = await _cliente.storage.from(_bucketAvatares).list(path: carpeta).timeout(_espera);
+      if (!archivos.any((a) => a.name == 'perfil.jpg')) return null;
+      return await _cliente.storage.from(_bucketAvatares).createSignedUrl('$carpeta/perfil.jpg', 3600).timeout(_espera);
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
+  @override
+  Future<void> guardarFotoPerfil(Uint8List bytes) async {
+    final carpeta = _carpetaAvatar;
+    if (carpeta == null) throw const ErrorApp(TipoError.sesionVencida);
+    try {
+      await _cliente.storage
+          .from(_bucketAvatares)
+          .uploadBinary(
+            '$carpeta/perfil.jpg',
+            bytes,
+            fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+          )
+          .timeout(const Duration(seconds: 30));
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
+  @override
+  Future<void> quitarFotoPerfil() async {
+    final carpeta = _carpetaAvatar;
+    if (carpeta == null) return;
+    try {
+      await _cliente.storage.from(_bucketAvatares).remove(['$carpeta/perfil.jpg']).timeout(_espera);
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
   @override
   Future<PreferenciaWhatsapp?> preferenciaWhatsapp() async {
     try {

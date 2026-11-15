@@ -13,6 +13,7 @@ import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pagos_logica.dart';
 import '../complaints/piezas_lista.dart';
+import 'foto_perfil.dart';
 import 'whatsapp_opcion.dart';
 
 /// Mi perfil: cabecera compacta y opciones agrupadas. Solo muestra el nombre
@@ -89,20 +90,7 @@ class PerfilScreen extends ConsumerWidget {
                 child: SobreTurquesa(
                   child: Row(
                     children: [
-                      Container(
-                        width: AppSpacing.cajaGrande,
-                        height: AppSpacing.cajaGrande,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(color: AppColors.onPrimary, shape: BoxShape.circle),
-                        child: nombre == null
-                            ? const Icon(Phosphor.user, color: AppColors.primaryDark)
-                            : ExcludeSemantics(
-                                child: Text(
-                                  iniciales(nombre),
-                                  style: textos.titleMedium!.copyWith(color: AppColors.primaryDark),
-                                ),
-                              ),
-                      ),
+                      AvatarEditable(lado: AppSpacing.cajaGrande, nombre: nombre, editable: !esDemo),
                       const SizedBox(width: AppSpacing.lg),
                       Expanded(
                         child: Column(

@@ -95,17 +95,17 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
     final abajo = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: barraSobreTurquesa,
+      value: barraSobreBlanco,
       child: Scaffold(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.surfaceSubtle,
         resizeToAvoidBottomInset: true,
         body: LayoutBuilder(
           builder: (context, caja) {
             final alto = caja.maxHeight;
             final bajo = MediaQuery.sizeOf(context).height < 700;
-            // Cabecera turquesa alta (40 % de la pantalla, 34 % si es baja) con el logo blanco al
-            // centro. Con el teclado abierto se reduce a la barra de estado para que los campos e
-            // «Ingresar» queden a la vista.
+            // Parte superior clara con círculos turquesa suaves, el logo en un círculo blanco, el
+            // nombre y una frase (40 % de la pantalla, 34 % si es baja). Con el teclado abierto se
+            // reduce a la barra de estado para que los campos e «Ingresar» queden a la vista.
             final cabecera = tecladoAbierto
                 ? arriba + AppSpacing.lg
                 : alto * (bajo ? AppSpacing.cabeceraIngresoBaja : AppSpacing.cabeceraIngreso);
@@ -116,17 +116,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
                 children: [
                   SizedBox(
                     height: cabecera,
-                    child: tecladoAbierto
-                        ? null
-                        : Padding(
-                            padding: EdgeInsets.only(top: arriba, bottom: AppSpacing.solapeHoja),
-                            child: Center(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: LogoVertical(altoIcono: bajo ? AppSpacing.logoIngresoBajo : AppSpacing.logoIngreso),
-                              ),
-                            ),
-                          ),
+                    child: tecladoAbierto ? null : _ZonaClara(arriba: arriba, bajo: bajo),
                   ),
                   // Hoja blanca que sube sobre la cabecera y llega hasta el borde inferior.
                   ConstrainedBox(
@@ -351,4 +341,92 @@ class _DialogoOlvidoState extends State<_DialogoOlvido> {
           ),
         ),
       );
+}
+
+/// Parte superior del ingreso: fondo claro con círculos turquesa suaves, el logo en un círculo
+/// blanco con sombra tenue, el nombre y una frase. Ocupa el espacio que deja el formulario.
+class _ZonaClara extends StatelessWidget {
+  const _ZonaClara({required this.arriba, required this.bajo});
+
+  final double arriba;
+  final bool bajo;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final logo = bajo ? AppSpacing.logoIngresoBajo : AppSpacing.logoIngreso;
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(right: -60, top: -40, child: _Circulo(150, AppColors.primarySoft)),
+          Positioned(left: -50, bottom: 24, child: _Circulo(96, AppColors.primary.withValues(alpha: 0.10))),
+          Positioned(right: 36, bottom: 56, child: _Circulo(16, AppColors.primary.withValues(alpha: 0.22))),
+          Positioned(left: 44, top: arriba + 28, child: _Circulo(10, AppColors.primary.withValues(alpha: 0.28))),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.xxl,
+              arriba + AppSpacing.md,
+              AppSpacing.xxl,
+              AppSpacing.solapeHoja + AppSpacing.md,
+            ),
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Semantics(
+                  header: true,
+                  label: 'Almira',
+                  child: ExcludeSemantics(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: logo,
+                          height: logo,
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.textPrimary.withValues(alpha: 0.10),
+                                blurRadius: 18,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Center(child: LogoAlmira(lado: logo * 0.62)),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text('Almira', style: textos.headlineMedium),
+                        const SizedBox(height: AppSpacing.xs),
+                        SizedBox(
+                          width: 280,
+                          child: Text(
+                            'Tus pagos, reclamos y obras municipales en un solo lugar.',
+                            style: textos.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Circulo extends StatelessWidget {
+  const _Circulo(this.lado, this.color);
+
+  final double lado;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) =>
+      Container(width: lado, height: lado, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
 }
