@@ -28,9 +28,9 @@ class ConfigurarScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => ref.read(sesionProvider.notifier).cerrarSesion(),
-            style: TextButton.styleFrom(foregroundColor: Colors.white),
             child: const Text('Salir'),
           ),
+          const SizedBox(width: AppSpacing.sm),
         ],
       ),
       body: SafeArea(

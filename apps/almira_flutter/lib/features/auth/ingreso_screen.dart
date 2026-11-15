@@ -169,7 +169,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
           textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
             labelText: 'Correo o código de contribuyente',
-            prefixIcon: Icon(Phosphor.user, size: AppIconos.lista),
+            prefixIcon: Icon(Phosphor.user),
           ),
           validator: (v) =>
               (v ?? '').trim().length >= 4 ? null : 'Escribe tu correo o tu código de contribuyente.',
@@ -185,10 +185,10 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
           onFieldSubmitted: (_) => _ingresar(),
           decoration: InputDecoration(
             labelText: 'Clave web',
-            prefixIcon: const Icon(Phosphor.lock, size: AppIconos.lista),
+            prefixIcon: const Icon(Phosphor.lock),
             suffixIcon: IconButton(
               tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
-              icon: Icon(_verClave ? Phosphor.eyeSlash : Phosphor.eye, size: AppIconos.lista),
+              icon: Icon(_verClave ? Phosphor.eyeSlash : Phosphor.eye),
               onPressed: () => setState(() => _verClave = !_verClave),
             ),
           ),
@@ -309,7 +309,7 @@ class _DialogoOlvidoState extends State<_DialogoOlvido> {
             autocorrect: false,
             decoration: const InputDecoration(
               labelText: 'Correo',
-              prefixIcon: Icon(Phosphor.envelope, size: AppIconos.lista),
+              prefixIcon: Icon(Phosphor.envelope),
             ),
             validator: (v) => RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
                 ? null

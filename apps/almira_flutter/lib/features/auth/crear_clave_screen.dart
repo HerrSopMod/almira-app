@@ -120,7 +120,7 @@ class _CrearClaveScreenState extends ConsumerState<CrearClaveScreen> {
                             : const Text('Guardar clave'),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      OutlinedButton(onPressed: _ocupado ? null : _seguir, child: const Text('Ahora no')),
+                      TextButton(onPressed: _ocupado ? null : _seguir, child: const Text('Ahora no')),
                     ],
                   ),
                 ),

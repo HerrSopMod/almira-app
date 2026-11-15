@@ -201,9 +201,8 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
             error: (error, _) => Aviso(
               ErrorApp.de(error).detalle,
               tono: Tono.error,
-              accion: OutlinedButton(
+              accion: TextButton(
                 onPressed: () => ref.invalidate(_municipalidadesRegistroProvider),
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                 child: const Text('Reintentar'),
               ),
             ),
