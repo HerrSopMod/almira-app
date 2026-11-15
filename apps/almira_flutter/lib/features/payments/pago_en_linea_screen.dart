@@ -49,13 +49,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
         title: const Text('Pagos en línea'),
         bottom: TabBar(
           controller: _pestanasControl,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
-          labelStyle: textos.titleSmall,
-          unselectedLabelStyle: textos.titleSmall!.copyWith(fontWeight: FontWeight.w500),
           labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          dividerColor: Colors.transparent,
           tabs: [for (final t in _pestanas) Tab(text: t.etiqueta)],
         ),
       ),
@@ -82,19 +76,21 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
             return Column(
               children: [
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.lg, AppSpacing.margen, 0),
+                  padding: EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, 0),
                   child: PasosPago(actual: 0),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.md, AppSpacing.margen, 0),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, 0),
                   child: SegmentedButton<bool>(
                     segments: const [
-                      ButtonSegment(value: true, label: Text('Beneficio al vencimiento')),
-                      ButtonSegment(value: false, label: Text('Deuda general')),
+                      ButtonSegment(
+                        value: true,
+                        label: Text('Beneficio al vencimiento', textAlign: TextAlign.center),
+                      ),
+                      ButtonSegment(value: false, label: Text('Deuda general', textAlign: TextAlign.center)),
                     ],
                     selected: {_beneficio},
                     showSelectedIcon: false,
-                    style: SegmentedButton.styleFrom(textStyle: textos.labelMedium),
                     onSelectionChanged: (s) => setState(() => _beneficio = s.first),
                   ),
                 ),
@@ -151,11 +147,16 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Expanded(child: Text('Importe total', style: textos.bodyLarge)),
-                          Text(
-                            soles(total),
-                            style: textos.titleLarge!.copyWith(fontFeatures: cifrasTabulares),
+                          Expanded(child: Text('Importe total', style: textos.bodyMedium)),
+                          const SizedBox(width: AppSpacing.md),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: Text(soles(total), style: textos.headlineSmall),
+                            ),
                           ),
                         ],
                       ),
