@@ -134,23 +134,26 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
               espacio,
               AccionPago(municipalidad: v.municipalidad, esDemo: esDemo),
             ],
-            espacioGrande,
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => context.push(Rutas.estadoCuenta),
-                    child: const Text('Estado de cuenta'),
+            espacioSeccion,
+            const TituloSeccion('Documentos'),
+            espacio,
+            Tarjeta(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  FilaAccion(
+                    icono: Phosphor.receipt,
+                    titulo: 'Estado de cuenta',
+                    alTocar: () => context.push(Rutas.estadoCuenta),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => context.push(Rutas.cuponera),
-                    child: const Text('Cuponera'),
+                  const Divider(indent: AppSpacing.lg, endIndent: AppSpacing.lg),
+                  FilaAccion(
+                    icono: Phosphor.fileText,
+                    titulo: 'Cuponera',
+                    alTocar: () => context.push(Rutas.cuponera),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ];
         },

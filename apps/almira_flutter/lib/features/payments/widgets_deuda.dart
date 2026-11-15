@@ -25,7 +25,9 @@ class InsigniaDeuda extends StatelessWidget {
       };
 }
 
-/// Fila de una obligación: concepto, periodo, vencimiento, importe y estado.
+/// Fila de una obligación. Primera línea: ícono, nombre e importe a la derecha; debajo, el
+/// periodo y el vencimiento, con la insignia de estado alineada a la derecha. Así el nombre
+/// tiene todo el ancho y no se parte a mitad de palabra con letra grande.
 class FilaDeuda extends StatelessWidget {
   const FilaDeuda({super.key, required this.deuda, required this.hoy, this.alTocar});
 
@@ -43,30 +45,37 @@ class FilaDeuda extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconoTributo(deuda.tipo, lado: 36),
+          IconoTributo(deuda.tipo, lado: AppSpacing.caja),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(deuda.tipo.nombre, style: textos.titleMedium),
-                if (deuda.periodo.isNotEmpty) Text(deuda.periodo, style: textos.bodyMedium),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: Text(deuda.tipo.nombre, style: textos.titleMedium)),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      soles(deuda.total),
+                      style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares),
+                    ),
+                  ],
+                ),
+                if (deuda.periodo.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(deuda.periodo, style: textos.bodyMedium),
+                ],
                 const SizedBox(height: AppSpacing.sm),
-                Text(vencimientoDe(deuda, hoy), style: textos.bodySmall),
+                Row(
+                  children: [
+                    Expanded(child: Text(vencimientoDe(deuda, hoy), style: textos.bodySmall)),
+                    const SizedBox(width: AppSpacing.sm),
+                    InsigniaDeuda(estado),
+                  ],
+                ),
               ],
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                soles(deuda.total),
-                style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              InsigniaDeuda(estado),
-            ],
           ),
         ],
       ),
@@ -89,10 +98,9 @@ class AccionPago extends StatelessWidget {
         tono: Tono.aviso,
       );
     }
-    return FilledButton.icon(
+    return FilledButton(
       onPressed: () => context.push(Rutas.pagoEnLinea),
-      icon: const Icon(Phosphor.lock, size: 20),
-      label: const Text('Pagar en línea'),
+      child: const Text('Pagar en línea'),
     );
   }
 }
