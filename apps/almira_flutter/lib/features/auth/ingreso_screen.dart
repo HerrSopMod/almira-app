@@ -139,7 +139,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> {
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const Center(child: EtiquetaDemo(sobreTurquesa: true)),
+      const Center(child: EtiquetaDemo()),
       const SizedBox(height: AppSpacing.md),
       Text(
         'Esta versión muestra datos de ejemplo. No necesitas una cuenta.',

@@ -45,7 +45,7 @@ class AppConfirmDialog extends StatelessWidget {
         horizontal: AppSpacing.xl,
         vertical: AppSpacing.xl,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.dialogo)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
         child: SingleChildScrollView(
@@ -88,7 +88,7 @@ class AppConfirmDialog extends StatelessWidget {
                         ),
                         side: const BorderSide(
                           color: AppColors.primary,
-                          width: 1.2,
+                          width: 1.5,
                         ),
                         foregroundColor: AppColors.primary,
                       ),

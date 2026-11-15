@@ -55,7 +55,7 @@ class ReclamosScreen extends ConsumerWidget {
           if (esDemo)
             const Padding(
               padding: EdgeInsets.only(right: AppSpacing.lg),
-              child: Center(child: EtiquetaDemo(sobreTurquesa: true)),
+              child: Center(child: EtiquetaDemo()),
             ),
         ],
       ),

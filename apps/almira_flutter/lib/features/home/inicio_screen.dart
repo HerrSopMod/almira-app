@@ -59,7 +59,7 @@ class InicioScreen extends ConsumerWidget {
         actions: [
           // Con letra muy grande no entra junto al saludo.
           if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15)
-            const Center(child: EtiquetaDemo(sobreTurquesa: true)),
+            const Center(child: EtiquetaDemo()),
           IconButton(
             tooltip: 'Avisos',
             icon: const Icon(Phosphor.bell),

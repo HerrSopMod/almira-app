@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:almira_flutter/app/app.dart';
 import 'package:almira_flutter/app/router.dart';
 import 'package:almira_flutter/app/theme/app_colors.dart';
+import 'package:almira_flutter/app/theme/app_spacing.dart';
 import 'package:almira_flutter/app/theme/app_theme.dart';
 import 'package:almira_flutter/core/widgets/app_confirm_dialog.dart';
 import 'package:almira_flutter/core/widgets/filtros.dart';
@@ -187,9 +188,9 @@ void main() {
       expect(cancelar.width, aceptar.width);
       expect(cancelar.height, 48);
       expect(aceptar.height, 48);
-      // Esquinas del diálogo de 24.
+      // Esquinas del diálogo según el tema.
       final forma = tester.widget<Dialog>(find.byType(Dialog)).shape! as RoundedRectangleBorder;
-      expect(forma.borderRadius, BorderRadius.circular(24));
+      expect(forma.borderRadius, BorderRadius.circular(AppRadius.dialogo));
     });
 
     testWidgets('la acción destructiva va en rojo con texto blanco; «Cancelar» con borde turquesa', (tester) async {

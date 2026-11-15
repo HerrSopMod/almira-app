@@ -143,7 +143,7 @@ class _ObrasScreenState extends ConsumerState<ObrasScreen> {
       appBar: AppBar(
         title: const Text('Obras'),
         actions: [
-          if (esDemo) const Center(child: EtiquetaDemo(sobreTurquesa: true)),
+          if (esDemo) const Center(child: EtiquetaDemo()),
           if (hayMapa)
             IconButton(
               tooltip: _mapaVisible ? 'Ver solo la lista' : 'Ver el mapa',

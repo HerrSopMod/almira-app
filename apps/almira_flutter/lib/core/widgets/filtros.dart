@@ -48,10 +48,10 @@ class ChipFiltro extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (activo) ...[
-                    const Icon(Phosphor.check, size: 16, color: Colors.white),
+                    const Icon(Phosphor.check, size: AppIconos.insignia, color: Colors.white),
                     const SizedBox(width: 6),
                   ] else if (icono != null) ...[
-                    Icon(icono, size: 16, color: AppColors.textPrimary),
+                    Icon(icono, size: AppIconos.insignia, color: AppColors.textPrimary),
                     const SizedBox(width: 6),
                   ],
                   Text(texto, style: estilo, maxLines: 1),
