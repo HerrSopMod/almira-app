@@ -7,6 +7,7 @@ import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_theme.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
@@ -196,10 +197,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
                       child: Column(
                         children: [
                           for (final d in elegidas)
-                            FilaDato(
-                              d.periodo.isEmpty ? d.concepto : '${d.concepto} · ${d.periodo}',
-                              soles(d.saldo),
-                            ),
+                            _LineaResumen(concepto: d.concepto, periodo: d.periodo, monto: d.saldo),
                           const Divider(height: AppSpacing.xl),
                           FilaDato('Total a pagar', soles(total), destacado: true),
                         ],
@@ -303,6 +301,42 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
           validator: validarCodigoAprobacion,
         ),
       ];
+}
+
+/// Una obligación del resumen: concepto y, debajo, el periodo; el monto a la derecha.
+class _LineaResumen extends StatelessWidget {
+  const _LineaResumen({required this.concepto, required this.periodo, required this.monto});
+
+  final String concepto;
+  final String periodo;
+  final double monto;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(concepto, style: textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500)),
+                if (periodo.isNotEmpty) Text(periodo, style: textos.bodySmall),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Text(
+            soles(monto),
+            style: textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500, fontFeatures: cifrasTabulares),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Medio de pago como tarjeta con borde: caja de ícono neutra a la izquierda, nombre y
@@ -465,7 +499,7 @@ class _ComprobanteState extends ConsumerState<_Comprobante> {
                   FilaDato('Medio de pago', widget.medio.etiqueta),
                   const Divider(height: AppSpacing.xl),
                   for (final l in widget.lineas)
-                    FilaDato(l.periodo.isEmpty ? l.concepto : '${l.concepto} · ${l.periodo}', soles(l.monto)),
+                    _LineaResumen(concepto: l.concepto, periodo: l.periodo, monto: l.monto),
                 ],
               ),
             ),

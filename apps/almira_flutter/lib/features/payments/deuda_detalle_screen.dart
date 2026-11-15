@@ -102,7 +102,7 @@ class DeudaDetalleScreen extends ConsumerWidget {
 }
 
 /// «Vence en 15 días», «Vence hoy» o «Venció hace 3 días», con un reloj a la izquierda y la
-/// insignia de estado a la derecha.
+/// insignia de estado a la derecha. La fecha exacta va en la tarjeta de abajo.
 class _FilaPlazo extends StatelessWidget {
   const _FilaPlazo({required this.estado, required this.vencimiento, required this.hoy});
 
@@ -112,12 +112,12 @@ class _FilaPlazo extends StatelessWidget {
 
   String get _texto {
     final v = vencimiento;
-    if (estado == EstadoDeuda.pagada) return v == null ? 'Pagada' : 'Pagada · vencía el ${diaYMes(v)}';
+    if (estado == EstadoDeuda.pagada) return 'Pagada';
     if (v == null) return 'Sin fecha de vencimiento';
     final dias = diasEntre(hoy, v);
     if (dias == 0) return 'Vence hoy';
-    if (dias > 0) return 'Vence en ${plural(dias, 'día', 'días')} · ${diaYMes(v)}';
-    return 'Venció hace ${plural(-dias, 'día', 'días')} · ${diaYMes(v)}';
+    if (dias > 0) return 'Vence en ${plural(dias, 'día', 'días')}';
+    return 'Venció hace ${plural(-dias, 'día', 'días')}';
   }
 
   @override
