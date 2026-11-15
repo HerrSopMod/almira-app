@@ -72,16 +72,16 @@ class PerfilScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.margen,
-            AppSpacing.lg,
-            AppSpacing.margen,
             AppSpacing.xl,
+            AppSpacing.margen,
+            AppSpacing.xxl,
           ),
           children: [
             Row(
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: AppSpacing.cajaGrande,
+                  height: AppSpacing.cajaGrande,
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(
                     color: AppColors.primarySoft,
@@ -101,7 +101,7 @@ class PerfilScreen extends ConsumerWidget {
                           ),
                         ),
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +118,7 @@ class PerfilScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            espacioGrande,
+            espacioSeccion,
             _Grupo(
               titulo: 'Cuenta y predio',
               hijos: [
@@ -190,15 +190,16 @@ class PerfilScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            // Peligro suave, según la guía: borde gris y texto en rojo oscuro.
             OutlinedButton.icon(
               onPressed: () => _cerrarSesion(context, ref),
-              icon: const Icon(Phosphor.signOut, size: 20),
+              icon: const Icon(Phosphor.signOut, size: AppIconos.boton),
               label: Text(
                 esDemo ? 'Salir de la demostración' : 'Cerrar sesión',
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.error, width: 1.2),
+                side: const BorderSide(color: AppColors.border),
               ),
             ),
           ],
@@ -226,10 +227,7 @@ class _Grupo extends StatelessWidget {
             left: AppSpacing.xs,
             bottom: AppSpacing.sm,
           ),
-          child: Semantics(
-            header: true,
-            child: Text(titulo, style: Theme.of(context).textTheme.labelMedium),
-          ),
+          child: RotuloSeccion(titulo),
         ),
         Tarjeta(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -260,6 +258,7 @@ class _Opcion extends StatelessWidget {
     subtitle: detalle == null ? null : Text(detalle!),
     trailing: const Icon(
       Phosphor.caretRight,
+      size: AppIconos.lista,
       color: AppColors.textSecondary,
     ),
     onTap: alTocar,
