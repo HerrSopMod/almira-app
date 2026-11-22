@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../app/theme/iconos.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../utils/formato.dart';
+import '../utils/rango_fechas.dart';
+import 'selector_rango_fechas.dart';
 
 /// Chip de filtro. Activo: relleno turquesa, texto blanco y un check pequeño. Inactivo: blanco,
 /// borde gris visible (3:1) y texto oscuro. Mínimo 44 de alto para tocarlo bien.
@@ -96,4 +99,73 @@ class GrupoFiltros extends StatelessWidget {
           ),
         ],
       );
+}
+
+/// Filtro por fecha, fácil de usar: periodos rápidos («Este mes», «3 meses», «Este año») y un
+/// botón con el calendario para elegir un rango de días. Con un rango elegido, el botón muestra
+/// las fechas. [hoy] viene del reloj de la app.
+class GrupoFiltroFechas extends StatelessWidget {
+  const GrupoFiltroFechas({
+    super.key,
+    required this.filtro,
+    required this.hoy,
+    required this.alCambiar,
+    this.titulo = 'Fechas',
+  });
+
+  final FiltroFechas filtro;
+  final DateTime hoy;
+  final ValueChanged<FiltroFechas> alCambiar;
+  final String titulo;
+
+  Future<void> _elegirEnCalendario(BuildContext context) async {
+    final dia = DateUtils.dateOnly(hoy);
+    final rango = await elegirRangoFechas(
+      context,
+      hoy: dia,
+      primera: DateTime(dia.year - 5),
+      ultima: DateTime(dia.year + 1, 12, 31),
+      inicial: filtro.elegido,
+    );
+    if (rango != null) alCambiar(filtro.conRango(rango));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final elegido = filtro.periodo == PeriodoFecha.elegido ? filtro.elegido : null;
+    final textoCalendario = elegido == null
+        ? 'Elegir fechas'
+        : '${fechaCorta(elegido.start)} – ${fechaCorta(elegido.end)}';
+    return GrupoFiltros(
+      titulo: titulo,
+      chips: [
+        ChipFiltro(
+          texto: 'Todas',
+          activo: filtro.periodo == PeriodoFecha.todas,
+          alTocar: () => alCambiar(FiltroFechas.todas),
+        ),
+        ChipFiltro(
+          texto: textoCalendario,
+          icono: Phosphor.calendarBlank,
+          activo: filtro.periodo == PeriodoFecha.elegido,
+          alTocar: () => _elegirEnCalendario(context),
+        ),
+        ChipFiltro(
+          texto: 'Este mes',
+          activo: filtro.periodo == PeriodoFecha.esteMes,
+          alTocar: () => alCambiar(filtro.conPeriodo(PeriodoFecha.esteMes)),
+        ),
+        ChipFiltro(
+          texto: '3 meses',
+          activo: filtro.periodo == PeriodoFecha.tresMeses,
+          alTocar: () => alCambiar(filtro.conPeriodo(PeriodoFecha.tresMeses)),
+        ),
+        ChipFiltro(
+          texto: 'Este año',
+          activo: filtro.periodo == PeriodoFecha.esteAnio,
+          alTocar: () => alCambiar(filtro.conPeriodo(PeriodoFecha.esteAnio)),
+        ),
+      ],
+    );
+  }
 }

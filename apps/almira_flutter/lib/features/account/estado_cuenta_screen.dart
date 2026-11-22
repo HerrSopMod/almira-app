@@ -8,6 +8,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
+import '../../core/utils/rango_fechas.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/filtros.dart';
 import '../../core/widgets/tributo.dart';
@@ -36,7 +37,7 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen>
     _pestanas.dispose();
     super.dispose();
   }
-  int? _anio;
+  FiltroFechas _fechas = FiltroFechas.todas;
   TipoDeuda? _tributo;
   bool _generando = false;
 
@@ -92,7 +93,7 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen>
               tabs: const [Tab(text: 'Estado de cuenta'), Tab(text: 'Historial de pagos')],
             ),
             espacioGrande,
-            if (_vista == _Vista.estado) ..._estado(v, hoy) else ..._historial(v),
+            if (_vista == _Vista.estado) ..._estado(v, hoy) else ..._historial(v, hoy),
           ];
         },
       ),
@@ -111,8 +112,6 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen>
       espacioChico,
       Ficha('Contribuyente', tipoTitulo(vecino.nombreCompleto)),
       Ficha('Código', vecino.codigoContribuyente ?? '-'),
-      if (vecino.dni != null) Ficha('DNI o RUC', vecino.dni!),
-      if (vecino.domicilioFiscal != null) Ficha('Domicilio fiscal', vecino.domicilioFiscal!),
       espacio,
       FilledButton.icon(
         onPressed: _generando ? null : () => _descargar(v, hoy),
@@ -152,28 +151,20 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen>
     ];
   }
 
-  List<Widget> _historial(VistaMunicipal v) {
-    final aniosConPago = {
-      for (final p in historialDePagos(v.pagos, v.deudas))
-        if (p.anio != null) p.anio!,
-    }.toList()
-      ..sort((a, b) => b.compareTo(a));
+  List<Widget> _historial(VistaMunicipal v, DateTime hoy) {
     final tributos = {
       for (final p in historialDePagos(v.pagos, v.deudas))
         if (p.tributo != null) p.tributo!,
     }.toList();
-    final lista = historialDePagos(v.pagos, v.deudas, anio: _anio, tributo: _tributo);
+    final lista = [
+      for (final p in historialDePagos(v.pagos, v.deudas, tributo: _tributo))
+        if (_fechas.contiene(p.pago.creadoEn, hoy)) p,
+    ];
     final total = lista.fold<double>(0, (s, p) => s + p.pago.monto);
 
     return [
-      GrupoFiltros(
-        titulo: 'Año',
-        chips: [
-          ChipFiltro(texto: 'Todos', activo: _anio == null, alTocar: () => setState(() => _anio = null)),
-          for (final a in aniosConPago)
-            ChipFiltro(texto: '$a', activo: _anio == a, alTocar: () => setState(() => _anio = a)),
-        ],
-      ),
+      // El calendario sustituye a los chips de año: periodos rápidos o un rango de días.
+      GrupoFiltroFechas(filtro: _fechas, hoy: hoy, alCambiar: (f) => setState(() => _fechas = f)),
       espacio,
       GrupoFiltros(
         titulo: 'Tributo',
@@ -213,11 +204,12 @@ class _FilaHistorial extends StatelessWidget {
     final d = pago.deuda;
     final fecha = pago.pago.creadoEn;
     return FilaLista(
+      inicio: d == null ? null : IconoTributo(d.tipo, lado: AppSpacing.caja),
       titulo: d?.tipo.nombre ?? 'Pago',
       monto: soles(pago.pago.monto),
       detalle: Text(
         [
-          if (d != null) _periodoConAnio(d),
+          if (d != null) periodoConAnio(d),
           if (fecha != null) fechaCorta(fecha),
           pago.pago.etiquetaMedio,
           if (pago.pago.referencia != null) pago.pago.referencia!,
@@ -357,10 +349,4 @@ List<_GrupoDeTributos> _gruposDeTributos(List<GrupoTributo> tributos) {
     if (tasas.isNotEmpty) _GrupoDeTributos('Tasas (arbitrios)', tasas),
     if (otros.isNotEmpty) _GrupoDeTributos('Otros cobros', otros),
   ];
-}
-
-/// «Trimestre 02 2026»; si el periodo ya trae el año («4.ª cuota 2026»), no se repite.
-String _periodoConAnio(Deuda d) {
-  final periodo = etiquetaPeriodo(d);
-  return periodo.contains('${d.anioTributo}') ? periodo : '$periodo ${d.anioTributo}';
 }

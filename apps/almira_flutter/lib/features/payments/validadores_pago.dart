@@ -48,4 +48,5 @@ String? validarDatosPago(DatosPago datos, DateTime hoy) => switch (datos) {
           validarCvv(d.cvv) ??
           validarTitular(d.titular),
       DatosYape d => validarCelularYape(d.celular) ?? validarCodigoAprobacion(d.codigoAprobacion),
+      DatosPlin d => validarCelularYape(d.celular) ?? validarCodigoAprobacion(d.codigoAprobacion),
     };

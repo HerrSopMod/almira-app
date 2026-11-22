@@ -74,7 +74,7 @@ abstract final class AppTheme {
     );
 
     const base = TextStyle(
-      fontFamily: 'Inter',
+      fontFamily: 'PlusJakartaSans',
       color: AppColors.textPrimary,
       letterSpacing: 0,
     );
@@ -154,7 +154,7 @@ abstract final class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: esquema,
-      fontFamily: 'Inter',
+      fontFamily: 'PlusJakartaSans',
       textTheme: textos,
       scaffoldBackgroundColor: AppColors.background,
       splashFactory: InkSparkle.splashFactory,

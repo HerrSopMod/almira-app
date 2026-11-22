@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
@@ -142,6 +143,17 @@ class RepositorioDemo implements Repositorio {
 
   @override
   Future<bool> guardarCelular(String celular) async => true;
+
+  // La foto de perfil se guarda en Supabase: sin cuenta real no hay dónde guardarla.
+  @override
+  Future<String?> urlFotoPerfil() async => null;
+
+  @override
+  Future<void> guardarFotoPerfil(Uint8List bytes) async =>
+      throw const ErrorApp(TipoError.servidor, 'La foto de perfil necesita conexión con el servicio.');
+
+  @override
+  Future<void> quitarFotoPerfil() async {}
 
   // Los recordatorios por WhatsApp necesitan la cuenta real: en modo demostración no hay nada que activar.
   @override

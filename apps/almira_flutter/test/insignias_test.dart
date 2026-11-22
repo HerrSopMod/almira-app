@@ -28,10 +28,7 @@ Widget _app(SharedPreferences preferencias) => ProviderScope(
 
 /// Con la tipografía real: la de prueba dibuja cada letra como un cuadrado y desborda sola.
 Future<void> _cargarInter() async {
-  final cargador = FontLoader('Inter');
-  for (final peso in ['400Regular', '500Medium', '600SemiBold', '700Bold']) {
-    cargador.addFont(rootBundle.load('assets/fonts/Inter_$peso.ttf'));
-  }
+  final cargador = FontLoader('PlusJakartaSans')..addFont(rootBundle.load('assets/fonts/PlusJakartaSans.ttf'));
   await cargador.load();
 }
 

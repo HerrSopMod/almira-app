@@ -13,6 +13,7 @@ import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pagos_logica.dart';
 import '../complaints/piezas_lista.dart';
+import 'foto_perfil.dart';
 import 'whatsapp_opcion.dart';
 
 /// Mi perfil: cabecera compacta y opciones agrupadas. Solo muestra el nombre
@@ -89,20 +90,7 @@ class PerfilScreen extends ConsumerWidget {
                 child: SobreTurquesa(
                   child: Row(
                     children: [
-                      Container(
-                        width: AppSpacing.cajaGrande,
-                        height: AppSpacing.cajaGrande,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(color: AppColors.onPrimary, shape: BoxShape.circle),
-                        child: nombre == null
-                            ? const Icon(Phosphor.user, color: AppColors.primaryDark)
-                            : ExcludeSemantics(
-                                child: Text(
-                                  iniciales(nombre),
-                                  style: textos.titleMedium!.copyWith(color: AppColors.primaryDark),
-                                ),
-                              ),
-                      ),
+                      AvatarEditable(lado: AppSpacing.cajaGrande, nombre: nombre, editable: !esDemo),
                       const SizedBox(width: AppSpacing.lg),
                       Expanded(
                         child: Column(
@@ -139,12 +127,18 @@ class PerfilScreen extends ConsumerWidget {
                           titulo: 'Cuenta y predio',
                           filas: [
                             for (final predio in v?.predios ?? const [])
-                              FilaLista(titulo: predio.direccion, detalle: DetalleFila('Predio ${predio.codigo}')),
+                              FilaLista(
+                                inicio: const IconoColor(PhosphorFill.houseLine, color: AppColors.primary),
+                                titulo: predio.direccion,
+                                detalle: DetalleFila('Predio ${predio.codigo}'),
+                              ),
                             FilaLista(
+                              inicio: const IconoColor(PhosphorFill.identificationBadge, color: AppColors.acentoVioleta),
                               titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
                               alTocar: () => context.push(Rutas.vincular),
                             ),
                             FilaLista(
+                              inicio: const IconoColor(PhosphorFill.buildings, color: AppColors.acentoAzul),
                               titulo: 'Municipalidad',
                               detalle: v?.municipalidad == null ? null : DetalleFila(v!.municipalidad!.nombre),
                               alTocar: () => context.push(Rutas.municipalidad),
@@ -156,15 +150,25 @@ class PerfilScreen extends ConsumerWidget {
                           filas: [
                             if (!esDemo)
                               FilaLista(
+                                inicio: const IconoColor(PhosphorFill.key, color: AppColors.acentoAmbar),
                                 titulo: 'Clave web',
                                 detalle: DetalleFila('Para entrar con tu correo o tu cuponera'),
                                 alTocar: () => _crearClave(context, ref),
                               ),
-                            FilaLista(titulo: 'Avisos y canales', alTocar: () => context.push(Rutas.avisos)),
+                            FilaLista(
+                              inicio: const IconoColor(PhosphorFill.bell, color: AppColors.acentoRosa),
+                              titulo: 'Avisos y canales',
+                              alTocar: () => context.push(Rutas.avisos),
+                            ),
                             // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
                             if (!esDemo && vecino != null) const OpcionWhatsapp(),
-                            FilaLista(titulo: 'Privacidad', alTocar: () => context.push(Rutas.privacidad)),
+                            FilaLista(
+                              inicio: const IconoColor(PhosphorFill.shieldCheck, color: AppColors.acentoVerde),
+                              titulo: 'Privacidad',
+                              alTocar: () => context.push(Rutas.privacidad),
+                            ),
                             FilaInterruptor(
+                              inicio: const IconoColor(PhosphorFill.textAa, color: AppColors.primary),
                               titulo: 'Texto más grande',
                               valor: textoGrande,
                               alCambiar: ref.read(textoGrandeProvider.notifier).cambiar,
@@ -175,10 +179,15 @@ class PerfilScreen extends ConsumerWidget {
                           titulo: 'Trámites y ayuda',
                           filas: [
                             FilaLista(
+                              inicio: const IconoColor(PhosphorFill.receipt, color: AppColors.acentoAzul),
                               titulo: 'Constancias de pago',
                               alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
                             ),
-                            FilaLista(titulo: 'Atención', alTocar: () => context.push(Rutas.atencion)),
+                            FilaLista(
+                              inicio: const IconoColor(PhosphorFill.headset, color: AppColors.acentoVioleta),
+                              titulo: 'Atención',
+                              alTocar: () => context.push(Rutas.atencion),
+                            ),
                           ],
                         ),
                         // Peligro suave, según la guía: borde gris y texto en rojo oscuro.

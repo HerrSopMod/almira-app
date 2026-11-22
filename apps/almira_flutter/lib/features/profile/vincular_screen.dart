@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/iconos.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/escudo_municipal.dart';
 import '../../shared/services/proveedores.dart';
 import '../auth/formulario_vincular.dart';
 
@@ -33,7 +34,15 @@ class VincularScreen extends ConsumerWidget {
               ];
             }
             return [
-              Text(municipalidad.nombre, style: textos.titleMedium),
+              Row(
+                children: [
+                  if (rutaEscudo(municipalidad) != null) ...[
+                    EscudoMunicipal(municipalidad, alto: 40),
+                    const SizedBox(width: AppSpacing.md),
+                  ],
+                  Expanded(child: Text(municipalidad.nombre, style: textos.titleMedium)),
+                ],
+              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Comprobamos tu número de cuponera y tu DNI.',

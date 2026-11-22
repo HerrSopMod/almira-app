@@ -9,6 +9,7 @@ import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/tributo.dart';
 import '../../shared/models/modelos.dart';
+import '../account/estado_cuenta_logica.dart';
 import 'pagos_logica.dart';
 
 class InsigniaDeuda extends StatelessWidget {
@@ -42,6 +43,7 @@ class FilaDeuda extends StatelessWidget {
     final estado = deuda.estadoAl(hoy);
     final vencida = estado == EstadoDeuda.vencida;
     return FilaLista(
+      inicio: IconoTributo(deuda.tipo, lado: AppSpacing.caja),
       titulo: deuda.tipo.nombre,
       monto: soles(deuda.total),
       alTocar: alTocar,
@@ -49,7 +51,7 @@ class FilaDeuda extends StatelessWidget {
       detalle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (deuda.periodo.isNotEmpty) Text(deuda.periodo, style: textos.bodyMedium),
+          Text(periodoConAnio(deuda), style: textos.bodyMedium),
           if (estado == EstadoDeuda.pagada) ...[
             const SizedBox(height: AppSpacing.xs),
             InsigniaDeuda(estado),

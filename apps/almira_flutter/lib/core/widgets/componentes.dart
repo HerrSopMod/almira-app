@@ -56,7 +56,7 @@ class LogoVertical extends StatelessWidget {
   );
 }
 
-/// Marca en una fila: ícono de 28 con «Almira» al lado, en Inter Bold. En [blanco] va sobre
+/// Marca en una fila: ícono de 28 con «Almira» al lado, en Plus Jakarta Sans Bold. En [blanco] va sobre
 /// turquesa. Se mantiene por compatibilidad: las pestañas raíz ya la traen en [CabeceraMarca].
 class MarcaAlmira extends StatelessWidget {
   const MarcaAlmira({super.key, this.blanco = false});
@@ -150,21 +150,21 @@ class LogoGoogle extends StatelessWidget {
 // Dentro de la cabecera todo se dibuja en blanco (SobreTurquesa): no pongas colores a mano.
 // ---------------------------------------------------------------------------------------
 
-/// Bloque superior turquesa de las pestañas raíz. Empieza detrás de la barra de estado; lleva
-/// el logo en blanco y el título a la izquierda y las acciones a la derecha. [hijo] va debajo,
-/// también en blanco (el saludo de Inicio, el total de Pagar). Debajo de la cabecera siempre
-/// va una [HojaBlanca].
+/// Bloque superior turquesa de las pestañas raíz. Empieza detrás de la barra de estado; lleva el
+/// título de la pantalla a la izquierda y las acciones a la derecha (sin logo: ya se sabe en qué
+/// app estás). Sin [titulo], solo quedan las acciones. [hijo] va debajo, también en blanco (el
+/// saludo de Inicio). Debajo de la cabecera siempre va una [HojaBlanca].
 class CabeceraMarca extends StatelessWidget {
   const CabeceraMarca({
     super.key,
-    required this.titulo,
+    this.titulo,
     this.acciones = const [],
     this.hijo,
     this.esDemo = false,
-    this.rellenoInferior = AppSpacing.solapeHoja + AppSpacing.lg,
+    this.rellenoInferior = AppSpacing.solapeHoja,
   });
 
-  final String titulo;
+  final String? titulo;
   final List<Widget> acciones;
   final Widget? hijo;
   final bool esDemo;
@@ -188,18 +188,18 @@ class CabeceraMarca extends StatelessWidget {
                 height: AppSpacing.barraSuperior,
                 child: Row(
                   children: [
-                    const LogoAlmira(lado: AppSpacing.logoCabecera, blanco: true),
-                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: Semantics(
-                        header: true,
-                        child: Text(
-                          titulo,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
-                        ),
-                      ),
+                      child: titulo == null
+                          ? const SizedBox.shrink()
+                          : Semantics(
+                              header: true,
+                              child: Text(
+                                titulo!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
+                              ),
+                            ),
                     ),
                     // Con letra muy grande la etiqueta no entra junto al título.
                     if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15) ...[
@@ -212,7 +212,7 @@ class CabeceraMarca extends StatelessWidget {
               ),
               if (hijo != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm, right: AppSpacing.md),
+                  padding: const EdgeInsets.only(right: AppSpacing.md),
                   child: hijo,
                 ),
             ],
@@ -508,6 +508,37 @@ class Destacado extends StatelessWidget {
   );
 }
 
+/// Ícono relleno en su color sobre un fondo del mismo color al 12 %: da vida a los accesos y a las
+/// filas sin llenar la pantalla de color. Cuadrado de esquinas redondas, o círculo con [circulo].
+class IconoColor extends StatelessWidget {
+  const IconoColor(
+    this.icono, {
+    super.key,
+    this.color = AppColors.primary,
+    this.lado = AppSpacing.caja,
+    this.circulo = false,
+  });
+
+  final IconData icono;
+  final Color color;
+  final double lado;
+  final bool circulo;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Container(
+      width: lado,
+      height: lado,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: AppColors.alfaFondoInsignia),
+        shape: circulo ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: circulo ? null : BorderRadius.circular(AppRadius.caja + 2),
+      ),
+      child: Icon(icono, size: lado * 0.5, color: color),
+    ),
+  );
+}
+
 /// Ícono dentro de un cuadrado de 40 con radio de 10. Neutro y primario van sobre gris claro
 /// con el ícono turquesa; los tonos de estado, sobre su fondo suave.
 class CajaIcono extends StatelessWidget {
@@ -539,9 +570,16 @@ class CajaIcono extends StatelessWidget {
 /// Acceso rápido de Inicio: círculo turquesa claro con el ícono turquesa y una etiqueta de
 /// hasta dos líneas, centrada. Toda la columna es táctil.
 class Acceso extends StatelessWidget {
-  const Acceso({super.key, required this.icono, required this.texto, required this.alTocar});
+  const Acceso({
+    super.key,
+    required this.icono,
+    required this.texto,
+    required this.alTocar,
+    this.color = AppColors.primary,
+  });
 
   final IconData icono;
+  final Color color;
   final String texto;
   final VoidCallback alTocar;
 
@@ -560,12 +598,7 @@ class Acceso extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: AppSpacing.acceso,
-                  height: AppSpacing.acceso,
-                  decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                  child: Icon(icono, size: AppIconos.caja, color: AppColors.primary),
-                ),
+                IconoColor(icono, color: color, lado: AppSpacing.acceso, circulo: true),
                 const SizedBox(height: AppSpacing.sm),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),

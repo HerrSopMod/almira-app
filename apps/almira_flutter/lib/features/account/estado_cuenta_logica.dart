@@ -169,3 +169,9 @@ bool _coincideTributo(TipoDeuda real, TipoDeuda pestana) =>
     pestana == TipoDeuda.otros ? (real == TipoDeuda.otros || real == TipoDeuda.multa) : real == pestana;
 
 double sumarSaldos(Iterable<Deuda> deudas) => deudas.fold(0, (s, d) => s + d.saldo);
+
+/// «Trimestre 02 2026»; si el periodo ya trae el año («4.ª cuota 2026»), no se repite.
+String periodoConAnio(Deuda d) {
+  final periodo = etiquetaPeriodo(d);
+  return periodo.contains('${d.anioTributo}') ? periodo : '$periodo ${d.anioTributo}';
+}

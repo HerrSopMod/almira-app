@@ -249,7 +249,7 @@ class _Atribucion extends StatelessWidget {
           child: const ExcludeSemantics(
             child: Text(
               '© OpenStreetMap',
-              style: TextStyle(fontSize: 11, color: AppColors.textPrimary, fontFamily: 'Inter'),
+              style: TextStyle(fontSize: 11, color: AppColors.textPrimary, fontFamily: 'PlusJakartaSans'),
             ),
           ),
         ),

@@ -47,6 +47,19 @@ final class DatosYape extends DatosPago {
   String toString() => 'DatosYape(•••)';
 }
 
+final class DatosPlin extends DatosPago {
+  const DatosPlin({required this.celular, required this.codigoAprobacion});
+
+  final String celular;
+  final String codigoAprobacion;
+
+  @override
+  MedioPago get medio => MedioPago.plin;
+
+  @override
+  String toString() => 'DatosPlin(•••)';
+}
+
 /// Qué se quiere cobrar: las deudas elegidas y los datos del medio. Nunca un importe:
 /// el monto lo toma el servidor de la base.
 class SolicitudCobro {

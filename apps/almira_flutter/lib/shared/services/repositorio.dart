@@ -46,6 +46,15 @@ abstract class Repositorio {
   /// todavía no tiene un contribuyente vinculado.
   Future<bool> guardarCelular(String celular);
 
+  /// Dirección temporal de la foto de perfil, o null si no hay foto.
+  Future<String?> urlFotoPerfil();
+
+  /// Guarda (o reemplaza) la foto de perfil de la cuenta. Llega ya reducida y en JPEG.
+  Future<void> guardarFotoPerfil(Uint8List bytes);
+
+  /// Quita la foto de perfil.
+  Future<void> quitarFotoPerfil();
+
   /// Estado de los recordatorios por WhatsApp de la cuenta, o null si nunca los configuró.
   Future<PreferenciaWhatsapp?> preferenciaWhatsapp();
 

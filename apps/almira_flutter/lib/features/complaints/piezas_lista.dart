@@ -69,10 +69,12 @@ class FilaInterruptor extends StatelessWidget {
     required this.alCambiar,
     this.detalle,
     this.alTocar,
+    this.inicio,
   });
 
   final String titulo;
   final String? detalle;
+  final Widget? inicio;
   final bool valor;
   final ValueChanged<bool>? alCambiar;
   final VoidCallback? alTocar;
@@ -90,6 +92,7 @@ class FilaInterruptor extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Row(
               children: [
+                if (inicio != null) ...[inicio!, const SizedBox(width: AppSpacing.md)],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

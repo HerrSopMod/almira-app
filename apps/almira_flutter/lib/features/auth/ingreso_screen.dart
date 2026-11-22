@@ -12,7 +12,6 @@ import '../../core/errors/error_app.dart';
 import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/services/proveedores.dart';
-import '../carga/pantalla_carga.dart';
 
 const _claveMinima = 8;
 
@@ -27,37 +26,7 @@ class IngresoScreen extends ConsumerStatefulWidget {
   ConsumerState<IngresoScreen> createState() => _IngresoScreenState();
 }
 
-class _IngresoScreenState extends ConsumerState<IngresoScreen> with SingleTickerProviderStateMixin {
-  /// La entrada animada se ve una sola vez por apertura de la app, al llegar desde el splash.
-  static bool _entradaVista = false;
-
-  /// Cuándo empezó la entrada. El router puede crear esta pantalla más de una vez al arrancar:
-  /// la copia nueva sigue desde donde iba la anterior, sin reiniciar (eso se veía como un salto).
-  static DateTime? _inicioEntrada;
-
-  static const _duracionEntrada = Duration(milliseconds: 1300);
-
-  /// Entrada: el ícono con «Almira» debajo empieza al centro, como en la pantalla de carga; tras
-  /// una breve pausa todo sube hasta la cabecera mientras la hoja blanca sube con el formulario.
-  late final AnimationController _entrada = AnimationController(
-    vsync: this,
-    duration: _duracionEntrada,
-    value: _entradaVista ? 1 : _avanceEntrada(),
-  );
-
-  static double _avanceEntrada() {
-    final inicio = _inicioEntrada;
-    if (inicio == null) return 0;
-    final pasado = DateTime.now().difference(inicio).inMicroseconds;
-    return (pasado / _duracionEntrada.inMicroseconds).clamp(0, 1).toDouble();
-  }
-
-  /// El logo sube y se achica; la hoja sube con él.
-  late final Animation<double> _subida = CurvedAnimation(
-    parent: _entrada,
-    curve: const Interval(0.3, 1, curve: Curves.easeInOutCubic),
-  );
-
+class _IngresoScreenState extends ConsumerState<IngresoScreen> {
   final _formulario = GlobalKey<FormState>();
   final _usuario = TextEditingController();
   final _clave = TextEditingController();
@@ -68,30 +37,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> with SingleTicker
   String? _error;
 
   @override
-  void initState() {
-    super.initState();
-    if (_entradaVista) return;
-    // Se marca como vista al terminar: el router puede crear esta pantalla más de una vez al
-    // arrancar, y la que queda en pantalla debe animarse.
-    _entrada.addStatusListener((estado) {
-      if (estado == AnimationStatus.completed) _entradaVista = true;
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // Con «reducir movimiento», sin animación.
-      if (MediaQuery.maybeDisableAnimationsOf(context) == true) {
-        _entrada.value = 1;
-      } else {
-        _inicioEntrada ??= DateTime.now();
-        _entrada.value = _avanceEntrada();
-        _entrada.forward();
-      }
-    });
-  }
-
-  @override
   void dispose() {
-    _entrada.dispose();
     _usuario.dispose();
     _clave.dispose();
     super.dispose();
@@ -126,7 +72,10 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> with SingleTicker
   }
 
   Future<void> _olvidoClave() async {
-    final correo = await showDialog<String>(context: context, builder: (_) => const _DialogoOlvido());
+    final correo = await showDialog<String>(
+      context: context,
+      builder: (_) => const _DialogoOlvido(),
+    );
     if (correo == null || !mounted) return;
     try {
       await ref.read(servicioAuthProvider).enviarEnlaceClave(correo);
@@ -146,115 +95,89 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> with SingleTicker
     final abajo = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: barraSobreTurquesa,
+      value: barraSobreBlanco,
       child: Scaffold(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.surfaceSubtle,
         resizeToAvoidBottomInset: true,
-        body: AnimatedBuilder(
-          animation: _entrada,
-          builder: (context, _) => LayoutBuilder(
-            builder: (context, caja) {
-              final alto = caja.maxHeight;
-              final bajo = MediaQuery.sizeOf(context).height < 700;
-              // Cabecera turquesa alta (40 % de la pantalla, 34 % si es baja) con el logo blanco al
-              // centro. Con el teclado abierto se reduce a la barra de estado para que los campos e
-              // «Ingresar» queden a la vista.
-              final destino = tecladoAbierto
-                  ? arriba + AppSpacing.lg
-                  : alto * (bajo ? AppSpacing.cabeceraIngresoBaja : AppSpacing.cabeceraIngreso);
-              // Durante la entrada, la cabecera ocupa toda la pantalla y se recoge hasta su alto.
-              final t = _subida.value;
-              final cabecera = tecladoAbierto ? destino : alto + (destino - alto) * t;
-              final icono =
-                  AppSpacing.logoCarga +
-                  ((bajo ? AppSpacing.logoIngresoBajo : AppSpacing.logoIngreso) - AppSpacing.logoCarga) * t;
-              return SingleChildScrollView(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      height: cabecera,
-                      child: tecladoAbierto
-                          ? null
-                          : Padding(
-                              // Al inicio, sin rellenos: el ícono queda en el centro exacto de la pantalla, como en el
-                              // splash. Los rellenos llegan con la subida.
-                              padding: EdgeInsets.only(top: arriba * t, bottom: AppSpacing.solapeHoja * t),
-                              child: Center(
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: _LogoEntrada(
-                                    lado: icono,
-                                    // Al inicio el ícono queda justo al centro, donde lo dejó la
-                                    // carga; «Almira» cuelga debajo sin moverlo.
-                                    centrarIcono: 1 - t,
-                                  ),
-                                ),
-                              ),
-                            ),
-                    ),
-                    // Hoja blanca que sube sobre la cabecera y llega hasta el borde inferior.
-                    ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: (alto - cabecera).clamp(0, double.infinity)),
-                      child: DecoratedBox(
-                        decoration: const BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.hoja)),
+        body: LayoutBuilder(
+          builder: (context, caja) {
+            final alto = caja.maxHeight;
+            final bajo = MediaQuery.sizeOf(context).height < 700;
+            // Parte superior clara con círculos turquesa suaves, el logo en un círculo blanco, el
+            // nombre y una frase (40 % de la pantalla, 34 % si es baja). Con el teclado abierto se
+            // reduce a la barra de estado para que los campos e «Ingresar» queden a la vista.
+            final cabecera = tecladoAbierto
+                ? arriba + AppSpacing.lg
+                : alto * (bajo ? AppSpacing.cabeceraIngresoBaja : AppSpacing.cabeceraIngreso);
+            return SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: cabecera,
+                    child: tecladoAbierto ? null : _ZonaClara(arriba: arriba, bajo: bajo),
+                  ),
+                  // Hoja blanca que sube sobre la cabecera y llega hasta el borde inferior.
+                  ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: (alto - cabecera).clamp(0, double.infinity)),
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.hoja)),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          AppSpacing.margen,
+                          AppSpacing.xl,
+                          AppSpacing.margen,
+                          AppSpacing.xl + abajo,
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            AppSpacing.margen,
-                            AppSpacing.xl,
-                            AppSpacing.margen,
-                            AppSpacing.xl + abajo,
-                          ),
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 440),
-                              child: Form(
-                                key: _formulario,
-                                autovalidateMode: _intentado
-                                    ? AutovalidateMode.onUserInteraction
-                                    : AutovalidateMode.disabled,
-                                child: esDemo ? _demo() : _conCuenta(),
-                              ),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 440),
+                            child: Form(
+                              key: _formulario,
+                              autovalidateMode: _intentado
+                                  ? AutovalidateMode.onUserInteraction
+                                  : AutovalidateMode.disabled,
+                              child: esDemo ? _demo() : _conCuenta(),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
   Widget _demo() => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const Center(child: EtiquetaDemo()),
-      const SizedBox(height: AppSpacing.md),
-      Text(
-        'Esta versión muestra datos de ejemplo. No necesitas una cuenta.',
-        style: Theme.of(context).textTheme.bodyMedium,
-        textAlign: TextAlign.center,
-      ),
-      const SizedBox(height: AppSpacing.xl),
-      _Boton(
-        texto: 'Entrar a la demostración',
-        cargando: _ocupado,
-        alTocar: _ocupado ? null : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarDemo()),
-      ),
-      if (_error != null) ...[const SizedBox(height: AppSpacing.lg), Aviso(_error!, tono: Tono.error)],
-    ],
-  );
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Center(child: EtiquetaDemo()),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Esta versión muestra datos de ejemplo. No necesitas una cuenta.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _Boton(
+            texto: 'Entrar a la demostración',
+            cargando: _ocupado,
+            alTocar: _ocupado ? null : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarDemo()),
+          ),
+          if (_error != null) ...[const SizedBox(height: AppSpacing.lg), Aviso(_error!, tono: Tono.error)],
+        ],
+      );
 
   Widget _conCuenta() {
     final textos = Theme.of(context).textTheme;
@@ -293,8 +216,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> with SingleTicker
               onPressed: () => setState(() => _verClave = !_verClave),
             ),
           ),
-          validator: (v) =>
-              (v ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
+          validator: (v) => (v ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
         ),
         const SizedBox(height: AppSpacing.xs),
         Align(
@@ -321,9 +243,7 @@ class _IngresoScreenState extends ConsumerState<IngresoScreen> with SingleTicker
         ),
         const SizedBox(height: AppSpacing.lg),
         OutlinedButton.icon(
-          onPressed: _ocupado
-              ? null
-              : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarConGoogle()),
+          onPressed: _ocupado ? null : () => _ejecutar(() => ref.read(servicioAuthProvider).ingresarConGoogle()),
           // Botón de Google: blanco, borde gris de 1 px y texto oscuro, como pide la guía.
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
@@ -365,15 +285,15 @@ class _Boton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FilledButton(
-    onPressed: alTocar,
-    child: cargando
-        ? const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-          )
-        : Text(texto),
-  );
+        onPressed: alTocar,
+        child: cargando
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+              )
+            : Text(texto),
+      );
 }
 
 /// Pide el correo para enviar el enlace de recuperación.
@@ -396,61 +316,117 @@ class _DialogoOlvidoState extends State<_DialogoOlvido> {
 
   @override
   Widget build(BuildContext context) => AppConfirmDialog(
-    titulo: 'Recupera tu clave',
-    textoConfirmar: 'Enviar enlace',
-    alConfirmar: () {
-      if (_formulario.currentState!.validate()) {
-        Navigator.pop(context, _correo.text.trim());
-      }
-    },
-    alCancelar: () => Navigator.pop(context),
-    contenido: Form(
-      key: _formulario,
-      child: TextFormField(
-        controller: _correo,
-        keyboardType: TextInputType.emailAddress,
-        autofillHints: const [AutofillHints.email],
-        autocorrect: false,
-        decoration: const InputDecoration(labelText: 'Correo', prefixIcon: Icon(Phosphor.envelope)),
-        validator: (v) => RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
-            ? null
-            : 'Escribe un correo válido.',
-      ),
-    ),
-  );
+        titulo: 'Recupera tu clave',
+        textoConfirmar: 'Enviar enlace',
+        alConfirmar: () {
+          if (_formulario.currentState!.validate()) {
+            Navigator.pop(context, _correo.text.trim());
+          }
+        },
+        alCancelar: () => Navigator.pop(context),
+        contenido: Form(
+          key: _formulario,
+          child: TextFormField(
+            controller: _correo,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            autocorrect: false,
+            decoration: const InputDecoration(
+              labelText: 'Correo',
+              prefixIcon: Icon(Phosphor.envelope),
+            ),
+            validator: (v) => RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
+                ? null
+                : 'Escribe un correo válido.',
+          ),
+        ),
+      );
 }
 
-/// Logo del ingreso durante la entrada: el ícono blanco y «Almira» debajo. Con [centrarIcono] en
-/// 1, el grupo baja lo justo para que el ícono quede en el centro, como en la pantalla de carga;
-/// en 0, el grupo entero va centrado, como [LogoVertical].
-class _LogoEntrada extends StatelessWidget {
-  const _LogoEntrada({required this.lado, required this.centrarIcono});
+/// Parte superior del ingreso: fondo claro con círculos turquesa suaves, el logo en un círculo
+/// blanco con sombra tenue, el nombre y una frase. Ocupa el espacio que deja el formulario.
+class _ZonaClara extends StatelessWidget {
+  const _ZonaClara({required this.arriba, required this.bajo});
 
-  final double lado;
-  final double centrarIcono;
+  final double arriba;
+  final bool bajo;
 
   @override
   Widget build(BuildContext context) {
-    final estilo = Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.onPrimary);
-    final altoNombre =
-        AppSpacing.lg + (estilo.fontSize! * estilo.height!) * MediaQuery.textScalerOf(context).scale(1);
-    return Semantics(
-      header: true,
-      label: 'Almira',
-      child: ExcludeSemantics(
-        child: Transform.translate(
-          offset: Offset(0, altoNombre / 2 * centrarIcono),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconoCarga(lado: lado),
-              // La misma separación que la pantalla de carga.
-              const SizedBox(height: AppSpacing.lg),
-              Text('Almira', style: estilo),
-            ],
+    final textos = Theme.of(context).textTheme;
+    final logo = bajo ? AppSpacing.logoIngresoBajo : AppSpacing.logoIngreso;
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(right: -60, top: -40, child: _Circulo(150, AppColors.primarySoft)),
+          Positioned(left: -50, bottom: 24, child: _Circulo(96, AppColors.primary.withValues(alpha: 0.10))),
+          Positioned(right: 36, bottom: 56, child: _Circulo(16, AppColors.primary.withValues(alpha: 0.22))),
+          Positioned(left: 44, top: arriba + 28, child: _Circulo(10, AppColors.primary.withValues(alpha: 0.28))),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.xxl,
+              arriba + AppSpacing.md,
+              AppSpacing.xxl,
+              AppSpacing.solapeHoja + AppSpacing.md,
+            ),
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Semantics(
+                  header: true,
+                  label: 'Almira',
+                  child: ExcludeSemantics(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: logo,
+                          height: logo,
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.textPrimary.withValues(alpha: 0.10),
+                                blurRadius: 18,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Center(child: LogoAlmira(lado: logo * 0.62)),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text('Almira', style: textos.headlineMedium),
+                        const SizedBox(height: AppSpacing.xs),
+                        SizedBox(
+                          width: 280,
+                          child: Text(
+                            'Tus pagos, reclamos y obras municipales en un solo lugar.',
+                            style: textos.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
+}
+
+class _Circulo extends StatelessWidget {
+  const _Circulo(this.lado, this.color);
+
+  final double lado;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) =>
+      Container(width: lado, height: lado, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
 }

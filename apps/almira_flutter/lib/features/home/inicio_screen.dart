@@ -5,16 +5,19 @@ import 'package:go_router/go_router.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_theme.dart';
 import '../../app/theme/iconos.dart';
 import '../../core/utils/formato.dart';
 import '../../core/utils/plazos.dart';
 import '../../core/widgets/cara_saldo.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/escudo_municipal.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import '../complaints/reclamos_logica.dart';
 import '../payments/pagos_logica.dart';
 import '../payments/widgets_deuda.dart';
+import '../profile/foto_perfil.dart';
 
 /// Cuántas obligaciones se listan en Inicio; el resto está en Pagar.
 const _maximoEnInicio = 3;
@@ -36,7 +39,6 @@ class InicioScreen extends ConsumerWidget {
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
         cabecera: (v) => CabeceraMarca(
-          titulo: 'Almira',
           esDemo: esDemo,
           acciones: [
             IconButton(
@@ -46,13 +48,13 @@ class InicioScreen extends ConsumerWidget {
             ),
             IconButton(
               tooltip: 'Mi perfil',
-              icon: const Icon(Phosphor.userCircle),
+              icon: const IconoPerfil(),
               onPressed: () => context.push(Rutas.perfil),
             ),
           ],
           hijo: _Saludo(
             nombre: v?.vecino?.nombre ?? sesion.cuenta?.nombre,
-            municipalidad: v?.municipalidad?.nombre,
+            municipalidad: v?.municipalidad,
           ),
           // Con la tarjeta flotante, el turquesa baja un poco más para que la tarjeta lo monte.
           rellenoInferior: v?.vecino == null ? AppSpacing.solapeHoja + AppSpacing.lg : AppSpacing.xl,
@@ -140,11 +142,12 @@ class _Saludo extends StatelessWidget {
   const _Saludo({this.nombre, this.municipalidad});
 
   final String? nombre;
-  final String? municipalidad;
+  final Municipalidad? municipalidad;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
+    final conEscudo = rutaEscudo(municipalidad) != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -159,11 +162,29 @@ class _Saludo extends StatelessWidget {
         ),
         if (municipalidad != null) ...[
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            municipalidad!,
-            style: textos.bodyLarge!.copyWith(color: AppColors.onPrimary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              // El escudo solo aparece en las municipalidades que lo tienen.
+              if (conEscudo) ...[
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.insignia),
+                  ),
+                  child: EscudoMunicipal(municipalidad, alto: 26),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Expanded(
+                child: Text(
+                  municipalidad!.nombre,
+                  style: textos.bodyLarge!.copyWith(color: AppColors.onPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ],
@@ -219,14 +240,66 @@ class _Resumen extends StatelessWidget {
           ),
           if (resumen.cantidadVencidas > 0) ...[
             const SizedBox(height: AppSpacing.sm),
-            Insignia(
-              '${plural(resumen.cantidadVencidas, 'vencida', 'vencidas')} · ${soles(resumen.montoVencido)}',
-              tono: Tono.error,
-              icono: Phosphor.warningCircle,
+            _AvisoVencidas(
+              texto: plural(resumen.cantidadVencidas, 'vencida', 'vencidas'),
+              monto: resumen.montoVencido,
             ),
           ],
         ],
       ],
+    );
+  }
+}
+
+/// Franja roja suave de lo ya vencido: ícono en círculo blanco, la cantidad y el monto a la derecha.
+class _AvisoVencidas extends StatelessWidget {
+  const _AvisoVencidas({required this.texto, required this.monto});
+
+  final String texto;
+  final double monto;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Semantics(
+      label: '$texto, ${soles(monto)}',
+      excludeSemantics: true,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: AppColors.errorSoft,
+          borderRadius: BorderRadius.circular(AppRadius.tarjeta),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.surface),
+              child: const Icon(PhosphorFill.warningCircle, size: AppIconos.insignia + 2, color: AppColors.error),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                texto,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textos.titleSmall!.copyWith(color: AppColors.error),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              soles(monto),
+              style: textos.titleSmall!.copyWith(
+                color: AppColors.error,
+                fontWeight: FontWeight.w700,
+                fontFeatures: cifrasTabulares,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -284,22 +357,22 @@ class _FilaObra extends StatelessWidget {
       );
 }
 
-/// Accesos rápidos: una fila de cuatro círculos turquesa claro con su etiqueta debajo.
+/// Accesos rápidos: una fila de cuatro círculos, cada uno con su color, y su etiqueta debajo.
 class _Accesos extends StatelessWidget {
   const _Accesos();
 
   @override
   Widget build(BuildContext context) {
-    Widget acceso(IconData icono, String texto, String ruta) => Expanded(
-          child: Acceso(icono: icono, texto: texto, alTocar: () => context.go(ruta)),
+    Widget acceso(IconData icono, Color color, String texto, String ruta) => Expanded(
+          child: Acceso(icono: icono, color: color, texto: texto, alTocar: () => context.go(ruta)),
         );
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        acceso(Phosphor.creditCard, 'Pagar en línea', Rutas.pagoEnLinea),
-        acceso(Phosphor.receipt, 'Estado de cuenta', Rutas.estadoCuenta),
-        acceso(Phosphor.fileText, 'Cuponera', Rutas.cuponera),
-        acceso(Phosphor.clockCounterClockwise, 'Historial', Rutas.estadoCuenta),
+        acceso(PhosphorFill.creditCard, AppColors.acentoVerde, 'Pagar en línea', Rutas.pagoEnLinea),
+        acceso(PhosphorFill.receipt, AppColors.acentoAzul, 'Estado de cuenta', Rutas.estadoCuenta),
+        acceso(PhosphorFill.fileText, AppColors.acentoVioleta, 'Cuponera', Rutas.cuponera),
+        acceso(PhosphorFill.clockCounterClockwise, AppColors.acentoAmbar, 'Historial', Rutas.estadoCuenta),
       ],
     );
   }

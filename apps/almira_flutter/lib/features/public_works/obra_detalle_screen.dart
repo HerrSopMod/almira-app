@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_theme.dart';
 import '../../app/theme/iconos.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
@@ -48,7 +50,17 @@ class ObraDetalleScreen extends ConsumerWidget {
               child: Text(obra.nombre, style: textos.titleLarge!),
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(obra.ubicacion, style: textos.bodyMedium!),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Icon(Phosphor.mapPin, size: AppIconos.insignia + 2, color: AppColors.acentoRosa),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(child: Text(obra.ubicacion, style: textos.bodyMedium!)),
+              ],
+            ),
             espacioChico,
             Align(alignment: Alignment.centerLeft, child: InsigniaObra(obra.estado)),
             espacio,
@@ -76,16 +88,38 @@ class ObraDetalleScreen extends ConsumerWidget {
             AvanceFisico(obra),
             espacioGrande,
             const TituloSeccion('Presupuesto'),
-            const SizedBox(height: AppSpacing.xs),
-            FilaDato('Asignado', soles(obra.montoAsignado)),
-            FilaDato('Gastado', soles(obra.montoEjecutado)),
-            if (gasto != null) FilaDato('Gastado del presupuesto', '$gasto$_nbsp%'),
-            if (obra.porcentajeTributos != null)
-              FilaDato('Financiado con tributos', '${obra.porcentajeTributos!.round()}$_nbsp%'),
-            espacioGrande,
-            if (inicio != null) Ficha('Inicio', fechaLarga(inicio)),
-            if (obra.meta.trim().isNotEmpty) Ficha('Meta', obra.meta.trim()),
-            if (actualizada != null) Ficha('Última actualización', haceDias(actualizada, hoy)),
+            espacioChico,
+            Tarjeta(
+              child: Column(
+                children: [
+                  _FilaIcono(PhosphorFill.wallet, AppColors.acentoAzul, 'Asignado', soles(obra.montoAsignado), aLaDerecha: true),
+                  _FilaIcono(PhosphorFill.receipt, AppColors.acentoAmbar, 'Gastado', soles(obra.montoEjecutado), aLaDerecha: true),
+                  if (gasto != null)
+                    _FilaIcono(PhosphorFill.listChecks, AppColors.acentoVioleta, 'Gastado del presupuesto', '$gasto$_nbsp%', aLaDerecha: true),
+                  if (obra.porcentajeTributos != null)
+                    _FilaIcono(
+                      PhosphorFill.bank,
+                      AppColors.acentoVerde,
+                      'Financiado con tributos',
+                      '${obra.porcentajeTributos!.round()}$_nbsp%',
+                      aLaDerecha: true,
+                    ),
+                ],
+              ),
+            ),
+            if (inicio != null || obra.meta.trim().isNotEmpty || actualizada != null) ...[
+              espacioGrande,
+              Tarjeta(
+                child: Column(
+                  children: [
+                    if (inicio != null) _FilaIcono(PhosphorFill.calendarBlank, AppColors.acentoAzul, 'Inicio', fechaLarga(inicio)),
+                    if (obra.meta.trim().isNotEmpty) _FilaIcono(PhosphorFill.flag, AppColors.acentoRosa, 'Meta', obra.meta.trim()),
+                    if (actualizada != null)
+                      _FilaIcono(PhosphorFill.arrowClockwise, AppColors.acentoVerde, 'Última actualización', haceDias(actualizada, hoy)),
+                  ],
+                ),
+              ),
+            ],
             if (obra.hitos.isNotEmpty) ...[
               espacioGrande,
               const TituloSeccion('Hitos'),
@@ -94,7 +128,13 @@ class ObraDetalleScreen extends ConsumerWidget {
                 if (i > 0) const Divider(),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  child: Text(hito, style: textos.bodyLarge!),
+                  child: Row(
+                    children: [
+                      _iconoHito(hito),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(child: Text(hito, style: textos.bodyLarge!)),
+                    ],
+                  ),
                 ),
               ],
             ],
@@ -107,3 +147,58 @@ class ObraDetalleScreen extends ConsumerWidget {
 
 /// Espacio no separable: evita que «66 %» se parta en dos líneas.
 const _nbsp = ' ';
+
+/// Ícono de un hito: completado si dice 100 %, en curso en los demás casos.
+Widget _iconoHito(String hito) {
+  final pct = RegExp(r'(\d+)\s*%').firstMatch(hito)?.group(1);
+  final completo = pct != null && int.parse(pct) >= 100;
+  return completo
+      ? const IconoColor(PhosphorFill.checkCircle, color: AppColors.acentoVerde, lado: 36)
+      : const IconoColor(PhosphorFill.clockClockwise, color: AppColors.acentoAmbar, lado: 36);
+}
+
+/// Dato con ícono de color: rótulo y valor. Los montos y porcentajes van a la derecha
+/// ([aLaDerecha]); los demás, con el rótulo arriba y el valor debajo.
+class _FilaIcono extends StatelessWidget {
+  const _FilaIcono(this.icono, this.color, this.rotulo, this.valor, {this.aLaDerecha = false});
+
+  final IconData icono;
+  final Color color;
+  final String rotulo;
+  final String valor;
+  final bool aLaDerecha;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Row(
+        children: [
+          IconoColor(icono, color: color, lado: 36),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: aLaDerecha
+                ? Text(rotulo, style: textos.bodyMedium)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(rotulo, style: estiloRotulo(context)),
+                      const SizedBox(height: 2),
+                      Text(valor, style: textos.bodyLarge),
+                    ],
+                  ),
+          ),
+          if (aLaDerecha) ...[
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              valor,
+              textAlign: TextAlign.end,
+              style: textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500, fontFeatures: cifrasTabulares),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
