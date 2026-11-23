@@ -119,7 +119,7 @@ void main() {
     expect(find.text('Arbitrios S/ 80.50'), findsOneWidget);
     expect(find.text('1 vencida'), findsOneWidget);
     // La lista de obligaciones repite cada monto en su fila. (El primer desplazable es la
-    // pantalla; el carrusel «En curso» es otro.)
+    // pantalla; el carrusel «Tus reclamos» es otro.)
     await tester.scrollUntilVisible(find.text('S/ 80.50'), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text('S/ 80.50'), findsOneWidget);
     expect(find.text('S/ 40.00'), findsOneWidget);

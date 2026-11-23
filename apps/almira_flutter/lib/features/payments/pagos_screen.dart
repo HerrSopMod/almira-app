@@ -126,6 +126,7 @@ class _PagosScreenState extends ConsumerState<PagosScreen> {
                             ? null
                             : (m) => setState(() => m ? _desmarcadas.remove(deuda.id) : _desmarcadas.add(deuda.id)),
                         alTocar: () => context.go(Rutas.deuda(deuda.id)),
+                        conEstado: !pagados,
                       ),
                   ],
                 ),
@@ -238,6 +239,7 @@ class _FilaObligacion extends StatelessWidget {
     required this.marcada,
     required this.alMarcar,
     required this.alTocar,
+    this.conEstado = true,
   });
 
   final Deuda deuda;
@@ -245,6 +247,9 @@ class _FilaObligacion extends StatelessWidget {
   final bool marcada;
   final ValueChanged<bool>? alMarcar;
   final VoidCallback alTocar;
+
+  /// En «Pagados» todas están pagadas: la insignia repetiría la pestaña.
+  final bool conEstado;
 
   @override
   Widget build(BuildContext context) {
@@ -291,8 +296,7 @@ class _FilaObligacion extends StatelessWidget {
                   children: [
                     Text(deuda.tipo.nombre, style: textos.titleMedium!.copyWith(fontWeight: FontWeight.w800)),
                     Text(periodoConAnio(deuda), style: textos.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 6),
-                    insignia,
+                    if (conEstado) ...[const SizedBox(height: 6), insignia],
                     if (grande) ...[const SizedBox(height: 6), monto],
                   ],
                 ),
