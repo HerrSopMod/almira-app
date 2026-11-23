@@ -7,7 +7,9 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
+import '../../core/utils/plazos.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/movimiento.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
@@ -52,38 +54,179 @@ class ReclamoDetalleScreen extends ConsumerWidget {
           final descripcion = (reclamo.descripcion ?? '').trim();
           final area = (reclamo.area ?? '').trim();
           return [
-            Text('Reclamo ${reclamo.codigo}', style: textos.bodyMedium!),
-            const SizedBox(height: AppSpacing.xs),
-            Semantics(
-              header: true,
-              child: Text(reclamo.titulo, style: textos.titleLarge!),
+            Aparecer(
+              child: Tarjeta(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Reclamo ${reclamo.codigo}',
+                            style: textos.titleSmall!.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ),
+                        InsigniaReclamo(reclamo: reclamo),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Semantics(
+                      header: true,
+                      child: Text(reclamo.titulo, style: textos.headlineSmall!.copyWith(fontSize: 22)),
+                    ),
+                    if (plazo != null && !reclamo.resuelto) ...[espacio, _CuentaRegresiva(plazo: plazo)],
+                  ],
+                ),
+              ),
             ),
-            espacioChico,
-            Align(alignment: Alignment.centerLeft, child: InsigniaReclamo(reclamo: reclamo)),
-            if (plazo != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              PlazoReclamo(plazo),
-            ],
-            espacioGrande,
-            _Foto(reclamoId: reclamo.id, tieneFoto: reclamo.tieneFoto),
-            if (descripcion.isNotEmpty) ...[
-              espacio,
-              Text(descripcion, style: textos.bodyLarge!),
-            ],
-            espacioGrande,
-            Ficha('Categoría', reclamo.tipo.etiqueta),
-            Ficha('Área a cargo', area.isEmpty ? 'Por asignar' : area),
-            if (creado != null) Ficha('Enviado el', fechaLarga(creado)),
-            espacioGrande,
-            const TituloSeccion('Ubicación'),
-            espacioChico,
-            _Ubicacion(reclamo: reclamo),
-            espacioGrande,
-            const TituloSeccion('Seguimiento'),
             espacio,
-            _LineaTiempo(pasos: pasosDe(reclamo)),
+            Aparecer(
+              paso: 1,
+              child: Tarjeta(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const TituloSeccion('Estado'),
+                    espacio,
+                    _LineaTiempo(pasos: pasosDe(reclamo)),
+                  ],
+                ),
+              ),
+            ),
+            espacio,
+            Aparecer(
+              paso: 2,
+              child: Tarjeta(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const TituloSeccion('Detalle'),
+                    if (descripcion.isNotEmpty) ...[
+                      espacioChico,
+                      Text(descripcion, style: textos.bodyLarge!.copyWith(height: 1.55)),
+                    ],
+                    espacio,
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: _Dato('Categoría', reclamo.tipo.etiqueta)),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(child: _Dato('Área a cargo', area.isEmpty ? 'Por asignar' : area)),
+                        ],
+                      ),
+                    ),
+                    if (creado != null) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _Dato('Enviado el', fechaLarga(creado)),
+                    ],
+                    espacio,
+                    _Foto(reclamoId: reclamo.id, tieneFoto: reclamo.tieneFoto),
+                  ],
+                ),
+              ),
+            ),
+            espacio,
+            Aparecer(
+              paso: 3,
+              child: Tarjeta(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const TituloSeccion('Ubicación'),
+                    espacioChico,
+                    _Ubicacion(reclamo: reclamo),
+                  ],
+                ),
+              ),
+            ),
           ];
         },
+      ),
+    );
+  }
+}
+
+/// «5 días hábiles para la respuesta» en una caja sol, con la fecha límite. Sale del plazo real
+/// (fecha de registro y días del plazo); si ya venció o no se conoce, lo dice.
+class _CuentaRegresiva extends StatelessWidget {
+  const _CuentaRegresiva({required this.plazo});
+
+  final Plazo plazo;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    final limite = plazo.limite;
+    final vencido = plazo.estado == EstadoPlazo.vencido;
+    final restantes = plazo.restantes;
+    final (numero, texto) = switch (plazo.estado) {
+      EstadoPlazo.porConfirmar => (null, 'Fecha de respuesta por confirmar'),
+      EstadoPlazo.venceHoy => ('0', 'La respuesta vence hoy'),
+      EstadoPlazo.vencido => ('!', 'Plazo de respuesta vencido'),
+      _ => ('${restantes ?? ''}', restantes == 1 ? 'día hábil para la respuesta' : 'días hábiles para la respuesta'),
+    };
+    final fondo = vencido ? AppColors.errorSoft : AppColors.sol100;
+    final color = vencido ? AppColors.error : AppColors.solTexto;
+    return Semantics(
+      label: [
+        if (numero != null && numero != '!') numero,
+        texto,
+        if (limite != null) 'Plazo: ${diaYMes(limite)}',
+      ].join(' '),
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(AppRadius.campo)),
+        child: Row(
+          children: [
+            if (numero != null) ...[
+              Rebote(
+                child: Text(numero, style: textos.headlineMedium!.copyWith(color: AppColors.textPrimary)),
+              ),
+              const SizedBox(width: AppSpacing.md),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    texto,
+                    style: textos.titleSmall!.copyWith(color: color, fontWeight: FontWeight.w800),
+                  ),
+                  if (limite != null)
+                    Text('Plazo: ${diaYMes(limite)}', style: textos.bodyMedium!.copyWith(color: color)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Dato del detalle en una caja turquesa muy clara: rótulo arriba y valor debajo.
+class _Dato extends StatelessWidget {
+  const _Dato(this.rotulo, this.valor);
+
+  final String rotulo;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(color: AppColors.primary50, borderRadius: BorderRadius.circular(AppRadius.caja)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(rotulo, style: textos.labelMedium!.copyWith(color: AppColors.textSecondary)),
+          const SizedBox(height: 2),
+          Text(valor, style: textos.titleMedium),
+        ],
       ),
     );
   }
@@ -180,24 +323,16 @@ class _MarcoFoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.tarjeta),
-        child: Container(
-          height: 200,
-          width: double.infinity,
-          color: AppColors.surfaceSubtle,
-          child: child,
-        ),
-      );
+    borderRadius: BorderRadius.circular(AppRadius.tarjeta),
+    child: Container(height: 200, width: double.infinity, color: AppColors.surfaceSubtle, child: child),
+  );
 }
 
 class _SinFoto extends StatelessWidget {
   const _SinFoto();
 
   @override
-  Widget build(BuildContext context) => const Aviso(
-        'Sin fotografía adjunta',
-        icono: Phosphor.cameraSlash,
-      );
+  Widget build(BuildContext context) => const Aviso('Sin fotografía adjunta', icono: Phosphor.cameraSlash);
 }
 
 class _ErrorFoto extends StatelessWidget {
@@ -232,9 +367,7 @@ class _ErrorFoto extends StatelessWidget {
         ),
       ),
     );
-    return dentroDeMarco
-        ? ColoredBox(color: AppColors.surfaceSubtle, child: contenido)
-        : _MarcoFoto(child: contenido);
+    return dentroDeMarco ? ColoredBox(color: AppColors.surfaceSubtle, child: contenido) : _MarcoFoto(child: contenido);
   }
 }
 
@@ -250,10 +383,7 @@ class _Ubicacion extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          direccion.isEmpty ? 'Sin dirección registrada' : direccion,
-          style: textos.bodyLarge!,
-        ),
+        Text(direccion.isEmpty ? 'Sin dirección registrada' : direccion, style: textos.bodyLarge!),
         espacioChico,
         if (reclamo.tieneUbicacion)
           MarcoMapa(
@@ -292,11 +422,12 @@ class _LineaTiempo extends StatelessWidget {
       children: [
         for (final (i, paso) in pasos.indexed)
           Semantics(
-            label: '${paso.titulo}: ${switch (paso.estado) {
-              EstadoPaso.hecho => 'completado',
-              EstadoPaso.actual => 'etapa actual',
-              EstadoPaso.pendiente => 'pendiente',
-            }}${paso.detalle == null ? '' : '. ${paso.detalle}'}',
+            label:
+                '${paso.titulo}: ${switch (paso.estado) {
+                  EstadoPaso.hecho => 'completado',
+                  EstadoPaso.actual => 'etapa actual',
+                  EstadoPaso.pendiente => 'pendiente',
+                }}${paso.detalle == null ? '' : '. ${paso.detalle}'}',
             child: ExcludeSemantics(
               child: IntrinsicHeight(
                 child: Row(
@@ -311,7 +442,7 @@ class _LineaTiempo extends StatelessWidget {
                             Expanded(
                               child: Container(
                                 width: 2,
-                                color: paso.estado == EstadoPaso.hecho ? AppColors.primary : AppColors.track,
+                                color: paso.estado == EstadoPaso.hecho ? AppColors.primary : AppColors.bordeCampo,
                               ),
                             ),
                         ],
@@ -328,7 +459,7 @@ class _LineaTiempo extends StatelessWidget {
                               paso.titulo,
                               style: textos.titleMedium!.copyWith(
                                 color: paso.estado == EstadoPaso.pendiente ? AppColors.textSecondary : null,
-                                fontWeight: paso.estado == EstadoPaso.pendiente ? FontWeight.w400 : null,
+                                fontWeight: paso.estado == EstadoPaso.pendiente ? FontWeight.w600 : FontWeight.w800,
                               ),
                             ),
                             if (paso.detalle != null) Text(paso.detalle!, style: textos.bodyMedium!),
@@ -346,39 +477,65 @@ class _LineaTiempo extends StatelessWidget {
   }
 }
 
-class _Punto extends StatelessWidget {
+class _Punto extends StatefulWidget {
   const _Punto({required this.estado});
 
   final EstadoPaso estado;
 
   @override
-  Widget build(BuildContext context) => Container(
+  State<_Punto> createState() => _PuntoState();
+}
+
+/// Punto de la línea de tiempo: hecho, turquesa con check; actual, coral con un halo que late
+/// (quieto con «reducir movimiento»); pendiente, un círculo vacío.
+class _PuntoState extends State<_Punto> with SingleTickerProviderStateMixin {
+  static final _enPrueba = WidgetsBinding.instance.runtimeType.toString().contains('TestWidgetsFlutterBinding');
+  late final AnimationController _pulso = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animar = widget.estado == EstadoPaso.actual && !sinMovimiento(context) && !_enPrueba;
+    if (animar && !_pulso.isAnimating) _pulso.repeat();
+    if (!animar) _pulso.stop();
+  }
+
+  @override
+  void dispose() {
+    _pulso.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _pulso,
+    builder: (context, _) {
+      final t = _pulso.value;
+      return Container(
         width: 24,
         height: 24,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: switch (estado) {
+          color: switch (widget.estado) {
             EstadoPaso.hecho => AppColors.primary,
-            EstadoPaso.actual => AppColors.primarySoft,
+            EstadoPaso.actual => AppColors.coral,
             EstadoPaso.pendiente => AppColors.surface,
           },
-          border: Border.all(
-            width: 2,
-            color: estado == EstadoPaso.pendiente ? AppColors.track : AppColors.primary,
-          ),
+          border: widget.estado == EstadoPaso.pendiente ? Border.all(width: 2, color: AppColors.bordeCampo) : null,
+          boxShadow: widget.estado == EstadoPaso.actual
+              ? [
+                  BoxShadow(
+                    color: AppColors.coral.withValues(alpha: 0.55 * (1 - t)),
+                    spreadRadius: 10 * t,
+                  ),
+                ]
+              : null,
         ),
-        child: switch (estado) {
-          EstadoPaso.hecho => const Icon(Phosphor.check, size: 14, color: Colors.white),
-          EstadoPaso.actual => const Center(
-              child: SizedBox(
-                width: 8,
-                height: 8,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                ),
-              ),
-            ),
-          EstadoPaso.pendiente => null,
-        },
+        child: widget.estado == EstadoPaso.hecho ? const Icon(Phosphor.check, size: 14, color: Colors.white) : null,
       );
+    },
+  );
 }

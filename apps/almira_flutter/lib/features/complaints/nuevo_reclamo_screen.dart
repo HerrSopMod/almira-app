@@ -1,4 +1,4 @@
-
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +13,10 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/ubicacion.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/movimiento.dart';
+import 'reclamos_screen.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
@@ -81,12 +84,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
     try {
       // Se reduce antes de subirla: suficiente para ver el problema, liviana
       // para datos móviles.
-      final archivo = await _selector.pickImage(
-        source: origen,
-        maxWidth: 1600,
-        maxHeight: 1600,
-        imageQuality: 80,
-      );
+      final archivo = await _selector.pickImage(source: origen, maxWidth: 1600, maxHeight: 1600, imageQuality: 80);
       if (archivo == null) return;
       final bytes = await archivo.readAsBytes();
       if (bytes.length > fotoMaximaBytes) {
@@ -103,7 +101,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
       setState(
         () => _errorFoto = sinPermiso
             ? 'Sin permiso para usar la ${origen == ImageSource.camera ? 'cámara' : 'galería'}. '
-                'Actívalo en los ajustes del teléfono o elige la otra opción.'
+                  'Actívalo en los ajustes del teléfono o elige la otra opción.'
             : 'No pudimos abrir la ${origen == ImageSource.camera ? 'cámara' : 'galería'}. Inténtalo de nuevo.',
       );
     } catch (_) {
@@ -196,11 +194,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
     final base = centroDe(vista);
     final elegido = await Navigator.of(context, rootNavigator: true).push<LatLng>(
       MaterialPageRoute(
-        builder: (_) => SelectorUbicacionScreen(
-          centro: base.centro,
-          zoom: base.zoom,
-          inicial: _punto,
-        ),
+        builder: (_) => SelectorUbicacionScreen(centro: base.centro, zoom: base.zoom, inicial: _punto),
       ),
     );
     if (elegido != null && mounted) {
@@ -245,7 +239,9 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
       _etapa = null;
     });
     try {
-      final id = await ref.read(repositorioProvider).crearReclamo(
+      final id = await ref
+          .read(repositorioProvider)
+          .crearReclamo(
             NuevoReclamo(
               tipo: _tipo ?? clasificarReclamo('${_asunto.text} ${_descripcion.text}'),
               titulo: _asunto.text.trim(),
@@ -305,14 +301,47 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
     final base = centroDe(vista);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nuevo reclamo'),
-        leading: IconButton(
-          tooltip: 'Cerrar',
-          icon: const Icon(Phosphor.x),
-          onPressed: _enviando ? null : () => context.pop(),
-        ),
+      appBar: BarraAlmira(
+        titulo: 'Nuevo reclamo',
+        cerrar: true,
+        alVolver: () {
+          if (!_enviando) context.pop();
+        },
       ),
+      // «Enviar reclamo» queda fijo abajo, siempre a la vista.
+      bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0
+          ? null
+          : _PieEnvio(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.boton),
+                  boxShadow: _enviando ? null : AppColors.sombraPrimaria,
+                ),
+                child: FilledButton(
+                  onPressed: _enviando ? null : () => _enviar(vista, fotoObligatoria),
+                  child: _enviando
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                            const SizedBox(width: AppSpacing.md),
+                            Text(switch (_etapa) {
+                              EtapaEnvio.subiendoFoto => 'Subiendo foto…',
+                              _ => 'Enviando reclamo…',
+                            }),
+                          ],
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const IconoAlmira(IconoA.enviar, tamano: 20, color: AppColors.onPrimary),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(_errorEnvio == null ? 'Enviar reclamo' : 'Reintentar envío'),
+                          ],
+                        ),
+                ),
+              ),
+            ),
       body: SafeArea(
         top: false,
         child: Form(
@@ -320,16 +349,43 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
           autovalidateMode: _intentado ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
           child: ListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.margen,
-              AppSpacing.xl,
-              AppSpacing.margen,
-              AppSpacing.xxl,
-            ),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, AppSpacing.xxl),
             children: [
-              TituloSeccion(fotoObligatoria ? 'Foto del problema' : 'Foto del problema (opcional)'),
-              espacioChico,
+              const TituloSeccion('¿Qué tipo de problema es?'),
+              espacio,
+              FormField<TipoReclamo>(
+                // La clave rehace el campo cuando cambia la sugerencia.
+                key: ValueKey(_tipo),
+                initialValue: _tipo,
+                validator: (_) => _tipo == null ? 'Elige una categoría.' : null,
+                builder: (estado) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _GrillaCategorias(
+                      elegida: _tipo,
+                      alElegir: _enviando
+                          ? null
+                          : (tipo) => setState(() {
+                              _tipo = tipo;
+                              _tipoElegidoAMano = true;
+                            }),
+                    ),
+                    if (estado.hasError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: Text(estado.errorText!, style: textos.bodySmall!.copyWith(color: AppColors.error)),
+                      )
+                    else if (_tipo != null && !_tipoElegidoAMano)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: Text('Sugerida por lo que escribiste. Puedes cambiarla.', style: textos.bodySmall),
+                      ),
+                  ],
+                ),
+              ),
+              espacioGrande,
               _CampoFoto(
+                obligatoria: fotoObligatoria,
                 foto: _foto,
                 cargando: _cargandoFoto,
                 conError: _intentado && fotoObligatoria && _foto == null,
@@ -341,10 +397,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
               ],
               if (_foto != null && _resultadoFoto?.estado == EstadoFoto.noValida && !_fotoAceptada) ...[
                 espacio,
-                OutlinedButton(
-                  onPressed: _enviando ? null : _menuFoto,
-                  child: const Text('Cambiar foto'),
-                ),
+                OutlinedButton(onPressed: _enviando ? null : _menuFoto, child: const Text('Cambiar foto')),
                 espacioChico,
                 OutlinedButton(
                   onPressed: _enviando ? null : () => setState(() => _fotoAceptada = true),
@@ -352,71 +405,42 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                 ),
               ],
               // Con foto, el estado de la foto ocupa el lugar de la ayuda.
-              if (_foto == null) ...[
+              if (_foto == null && _intentado && fotoObligatoria) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  _intentado && fotoObligatoria
-                      ? 'Adjunta una foto para enviar el reclamo.'
-                      : 'De la cámara o la galería.',
-                  style: textos.bodyMedium!.copyWith(
-                    color: _intentado && fotoObligatoria ? AppColors.error : null,
-                  ),
+                  'Adjunta una foto para enviar el reclamo.',
+                  style: textos.bodyMedium!.copyWith(color: AppColors.error),
                 ),
               ],
               if (_errorFoto != null) ...[espacioChico, Aviso(_errorFoto!, tono: Tono.error)],
               espacioGrande,
-              TextFormField(
-                controller: _asunto,
-                enabled: !_enviando,
-                textCapitalization: TextCapitalization.sentences,
-                textInputAction: TextInputAction.next,
-                maxLength: asuntoMaximo,
-                onChanged: (_) => _sugerirCategoria(),
-                decoration: const InputDecoration(
-                  labelText: 'Asunto',
-                  hintText: 'Ejemplo: Poste sin luz',
+              CampoConRotulo(
+                rotulo: 'Asunto',
+                campo: TextFormField(
+                  controller: _asunto,
+                  enabled: !_enviando,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
+                  maxLength: asuntoMaximo,
+                  onChanged: (_) => _sugerirCategoria(),
+                  decoration: const InputDecoration(hintText: 'Ejemplo: Poste sin luz'),
+                  validator: validarAsunto,
                 ),
-                validator: validarAsunto,
               ),
               espacioChico,
-              TextFormField(
-                controller: _descripcion,
-                enabled: !_enviando,
-                textCapitalization: TextCapitalization.sentences,
-                minLines: 3,
-                maxLines: 6,
-                maxLength: descripcionMaxima,
-                onChanged: (_) => _sugerirCategoria(),
-                decoration: const InputDecoration(
-                  labelText: 'Descripción',
-                  hintText: 'Qué pasa y desde cuándo',
-                  alignLabelWithHint: true,
+              CampoConRotulo(
+                rotulo: 'Descripción',
+                campo: TextFormField(
+                  controller: _descripcion,
+                  enabled: !_enviando,
+                  textCapitalization: TextCapitalization.sentences,
+                  minLines: 3,
+                  maxLines: 6,
+                  maxLength: descripcionMaxima,
+                  onChanged: (_) => _sugerirCategoria(),
+                  decoration: const InputDecoration(hintText: 'Qué pasa y desde cuándo'),
+                  validator: validarDescripcion,
                 ),
-                validator: validarDescripcion,
-              ),
-              espacioChico,
-              DropdownButtonFormField<TipoReclamo>(
-                // La clave rehace el campo cuando cambia la sugerencia.
-                key: ValueKey(_tipo),
-                initialValue: _tipo,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: 'Categoría',
-                  helperText: _tipo != null && !_tipoElegidoAMano
-                      ? 'Sugerida por lo que escribiste. Puedes cambiarla.'
-                      : null,
-                ),
-                items: [
-                  for (final tipo in TipoReclamo.values)
-                    DropdownMenuItem(value: tipo, child: Text(tipo.etiqueta)),
-                ],
-                onChanged: _enviando
-                    ? null
-                    : (tipo) => setState(() {
-                          _tipo = tipo;
-                          _tipoElegidoAMano = true;
-                        }),
-                validator: (tipo) => tipo == null ? 'Elige una categoría.' : null,
               ),
               espacioGrande,
               const TituloSeccion('Ubicación'),
@@ -465,11 +489,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
               OutlinedButton.icon(
                 onPressed: _enviando || _buscandoGps ? null : _usarMiUbicacion,
                 icon: _buscandoGps
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Phosphor.crosshair, size: AppIconos.boton),
                 label: const Text('Usar mi ubicación'),
               ),
@@ -479,60 +499,38 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
                   _fallaGps!.mensaje,
                   tono: Tono.aviso,
                   accion: _fallaGps!.ofrecerAjustes
-                      ? TextButton(
-                          onPressed: abrirAjustesDeUbicacion,
-                          child: const Text('Abrir ajustes'),
-                        )
+                      ? TextButton(onPressed: abrirAjustesDeUbicacion, child: const Text('Abrir ajustes'))
                       : null,
                 ),
               ],
               espacio,
-              TextFormField(
-                controller: _direccion,
-                enabled: !_enviando,
-                textCapitalization: TextCapitalization.words,
-                maxLength: direccionMaxima,
-                decoration: InputDecoration(
-                  labelText: 'Dirección o referencia',
-                  hintText: 'Calle, número o cruce',
-                  counterText: '',
-                  suffixIcon: vista.predios.isEmpty
-                      ? null
-                      : IconButton(
-                          tooltip: 'Usar la dirección de mi predio',
-                          icon: const Icon(Phosphor.house),
-                          onPressed: _enviando
-                              ? null
-                              : () => setState(() => _direccion.text = vista.predios.first.direccion),
-                        ),
+              CampoConRotulo(
+                rotulo: 'Dirección o referencia',
+                campo: TextFormField(
+                  controller: _direccion,
+                  enabled: !_enviando,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: direccionMaxima,
+                  decoration: InputDecoration(
+                    hintText: 'Calle, número o cruce',
+                    counterText: '',
+                    suffixIcon: vista.predios.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Usar la dirección de mi predio',
+                            icon: const Icon(Phosphor.house),
+                            onPressed: _enviando
+                                ? null
+                                : () => setState(() => _direccion.text = vista.predios.first.direccion),
+                          ),
+                  ),
+                  validator: validarDireccion,
                 ),
-                validator: validarDireccion,
               ),
               if (_errorEnvio != null) ...[
                 espacio,
                 Aviso('No se envió el reclamo. ${_errorEnvio!} Tus datos siguen aquí.', tono: Tono.error),
               ],
-              espacioGrande,
-              FilledButton(
-                onPressed: _enviando ? null : () => _enviar(vista, fotoObligatoria),
-                child: _enviando
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Text(switch (_etapa) {
-                            EtapaEnvio.subiendoFoto => 'Subiendo foto…',
-                            _ => 'Enviando reclamo…',
-                          }),
-                        ],
-                      )
-                    : Text(_errorEnvio == null ? 'Enviar reclamo' : 'Reintentar envío'),
-              ),
             ],
           ),
         ),
@@ -547,21 +545,18 @@ class _RevisandoFoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        liveRegion: true,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSpacing.altoInsignia),
-          child: Row(
-            children: [
-              const SizedBox.square(
-                dimension: AppSpacing.iconoInsignia,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Flexible(child: Text('Revisando foto…', style: Theme.of(context).textTheme.bodyMedium)),
-            ],
-          ),
-        ),
-      );
+    liveRegion: true,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: AppSpacing.altoInsignia),
+      child: Row(
+        children: [
+          const SizedBox.square(dimension: AppSpacing.iconoInsignia, child: CircularProgressIndicator(strokeWidth: 2)),
+          const SizedBox(width: AppSpacing.sm),
+          Flexible(child: Text('Revisando foto…', style: Theme.of(context).textTheme.bodyMedium)),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Estado de la foto en una insignia y, debajo, el motivo en texto secundario.
@@ -637,19 +632,231 @@ class _PanelDiagnostico extends StatelessWidget {
   }
 }
 
+/// Pie fijo con el botón de enviar.
+class _PieEnvio extends StatelessWidget {
+  const _PieEnvio({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(
+      color: AppColors.surface,
+      border: Border(top: BorderSide(color: AppColors.border)),
+    ),
+    child: SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.md, AppSpacing.margen, AppSpacing.md),
+        child: child,
+      ),
+    ),
+  );
+}
+
+/// Categorías como grilla de tres columnas, con su ícono. Elegida: borde turquesa y un check.
+class _GrillaCategorias extends StatelessWidget {
+  const _GrillaCategorias({required this.elegida, required this.alElegir});
+
+  final TipoReclamo? elegida;
+  final ValueChanged<TipoReclamo>? alElegir;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    const columnas = 3;
+    const tipos = TipoReclamo.values;
+    return Column(
+      children: [
+        for (var f = 0; f < tipos.length; f += columnas) ...[
+          if (f > 0) const SizedBox(height: AppSpacing.sm),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var c = 0; c < columnas; c++) ...[
+                  if (c > 0) const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: f + c < tipos.length
+                        ? _Categoria(
+                            tipo: tipos[f + c],
+                            elegida: elegida == tipos[f + c],
+                            alTocar: alElegir == null ? null : () => alElegir!(tipos[f + c]),
+                            estilo: textos.labelMedium!,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _Categoria extends StatelessWidget {
+  const _Categoria({required this.tipo, required this.elegida, required this.alTocar, required this.estilo});
+
+  final TipoReclamo tipo;
+  final bool elegida;
+  final VoidCallback? alTocar;
+  final TextStyle estilo;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icono, color) = iconoCategoria(tipo);
+    final radio = BorderRadius.circular(AppRadius.campo + 2);
+    return Semantics(
+      inMutuallyExclusiveGroup: true,
+      checked: elegida,
+      button: true,
+      label: tipo.etiqueta,
+      excludeSemantics: true,
+      child: Presionable(
+        child: AnimatedContainer(
+          duration: duracionDe(context),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: radio,
+            border: Border.all(color: elegida ? AppColors.primary : AppColors.bordeCampo, width: elegida ? 2 : 1.5),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: radio,
+              onTap: alTocar,
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: AppSpacing.md),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconoColor.svg(icono, color: color),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(tipo.etiqueta, textAlign: TextAlign.center, style: estilo, maxLines: 2),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (elegida)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                        child: const Icon(Icons.check_rounded, size: 14, color: Colors.white),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Borde punteado redondeado (la invitación a agregar una foto).
+class _BordePunteado extends CustomPainter {
+  const _BordePunteado({required this.color, required this.radio});
+
+  final Color color;
+  final double radio;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final trazo = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+    final ruta = ui.Path()..addRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radio)));
+    for (final m in ruta.computeMetrics()) {
+      for (double d = 0; d < m.length; d += 10) {
+        canvas.drawPath(m.extractPath(d, d + 5), trazo);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BordePunteado old) => old.color != color;
+}
+
 /// Zona de la foto: invita a adjuntar o muestra la miniatura real.
 class _CampoFoto extends StatelessWidget {
-  const _CampoFoto({required this.foto, required this.cargando, required this.conError, this.alTocar});
+  const _CampoFoto({
+    required this.foto,
+    required this.cargando,
+    required this.conError,
+    required this.obligatoria,
+    this.alTocar,
+  });
 
   final Uint8List? foto;
   final bool cargando;
   final bool conError;
+  final bool obligatoria;
   final VoidCallback? alTocar;
 
   @override
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    final borde = BorderRadius.circular(AppRadius.tarjeta);
+    final borde = BorderRadius.circular(AppRadius.tarjeta - 4);
+    if (foto == null && !cargando) {
+      // Sin foto: una invitación con borde punteado coral.
+      return Semantics(
+        button: true,
+        label: 'Adjuntar foto',
+        excludeSemantics: true,
+        child: CustomPaint(
+          painter: _BordePunteado(color: conError ? AppColors.error : AppColors.coral, radio: AppRadius.tarjeta - 4),
+          child: Material(
+            color: AppColors.coral100.withValues(alpha: 0.45),
+            borderRadius: borde,
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: alTocar,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.coral100,
+                        borderRadius: BorderRadius.circular(AppRadius.cajaMediana),
+                      ),
+                      child: const Center(child: IconoAlmira(IconoA.camara, tamano: 24, color: AppColors.textPrimary)),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Agrega una foto', style: textos.titleMedium!.copyWith(fontWeight: FontWeight.w800)),
+                          Text(
+                            obligatoria ? 'De la cámara o la galería' : 'Opcional · de la cámara o la galería',
+                            style: textos.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.add_rounded, color: AppColors.textPrimary),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Semantics(
       button: true,
       label: foto == null ? 'Adjuntar foto' : 'Foto adjunta. Cambiar o quitar',
@@ -668,45 +875,39 @@ class _CampoFoto extends StatelessWidget {
             child: cargando
                 ? const Center(child: CircularProgressIndicator(strokeWidth: 3))
                 : foto == null
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Phosphor.cameraPlus, size: AppIconos.vacio, color: AppColors.primary),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            'Adjuntar foto',
-                            style: textos.labelLarge!.copyWith(color: AppColors.primary),
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Phosphor.cameraPlus, size: AppIconos.vacio, color: AppColors.primary),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text('Adjuntar foto', style: textos.labelLarge!.copyWith(color: AppColors.primary)),
+                    ],
+                  )
+                : Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.memory(foto!, fit: BoxFit.cover, gaplessPlayback: true),
+                      Positioned(
+                        right: AppSpacing.sm,
+                        bottom: AppSpacing.sm,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(AppRadius.pastilla),
                           ),
-                        ],
-                      )
-                    : Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.memory(foto!, fit: BoxFit.cover, gaplessPlayback: true),
-                          Positioned(
-                            right: AppSpacing.sm,
-                            bottom: AppSpacing.sm,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(AppRadius.pastilla),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Phosphor.pencilSimple, size: AppIconos.insignia, color: AppColors.primaryDark),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Cambiar',
-                                    style: textos.labelMedium!.copyWith(color: AppColors.primaryDark),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Phosphor.pencilSimple, size: AppIconos.insignia, color: AppColors.primaryDark),
+                              const SizedBox(width: 6),
+                              Text('Cambiar', style: textos.labelMedium!.copyWith(color: AppColors.primaryDark)),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
+                    ],
+                  ),
           ),
         ),
       ),

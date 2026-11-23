@@ -8,6 +8,7 @@ import 'package:almira_flutter/shared/services/proveedores.dart';
 import 'package:almira_flutter/shared/services/repositorio_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:almira_flutter/features/complaints/reclamos_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -147,7 +148,7 @@ void main() {
     expect(find.text('Poste sin luz en la esquina'), findsOneWidget);
     expect(find.textContaining('Respuesta hasta el'), findsOneWidget);
     expect(find.textContaining('días hábiles'), findsNothing);
-    expect(find.text('Resuelto'), findsOneWidget);
+    expect(find.descendant(of: find.byType(InsigniaReclamo), matching: find.text('Resuelto')), findsOneWidget);
     expect(find.textContaining(' de 10 días'), findsNothing);
   });
 
