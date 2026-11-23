@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -24,8 +25,7 @@ class PagoEnLineaScreen extends ConsumerStatefulWidget {
   ConsumerState<PagoEnLineaScreen> createState() => _PagoEnLineaScreenState();
 }
 
-class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
-    with SingleTickerProviderStateMixin {
+class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen> with SingleTickerProviderStateMixin {
   late final TabController _pestanasControl = TabController(length: _pestanas.length, vsync: this)
     ..addListener(() => setState(() {}));
   bool _beneficio = true;
@@ -83,17 +83,10 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, 0),
-                  child: SegmentedButton<bool>(
-                    segments: const [
-                      ButtonSegment(
-                        value: true,
-                        label: Text('Beneficio al vencimiento', textAlign: TextAlign.center),
-                      ),
-                      ButtonSegment(value: false, label: Text('Deuda general', textAlign: TextAlign.center)),
-                    ],
-                    selected: {_beneficio},
-                    showSelectedIcon: false,
-                    onSelectionChanged: (s) => setState(() => _beneficio = s.first),
+                  child: Segmentado<bool>(
+                    opciones: const [(true, 'Beneficio al vencimiento'), (false, 'Deuda general')],
+                    actual: _beneficio,
+                    alElegir: (b) => setState(() => _beneficio = b),
                   ),
                 ),
                 Expanded(
@@ -103,76 +96,111 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
                           children: [
                             VistaVacia(
                               icono: Phosphor.checkCircle,
-                              titulo: _beneficio
-                                  ? 'No tienes pagos del año en curso'
-                                  : 'No tienes deuda en ${tributo.etiqueta.toLowerCase()}',
+                              ilustracion: Ilustracion.vacioPagos,
+                              titulo: '¡Estás al día!',
+                              detalle: _beneficio
+                                  ? 'No tienes pagos del año en curso en ${tributo.etiqueta}.'
+                                  : 'No tienes deuda en ${tributo.etiqueta.toLowerCase()}.',
+                            ),
+                            Center(
+                              child: FilledButton.icon(
+                                onPressed: () => context.push(Rutas.estadoCuenta),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppColors.primary100,
+                                  foregroundColor: AppColors.primary,
+                                  minimumSize: const Size(0, 44),
+                                  shape: const StadiumBorder(),
+                                ),
+                                icon: const IconoAlmira(IconoA.historial, tamano: 18, color: AppColors.primary),
+                                label: const Text('Ver historial de pagos'),
+                              ),
                             ),
                           ],
                         )
                       : ListView(
                           padding: const EdgeInsets.fromLTRB(
-                              AppSpacing.margen, AppSpacing.md, AppSpacing.margen, AppSpacing.lg),
+                            AppSpacing.margen,
+                            AppSpacing.md,
+                            AppSpacing.margen,
+                            AppSpacing.lg,
+                          ),
                           children: [
-                            CheckboxListTile(
-                              value: todasMarcadas,
-                              onChanged: (marcar) => setState(() {
-                                for (final d in lista) {
-                                  marcar == true ? _elegidas.add(d.id) : _elegidas.remove(d.id);
-                                }
-                              }),
-                              controlAffinity: ListTileControlAffinity.leading,
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('Seleccionar todo'),
-                            ),
-                            const Divider(),
-                            for (final d in lista) ...[
-                              _FilaPeriodo(
-                                deuda: d,
-                                hoy: hoy,
-                                marcada: _elegidas.contains(d.id),
-                                alCambiar: (marcar) => setState(
-                                  () => marcar ? _elegidas.add(d.id) : _elegidas.remove(d.id),
-                                ),
+                            GrupoTarjeta(
+                              padding: const EdgeInsets.fromLTRB(
+                                AppSpacing.xs,
+                                AppSpacing.xs,
+                                AppSpacing.lg,
+                                AppSpacing.xs,
                               ),
-                              const Divider(),
-                            ],
+                              filas: [
+                                InkWell(
+                                  onTap: () => setState(() {
+                                    for (final d in lista) {
+                                      todasMarcadas ? _elegidas.remove(d.id) : _elegidas.add(d.id);
+                                    }
+                                  }),
+                                  child: Row(
+                                    children: [
+                                      CasillaAlmira(
+                                        marcada: todasMarcadas,
+                                        semantica: 'Seleccionar todo',
+                                        alCambiar: (marcar) => setState(() {
+                                          for (final d in lista) {
+                                            marcar ? _elegidas.add(d.id) : _elegidas.remove(d.id);
+                                          }
+                                        }),
+                                      ),
+                                      Text('Seleccionar todo', style: textos.titleMedium),
+                                    ],
+                                  ),
+                                ),
+                                for (final d in lista)
+                                  _FilaPeriodo(
+                                    deuda: d,
+                                    hoy: hoy,
+                                    marcada: _elegidas.contains(d.id),
+                                    alCambiar: (marcar) =>
+                                        setState(() => marcar ? _elegidas.add(d.id) : _elegidas.remove(d.id)),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                 ),
                 Container(
                   padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.margen, AppSpacing.md, AppSpacing.margen, AppSpacing.lg),
+                    AppSpacing.margen,
+                    AppSpacing.md,
+                    AppSpacing.margen,
+                    AppSpacing.lg,
+                  ),
                   decoration: const BoxDecoration(
                     color: AppColors.surface,
                     border: Border(top: BorderSide(color: AppColors.border)),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Row(
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(child: Text('Importe total', style: textos.bodyMedium)),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: FittedBox(
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Importe total', style: textos.labelMedium),
+                            FittedBox(
                               fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerRight,
-                              child: Text(soles(total), style: textos.headlineSmall),
+                              alignment: Alignment.centerLeft,
+                              child: Monto(total, tamano: 26),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      const SizedBox(width: AppSpacing.md),
                       SizedBox(
-                        width: double.infinity,
                         child: FilledButton(
                           onPressed: elegidasTotal.isEmpty
                               ? null
-                              : () => context.push(
-                                    Rutas.confirmarPago,
-                                    extra: elegidasTotal.map((d) => d.id).toList(),
-                                  ),
+                              : () => context.push(Rutas.confirmarPago, extra: elegidasTotal.map((d) => d.id).toList()),
+                          style: FilledButton.styleFrom(minimumSize: const Size(132, AppSpacing.boton)),
                           child: const Text('Siguiente'),
                         ),
                       ),
@@ -191,12 +219,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
 /// Periodo a pagar: casilla, periodo en 15/500 con el concepto en gris debajo, y el saldo a la
 /// derecha. Si ya venció, la insignia «Vencida» (estado real).
 class _FilaPeriodo extends StatelessWidget {
-  const _FilaPeriodo({
-    required this.deuda,
-    required this.hoy,
-    required this.marcada,
-    required this.alCambiar,
-  });
+  const _FilaPeriodo({required this.deuda, required this.hoy, required this.marcada, required this.alCambiar});
 
   final Deuda deuda;
   final DateTime hoy;
@@ -213,7 +236,7 @@ class _FilaPeriodo extends StatelessWidget {
       alTocar: () => alCambiar(!marcada),
       final_: const SizedBox.shrink(),
       semantica: '${deuda.concepto} ${deuda.periodo}, ${soles(deuda.saldo)}',
-      inicio: Checkbox(value: marcada, onChanged: (m) => alCambiar(m ?? false)),
+      inicio: CasillaAlmira(marcada: marcada, alCambiar: alCambiar, semantica: deuda.periodo),
       detalle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -231,12 +254,7 @@ class _FilaPeriodo extends StatelessWidget {
 
 /// Como `CuerpoAsync`, pero el contenido ocupa toda la pantalla (no es una lista que se desplaza).
 class CuerpoAsyncSinLista<T> extends StatelessWidget {
-  const CuerpoAsyncSinLista({
-    super.key,
-    required this.valor,
-    required this.alRecargar,
-    required this.construir,
-  });
+  const CuerpoAsyncSinLista({super.key, required this.valor, required this.alRecargar, required this.construir});
 
   final AsyncValue<T> valor;
   final Future<void> Function() alRecargar;

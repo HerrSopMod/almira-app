@@ -1427,6 +1427,112 @@ class CuerpoAsync<T> extends StatelessWidget {
   }
 }
 
+/// Selector segmentado del rediseño: una pista beige redondeada con la opción elegida en una
+/// píldora. [oscuro] pinta la elegida en tinta con texto blanco (Pagar); si no, en blanco con
+/// sombra (Estado de cuenta, Pago en línea).
+class Segmentado<T> extends StatelessWidget {
+  const Segmentado({
+    super.key,
+    required this.opciones,
+    required this.actual,
+    required this.alElegir,
+    this.oscuro = false,
+  });
+
+  final List<(T, String)> opciones;
+  final T actual;
+  final ValueChanged<T> alElegir;
+  final bool oscuro;
+
+  static const pista = Color(0xFFEDE7DC);
+
+  @override
+  Widget build(BuildContext context) {
+    final estilo = Theme.of(context).textTheme.titleSmall!;
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(color: pista, borderRadius: BorderRadius.circular(AppRadius.campo)),
+      child: Row(
+        children: [
+          for (final (valor, texto) in opciones)
+            Expanded(
+              child: Semantics(
+                button: true,
+                selected: valor == actual,
+                label: texto,
+                excludeSemantics: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => alElegir(valor),
+                  child: AnimatedContainer(
+                    duration: duracionDe(context, 220),
+                    curve: curvaAlmira,
+                    constraints: const BoxConstraints(minHeight: 44),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: valor == actual
+                          ? (oscuro ? AppColors.textPrimary : AppColors.surface)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(AppRadius.campo - 4),
+                      boxShadow: valor == actual && !oscuro ? AppColors.sombraCard : null,
+                    ),
+                    child: Text(
+                      texto,
+                      textAlign: TextAlign.center,
+                      style: estilo.copyWith(
+                        fontWeight: valor == actual ? FontWeight.w800 : FontWeight.w700,
+                        color: valor == actual
+                            ? (oscuro ? Colors.white : AppColors.textPrimary)
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Casilla de selección del rediseño: cuadrado de 26 con radio de 8; marcada, turquesa con check.
+class CasillaAlmira extends StatelessWidget {
+  const CasillaAlmira({super.key, required this.marcada, required this.alCambiar, this.semantica});
+
+  final bool marcada;
+  final ValueChanged<bool>? alCambiar;
+  final String? semantica;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    checked: marcada,
+    label: semantica,
+    excludeSemantics: true,
+    child: InkResponse(
+      onTap: alCambiar == null ? null : () => alCambiar!(!marcada),
+      radius: 24,
+      child: SizedBox.square(
+        dimension: AppSpacing.toque,
+        child: Center(
+          child: AnimatedContainer(
+            duration: duracionDe(context, 160),
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(
+              color: marcada ? AppColors.primary : AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: marcada ? AppColors.primary : AppColors.bordeControl, width: 1.5),
+            ),
+            child: marcada ? const Icon(Icons.check_rounded, size: 18, color: Colors.white) : null,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 /// Campo con su rótulo encima (14, peso 700), como en el rediseño: el campo lleva solo el
 /// ejemplo dentro. El rótulo también es la etiqueta del campo para lectores de pantalla.
 class CampoConRotulo extends StatelessWidget {
