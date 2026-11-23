@@ -19,6 +19,7 @@ import '../account/estado_cuenta_logica.dart';
 import '../complaints/reclamos_logica.dart';
 import '../payments/pagos_logica.dart';
 import '../profile/foto_perfil.dart';
+import '../public_works/obras_screen.dart';
 
 /// Cuántas obligaciones se listan en Inicio; el resto está en Pagar.
 const _maximoEnInicio = 3;
@@ -630,15 +631,6 @@ IconoA iconoDeReclamo(TipoReclamo tipo) => switch (tipo) {
   TipoReclamo.cobroIndebido => IconoA.tarjeta,
   _ => IconoA.reclamos,
 };
-
-/// Ilustración de una obra según su nombre (pistas, parque o veredas). No hay fotos de obras en
-/// la base: se usa la ilustración más cercana.
-Ilustracion ilustracionDeObra(Obra obra) {
-  final n = normalizar('${obra.nombre} ${obra.nombreCorto ?? ''}');
-  if (n.contains('parque') || n.contains('plaza') || n.contains('area verde')) return Ilustracion.obraParque;
-  if (n.contains('vereda') || n.contains('accesib')) return Ilustracion.obraVeredas;
-  return Ilustracion.obraPistas;
-}
 
 /// Obra en ejecución: ilustración arriba, nombre y barra de avance con el porcentaje.
 class _TarjetaObra extends StatelessWidget {
