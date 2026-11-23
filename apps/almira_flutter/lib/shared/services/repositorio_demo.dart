@@ -144,6 +144,10 @@ class RepositorioDemo implements Repositorio {
   @override
   Future<bool> guardarCelular(String celular) async => true;
 
+  // Las fotos de las obras viven en Supabase: en demostración no hay ninguna.
+  @override
+  Future<List<String>> urlsFotosObra(String municipalidadId, String obraId) async => const [];
+
   // La foto de perfil se guarda en Supabase: sin cuenta real no hay dónde guardarla.
   @override
   Future<String?> urlFotoPerfil() async => null;

@@ -55,6 +55,9 @@ abstract class Repositorio {
   /// Quita la foto de perfil.
   Future<void> quitarFotoPerfil();
 
+  /// Direcciones temporales de las fotos de una obra, en orden. Vacía si no tiene.
+  Future<List<String>> urlsFotosObra(String municipalidadId, String obraId);
+
   /// Estado de los recordatorios por WhatsApp de la cuenta, o null si nunca los configuró.
   Future<PreferenciaWhatsapp?> preferenciaWhatsapp();
 

@@ -151,9 +151,11 @@ function FilaObra({ obra, seleccionada }: { obra: Obra; seleccionada: boolean })
           <Texto variante="bodyLg" color={colors.textSecondary} style={estilos.flexible}>
             {obra.avancePct} % de avance
           </Texto>
-          <Texto variante="bodyLgMedium" alineacion="right" tabular>
-            {formatearSoles(obra.montoAsignado, { sinDecimales: true })}
-          </Texto>
+          {obra.montoAsignado > 0 ? (
+            <Texto variante="bodyLgMedium" alineacion="right" tabular>
+              {formatearSoles(obra.montoAsignado, { sinDecimales: true })}
+            </Texto>
+          ) : null}
         </View>
       </Tarjeta>
     </Pressable>
