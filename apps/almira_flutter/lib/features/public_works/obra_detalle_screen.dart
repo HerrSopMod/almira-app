@@ -1,7 +1,4 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -19,8 +16,8 @@ import '../../shared/services/proveedores.dart';
 import 'fotos_obra.dart';
 import 'obras_screen.dart';
 
-/// Detalle de obra (rediseño): la ilustración grande arriba con el botón de volver y el estado;
-/// la tarjeta con el nombre, la dirección, el anillo de avance físico, la meta y la última
+/// Detalle de obra (rediseño): la barra turquesa con el botón de volver y el estado; la tarjeta
+/// con el nombre, la dirección, el anillo de avance físico, la meta y la última
 /// actualización; el presupuesto (cuánto se gastó del asignado) y la ubicación en el mapa.
 class ObraDetalleScreen extends ConsumerWidget {
   const ObraDetalleScreen({super.key, required this.id});
@@ -33,11 +30,18 @@ class ObraDetalleScreen extends ConsumerWidget {
     final hoy = ref.watch(relojProvider)();
     final textos = Theme.of(context).textTheme;
 
+    final actual = vista.valueOrNull?.obras.where((o) => o.id == id).firstOrNull;
+
     return Scaffold(
+      appBar: BarraAlmira(
+        titulo: 'Obra',
+        acciones: [
+          if (actual != null) ...[InsigniaObra(actual.estado, sobreTurquesa: true), const SizedBox(width: AppSpacing.md)],
+        ],
+      ),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
-        cabecera: (v) => _Portada(obra: v?.obras.where((o) => o.id == id).firstOrNull),
         construir: (v) {
           final obra = v.obras.where((o) => o.id == id).firstOrNull;
           if (obra == null) {
@@ -207,55 +211,6 @@ class ObraDetalleScreen extends ConsumerWidget {
 
 /// Espacio no separable: evita que «66 %» se parta en dos líneas.
 const _nbsp = ' ';
-
-/// Portada: la ilustración de la obra a todo el ancho, con el botón de volver y el estado. La hoja
-/// crema sube sobre ella.
-class _Portada extends StatelessWidget {
-  const _Portada({required this.obra});
-
-  final Obra? obra;
-
-  @override
-  Widget build(BuildContext context) {
-    final arriba = MediaQuery.paddingOf(context).top;
-    final o = obra;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: barraSobreBlanco,
-      child: SizedBox(
-        height: arriba + 210,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (o != null) ImagenObra(obra: o) else const ColoredBox(color: AppColors.primary100),
-            Positioned(
-              top: arriba + AppSpacing.md,
-              left: AppSpacing.lg,
-              right: AppSpacing.lg,
-              child: Row(
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppRadius.caja),
-                      boxShadow: AppColors.sombraCard,
-                    ),
-                    child: BotonCuadro(
-                      semantica: 'Volver',
-                      fondo: AppColors.surface,
-                      alTocar: () => Navigator.maybePop(context),
-                      child: const Icon(Phosphor.arrowLeft, size: 22, color: AppColors.textPrimary),
-                    ),
-                  ),
-                  const Spacer(),
-                  if (o != null) InsigniaObra(o.estado),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 /// Rótulo pequeño en gris y valor en 800 (meta, última actualización).
 class _DatoCorto extends StatelessWidget {

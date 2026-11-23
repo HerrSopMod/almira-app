@@ -45,8 +45,8 @@ List<Obra> filtrarObras(List<Obra> obras, FiltroObra filtro) => obras
 
 Color colorObra(Obra obra) => obra.estado == EstadoObra.finalizada ? AppColors.limaTexto : AppColors.primary;
 
-/// Ilustración de una obra según su nombre (pistas, parque o veredas). La base no guarda fotos de
-/// obras: se usa la ilustración más cercana.
+/// Ilustración de una obra según su nombre (pistas, parque o veredas). Es la que se ve cuando la
+/// obra no tiene fotos.
 Ilustracion ilustracionDeObra(Obra obra) {
   final n = normalizar('${obra.nombre} ${obra.nombreCorto ?? ''}');
   if (n.contains('parque') || n.contains('plaza') || n.contains('area verde')) return Ilustracion.obraParque;
@@ -55,14 +55,20 @@ Ilustracion ilustracionDeObra(Obra obra) {
 }
 
 class InsigniaObra extends StatelessWidget {
-  const InsigniaObra(this.estado, {super.key});
+  const InsigniaObra(this.estado, {super.key, this.sobreTurquesa = false});
 
   final EstadoObra estado;
 
+  /// Fondo blanco para que la píldora se lea sobre la barra turquesa.
+  final bool sobreTurquesa;
+
   @override
-  Widget build(BuildContext context) => estado == EstadoObra.finalizada
-      ? Insignia(estado.etiqueta, tono: Tono.exito, icono: Phosphor.check)
-      : Insignia(estado.etiqueta, tono: Tono.aviso);
+  Widget build(BuildContext context) {
+    final fondo = sobreTurquesa ? AppColors.surface : null;
+    return estado == EstadoObra.finalizada
+        ? Insignia(estado.etiqueta, tono: Tono.exito, icono: Phosphor.check, fondo: fondo)
+        : Insignia(estado.etiqueta, tono: Tono.aviso, fondo: fondo);
+  }
 }
 
 /// Avance físico de la obra en un anillo que se llena hasta el porcentaje, rotulado «avance

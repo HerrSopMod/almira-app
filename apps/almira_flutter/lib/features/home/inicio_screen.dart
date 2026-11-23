@@ -19,6 +19,7 @@ import '../account/estado_cuenta_logica.dart';
 import '../complaints/reclamos_logica.dart';
 import '../payments/pagos_logica.dart';
 import '../profile/foto_perfil.dart';
+import '../public_works/fotos_obra.dart';
 import '../public_works/obras_screen.dart';
 
 /// Cuántas obligaciones se listan en Inicio; el resto está en Pagar.
@@ -656,7 +657,8 @@ class _TarjetaObra extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 76, child: ImagenIlustracion(ilustracionDeObra(obra), ajuste: BoxFit.cover)),
+          // La primera foto real de la obra; sin foto (o si no carga), la ilustración de siempre.
+          SizedBox(height: 76, child: ImagenObra(obra: obra)),
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
             child: Column(
