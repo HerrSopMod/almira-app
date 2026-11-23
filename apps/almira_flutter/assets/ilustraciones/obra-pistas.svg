@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 150" width="340" height="150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Pista recién asfaltada"><title>Mantenimiento de pistas</title>
+<rect width="340" height="150" fill="#DDF1EE"/>
+<circle cx="286" cy="34" r="16" fill="#FFC94A"/>
+<rect x="20" y="40" width="50" height="64" rx="3" fill="#FF7A59"/><rect x="16" y="36" width="58" height="8" rx="2" fill="#12393A"/><rect x="30" y="54" width="12" height="12" rx="2" fill="#FFF6EA"/><rect x="48" y="54" width="12" height="12" rx="2" fill="#FFF6EA"/>
+<rect x="80" y="54" width="44" height="50" rx="3" fill="#14A39A"/><rect x="88" y="64" width="10" height="12" rx="2" fill="#E6F4F1"/><rect x="106" y="64" width="10" height="12" rx="2" fill="#E6F4F1"/>
+<path d="M226 104V70" stroke="#12393A" stroke-width="4" stroke-linecap="round"/><circle cx="226" cy="58" r="18" fill="#B8E07A"/>
+<path d="M0 104h340v46H0z" fill="#3E5554"/>
+<path d="M0 104h340v6H0z" fill="#C9DCD9"/>
+<path d="M20 128h30M80 128h30M140 128h30M200 128h30M260 128h30" stroke="#FFC94A" stroke-width="5" stroke-linecap="round"/>
+<g transform="translate(232 72)"><rect x="0" y="16" width="70" height="30" rx="6" fill="#FFC94A"/><rect x="30" y="0" width="30" height="20" rx="4" fill="#FFC94A" stroke="#12393A" stroke-width="3"/><circle cx="16" cy="50" r="12" fill="#12393A"/><rect x="44" y="40" width="34" height="22" rx="11" fill="#12393A"/><rect x="8" y="22" width="16" height="6" rx="3" fill="#12393A"/></g>
+<g transform="translate(170 86)"><path d="M10 0l10 30H0z" fill="#FF7A59"/><path d="M4 18h12M7 9h6" stroke="#FFF" stroke-width="3"/><rect x="-3" y="28" width="26" height="5" rx="2" fill="#12393A"/></g>
+</svg>

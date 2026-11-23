@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 150" width="220" height="150" role="img" aria-label="Candado con llave"><title>Clave web</title>
+<ellipse cx="110" cy="136" rx="92" ry="10" fill="#F6EEDF"/>
+<circle cx="40" cy="34" r="22" fill="#E6F4F1"/>
+<path d="M82 66V50a28 28 0 0 1 56 0v16" stroke="#12393A" stroke-width="10" stroke-linecap="round" fill="none"/>
+<rect x="64" y="62" width="92" height="70" rx="14" fill="#14A39A"/>
+<rect x="64" y="62" width="92" height="16" rx="8" fill="#0A6E72" opacity=".35"/>
+<circle cx="110" cy="94" r="10" fill="#12393A"/><path d="M110 100v14" stroke="#12393A" stroke-width="8" stroke-linecap="round"/>
+<g fill="#FFF6EA"><circle cx="80" cy="120" r="3"/><circle cx="90" cy="120" r="3"/><circle cx="130" cy="120" r="3"/><circle cx="140" cy="120" r="3"/></g>
+<g transform="rotate(-30 176 96)"><circle cx="162" cy="96" r="13" fill="#FFC94A" stroke="#12393A" stroke-width="3"/><circle cx="162" cy="96" r="4" fill="#12393A"/><path d="M175 96h30M196 96v8M204 96v6" stroke="#12393A" stroke-width="5" stroke-linecap="round"/></g>
+<path d="M188 30l6 2-6 2-2 6-2-6-6-2 6-2 2-6zM30 92l4 1-4 1-1 4-1-4-4-1 4-1 1-4z" fill="#FF7A59"/>
+</svg>

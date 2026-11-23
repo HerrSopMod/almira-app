@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 150" width="340" height="150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Parque renovado"><title>Renovación del parque</title>
+<rect width="340" height="150" fill="#FFF1D6"/>
+<path d="M0 100c60-14 120-18 170-14s110 4 170-8v72H0z" fill="#B8E07A"/>
+<path d="M0 116c80-10 160-8 340 4v30H0z" fill="#7DBB4A"/>
+<circle cx="60" cy="36" r="14" fill="#FFC94A"/>
+<g><path d="M70 110V70" stroke="#12393A" stroke-width="5" stroke-linecap="round"/><circle cx="70" cy="56" r="24" fill="#14A39A"/></g>
+<g><path d="M278 106V62" stroke="#12393A" stroke-width="5" stroke-linecap="round"/><circle cx="278" cy="50" r="28" fill="#14A39A"/><circle cx="262" cy="40" r="5" fill="#FF7A59"/><circle cx="292" cy="56" r="5" fill="#FF7A59"/></g>
+<g transform="translate(150 60)"><path d="M0 50V6M60 50V6" stroke="#12393A" stroke-width="4" stroke-linecap="round"/><path d="M-6 6h72" stroke="#FF7A59" stroke-width="6" stroke-linecap="round"/><path d="M18 6v26M42 6v26" stroke="#12393A" stroke-width="2"/><rect x="12" y="32" width="12" height="4" rx="2" fill="#FFC94A"/><rect x="36" y="32" width="12" height="4" rx="2" fill="#FFC94A"/></g>
+<g transform="translate(110 96)"><rect x="0" y="0" width="34" height="5" rx="2" fill="#FF7A59"/><rect x="0" y="8" width="34" height="4" rx="2" fill="#FF7A59"/><path d="M4 12v10M30 12v10" stroke="#12393A" stroke-width="3" stroke-linecap="round"/></g>
+<g transform="translate(222 76)"><path d="M6 0v46" stroke="#12393A" stroke-width="3"/><rect x="0" y="-12" width="12" height="14" rx="4" fill="#FFC94A"/></g>
+</svg>

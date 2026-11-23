@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 220" width="360" height="220" role="img" aria-label="Vecinos caminando por su barrio">
+  <title>Barrio Almira</title>
+  <!-- suelo -->
+  <path d="M18 196c18-22 70-30 160-30s150 6 168 28c6 8-6 16-30 18-60 5-190 6-268 2-24-1-38-8-30-18z" fill="#F6EEDF"/>
+  <!-- nubes / sol -->
+  <circle cx="300" cy="34" r="16" fill="#FFC94A"/>
+  <path d="M40 40h34a10 10 0 0 0-18-8 8 8 0 0 0-16 8z" fill="#E6F4F1"/>
+  <path d="M232 22h28a8 8 0 0 0-14-6 7 7 0 0 0-14 6z" fill="#E6F4F1"/>
+
+  <!-- casa coral izquierda -->
+  <g id="casa-coral">
+    <rect x="34" y="72" width="62" height="106" rx="3" fill="#FF7A59"/>
+    <rect x="30" y="66" width="70" height="10" rx="3" fill="#12393A"/>
+    <rect x="44" y="88" width="16" height="18" rx="2" fill="#FFF6EA"/>
+    <rect x="70" y="88" width="16" height="18" rx="2" fill="#FFF6EA"/>
+    <path d="M56 178v-30a9 9 0 0 1 18 0v30z" fill="#14A39A"/>
+    <rect x="44" y="120" width="16" height="16" rx="2" fill="#FFF6EA"/>
+  </g>
+
+  <!-- municipalidad teal -->
+  <g id="muni">
+    <rect x="104" y="52" width="72" height="126" rx="3" fill="#14A39A"/>
+    <rect x="100" y="46" width="80" height="10" rx="3" fill="#12393A"/>
+    <rect x="130" y="30" width="20" height="18" rx="2" fill="#F6EEDF"/>
+    <path d="M140 30V12" stroke="#12393A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M141 12h14l-4 5 4 5h-14z" fill="#FF7A59"/>
+    <g fill="#E6F4F1">
+      <rect x="114" y="66" width="14" height="16" rx="2"/>
+      <rect x="133" y="66" width="14" height="16" rx="2"/>
+      <rect x="152" y="66" width="14" height="16" rx="2"/>
+      <rect x="114" y="94" width="14" height="16" rx="2"/>
+      <rect x="133" y="94" width="14" height="16" rx="2"/>
+      <rect x="152" y="94" width="14" height="16" rx="2"/>
+    </g>
+    <rect x="126" y="140" width="28" height="38" rx="3" fill="#0A6E72"/>
+    <rect x="120" y="126" width="40" height="8" rx="2" fill="#FFC94A"/>
+  </g>
+
+  <!-- bodega -->
+  <g id="bodega">
+    <rect x="186" y="96" width="70" height="82" rx="3" fill="#FFF6EA"/>
+    <path d="M182 92h78l-4 22H186z" fill="#FF7A59"/>
+    <path d="M195 92l-2 22M208 92v22M221 92v22M234 92l2 22M247 92l3 22" stroke="#FFF6EA" stroke-width="5"/>
+    <rect x="182" y="86" width="78" height="8" rx="3" fill="#12393A"/>
+    <rect x="196" y="126" width="24" height="22" rx="2" fill="#B8E07A"/>
+    <rect x="228" y="126" width="18" height="52" rx="2" fill="#14A39A"/>
+  </g>
+
+  <!-- arbol -->
+  <g id="arbol">
+    <path d="M296 182v-54" stroke="#12393A" stroke-width="6" stroke-linecap="round"/>
+    <path d="M296 150l-12-12M296 140l10-10" stroke="#12393A" stroke-width="4" stroke-linecap="round"/>
+    <path d="M296 70c18 0 30 12 30 26 10 4 14 14 10 24-4 12-18 16-28 12-6 6-18 6-24 0-12 4-26-2-28-14-2-10 4-18 12-22 0-14 12-26 28-26z" fill="#B8E07A"/>
+    <path d="M276 100c4-6 10-8 16-6M304 88c6 0 10 4 12 8" stroke="#7DBB4A" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- banca -->
+  <g id="banca" fill="#FF7A59">
+    <rect x="300" y="160" width="44" height="6" rx="2"/>
+    <rect x="300" y="170" width="44" height="5" rx="2"/>
+    <path d="M304 175v12M340 175v12" stroke="#12393A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- planta -->
+  <path d="M20 188h16l-3 12H23z" fill="#FF7A59"/>
+  <path d="M28 188c-2-10-10-14-14-12 2 6 6 10 14 12zm0 0c2-12 8-16 14-14-2 8-6 12-14 14z" fill="#14A39A"/>
+
+  <!-- persona 1 (con celular) -->
+  <g id="vecina">
+    <path d="M122 206l6-24M140 206l-4-24" stroke="#12393A" stroke-width="6" stroke-linecap="round"/>
+    <path d="M118 206h10M136 206h10" stroke="#12393A" stroke-width="5" stroke-linecap="round"/>
+    <path d="M118 152c0-8 6-12 14-12s14 4 14 12l4 34h-36z" fill="#FFC94A"/>
+    <path d="M146 158l10 10 6-8" stroke="#B9774E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="158" y="148" width="9" height="14" rx="2" fill="#12393A" transform="rotate(15 162 155)"/>
+    <path d="M120 158l-8 18" stroke="#B9774E" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="132" cy="128" r="10" fill="#B9774E"/>
+    <path d="M122 126c0-8 6-12 12-12 7 0 11 6 10 12-4-4-10-4-14-2-2 6-4 10-8 12z" fill="#12393A"/>
+  </g>
+
+  <!-- persona 2 (niño) -->
+  <g id="vecino">
+    <path d="M206 206l4-20M220 206l-2-20" stroke="#12393A" stroke-width="6" stroke-linecap="round"/>
+    <path d="M202 206h9M216 206h9" stroke="#12393A" stroke-width="5" stroke-linecap="round"/>
+    <path d="M202 166c0-6 5-10 11-10s11 4 11 10l2 22h-26z" fill="#14A39A"/>
+    <path d="M204 170l-10 10" stroke="#F2B38A" stroke-width="5" stroke-linecap="round"/>
+    <path d="M222 170l8 8" stroke="#F2B38A" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="213" cy="146" r="9" fill="#F2B38A"/>
+    <path d="M204 144c0-6 4-10 10-10 5 0 9 4 8 9-6 0-12-2-14-5-1 3-2 5-4 6z" fill="#12393A"/>
+    <!-- globo -->
+    <path d="M230 178l6-34" stroke="#12393A" stroke-width="1.5"/>
+    <ellipse cx="238" cy="134" rx="9" ry="11" fill="#FF7A59"/>
+  </g>
+</svg>

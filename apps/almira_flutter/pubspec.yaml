@@ -44,6 +44,8 @@ flutter:
     - assets/marcas_pago/
     - assets/escudos/
     - assets/bot_avatar.svg
+    - assets/iconos/
+    - assets/ilustraciones/
   fonts:
     - family: PlusJakartaSans
       fonts:
@@ -55,6 +57,8 @@ flutter:
           weight: 600
         - asset: assets/fonts/PlusJakartaSans.ttf
           weight: 700
+        - asset: assets/fonts/PlusJakartaSans.ttf
+          weight: 800
 # Ícono del lanzador (Android y web), generado desde el ícono de la marca:
 # `dart run flutter_launcher_icons`.
 # En Android: casa blanca con el mensaje sobre fondo turquesa, como el splash (sin el cuadro
