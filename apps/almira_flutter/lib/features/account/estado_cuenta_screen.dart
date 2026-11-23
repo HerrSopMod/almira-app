@@ -17,6 +17,8 @@ import '../../core/widgets/tributo.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'estado_cuenta_logica.dart';
+import '../payments/detalle_deuda_logica.dart';
+import 'hoja_trimestre.dart';
 import 'pdf_documentos.dart';
 
 enum _Vista { estado, historial }
@@ -215,7 +217,10 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen> with Si
                       ),
                     ],
                   ),
-                  for (final anio in tributo.anios) ...[espacio, _TablaAnio(anio: anio, hoy: hoy)],
+                  for (final anio in tributo.anios) ...[
+                    espacio,
+                    _TablaAnio(anio: anio, hoy: hoy, vista: v, esDemo: ref.watch(esDemoProvider)),
+                  ],
                   espacioChico,
                   const Divider(),
                   FilaDato('Total acumulado', soles(tributo.acumulado.saldo), destacado: true),
@@ -362,46 +367,24 @@ class _TotalGeneral extends StatelessWidget {
 /// gris y saldo a la derecha) y el total del año. Al tocar un periodo se abre el detalle con
 /// todas las columnas del estado de cuenta.
 class _TablaAnio extends StatelessWidget {
-  const _TablaAnio({required this.anio, required this.hoy});
+  const _TablaAnio({required this.anio, required this.hoy, required this.vista, required this.esDemo});
 
   final GrupoAnio anio;
   final DateTime hoy;
+  final VistaMunicipal vista;
+  final bool esDemo;
 
   static String _f(DateTime? d) => d == null ? '' : fechaCorta(d);
 
-  void _detalle(BuildContext context, Deuda d) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (_) => SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, 0, AppSpacing.margen, AppSpacing.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('${etiquetaPeriodo(d)} ${d.anioTributo}', style: Theme.of(context).textTheme.titleLarge),
-              Text(d.concepto, style: Theme.of(context).textTheme.bodyMedium),
-              const SizedBox(height: AppSpacing.md),
-              Ficha('Estado', d.pendiente ? 'Pendiente' : 'Pagado'),
-              Ficha('Vencimiento', _f(d.vencimiento)),
-              if (d.fechaPago != null) Ficha('Fecha de pago', _f(d.fechaPago)),
-              if (d.nroValor != null) Ficha('Nro. de valor', d.nroValor!),
-              if (d.expCoactivo != null) Ficha('Exp. coactivo', d.expCoactivo!),
-              const Divider(height: AppSpacing.xl),
-              FilaDato('Insoluto', soles(d.montoInsoluto)),
-              FilaDato('Gastos de emisión', soles(d.gastosEmision)),
-              FilaDato('Interés de actualización', soles(d.interesActualizacion + d.interesMoratorio)),
-              FilaDato('Descuento', '- ${soles(d.descuento)}'),
-              FilaDato('Pagos', soles(d.pagosAplicados)),
-              FilaDato('Saldo', soles(d.saldo), destacado: true),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  void _detalle(BuildContext context, Deuda d) => mostrarHojaTrimestre(
+    context,
+    deuda: d,
+    hoy: hoy,
+    pagos: vista.pagos,
+    municipalidad: vista.municipalidad,
+    vecino: vista.vecino,
+    esDemo: esDemo,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -413,7 +396,8 @@ class _TablaAnio extends StatelessWidget {
         Text('Año ${anio.anio}', style: estiloRotulo(context)),
         for (final d in anio.filas) ...[
           FilaLista(
-            titulo: etiquetaPeriodo(d),
+            inicio: _IndicadorCuota(deuda: d, hoy: hoy),
+            titulo: tituloCuota(d),
             monto: soles(d.saldo),
             alTocar: () => _detalle(context, d),
             semantica: '${etiquetaPeriodo(d)} ${anio.anio}, saldo ${soles(d.saldo)}. Ver detalle',
@@ -430,8 +414,9 @@ class _TablaAnio extends StatelessWidget {
   /// «Vence el 30 nov 2026», «Venció el 15 oct 2026» (en rojo) o «Pagado el 28 oct 2026».
   Widget _lineaPeriodo(BuildContext context, Deuda d) {
     final vencida = d.estadoAl(hoy) == EstadoDeuda.vencida;
+    final pagado = fechaDePago(d, vista.pagos);
     final texto = !d.pendiente
-        ? 'Pagado el ${_f(d.fechaPago ?? d.vencimiento)}'
+        ? (pagado == null ? 'Pagado' : 'Pagado el ${_f(pagado)}')
         : (vencida ? 'Venció el ${_f(d.vencimiento)}' : 'Vence el ${_f(d.vencimiento)}');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -447,6 +432,37 @@ class _TablaAnio extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Indicador de 40 de una cuota: check lima si está pagada, alerta roja si venció y calendario sol
+/// si está por vencer.
+class _IndicadorCuota extends StatelessWidget {
+  const _IndicadorCuota({required this.deuda, required this.hoy});
+
+  final Deuda deuda;
+  final DateTime hoy;
+
+  @override
+  Widget build(BuildContext context) => switch (deuda.estadoAl(hoy)) {
+    EstadoDeuda.pagada => const IconoColor(
+      Icons.check_rounded,
+      color: AppColors.lima,
+      lado: 40,
+      colorIcono: AppColors.limaTexto,
+    ),
+    EstadoDeuda.vencida => const IconoColor.svg(
+      IconoA.alerta,
+      color: AppColors.error,
+      lado: 40,
+      colorIcono: AppColors.error,
+    ),
+    EstadoDeuda.vigente => const IconoColor.svg(
+      IconoA.calendario,
+      color: AppColors.sol,
+      lado: 40,
+      colorIcono: AppColors.solTexto,
+    ),
+  };
 }
 
 class _GrupoDeTributos {

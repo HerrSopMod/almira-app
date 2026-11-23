@@ -772,18 +772,27 @@ class IconoColor extends StatelessWidget {
     this.color = AppColors.primary,
     this.lado = AppSpacing.caja,
     this.circulo = false,
+    this.colorIcono,
   }) : svg = null;
 
   /// Con uno de los íconos propios del rediseño.
-  const IconoColor.svg(IconoA this.svg, {super.key, this.color = AppColors.primary, this.lado = AppSpacing.caja})
-    : icono = null,
-      circulo = false;
+  const IconoColor.svg(
+    IconoA this.svg, {
+    super.key,
+    this.color = AppColors.primary,
+    this.lado = AppSpacing.caja,
+    this.colorIcono,
+  }) : icono = null,
+       circulo = false;
 
   final IconData? icono;
   final IconoA? svg;
   final Color color;
   final double lado;
   final bool circulo;
+
+  /// Color del ícono; por defecto, tinta (sin manchas de color).
+  final Color? colorIcono;
 
   @override
   Widget build(BuildContext context) {
@@ -796,8 +805,8 @@ class IconoColor extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(color: AppColors.fondoPastel(color), borderRadius: BorderRadius.circular(radio)),
         child: svg != null
-            ? IconoAlmira(svg!, tamano: tamano, color: AppColors.textPrimary)
-            : Icon(icono, size: tamano, color: AppColors.textPrimary),
+            ? IconoAlmira(svg!, tamano: tamano, color: colorIcono ?? AppColors.textPrimary)
+            : Icon(icono, size: tamano, color: colorIcono ?? AppColors.textPrimary),
       ),
     );
   }
@@ -1605,6 +1614,35 @@ class Monto extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Línea punteada de 1 px (antes del saldo en los desgloses).
+class LineaPunteada extends StatelessWidget {
+  const LineaPunteada({super.key});
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(
+    height: 1,
+    width: double.infinity,
+    child: CustomPaint(painter: _PintorPunteado()),
+  );
+}
+
+class _PintorPunteado extends CustomPainter {
+  const _PintorPunteado();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = AppColors.bordeCampo
+      ..strokeWidth = 1;
+    for (double x = 0; x < size.width; x += 7) {
+      canvas.drawLine(Offset(x, 0), Offset(math.min(x + 4, size.width), 0), p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PintorPunteado old) => false;
 }
 
 /// Separación vertical estándar entre bloques.
