@@ -122,7 +122,7 @@ class InicioScreen extends ConsumerWidget {
       ],
       if (enCurso.isNotEmpty) ...[
         espacioGrande,
-        const Aparecer(paso: 6, child: TituloSeccion('En curso')),
+        const Aparecer(paso: 6, child: TituloSeccion('Tus reclamos')),
         espacio,
         _Carrusel(tarjetas: enCurso),
       ],
