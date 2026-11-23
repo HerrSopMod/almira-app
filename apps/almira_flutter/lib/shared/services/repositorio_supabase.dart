@@ -193,9 +193,10 @@ class RepositorioSupabase implements Repositorio {
       if (nombres.isEmpty) return const [];
       final firmadas = await _cliente.storage
           .from(_bucketObras)
-          .createSignedUrls([for (final n in nombres.take(_maxFotosObra)) '$carpeta/$n'], 3600)
+          .createSignedUrlsResult([for (final n in nombres.take(_maxFotosObra)) '$carpeta/$n'], 3600)
           .timeout(_espera);
-      return [for (final f in firmadas) if (f.signedUrl.isNotEmpty) f.signedUrl];
+      // Una foto que no se pudo firmar se omite: las demás se muestran igual.
+      return [for (final f in firmadas) if (f is SignedUrlSuccess && f.signedUrl.isNotEmpty) f.signedUrl];
     } catch (error) {
       throw ErrorApp.de(error);
     }

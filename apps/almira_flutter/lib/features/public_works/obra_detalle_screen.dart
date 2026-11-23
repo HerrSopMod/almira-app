@@ -9,6 +9,7 @@ import '../../app/theme/iconos.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/mapa_almira.dart';
+import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'fotos_obra.dart';
 import 'obras_screen.dart';
@@ -86,36 +87,36 @@ class ObraDetalleScreen extends ConsumerWidget {
               )
             else
               Text('Sin punto en el mapa.', style: textos.bodyMedium!),
-            espacioGrande,
             // El avance solo se muestra en obras en ejecución: una finalizada no lo necesita.
             if (obra.estado != EstadoObra.finalizada) ...[
-              AvanceFisico(obra),
               espacioGrande,
+              AvanceFisico(obra),
             ],
-            // Montos en cero son datos que la municipalidad aún no registra: no se muestran.
+            // Un monto en cero es un dato que no se tiene: no se muestra como si fuera real.
             if (obra.montoAsignado > 0 || obra.montoEjecutado > 0 || obra.porcentajeTributos != null) ...[
-            const TituloSeccion('Presupuesto'),
-            espacioChico,
-            Tarjeta(
-              child: Column(
-                children: [
-                  if (obra.montoAsignado > 0)
-                    _FilaIcono(PhosphorFill.wallet, AppColors.acentoAzul, 'Asignado', soles(obra.montoAsignado), aLaDerecha: true),
-                  if (obra.montoEjecutado > 0)
-                    _FilaIcono(PhosphorFill.receipt, AppColors.acentoAmbar, 'Gastado', soles(obra.montoEjecutado), aLaDerecha: true),
-                  if (gasto != null && obra.montoEjecutado > 0)
-                    _FilaIcono(PhosphorFill.listChecks, AppColors.acentoVioleta, 'Gastado del presupuesto', '$gasto$_nbsp%', aLaDerecha: true),
-                  if (obra.porcentajeTributos != null)
-                    _FilaIcono(
-                      PhosphorFill.bank,
-                      AppColors.acentoVerde,
-                      'Financiado con tributos',
-                      '${obra.porcentajeTributos!.round()}$_nbsp%',
-                      aLaDerecha: true,
-                    ),
-                ],
+              espacioGrande,
+              const TituloSeccion('Presupuesto'),
+              espacioChico,
+              Tarjeta(
+                child: Column(
+                  children: [
+                    if (obra.montoAsignado > 0)
+                      _FilaIcono(PhosphorFill.wallet, AppColors.acentoAzul, 'Asignado', soles(obra.montoAsignado), aLaDerecha: true),
+                    if (obra.montoEjecutado > 0)
+                      _FilaIcono(PhosphorFill.receipt, AppColors.acentoAmbar, 'Gastado', soles(obra.montoEjecutado), aLaDerecha: true),
+                    if (gasto != null && obra.montoEjecutado > 0)
+                      _FilaIcono(PhosphorFill.listChecks, AppColors.acentoVioleta, 'Gastado del presupuesto', '$gasto$_nbsp%', aLaDerecha: true),
+                    if (obra.porcentajeTributos != null)
+                      _FilaIcono(
+                        PhosphorFill.bank,
+                        AppColors.acentoVerde,
+                        'Financiado con tributos',
+                        '${obra.porcentajeTributos!.round()}$_nbsp%',
+                        aLaDerecha: true,
+                      ),
+                  ],
+                ),
               ),
-            ),
             ],
             if (inicio != null || obra.meta.trim().isNotEmpty || actualizada != null) ...[
               espacioGrande,
