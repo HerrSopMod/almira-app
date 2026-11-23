@@ -120,7 +120,10 @@ export function Obras() {
                     <strong>{formatearPorcentaje(obra.avancePct)}</strong>
                   </span>
                 </td>
-                <td className="monto">{formatearSoles(obra.montoAsignado, { sinDecimales: true })}</td>
+                {/* 0 significa que no hay dato: no se muestra como si fuera un monto real. */}
+                <td className="monto">
+                  {obra.montoAsignado > 0 ? formatearSoles(obra.montoAsignado, { sinDecimales: true }) : 'Sin dato'}
+                </td>
                 <td>{atrasada ? <Chip tono="warn">{actualizada}</Chip> : actualizada}</td>
                 <td>
                   <Interruptor

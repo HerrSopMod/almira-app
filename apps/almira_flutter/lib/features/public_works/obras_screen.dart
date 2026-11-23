@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +20,7 @@ import '../../app/theme/app_theme.dart';
 import '../../app/theme/iconos_almira.dart';
 import '../../core/widgets/movimiento.dart';
 import '../complaints/reclamos_screen.dart';
+import 'fotos_obra.dart';
 import '../complaints/reclamos_logica.dart';
 
 enum FiltroObra {
@@ -62,7 +65,8 @@ class InsigniaObra extends StatelessWidget {
       : Insignia(estado.etiqueta, tono: Tono.aviso);
 }
 
-/// Avance físico de la obra, rotulado para no confundirlo con el gasto.
+/// Avance físico de la obra en un anillo que se llena hasta el porcentaje, rotulado «avance
+/// físico» para no confundirlo con el gasto. Solo va en obras en ejecución.
 class AvanceFisico extends StatelessWidget {
   const AvanceFisico(this.obra, {super.key});
 
@@ -72,28 +76,69 @@ class AvanceFisico extends StatelessWidget {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     final pct = obra.avancePct.clamp(0, 100).toDouble();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(child: Text('Avance físico', style: textos.bodyMedium!)),
-            Text('${pct.round()} %', style: textos.titleMedium!.copyWith(fontFeatures: cifrasTabulares)),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.pastilla),
-          child: LinearProgressIndicator(
-            value: pct / 100,
-            minHeight: 6,
-            color: colorObra(obra),
-            semanticsLabel: 'Avance físico ${pct.round()} por ciento',
+    final anillo = TweenAnimationBuilder<double>(
+      tween: Tween(begin: sinMovimiento(context) ? pct : 0, end: pct),
+      duration: const Duration(milliseconds: 1400),
+      curve: curvaAlmira,
+      builder: (context, valor, _) => CustomPaint(
+        painter: _PintorAnillo(fraccion: valor / 100, color: AppColors.primary500),
+        child: SizedBox.square(
+          dimension: 104,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FittedBox(
+                  child: Text(
+                    '${valor.round()}%',
+                    style: textos.headlineSmall!.copyWith(fontFeatures: cifrasTabulares),
+                  ),
+                ),
+                Text('avance físico', style: textos.labelSmall!.copyWith(color: AppColors.textSecondary)),
+              ],
+            ),
           ),
         ),
-      ],
+      ),
+    );
+    return Semantics(label: 'Avance físico ${pct.round()} por ciento', excludeSemantics: true, child: anillo);
+  }
+}
+
+class _PintorAnillo extends CustomPainter {
+  const _PintorAnillo({required this.fraccion, required this.color});
+
+  final double fraccion;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const grosor = 10.0;
+    final centro = size.center(Offset.zero);
+    final radio = (math.min(size.width, size.height) - grosor) / 2;
+    canvas.drawCircle(
+      centro,
+      radio,
+      Paint()
+        ..color = AppColors.primary50
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = grosor,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: centro, radius: radio),
+      -math.pi / 2,
+      2 * math.pi * fraccion,
+      false,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = grosor
+        ..strokeCap = StrokeCap.round,
     );
   }
+
+  @override
+  bool shouldRepaint(_PintorAnillo old) => old.fraccion != fraccion || old.color != color;
 }
 
 class ObrasScreen extends ConsumerStatefulWidget {
@@ -333,7 +378,9 @@ class _TarjetaObra extends StatelessWidget {
       child: Tarjeta(
         padding: EdgeInsets.zero,
         onTap: () => context.go(Rutas.obra(obra.id)),
-        semantica: 'Obra ${obra.nombre}, ${obra.estado.etiqueta}, avance físico $pct por ciento. Ver detalle',
+        semantica: concluida
+            ? 'Obra ${obra.nombre}, ${obra.estado.etiqueta}. Ver detalle'
+            : 'Obra ${obra.nombre}, ${obra.estado.etiqueta}, avance físico $pct por ciento. Ver detalle',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -342,7 +389,7 @@ class _TarjetaObra extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ImagenIlustracion(ilustracionDeObra(obra), ajuste: BoxFit.cover),
+                  ImagenObra(obra: obra),
                   Positioned(top: AppSpacing.md, left: AppSpacing.md, child: InsigniaObra(obra.estado)),
                 ],
               ),
@@ -367,25 +414,29 @@ class _TarjetaObra extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        '$pct$_nbsp%',
-                        style: textos.titleLarge!.copyWith(fontSize: 20, fontFeatures: cifrasTabulares),
-                      ),
+                      if (!concluida) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          '$pct$_nbsp%',
+                          style: textos.titleLarge!.copyWith(fontSize: 20, fontFeatures: cifrasTabulares),
+                        ),
+                      ],
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary50,
-                      borderRadius: BorderRadius.circular(AppRadius.pastilla),
+                  // Una obra concluida no necesita barra de avance.
+                  if (!concluida) const SizedBox(height: AppSpacing.sm),
+                  if (!concluida)
+                    Container(
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary50,
+                        borderRadius: BorderRadius.circular(AppRadius.pastilla),
+                      ),
+                      child: BarraCreciente(
+                        fraccion: pct / 100,
+                        color: concluida ? AppColors.limaTexto.withValues(alpha: 0.75) : AppColors.primary500,
+                      ),
                     ),
-                    child: BarraCreciente(
-                      fraccion: pct / 100,
-                      color: concluida ? AppColors.limaTexto.withValues(alpha: 0.75) : AppColors.primary500,
-                    ),
-                  ),
                   if (alVerEnMapa != null)
                     Align(
                       alignment: Alignment.centerLeft,

@@ -16,6 +16,7 @@ import '../../core/widgets/mapa_almira.dart';
 import '../../core/widgets/movimiento.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
+import 'fotos_obra.dart';
 import 'obras_screen.dart';
 
 /// Detalle de obra (rediseño): la ilustración grande arriba con el botón de volver y el estado;
@@ -79,8 +80,11 @@ class ObraDetalleScreen extends ConsumerWidget {
                     espacio,
                     Row(
                       children: [
-                        _AnilloAvance(obra: obra),
-                        const SizedBox(width: AppSpacing.lg),
+                        // El avance solo se muestra en obras en ejecución: una concluida no lo necesita.
+                        if (obra.estado != EstadoObra.finalizada) ...[
+                          AvanceFisico(obra),
+                          const SizedBox(width: AppSpacing.lg),
+                        ],
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,32 +106,41 @@ class ObraDetalleScreen extends ConsumerWidget {
               ),
             ),
             espacio,
-            Aparecer(
-              paso: 1,
-              child: Tarjeta(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const TituloSeccion('Presupuesto'),
-                    espacio,
-                    if (gasto != null) ...[_BloqueGasto(porcentaje: gasto, asignado: obra.montoAsignado), espacioChico],
-                    _FilaMonto(IconoA.presupuesto, AppColors.primary, 'Asignado', soles(obra.montoAsignado)),
-                    const Divider(),
-                    _FilaMonto(IconoA.pagar, AppColors.coral, 'Gastado', soles(obra.montoEjecutado)),
-                    if (obra.porcentajeTributos != null) ...[
-                      const Divider(),
-                      _FilaMonto(
-                        IconoA.municipalidad,
-                        AppColors.lima,
-                        'Financiado con tributos',
-                        '${obra.porcentajeTributos!.round()}$_nbsp%',
-                      ),
+            FotosObra(municipalidadId: obra.municipalidadId, obraId: obra.id),
+            // Un monto en cero es un dato que no se tiene: no se muestra como si fuera real.
+            if (obra.montoAsignado > 0 || obra.montoEjecutado > 0 || obra.porcentajeTributos != null) ...[
+              Aparecer(
+                paso: 1,
+                child: Tarjeta(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const TituloSeccion('Presupuesto'),
+                      espacio,
+                      if (gasto != null && obra.montoEjecutado > 0) ...[
+                        _BloqueGasto(porcentaje: gasto, asignado: obra.montoAsignado),
+                        espacioChico,
+                      ],
+                      if (obra.montoAsignado > 0)
+                        _FilaMonto(IconoA.presupuesto, AppColors.primary, 'Asignado', soles(obra.montoAsignado)),
+                      if (obra.montoAsignado > 0 && obra.montoEjecutado > 0) const Divider(),
+                      if (obra.montoEjecutado > 0)
+                        _FilaMonto(IconoA.pagar, AppColors.coral, 'Gastado', soles(obra.montoEjecutado)),
+                      if (obra.porcentajeTributos != null) ...[
+                        if (obra.montoAsignado > 0 || obra.montoEjecutado > 0) const Divider(),
+                        _FilaMonto(
+                          IconoA.municipalidad,
+                          AppColors.lima,
+                          'Financiado con tributos',
+                          '${obra.porcentajeTributos!.round()}$_nbsp%',
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-            espacio,
+              espacio,
+            ],
             Aparecer(
               paso: 2,
               child: Tarjeta(
@@ -213,10 +226,7 @@ class _Portada extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (o != null)
-              ImagenIlustracion(ilustracionDeObra(o), ajuste: BoxFit.cover)
-            else
-              const ColoredBox(color: AppColors.primary100),
+            if (o != null) ImagenObra(obra: o) else const ColoredBox(color: AppColors.primary100),
             Positioned(
               top: arriba + AppSpacing.md,
               left: AppSpacing.lg,
@@ -245,74 +255,6 @@ class _Portada extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Anillo del avance físico: se llena hasta el porcentaje (lima si la obra concluyó).
-class _AnilloAvance extends StatelessWidget {
-  const _AnilloAvance({required this.obra});
-
-  final Obra obra;
-
-  @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    final pct = obra.avancePct.clamp(0, 100).toDouble();
-    final color = obra.estado == EstadoObra.finalizada ? AppColors.lima : AppColors.primary500;
-    final anillo = TweenAnimationBuilder<double>(
-      tween: Tween(begin: sinMovimiento(context) ? pct : 0, end: pct),
-      duration: const Duration(milliseconds: 1400),
-      curve: curvaAlmira,
-      builder: (context, valor, _) => CustomPaint(
-        painter: _PintorAnillo(fraccion: valor / 100, color: color),
-        child: SizedBox.square(
-          dimension: 104,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FittedBox(
-                  child: Text(
-                    '${valor.round()}%',
-                    style: textos.headlineSmall!.copyWith(fontFeatures: cifrasTabulares),
-                  ),
-                ),
-                Text('avance físico', style: textos.labelSmall!.copyWith(color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    return Semantics(label: 'Avance físico ${pct.round()} por ciento', excludeSemantics: true, child: anillo);
-  }
-}
-
-class _PintorAnillo extends CustomPainter {
-  const _PintorAnillo({required this.fraccion, required this.color});
-
-  final double fraccion;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const grosor = 10.0;
-    final centro = size.center(Offset.zero);
-    final radio = (math.min(size.width, size.height) - grosor) / 2;
-    final base = Paint()
-      ..color = AppColors.primary50
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = grosor;
-    canvas.drawCircle(centro, radio, base);
-    final arco = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = grosor
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(Rect.fromCircle(center: centro, radius: radio), -math.pi / 2, 2 * math.pi * fraccion, false, arco);
-  }
-
-  @override
-  bool shouldRepaint(_PintorAnillo old) => old.fraccion != fraccion || old.color != color;
 }
 
 /// Rótulo pequeño en gris y valor en 800 (meta, última actualización).

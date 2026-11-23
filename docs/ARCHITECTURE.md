@@ -81,7 +81,7 @@ El asistente se llama "Asistente" y no usa IA (la pantalla lo dice en su nota: "
 
 Reclamos: Nuevo reclamo (16) toma la foto con la cámara (`expo-image-picker`) y, si el vecino toca "Usar mi ubicación", lee el GPS (`expo-location`), siempre con permiso. Por ahora los dos se quedan en el teléfono: la foto no se sube a Storage, el punto del GPS no se guarda en el reclamo y la pantalla lo dice en una nota. Las pantallas 15, 17 y 18 siguen mostrando un dibujo fijo según la categoría en miniatura (`MiniaturaFoto` de `FotoSimulada.tsx`). El minimapa de la 16 es real, fijo y sin gestos: marca el punto del GPS si lo hay y, si no, la ubicación de ejemplo del predio (`UBICACIONES_PREDIO_EJEMPLO`); si el vecino cambia la dirección sin GPS, el mapa queda en el distrito sin marcador. El reclamo guarda el punto de ejemplo del predio, o ninguno si cambió la dirección. La ayuda de Reclamos lleva a Atención humana; no se muestra ningún teléfono. La ubicación parte de la dirección del predio y el vecino puede ajustarla a mano. `clasificarReclamo` (`packages/shared/src/reclamos.ts`) elige la categoría con palabras clave y `AREA_TIPO_RECLAMO` da el área; no hay IA. El plazo de ejemplo es de 10 días hábiles para todas las categorías. Al confirmar, `registrarReclamo` guarda el reclamo en memoria con el siguiente código de la municipalidad, estado `derivado` y fecha `HOY_EJEMPLO`, y abre su seguimiento. El estado lo cambia la municipalidad.
 
-Obras: el mapa es real (ver «Mapa de obras» más abajo). La pantalla 19 filtra con los chips Todas, En ejecución y Concluidas; al tocar un marcador se resalta su tarjeta y la lista baja hasta ella. Con `/obras?obra=<id>` la obra llega seleccionada y centrada: así vuelven el ícono de mapa y "Ver en el mapa" del detalle (20), que solo aparecen si la obra tiene ubicación. El botón de recentrar vuelve al encuadre de las obras; no usa el GPS. El detalle muestra una imagen ilustrativa porque no hay fotos publicadas.
+Obras: el mapa es real (ver «Mapa de obras» más abajo). La pantalla 19 filtra con los chips Todas, En ejecución y Concluidas; al tocar un marcador se resalta su tarjeta y la lista baja hasta ella. Con `/obras?obra=<id>` la obra llega seleccionada y centrada: así vuelven el ícono de mapa y "Ver en el mapa" del detalle (20), que solo aparecen si la obra tiene ubicación. El botón de recentrar vuelve al encuadre de las obras; no usa el GPS. El detalle muestra una imagen ilustrativa porque no hay fotos publicadas. En la app Flutter, el detalle muestra las fotos reales de la obra si existen: están en el bucket privado `obras` de Supabase (`{municipalidad_id}/{obra_id}/{archivo}`, hasta 12 por obra), las sube solo el personal y se ven con direcciones firmadas temporales; sin fotos o en modo demostración no se muestra nada. En una obra finalizada no se muestra el avance, y un monto en 0 (sin dato) no se muestra en la app Flutter, la app Expo ni el panel.
 
 Mi perfil vive dentro de la pestaña Inicio. "Texto más grande" (`src/textoGrande.tsx`) agranda en memoria todos los textos de `Texto`. Cerrar sesión vuelve al ingreso, cierra la sesión de Supabase (`signOut`), si está configurado, y olvida en memoria el método de ingreso y el consentimiento. Privacidad y mis datos muestra y cambia los permisos que guardó el consentimiento; las solicitudes ARCO son simuladas. Sin smartphone usa un número SMS y un horario de ejemplo (`SMS_NUMERO_EJEMPLO`, `HORARIO_MODULO_EJEMPLO`) y la reserva de turno es simulada.
 
@@ -120,7 +120,9 @@ Cada tabla de datos lleva `municipalidad_id`.
 - `vecinos` tiene una fila por persona y municipalidad: quien tributa en dos distritos tiene dos filas. `user_id` queda vacío hasta que vincula su DNI.
 - Las llaves foráneas compuestas `(municipalidad_id, id)` impiden que una deuda, un pago o un reclamo apunte a un vecino de otra municipalidad, incluso con `service_role`.
 - `reclamos.foto_ruta` es obligatoria y debe estar en la carpeta de su municipalidad.
-- `obras.latitud` y `obras.longitud` son nulas (`20261109000001_obras_ubicacion.sql`): una obra sin coordenadas sale en la lista, pero no en el mapa.
+- `obras.latitud` y `obras.longitud` son nulas (`20261109000001_obras_ubicacion.sql`): una obra sin coordenadas sale en la lista, pero no en el mapa. Las obras de Infobras todavía no tienen coordenadas; `supabase/scripts/infobras-coordenadas.js` genera la migración que las carga.
+- `obras.codigo_infobras` y `obras.nombre_oficial` (`20261123000001_obras_lince.sql`) guardan el código y el nombre tal como están en Infobras (Contraloría). El índice único `(municipalidad_id, codigo_infobras)` evita duplicar una obra al volver a cargarla. Son nulas en las obras que no vienen de Infobras.
+- Obras reales: `20261123000001` carga 15 obras de Lince y `20261123000003` crea la municipalidad de Lurín (con el mismo id que en producción) y carga sus 24 obras, 17 publicadas; `20261123000006` carga 59 obras de La Victoria (Lima), 46 publicadas, en la municipalidad con slug `la-victoria`. Un monto en 0 significa que Infobras no lo informa. En una base nueva, la carga de Lince no hace nada porque el seed crea Lince después de las migraciones.
 
 ## Seguridad
 
@@ -135,13 +137,15 @@ Las funciones de `supabase/migrations/20261031000002_rls.sql` viven en el esquem
 | `pagos` | Lee los propios | Lee | Escribe |
 | `recordatorios` | Lee los propios | Lee | Escribe |
 | `reclamos` | Lee y crea los propios | Lee y cambia `estado`, `area` y `plazo` | Elimina |
-| `obras` | Lee todas | Crea y actualiza las suyas | Elimina |
+| `obras` | Lee las publicadas | Crea y actualiza las suyas, solo en las columnas permitidas | Elimina; escribe `codigo_infobras`, `nombre_oficial`, `latitud`, `longitud` y `fotos` |
 
-**Pendiente:** obras usa grant de tabla completa para authenticated; pasar a permisos por columna según CLAUDE.md. Por eso el personal de la municipalidad también puede escribir `latitud` y `longitud` de sus obras; los vecinos no, porque la política exige ser personal.
+En `obras`, `20261123000004_obras_permisos_columna.sql` cambia el grant de tabla completa por permisos por columna (prueba en `supabase/tests/obras_permisos.sql`). **Pendiente:** esa migración todavía no está aplicada en producción; hasta entonces, el personal puede escribir todas las columnas de sus obras. Los vecinos no escriben, porque las políticas exigen ser personal.
 
 `anon` no tiene acceso a ninguna tabla. Un pago solo se confirma desde el servidor, nunca desde el cliente.
 
 El bucket privado `evidencias` usa la ruta `{municipalidad_id}/{user_id}/{archivo}`. El vecino sube a su carpeta, el personal lee las de su municipalidad y nadie reemplaza ni borra evidencias desde el cliente.
+
+El bucket privado `obras` (`20261123000002_fotos_obras.sql`) usa la ruta `{municipalidad_id}/{obra_id}/{archivo}`, con JPEG, PNG o WebP de hasta 5 MB. Ven las fotos los vecinos y el personal de esa municipalidad; solo el personal sube, cambia o quita. No hay pantalla para subirlas: hoy las sube el personal desde Supabase (Storage) y solo con permiso de la municipalidad. Las fotos actuales son capturas pequeñas de Infobras y hay que cambiarlas por las originales.
 
 Al agregar una tabla: incluye `municipalidad_id`, activa RLS y revoca los permisos de `anon` y `authenticated`, porque Supabase los concede por defecto en tablas nuevas.
 
