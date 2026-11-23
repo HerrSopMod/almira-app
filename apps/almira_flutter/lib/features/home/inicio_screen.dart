@@ -19,6 +19,7 @@ import '../account/estado_cuenta_logica.dart';
 import '../complaints/reclamos_logica.dart';
 import '../payments/pagos_logica.dart';
 import '../profile/foto_perfil.dart';
+import '../public_works/fotos_obra.dart';
 import '../public_works/obras_screen.dart';
 
 /// Cuántas obligaciones se listan en Inicio; el resto está en Pagar.
@@ -640,14 +641,17 @@ IconoA iconoDeReclamo(TipoReclamo tipo) => switch (tipo) {
 };
 
 /// Obra en ejecución: ilustración arriba, nombre y barra de avance con el porcentaje.
-class _TarjetaObra extends StatelessWidget {
+class _TarjetaObra extends ConsumerWidget {
   const _TarjetaObra({required this.obra});
 
   final Obra obra;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textos = Theme.of(context).textTheme;
+    // La primera foto real de la obra; sin foto (o si no carga), la ilustración de siempre.
+    final fotos = ref.watch(fotosObraProvider((obra.municipalidadId, obra.id))).valueOrNull ?? const <String>[];
+    final ilustracion = ImagenIlustracion(ilustracionDeObra(obra), ajuste: BoxFit.cover);
     final avance = obra.avancePct.clamp(0, 100) / 100;
     return Tarjeta(
       padding: EdgeInsets.zero,
@@ -656,7 +660,18 @@ class _TarjetaObra extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 76, child: ImagenIlustracion(ilustracionDeObra(obra), ajuste: BoxFit.cover)),
+          SizedBox(
+            height: 76,
+            child: fotos.isEmpty
+                ? ilustracion
+                : Image.network(
+                    fotos.first,
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                    loadingBuilder: (_, hijo, progreso) => progreso == null ? hijo : ilustracion,
+                    errorBuilder: (_, _, _) => ilustracion,
+                  ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
             child: Column(
