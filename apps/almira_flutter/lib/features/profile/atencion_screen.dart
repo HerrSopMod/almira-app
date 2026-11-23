@@ -19,7 +19,7 @@ class AtencionScreen extends ConsumerWidget {
     final vista = ref.watch(vistaProvider);
     final textos = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Atención')),
+      appBar: BarraAlmira(titulo: 'Atención'),
       body: SafeArea(
         top: false,
         child: CuerpoAsync<VistaMunicipal>(

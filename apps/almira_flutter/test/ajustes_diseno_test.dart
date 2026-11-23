@@ -352,6 +352,8 @@ void main() {
       // Verificar celular.
       tester.view.viewInsets = FakeViewPadding.zero;
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Ahora no'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Ahora no'));
       await tester.pumpAndSettle();
       await tester.tap(find.byType(TextFormField).first);

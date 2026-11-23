@@ -50,13 +50,19 @@ Future<void> _entrar(WidgetTester tester) async {
   await tester.tap(find.text('Continuar'));
   await tester.pumpAndSettle();
   expect(find.text('Crea tu clave web'), findsOneWidget);
+  await tester.ensureVisible(find.text('Ahora no'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Ahora no'));
   await tester.pumpAndSettle();
   expect(find.text('Verifica tu celular'), findsOneWidget);
   await tester.enterText(find.byType(TextFormField).first, '987654321');
+  await tester.ensureVisible(find.text('Recibir código'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Recibir código'));
   await tester.pumpAndSettle();
   await tester.enterText(find.byType(TextFormField).last, '123456');
+  await tester.ensureVisible(find.text('Verificar'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Verificar'));
   await tester.pumpAndSettle();
   expect(find.text('Privacidad'), findsWidgets);
@@ -74,7 +80,7 @@ void main() {
     expect(find.text('Demostración'), findsOneWidget);
     await _entrar(tester);
 
-    final interruptores = tester.widgetList<SwitchListTile>(find.byType(SwitchListTile));
+    final interruptores = tester.widgetList<Switch>(find.byType(Switch));
     expect(interruptores, hasLength(3));
     expect(interruptores.every((i) => i.value == false), isTrue);
 

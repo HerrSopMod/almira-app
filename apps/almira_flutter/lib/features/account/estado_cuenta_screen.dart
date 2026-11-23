@@ -66,7 +66,7 @@ class _EstadoCuentaScreenState extends ConsumerState<EstadoCuentaScreen>
     final hoy = ref.watch(relojProvider)();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Estado de cuenta')),
+      appBar: BarraAlmira(titulo: 'Estado de cuenta'),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,

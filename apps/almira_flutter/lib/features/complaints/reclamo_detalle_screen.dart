@@ -29,7 +29,7 @@ class ReclamoDetalleScreen extends ConsumerWidget {
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Seguimiento')),
+      appBar: BarraAlmira(titulo: 'Seguimiento'),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: () async {

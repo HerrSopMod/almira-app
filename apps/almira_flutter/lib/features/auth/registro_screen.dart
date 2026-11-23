@@ -3,13 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/scroll_formulario.dart';
 import '../../shared/services/proveedores.dart';
-import '../payments/pasos_pago.dart';
+import 'pasos_registro.dart';
 import 'servicio_auth.dart';
 
 const _claveMinima = 8;
@@ -93,11 +95,9 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
       return;
     }
     _ejecutar(() async {
-      await ref.read(servicioAuthProvider).verificarCuponera(
-            slug: municipalidad.slug,
-            cuponera: _cuponera.text,
-            dni: _dni.text,
-          );
+      await ref
+          .read(servicioAuthProvider)
+          .verificarCuponera(slug: municipalidad.slug, cuponera: _cuponera.text, dni: _dni.text);
       if (mounted) setState(() => _paso = 1);
     });
   }
@@ -123,31 +123,56 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
     final municipalidad = _municipalidad!;
     // La municipalidad elegida pasa a la sesión, para seguir con el consentimiento.
     ref.read(sesionProvider.notifier).elegirMunicipalidad(municipalidad.id);
-    _ejecutar(() => ref.read(servicioAuthProvider).registrarConCuponera(
-          slug: municipalidad.slug,
-          cuponera: _cuponera.text,
-          dni: _dni.text,
-          correo: _correo.text,
-          clave: _clave.text,
-          celular: _celular.text,
-        ));
+    _ejecutar(
+      () => ref
+          .read(servicioAuthProvider)
+          .registrarConCuponera(
+            slug: municipalidad.slug,
+            cuponera: _cuponera.text,
+            dni: _dni.text,
+            correo: _correo.text,
+            clave: _clave.text,
+            celular: _celular.text,
+          ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Los tres primeros pasos del registro; el cuarto (Privacidad) viene después.
+    const nombres = ['Cuponera', 'Clave web', 'Celular'];
+    final cabecera = switch (_paso) {
+      0 => const CabeceraPaso(
+        ilustracion: Ilustracion.pasoCuponera,
+        fondo: AppColors.primary50,
+        titulo: 'Vincula tu cuponera',
+        detalle: 'Así vemos tus tributos y pagos de tu casa.',
+      ),
+      1 => const CabeceraPaso(
+        ilustracion: Ilustracion.pasoClave,
+        fondo: AppColors.sol100,
+        titulo: 'Crea tu clave web',
+        detalle: 'Con ella entrarás con tu correo o tu código de contribuyente.',
+      ),
+      _ => const CabeceraPaso(
+        ilustracion: Ilustracion.pasoCelular,
+        fondo: AppColors.coral100,
+        titulo: 'Verifica tu celular',
+        detalle: 'Es el número donde recibirás tus avisos.',
+      ),
+    };
     return PopScope(
       canPop: _paso == 0,
       onPopInvokedWithResult: (volvio, _) {
         if (!volvio) _atras();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Crea tu cuenta'),
-          leading: IconButton(
-            tooltip: 'Volver',
-            icon: const Icon(Phosphor.arrowLeft),
-            onPressed: _ocupado ? null : _atras,
-          ),
+        appBar: BarraPasos(
+          paso: _paso + 1,
+          nombre: nombres[_paso],
+          alVolver: () {
+            if (!_ocupado) _atras();
+          },
         ),
         body: SafeArea(
           top: false,
@@ -158,8 +183,7 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    IndicadorPasos(titulos: const ['Cuponera', 'Cuenta', 'Celular'], actual: _paso),
-                    const SizedBox(height: AppSpacing.xl),
+                    KeyedSubtree(key: ValueKey('cabecera-$_paso'), child: cabecera),
                     switch (_paso) {
                       0 => _vistaCuponera(),
                       1 => _vistaCuenta(),
@@ -175,16 +199,15 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
     );
   }
 
-  Widget _boton(String texto, VoidCallback alTocar) => FilledButton(
-        onPressed: _ocupado ? null : alTocar,
-        child: _ocupado
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-              )
-            : Text(texto),
-      );
+  Widget _boton(String texto, VoidCallback alTocar) => BotonPaso(texto: texto, alTocar: alTocar, ocupado: _ocupado);
+
+  Widget _rotulo(String texto) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+    child: Semantics(
+      header: true,
+      child: Text(texto, style: Theme.of(context).textTheme.titleSmall!.copyWith(fontSize: 14)),
+    ),
+  );
 
   Widget _vistaCuponera() {
     final lista = ref.watch(_municipalidadesRegistroProvider);
@@ -206,44 +229,57 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
                 child: const Text('Reintentar'),
               ),
             ),
-            data: (municipalidades) => DropdownButtonFormField<MunicipalidadRegistro>(
-              initialValue: _municipalidad,
-              isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Municipalidad'),
-              items: [
-                for (final m in municipalidades) DropdownMenuItem(value: m, child: Text(m.nombre)),
+            data: (municipalidades) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _rotulo('Tu municipalidad'),
+                for (final m in municipalidades) ...[
+                  TarjetaOpcion(
+                    titulo: m.nombre,
+                    detalle: m.zona,
+                    elegida: m.id == _municipalidad?.id,
+                    alElegir: () => setState(() {
+                      _municipalidad = m;
+                      _error = null;
+                    }),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
               ],
-              onChanged: (m) => setState(() => _municipalidad = m),
-              validator: (m) => m == null ? 'Elige tu municipalidad.' : null,
+            ),
+          ),
+          espacioChico,
+          CampoConRotulo(
+            rotulo: 'Tu número de cuponera',
+            campo: TextFormField(
+              controller: _cuponera,
+              textCapitalization: TextCapitalization.characters,
+              textInputAction: TextInputAction.next,
+              inputFormatters: [LengthLimitingTextInputFormatter(20)],
+              decoration: const InputDecoration(
+                hintText: 'Ejemplo: 0048217',
+                prefixIcon: Icon(Phosphor.identificationBadge, size: 22),
+                helperText: 'Es un dato privado: confirma que eres contribuyente.',
+              ),
+              validator: (v) =>
+                  RegExp(r'^[A-Za-z0-9-]{4,20}$').hasMatch((v ?? '').trim()) ? null : 'Escribe tu número de cuponera.',
             ),
           ),
           espacio,
-          TextFormField(
-            controller: _cuponera,
-            textCapitalization: TextCapitalization.characters,
-            textInputAction: TextInputAction.next,
-            inputFormatters: [LengthLimitingTextInputFormatter(20)],
-            decoration: const InputDecoration(
-              labelText: 'Número de cuponera',
-              prefixIcon: Icon(Phosphor.identificationBadge),
-              helperText: 'Es el número privado de tu cuponera impresa.',
+          CampoConRotulo(
+            rotulo: 'DNI',
+            campo: TextFormField(
+              controller: _dni,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(8)],
+              onFieldSubmitted: (_) => _paso1(),
+              decoration: const InputDecoration(hintText: '8 dígitos', prefixIcon: Icon(Phosphor.creditCard, size: 22)),
+              validator: (v) => (v ?? '').length == 8 ? null : 'Escribe los 8 dígitos de tu DNI.',
             ),
-            validator: (v) => RegExp(r'^[A-Za-z0-9-]{4,20}$').hasMatch((v ?? '').trim())
-                ? null
-                : 'Escribe tu número de cuponera.',
-          ),
-          espacio,
-          TextFormField(
-            controller: _dni,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.done,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(8)],
-            onFieldSubmitted: (_) => _paso1(),
-            decoration: const InputDecoration(labelText: 'DNI', prefixIcon: Icon(Phosphor.creditCard)),
-            validator: (v) => (v ?? '').length == 8 ? null : 'Escribe los 8 dígitos de tu DNI.',
           ),
           if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
-          espacio,
+          espacioGrande,
           _boton('Continuar', _paso1),
         ],
       ),
@@ -251,88 +287,109 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
   }
 
   Widget _vistaCuenta() => Form(
-        key: _formularios[1],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: _correo,
-              keyboardType: TextInputType.emailAddress,
-              autofillHints: const [AutofillHints.email],
-              autocorrect: false,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Correo', prefixIcon: Icon(Phosphor.envelope)),
-              validator: (v) =>
-                  _correoValido.hasMatch((v ?? '').trim()) ? null : 'Escribe un correo válido.',
+    key: _formularios[1],
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CampoConRotulo(
+          rotulo: 'Correo',
+          campo: TextFormField(
+            controller: _correo,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            autocorrect: false,
+            textInputAction: TextInputAction.next,
+            decoration: const InputDecoration(
+              hintText: 'ejemplo@correo.com',
+              prefixIcon: Icon(Phosphor.envelope, size: 22),
             ),
-            espacio,
-            TextFormField(
-              controller: _clave,
-              obscureText: !_verClave,
-              autofillHints: const [AutofillHints.newPassword],
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: 'Clave web',
-                prefixIcon: const Icon(Phosphor.lock),
-                helperText: 'Mínimo $_claveMinima caracteres.',
-                suffixIcon: IconButton(
-                  tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
-                  icon: Icon(_verClave ? Phosphor.eyeSlash : Phosphor.eye),
-                  onPressed: () => setState(() => _verClave = !_verClave),
-                ),
+            validator: (v) => _correoValido.hasMatch((v ?? '').trim()) ? null : 'Escribe un correo válido.',
+          ),
+        ),
+        espacio,
+        CampoConRotulo(
+          rotulo: 'Clave web',
+          campo: TextFormField(
+            controller: _clave,
+            obscureText: !_verClave,
+            autofillHints: const [AutofillHints.newPassword],
+            textInputAction: TextInputAction.next,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: 'Tu clave',
+              prefixIcon: const Icon(Phosphor.lock, size: 22),
+              suffixIcon: IconButton(
+                tooltip: _verClave ? 'Ocultar clave' : 'Mostrar clave',
+                icon: Icon(_verClave ? Phosphor.eyeSlash : Phosphor.eye, size: 22),
+                onPressed: () => setState(() => _verClave = !_verClave),
               ),
-              validator: (v) =>
-                  (v ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
             ),
-            espacio,
-            TextFormField(
-              controller: _repetir,
-              obscureText: !_verClave,
-              textInputAction: TextInputAction.done,
-              onFieldSubmitted: (_) => _paso2(),
-              decoration: const InputDecoration(labelText: 'Repite tu clave', prefixIcon: Icon(Phosphor.lockKey)),
-              validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
-            ),
-            if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
-            espacio,
-            _boton('Continuar', _paso2),
+            validator: (v) => (v ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
+          ),
+        ),
+        MedidorClave(clave: _clave.text, minimo: _claveMinima),
+        espacio,
+        CampoConRotulo(
+          rotulo: 'Repite tu clave',
+          campo: TextFormField(
+            controller: _repetir,
+            obscureText: !_verClave,
+            textInputAction: TextInputAction.done,
+            onChanged: (_) => setState(() {}),
+            onFieldSubmitted: (_) => _paso2(),
+            decoration: const InputDecoration(hintText: 'Tu clave otra vez', prefixIcon: Icon(Phosphor.lock, size: 22)),
+            validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
+          ),
+        ),
+        ReglasClave(
+          reglas: [
+            ('Mínimo $_claveMinima caracteres', _clave.text.length >= _claveMinima),
+            ('Ambas claves coinciden', _repetir.text.isNotEmpty && _repetir.text == _clave.text),
           ],
         ),
-      );
+        if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
+        espacioGrande,
+        _boton('Continuar', _paso2),
+      ],
+    ),
+  );
 
   Widget _vistaCelular() => Form(
-        key: _formularios[2],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: _celular,
-              keyboardType: TextInputType.phone,
-              autofillHints: const [AutofillHints.telephoneNumberNational],
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
-              onChanged: (_) {
-                if (_codigoPedido) setState(() => _codigoPedido = false);
-              },
-              decoration: const InputDecoration(labelText: 'Celular', prefixText: '+51 ', prefixIcon: Icon(Phosphor.deviceMobile)),
-              validator: (v) =>
-                  _celularValido.hasMatch(v ?? '') ? null : 'Escribe los 9 dígitos de tu celular.',
-            ),
-            if (_codigoPedido) ...[
-              espacio,
-              TextFormField(
-                controller: _codigo,
-                keyboardType: TextInputType.number,
-                autofillHints: const [AutofillHints.oneTimeCode],
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
-                onFieldSubmitted: (_) => _crearCuenta(),
-                decoration: const InputDecoration(labelText: 'Código de 6 dígitos', prefixIcon: Icon(Phosphor.password)),
-                validator: (v) => (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',
-              ),
-            ],
-            if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
-            espacio,
-            _boton(_codigoPedido ? 'Verificar y crear cuenta' : 'Recibir código', _codigoPedido ? _crearCuenta : _pedirCodigo),
-          ],
+    key: _formularios[2],
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CampoConRotulo(
+          rotulo: 'Celular',
+          campo: TextFormField(
+            controller: _celular,
+            keyboardType: TextInputType.phone,
+            autofillHints: const [AutofillHints.telephoneNumberNational],
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
+            onChanged: (_) {
+              if (_codigoPedido) setState(() => _codigoPedido = false);
+            },
+            decoration: const InputDecoration(hintText: '987 654 321', prefixIcon: PrefijoPeru()),
+            validator: (v) => _celularValido.hasMatch(v ?? '') ? null : 'Escribe los 9 dígitos de tu celular.',
+          ),
         ),
-      );
+        if (_codigoPedido) ...[
+          espacio,
+          CampoConRotulo(
+            rotulo: 'Código de 6 dígitos',
+            campo: CampoCodigo(
+              controller: _codigo,
+              validator: (v) => (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',
+            ),
+          ),
+        ],
+        if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
+        espacioGrande,
+        _boton(
+          _codigoPedido ? 'Verificar y crear cuenta' : 'Recibir código',
+          _codigoPedido ? _crearCuenta : _pedirCodigo,
+        ),
+      ],
+    ),
+  );
 }

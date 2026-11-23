@@ -57,7 +57,7 @@ class _SelectorUbicacionScreenState extends State<SelectorUbicacionScreen> {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Ubica el problema')),
+      appBar: BarraAlmira(titulo: 'Ubica el problema'),
       body: Column(
         children: [
           Expanded(

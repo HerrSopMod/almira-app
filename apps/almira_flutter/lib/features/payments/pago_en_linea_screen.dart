@@ -44,7 +44,7 @@ class _PagoEnLineaScreenState extends ConsumerState<PagoEnLineaScreen>
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pagos en línea')),
+      appBar: BarraAlmira(titulo: 'Pagos en línea'),
       body: SafeArea(
         top: false,
         child: CuerpoAsyncSinLista<VistaMunicipal>(

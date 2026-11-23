@@ -64,7 +64,7 @@ class _AvisosScreenState extends ConsumerState<AvisosScreen> {
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Avisos')),
+      appBar: BarraAlmira(titulo: 'Avisos'),
       body: SafeArea(
         top: false,
         child: CuerpoAsync<VistaMunicipal>(

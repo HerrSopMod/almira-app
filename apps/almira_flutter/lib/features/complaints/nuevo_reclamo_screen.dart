@@ -289,7 +289,7 @@ class _NuevoReclamoScreenState extends ConsumerState<NuevoReclamoScreen> {
 
     if (vista == null || vista.vecino == null || vista.municipalidad == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Nuevo reclamo')),
+        appBar: BarraAlmira(titulo: 'Nuevo reclamo'),
         body: VistaVacia(
           icono: Phosphor.identificationBadge,
           titulo: 'Vincula tu código de contribuyente',

@@ -41,7 +41,7 @@ class _CuponeraScreenState extends ConsumerState<CuponeraScreen> {
     final anio = ref.watch(relojProvider)().year;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cuponera')),
+      appBar: BarraAlmira(titulo: 'Cuponera'),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,

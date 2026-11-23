@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/iconos.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/router.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/scroll_formulario.dart';
 import '../../shared/services/proveedores.dart';
+import 'pasos_registro.dart';
 
 final _celularValido = RegExp(r'^9\d{8}$');
 
@@ -63,75 +65,62 @@ class _VerificarCelularScreenState extends ConsumerState<VerificarCelularScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Verifica tu celular')),
-        body: SafeArea(
-          top: false,
-          child: ScrollFormulario(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: Form(
-                  key: _formulario,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextFormField(
-                        controller: _celular,
-                        keyboardType: TextInputType.phone,
-                        autofillHints: const [AutofillHints.telephoneNumberNational],
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(9),
-                        ],
-                        onChanged: (_) {
-                          if (_codigoPedido) setState(() => _codigoPedido = false);
-                        },
-                        decoration: const InputDecoration(
-                          labelText: 'Celular',
-                          prefixText: '+51 ',
-                          prefixIcon: Icon(Phosphor.deviceMobile),
-                        ),
-                        validator: (v) => _celularValido.hasMatch(v ?? '')
-                            ? null
-                            : 'Escribe los 9 dígitos de tu celular.',
-                      ),
-                      if (_codigoPedido) ...[
-                        espacio,
-                        TextFormField(
-                          controller: _codigo,
-                          keyboardType: TextInputType.number,
-                          autofillHints: const [AutofillHints.oneTimeCode],
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(6),
-                          ],
-                          onFieldSubmitted: (_) => _verificar(),
-                          decoration: const InputDecoration(
-                            labelText: 'Código de 6 dígitos',
-                            prefixIcon: Icon(Phosphor.password),
-                          ),
-                          validator: (v) =>
-                              (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',
-                        ),
-                      ],
-                      if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
-                      espacio,
-                      FilledButton(
-                        onPressed: _ocupado ? null : (_codigoPedido ? _verificar : _pedirCodigo),
-                        child: _ocupado
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                              )
-                            : Text(_codigoPedido ? 'Verificar' : 'Recibir código'),
-                      ),
-                    ],
+    appBar: const BarraPasos(paso: 3, nombre: 'Celular'),
+    body: SafeArea(
+      top: false,
+      child: ScrollFormulario(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: Form(
+              key: _formulario,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const CabeceraPaso(
+                    ilustracion: Ilustracion.pasoCelular,
+                    fondo: AppColors.coral100,
+                    titulo: 'Verifica tu celular',
+                    detalle: 'Es el número donde recibirás tus avisos.',
                   ),
-                ),
+                  CampoConRotulo(
+                    rotulo: 'Celular',
+                    campo: TextFormField(
+                      controller: _celular,
+                      keyboardType: TextInputType.phone,
+                      autofillHints: const [AutofillHints.telephoneNumberNational],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
+                      onChanged: (_) {
+                        if (_codigoPedido) setState(() => _codigoPedido = false);
+                      },
+                      decoration: const InputDecoration(hintText: '987 654 321', prefixIcon: PrefijoPeru()),
+                      validator: (v) =>
+                          _celularValido.hasMatch(v ?? '') ? null : 'Escribe los 9 dígitos de tu celular.',
+                    ),
+                  ),
+                  if (_codigoPedido) ...[
+                    espacio,
+                    CampoConRotulo(
+                      rotulo: 'Código de 6 dígitos',
+                      campo: CampoCodigo(
+                        controller: _codigo,
+                        validator: (v) => (v ?? '').length == 6 ? null : 'Escribe el código de 6 dígitos.',
+                      ),
+                    ),
+                  ],
+                  if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
+                  espacioGrande,
+                  BotonPaso(
+                    texto: _codigoPedido ? 'Verificar' : 'Recibir código',
+                    alTocar: _codigoPedido ? _verificar : _pedirCodigo,
+                    ocupado: _ocupado,
+                  ),
+                ],
               ),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

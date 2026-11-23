@@ -42,7 +42,7 @@ class _PrivacidadScreenState extends ConsumerState<PrivacidadScreen> {
     final valor = _pendiente ?? ref.watch(sesionProvider).consentimientos;
     final habilitado = _pendiente == null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Privacidad')),
+      appBar: BarraAlmira(titulo: 'Privacidad'),
       body: SafeArea(
         top: false,
         child: ListView(

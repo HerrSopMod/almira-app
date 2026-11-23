@@ -26,7 +26,7 @@ class DeudaDetalleScreen extends ConsumerWidget {
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalle')),
+      appBar: BarraAlmira(titulo: 'Detalle'),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,

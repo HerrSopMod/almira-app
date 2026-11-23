@@ -17,7 +17,7 @@ class VincularScreen extends ConsumerWidget {
     final vista = ref.watch(vistaProvider);
     final textos = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Vincular cuponera')),
+      appBar: BarraAlmira(titulo: 'Vincular cuponera'),
       body: SafeArea(
         top: false,
         child: CuerpoAsync<VistaMunicipal>(

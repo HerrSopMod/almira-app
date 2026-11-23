@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/iconos.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
+import '../complaints/piezas_lista.dart';
 import '../../shared/models/modelos.dart';
 
 /// Preferencias opcionales de privacidad. Cada una se activa con una acción
 /// del vecino; ninguna viene encendida.
 class InterruptoresPrivacidad extends StatelessWidget {
-  const InterruptoresPrivacidad({
-    super.key,
-    required this.valor,
-    required this.alCambiar,
-    this.habilitado = true,
-  });
+  const InterruptoresPrivacidad({super.key, required this.valor, required this.alCambiar, this.habilitado = true});
 
   final Consentimientos valor;
   final ValueChanged<Consentimientos> alCambiar;
@@ -21,35 +18,37 @@ class InterruptoresPrivacidad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Tarjeta(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child: Column(
-          children: [
-            SwitchListTile(
-              value: valor.asistente,
-              onChanged: habilitado ? (v) => alCambiar(valor.con(asistente: v)) : null,
-              secondary: const Icon(Phosphor.chatCircle),
-              title: const Text('Guardar mis consultas al asistente'),
-              subtitle: const Text('En este teléfono, para retomarlas. Apagado, se borran al salir.'),
-            ),
-            const Divider(indent: 56),
-            SwitchListTile(
-              value: valor.whatsapp,
-              onChanged: habilitado ? (v) => alCambiar(valor.con(whatsapp: v)) : null,
-              secondary: const Icon(Phosphor.chatsCircle),
-              title: const Text('Avisos por WhatsApp'),
-              subtitle: const Text('Recordatorios de vencimiento de tus tributos.'),
-            ),
-            const Divider(indent: 56),
-            SwitchListTile(
-              value: valor.sms,
-              onChanged: habilitado ? (v) => alCambiar(valor.con(sms: v)) : null,
-              secondary: const Icon(Phosphor.chatText),
-              title: const Text('Avisos por SMS'),
-              subtitle: const Text('Los mismos recordatorios, por mensaje de texto.'),
-            ),
-          ],
+    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xs),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const RotuloGrupo('Opcional'),
+        FilaInterruptor(
+          inicio: const IconoColor.svg(IconoA.asistente, color: AppColors.coral),
+          titulo: 'Guardar mis consultas al asistente',
+          detalle: 'En este teléfono, para retomarlas. Apagado, se borran al salir.',
+          valor: valor.asistente,
+          alCambiar: habilitado ? (v) => alCambiar(valor.con(asistente: v)) : null,
         ),
-      );
+        const Divider(),
+        FilaInterruptor(
+          inicio: const IconoColor.svg(IconoA.chat, color: AppColors.lima),
+          titulo: 'Avisos por WhatsApp',
+          detalle: 'Recordatorios de vencimiento de tus tributos.',
+          valor: valor.whatsapp,
+          alCambiar: habilitado ? (v) => alCambiar(valor.con(whatsapp: v)) : null,
+        ),
+        const Divider(),
+        FilaInterruptor(
+          inicio: const IconoColor.svg(IconoA.sms, color: AppColors.sol),
+          titulo: 'Avisos por SMS',
+          detalle: 'Los mismos recordatorios, por mensaje de texto.',
+          valor: valor.sms,
+          alCambiar: habilitado ? (v) => alCambiar(valor.con(sms: v)) : null,
+        ),
+      ],
+    ),
+  );
 }
 
 /// Información completa de privacidad, fuera de las pantallas operativas.
@@ -61,33 +60,25 @@ void mostrarInformacionPrivacidad(BuildContext context) {
     builder: (context) {
       final textos = Theme.of(context).textTheme;
       Widget bloque(String titulo, String cuerpo) => Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(titulo, style: textos.titleSmall),
-                const SizedBox(height: AppSpacing.xs),
-                Text(cuerpo, style: textos.bodyMedium),
-              ],
-            ),
-          );
+        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(titulo, style: textos.titleSmall),
+            const SizedBox(height: AppSpacing.xs),
+            Text(cuerpo, style: textos.bodyMedium),
+          ],
+        ),
+      );
       return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.75,
         maxChildSize: 0.95,
         builder: (context, desplazamiento) => ListView(
           controller: desplazamiento,
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.margen,
-            0,
-            AppSpacing.margen,
-            AppSpacing.xl,
-          ),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, 0, AppSpacing.margen, AppSpacing.xl),
           children: [
-            Semantics(
-              header: true,
-              child: Text('Cómo se usan tus datos', style: textos.titleLarge),
-            ),
+            Semantics(header: true, child: Text('Cómo se usan tus datos', style: textos.titleLarge)),
             espacio,
             bloque(
               'Qué datos usa Almira',

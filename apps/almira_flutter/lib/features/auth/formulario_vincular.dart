@@ -43,9 +43,7 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
       _ocupado = true;
       _error = null;
     });
-    final error = await ref
-        .read(repositorioProvider)
-        .vincularCodigo(widget.municipalidadId, _codigo.text, _dni.text);
+    final error = await ref.read(repositorioProvider).vincularCodigo(widget.municipalidadId, _codigo.text, _dni.text);
     if (error == null) {
       // Ya vinculado, las políticas dejan ver sus tributos: se vuelven a leer.
       await ref.read(datosProvider.notifier).recargar();
@@ -69,48 +67,49 @@ class _FormularioVincularState extends ConsumerState<FormularioVincular> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextFormField(
-            controller: _codigo,
-            textCapitalization: TextCapitalization.characters,
-            textInputAction: TextInputAction.next,
-            inputFormatters: [LengthLimitingTextInputFormatter(20)],
-            decoration: InputDecoration(
-              labelText: 'Número de cuponera',
-              prefixIcon: const Icon(Phosphor.identificationBadge),
-              helperText: esDemo
-                  ? 'Demostración: usa ${DatosDemo.numeroCuponera}'
-                  : 'Es el número privado de tu cuponera impresa.',
+          CampoConRotulo(
+            rotulo: 'Número de cuponera',
+            campo: TextFormField(
+              controller: _codigo,
+              textCapitalization: TextCapitalization.characters,
+              textInputAction: TextInputAction.next,
+              inputFormatters: [LengthLimitingTextInputFormatter(20)],
+              decoration: InputDecoration(
+                hintText: 'Ejemplo: 0048217',
+                prefixIcon: const Icon(Phosphor.identificationBadge, size: 22),
+                helperText: esDemo
+                    ? 'Demostración: usa ${DatosDemo.numeroCuponera}'
+                    : 'Es el número privado de tu cuponera impresa.',
+              ),
+              validator: (valor) =>
+                  _codigoValido.hasMatch((valor ?? '').trim()) ? null : 'Usa de 4 a 20 letras, números o guiones.',
             ),
-            validator: (valor) => _codigoValido.hasMatch((valor ?? '').trim())
-                ? null
-                : 'Usa de 4 a 20 letras, números o guiones.',
           ),
           espacio,
-          TextFormField(
-            controller: _dni,
-            keyboardType: TextInputType.visiblePassword,
-            textInputAction: TextInputAction.done,
-            inputFormatters: [LengthLimitingTextInputFormatter(12)],
-            onFieldSubmitted: (_) => _vincular(),
-            decoration: InputDecoration(
-              labelText: 'DNI o carné de extranjería',
-              prefixIcon: const Icon(Phosphor.creditCard),
-              helperText: esDemo ? 'Demostración: usa ${DatosDemo.dni}' : null,
+          CampoConRotulo(
+            rotulo: 'DNI o carné de extranjería',
+            campo: TextFormField(
+              controller: _dni,
+              keyboardType: TextInputType.visiblePassword,
+              textInputAction: TextInputAction.done,
+              inputFormatters: [LengthLimitingTextInputFormatter(12)],
+              onFieldSubmitted: (_) => _vincular(),
+              decoration: InputDecoration(
+                hintText: '8 a 12 letras o números',
+                prefixIcon: const Icon(Phosphor.creditCard, size: 22),
+                helperText: esDemo ? 'Demostración: usa ${DatosDemo.dni}' : null,
+              ),
+              validator: (valor) => _documentoValido.hasMatch((valor ?? '').trim())
+                  ? null
+                  : 'Escribe de 8 a 12 letras o números, sin espacios.',
             ),
-            validator: (valor) => _documentoValido.hasMatch((valor ?? '').trim())
-                ? null
-                : 'Escribe de 8 a 12 letras o números, sin espacios.',
           ),
           if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
           espacio,
           OutlinedButton(
             onPressed: _ocupado ? null : _vincular,
             child: _ocupado
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  )
+                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
                 : const Text('Vincular código'),
           ),
         ],

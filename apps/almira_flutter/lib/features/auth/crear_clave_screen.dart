@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/scroll_formulario.dart';
 import '../../shared/services/proveedores.dart';
+import 'pasos_registro.dart';
 
 const _claveMinima = 8;
 
@@ -60,73 +63,79 @@ class _CrearClaveScreenState extends ConsumerState<CrearClaveScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Crea tu clave web')),
-        body: SafeArea(
-          top: false,
-          child: ScrollFormulario(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: Form(
-                  key: _formulario,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Con ella entrarás con tu correo o tu código de contribuyente.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      espacio,
-                      TextFormField(
-                        controller: _clave,
-                        obscureText: !_ver,
-                        autofillHints: const [AutofillHints.newPassword],
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelText: 'Clave web',
-                          helperText: 'Mínimo $_claveMinima caracteres.',
-                          prefixIcon: const Icon(Phosphor.lock),
-                          suffixIcon: IconButton(
-                            tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
-                            icon: Icon(_ver ? Phosphor.eyeSlash : Phosphor.eye),
-                            onPressed: () => setState(() => _ver = !_ver),
-                          ),
+    appBar: const BarraPasos(paso: 2, nombre: 'Clave web'),
+    body: SafeArea(
+      top: false,
+      child: ScrollFormulario(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: Form(
+              key: _formulario,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const CabeceraPaso(
+                    ilustracion: Ilustracion.pasoClave,
+                    fondo: AppColors.sol100,
+                    titulo: 'Crea tu clave web',
+                    detalle: 'Con ella entrarás con tu correo o tu código de contribuyente.',
+                  ),
+                  CampoConRotulo(
+                    rotulo: 'Clave web',
+                    campo: TextFormField(
+                      controller: _clave,
+                      obscureText: !_ver,
+                      autofillHints: const [AutofillHints.newPassword],
+                      textInputAction: TextInputAction.next,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        hintText: 'Tu clave',
+                        prefixIcon: const Icon(Phosphor.lock, size: 22),
+                        suffixIcon: IconButton(
+                          tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
+                          icon: Icon(_ver ? Phosphor.eyeSlash : Phosphor.eye, size: 22),
+                          onPressed: () => setState(() => _ver = !_ver),
                         ),
-                        validator: (v) =>
-                            (v ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
                       ),
-                      espacio,
-                      TextFormField(
-                        controller: _repetir,
-                        obscureText: !_ver,
-                        textInputAction: TextInputAction.done,
-                        onFieldSubmitted: (_) => _guardar(),
-                        decoration: const InputDecoration(
-                          labelText: 'Repite tu clave',
-                          prefixIcon: Icon(Phosphor.lockKey),
-                        ),
-                        validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
+                      validator: (v) =>
+                          (v ?? '').length >= _claveMinima ? null : 'Usa al menos $_claveMinima caracteres.',
+                    ),
+                  ),
+                  MedidorClave(clave: _clave.text, minimo: _claveMinima),
+                  espacio,
+                  CampoConRotulo(
+                    rotulo: 'Repite tu clave',
+                    campo: TextFormField(
+                      controller: _repetir,
+                      obscureText: !_ver,
+                      textInputAction: TextInputAction.done,
+                      onChanged: (_) => setState(() {}),
+                      onFieldSubmitted: (_) => _guardar(),
+                      decoration: const InputDecoration(
+                        hintText: 'Tu clave otra vez',
+                        prefixIcon: Icon(Phosphor.lock, size: 22),
                       ),
-                      if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
-                      espacioGrande,
-                      FilledButton(
-                        onPressed: _ocupado ? null : _guardar,
-                        child: _ocupado
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                              )
-                            : const Text('Guardar clave'),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      TextButton(onPressed: _ocupado ? null : _seguir, child: const Text('Ahora no')),
+                      validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
+                    ),
+                  ),
+                  ReglasClave(
+                    reglas: [
+                      ('Mínimo $_claveMinima caracteres', _clave.text.length >= _claveMinima),
+                      ('Ambas claves coinciden', _repetir.text.isNotEmpty && _repetir.text == _clave.text),
                     ],
                   ),
-                ),
+                  if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
+                  espacioGrande,
+                  BotonPaso(texto: 'Guardar clave', alTocar: _guardar, ocupado: _ocupado),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(onPressed: _ocupado ? null : _seguir, child: const Text('Ahora no')),
+                ],
               ),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

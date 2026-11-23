@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -230,6 +231,145 @@ class CabeceraMarca extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Encabezado de las pantallas de detalle (rediseño): degradado turquesa, botón cuadrado de volver
+/// (o de cerrar, en las que se abren como diálogo), título de 24 en 800 y, al pie, el arranque de
+/// la hoja crema con esquinas de 26. Va en `Scaffold.appBar`, con el fondo crema del tema.
+class BarraAlmira extends StatelessWidget implements PreferredSizeWidget {
+  const BarraAlmira({
+    super.key,
+    required this.titulo,
+    this.acciones = const [],
+    this.esDemo = false,
+    this.cerrar,
+    this.alVolver,
+    this.conVolver = true,
+  });
+
+  final String titulo;
+  final List<Widget> acciones;
+  final bool esDemo;
+
+  /// Muestra una X en vez de la flecha. Sin valor, la X sale si la pantalla se abrió como diálogo.
+  final bool? cerrar;
+
+  /// Qué hace el botón de volver; por defecto, cerrar la pantalla.
+  final VoidCallback? alVolver;
+
+  /// false oculta el botón de volver aunque se pueda volver.
+  final bool conVolver;
+
+  static const double _fila = 64;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(_fila + AppSpacing.sm + AppRadius.hoja);
+
+  @override
+  Widget build(BuildContext context) {
+    final arriba = MediaQuery.paddingOf(context).top;
+    final ruta = ModalRoute.of(context);
+    final puedeVolver = conVolver && (alVolver != null || (ruta?.impliesAppBarDismissal ?? false));
+    final esCerrar = cerrar ?? (ruta is PageRoute && ruta.fullscreenDialog);
+    final textos = Theme.of(context).textTheme;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: barraSobreTurquesa,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppColors.degradadoCabecera),
+        child: CustomPaint(
+          painter: const _CirculosCabecera(decorado: false),
+          child: SobreTurquesa(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: arriba),
+                SizedBox(
+                  height: _fila,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: puedeVolver ? AppSpacing.lg : AppSpacing.margen,
+                      right: AppSpacing.sm,
+                    ),
+                    child: Row(
+                      children: [
+                        if (puedeVolver) ...[
+                          BotonCuadro(
+                            semantica: esCerrar ? 'Cerrar' : 'Volver',
+                            alTocar: alVolver ?? () => Navigator.maybePop(context),
+                            child: Icon(esCerrar ? Icons.close_rounded : Phosphor.arrowLeft, size: 22),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                        ],
+                        Expanded(
+                          child: Semantics(
+                            header: true,
+                            child: Text(
+                              titulo,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: textos.headlineSmall!.copyWith(color: AppColors.onPrimary),
+                            ),
+                          ),
+                        ),
+                        if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15) ...[
+                          const EtiquetaDemo(sobreTurquesa: true),
+                          const SizedBox(width: AppSpacing.xs),
+                        ],
+                        ...acciones,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Container(
+                  height: AppRadius.hoja,
+                  decoration: const BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.hoja)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botón cuadrado de 44 con radio de 14, blanco translúcido sobre el degradado.
+class BotonCuadro extends StatelessWidget {
+  const BotonCuadro({super.key, required this.semantica, required this.alTocar, required this.child, this.fondo});
+
+  final String semantica;
+  final VoidCallback alTocar;
+  final Widget child;
+  final Color? fondo;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: semantica,
+    excludeSemantics: true,
+    child: Tooltip(
+      message: semantica,
+      excludeFromSemantics: true,
+      child: Presionable(
+        child: Material(
+          color: fondo ?? Colors.white.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(AppRadius.caja),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: alTocar,
+            child: SizedBox.square(
+              dimension: AppSpacing.caja,
+              child: Center(child: child),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// Círculos suaves del encabezado: uno turquesa claro arriba a la derecha y, en Inicio, uno sol
@@ -780,6 +920,48 @@ class RotuloSeccion extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(header: true, child: Text(texto, style: estiloRotulo(context)));
 }
 
+/// Rótulo de un grupo de filas del rediseño («CUENTA Y PREDIO»): 12 en 800, gris, en
+/// mayúsculas con algo de aire. Lectores de pantalla lo leen en tipo oración.
+class RotuloGrupo extends StatelessWidget {
+  const RotuloGrupo(this.texto, {super.key});
+
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    header: true,
+    label: texto,
+    excludeSemantics: true,
+    child: Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
+      child: Text(
+        texto.toUpperCase(),
+        style: Theme.of(context).textTheme.labelMedium!
+            .copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w800, letterSpacing: 0.7),
+      ),
+    ),
+  );
+}
+
+/// Grupo de filas dentro de una tarjeta blanca, con una línea fina entre ellas.
+class GrupoTarjeta extends StatelessWidget {
+  const GrupoTarjeta({super.key, required this.filas, this.padding});
+
+  final List<Widget> filas;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) => Tarjeta(
+    padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, fila) in filas.indexed) ...[if (i > 0) const Divider(), fila],
+      ],
+    ),
+  );
+}
+
 /// Ficha de un dato: rótulo pequeño en gris arriba y el valor debajo, a todo el ancho. Para
 /// textos (fechas, direcciones, nombres), no para montos: esos van en [FilaDato].
 class Ficha extends StatelessWidget {
@@ -947,10 +1129,7 @@ class FilaAccion extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           child: Row(
             children: [
-              if (icono != null) ...[
-                Icon(icono, size: AppIconos.caja, color: AppColors.primary),
-                const SizedBox(width: AppSpacing.md),
-              ],
+              if (icono != null) ...[IconoColor(icono!), const SizedBox(width: AppSpacing.md)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

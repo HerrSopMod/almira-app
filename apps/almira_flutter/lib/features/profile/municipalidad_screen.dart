@@ -41,7 +41,7 @@ class _MunicipalidadScreenState extends ConsumerState<MunicipalidadScreen> {
   Widget build(BuildContext context) {
     final vista = ref.watch(vistaProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Municipalidad')),
+      appBar: BarraAlmira(titulo: 'Municipalidad'),
       body: SafeArea(
         top: false,
         child: CuerpoAsync<VistaMunicipal>(
