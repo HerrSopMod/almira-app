@@ -3,23 +3,22 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
-import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../core/widgets/componentes.dart';
 
 /// Una pestaña de la barra. [rama] es su posición en el router (Inicio 0, Pagar 1,
 /// Reclamos 2, Obras 3, Asistente 4): las rutas no cambian, solo el orden en pantalla.
 class _Destino {
-  const _Destino(this.rama, this.etiqueta, this.icono, this.iconoActivo);
+  const _Destino(this.rama, this.etiqueta, this.icono);
   final int rama;
   final String etiqueta;
-  final IconData icono;
-  final IconData iconoActivo;
+  final IconoA icono;
 }
 
-const _inicio = _Destino(0, 'Inicio', Phosphor.house, PhosphorFill.house);
-const _pagar = _Destino(1, 'Pagar', Phosphor.wallet, PhosphorFill.wallet);
-const _reclamos = _Destino(2, 'Reclamos', Phosphor.megaphone, PhosphorFill.megaphone);
-const _obras = _Destino(3, 'Obras', Phosphor.mapTrifold, Phosphor.mapTrifold);
+const _inicio = _Destino(0, 'Inicio', IconoA.inicio);
+const _pagar = _Destino(1, 'Pagar', IconoA.pagar);
+const _reclamos = _Destino(2, 'Reclamos', IconoA.reclamos);
+const _obras = _Destino(3, 'Obras', IconoA.obras);
 const _ramaAsistente = 4;
 
 /// Marco de las cinco secciones principales, con la barra inferior.
@@ -30,10 +29,10 @@ class ShellPrincipal extends StatelessWidget {
   final StatefulNavigationShell navegacion;
 
   void _ir(int rama) => navegacion.goBranch(
-        rama,
-        // Tocar la pestaña ya elegida vuelve a su pantalla principal.
-        initialLocation: rama == navegacion.currentIndex,
-      );
+    rama,
+    // Tocar la pestaña ya elegida vuelve a su pantalla principal.
+    initialLocation: rama == navegacion.currentIndex,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +45,7 @@ class ShellPrincipal extends StatelessWidget {
   }
 }
 
-/// Barra inferior blanca con esquinas superiores de 20 y sombra suave. Orden: Inicio, Pagar,
+/// Barra inferior blanca con una línea arriba y sombra suave hacia arriba. Orden: Inicio, Pagar,
 /// Asistente (botón central que sobresale), Reclamos y Obras. La pestaña activa va en turquesa
 /// con una línea corta arriba.
 class BarraInferior extends StatelessWidget {
@@ -60,14 +59,12 @@ class BarraInferior extends StatelessWidget {
   Widget build(BuildContext context) {
     final abajo = MediaQuery.paddingOf(context).bottom;
     Widget pestana(_Destino d) => Expanded(
-          child: _Pestana(destino: d, activa: actual == d.rama, alTocar: () => alElegir(d.rama)),
-        );
+      child: _Pestana(destino: d, activa: actual == d.rama, alTocar: () => alElegir(d.rama)),
+    );
     // Las etiquetas son de una sola palabra y el ancho es fijo: el aumento de letra se limita a
     // 1.15 para que «Reclamos» no se parta.
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.15),
-      ),
+      data: MediaQuery.of(context).copyWith(textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.15)),
       child: SizedBox(
         height: AppSpacing.salienteCentral + AppSpacing.barraInferior + abajo,
         child: Stack(
@@ -80,10 +77,8 @@ class BarraInferior extends StatelessWidget {
               child: DecoratedBox(
                 decoration: const BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.hoja)),
-                  boxShadow: [
-                    BoxShadow(color: AppColors.sombraTarjeta, blurRadius: 16, offset: Offset(0, -2)),
-                  ],
+                  border: Border(top: BorderSide(color: AppColors.border)),
+                  boxShadow: [BoxShadow(color: Color(0x0F12393A), blurRadius: 20, offset: Offset(0, -6))],
                 ),
                 child: Padding(
                   padding: EdgeInsets.only(bottom: abajo),
@@ -110,10 +105,7 @@ class BarraInferior extends StatelessWidget {
               left: 0,
               right: 0,
               child: Center(
-                child: _BotonAsistente(
-                  activo: actual == _ramaAsistente,
-                  alTocar: () => alElegir(_ramaAsistente),
-                ),
+                child: _BotonAsistente(activo: actual == _ramaAsistente, alTocar: () => alElegir(_ramaAsistente)),
               ),
             ),
           ],
@@ -162,19 +154,12 @@ class _Pestana extends StatelessWidget {
               TweenAnimationBuilder<Color?>(
                 tween: ColorTween(end: color),
                 duration: duracion,
-                builder: (_, c, _) => Icon(
-                  activa ? destino.iconoActivo : destino.icono,
-                  size: AppIconos.navegacion,
-                  color: c,
-                ),
+                builder: (_, c, _) => IconoAlmira(destino.icono, tamano: AppIconos.navegacion, color: c),
               ),
               const SizedBox(height: AppSpacing.xs),
               AnimatedDefaultTextStyle(
                 duration: duracion,
-                style: etiqueta.copyWith(
-                  color: color,
-                  fontWeight: activa ? FontWeight.w600 : FontWeight.w500,
-                ),
+                style: etiqueta.copyWith(color: color, fontWeight: activa ? FontWeight.w800 : FontWeight.w700),
                 child: Text(destino.etiqueta, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
             ],
@@ -202,14 +187,12 @@ class _EtiquetaCentral extends StatelessWidget {
         child: Column(
           children: [
             // Mismo alto que línea + ícono de las otras pestañas: las etiquetas quedan en fila.
-            const SizedBox(
-              height: AppSpacing.lineaActivaAlto + AppSpacing.sm + AppIconos.navegacion + AppSpacing.xs,
-            ),
+            const SizedBox(height: AppSpacing.lineaActivaAlto + AppSpacing.sm + AppIconos.navegacion + AppSpacing.xs),
             AnimatedDefaultTextStyle(
               duration: duracionDe(context),
               style: etiqueta.copyWith(
                 color: activa ? AppColors.primary : AppColors.textSecondary,
-                fontWeight: activa ? FontWeight.w600 : FontWeight.w500,
+                fontWeight: activa ? FontWeight.w800 : FontWeight.w700,
               ),
               child: const Text('Asistente', maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
@@ -220,8 +203,8 @@ class _EtiquetaCentral extends StatelessWidget {
   }
 }
 
-/// Botón circular turquesa del Asistente, con anillo blanco y un robot blanco de líneas
-/// limpias. Sobresale de la barra. Activo: turquesa oscuro.
+/// Botón circular del Asistente: degradado turquesa, anillo blanco de 4 y sombra turquesa.
+/// Sobresale de la barra. Activo: un poco más oscuro.
 class _BotonAsistente extends StatelessWidget {
   const _BotonAsistente({required this.activo, required this.alTocar});
 
@@ -230,41 +213,43 @@ class _BotonAsistente extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        button: true,
-        selected: activo,
-        label: 'Asistente',
-        excludeSemantics: true,
-        child: Tooltip(
-          message: 'Asistente',
-          excludeFromSemantics: true,
-          child: Container(
-            width: AppSpacing.botonCentral,
-            height: AppSpacing.botonCentral,
-            padding: const EdgeInsets.all(AppSpacing.anilloCentral),
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: AppColors.sombraTarjeta, blurRadius: 12, offset: Offset(0, 2))],
-            ),
-            child: AnimatedContainer(
-              duration: duracionDe(context),
-              decoration: BoxDecoration(
-                color: activo ? AppColors.primaryDark : AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Material(
-                type: MaterialType.transparency,
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: alTocar,
-                  child: const Center(
-                    child: Icon(Phosphor.robot, size: AppIconos.central, color: AppColors.onPrimary),
-                  ),
-                ),
+    button: true,
+    selected: activo,
+    label: 'Asistente',
+    excludeSemantics: true,
+    child: Tooltip(
+      message: 'Asistente',
+      excludeFromSemantics: true,
+      child: Container(
+        width: AppSpacing.botonCentral,
+        height: AppSpacing.botonCentral,
+        padding: const EdgeInsets.all(AppSpacing.anilloCentral),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          shape: BoxShape.circle,
+          boxShadow: [BoxShadow(color: Color(0x590A6E72), blurRadius: 18, offset: Offset(0, 8))],
+        ),
+        child: AnimatedContainer(
+          duration: duracionDe(context),
+          decoration: BoxDecoration(
+            gradient: activo
+                ? const LinearGradient(colors: [AppColors.primary, AppColors.primaryDark])
+                : AppColors.degradadoAsistente,
+            shape: BoxShape.circle,
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: alTocar,
+              child: const Center(
+                child: IconoAlmira(IconoA.asistente, tamano: AppIconos.central, color: AppColors.onPrimary),
               ),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
