@@ -88,10 +88,8 @@ class InicioScreen extends ConsumerWidget {
     final pendientes = filtrarDeudas(v.deudas, FiltroDeuda.pendientes, hoy);
     final reclamos = v.reclamos.where((r) => !r.resuelto).toList();
     final obras = v.obras.where((o) => o.estado == EstadoObra.enEjecucion).toList();
-    final enCurso = [
-      for (final r in reclamos) _TarjetaReclamo(reclamo: r, hoy: hoy),
-      for (final o in obras) _TarjetaObra(obra: o),
-    ];
+    final tarjetasReclamos = [for (final r in reclamos) _TarjetaReclamo(reclamo: r, hoy: hoy)];
+    final tarjetasObras = [for (final o in obras) _TarjetaObra(obra: o)];
 
     return [
       const Aparecer(paso: 3, child: _Accesos()),
@@ -120,11 +118,17 @@ class InicioScreen extends ConsumerWidget {
           ),
         ),
       ],
-      if (enCurso.isNotEmpty) ...[
+      if (tarjetasReclamos.isNotEmpty) ...[
         espacioGrande,
         const Aparecer(paso: 6, child: TituloSeccion('Tus reclamos')),
         espacio,
-        _Carrusel(tarjetas: enCurso),
+        _Carrusel(tarjetas: tarjetasReclamos),
+      ],
+      if (tarjetasObras.isNotEmpty) ...[
+        espacioGrande,
+        const Aparecer(paso: 7, child: TituloSeccion('Obras en ejecución')),
+        espacio,
+        _Carrusel(tarjetas: tarjetasObras, paso: 7),
       ],
     ];
   }
@@ -558,9 +562,12 @@ class _FilaObligacion extends StatelessWidget {
 
 /// Fila horizontal de tarjetas que se desliza, a sangre con los márgenes de la pantalla.
 class _Carrusel extends StatelessWidget {
-  const _Carrusel({required this.tarjetas});
+  const _Carrusel({required this.tarjetas, this.paso = 6});
 
   final List<Widget> tarjetas;
+
+  /// Paso de aparición de la primera tarjeta; las demás van una después de otra.
+  final int paso;
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
@@ -573,7 +580,7 @@ class _Carrusel extends StatelessWidget {
           for (final (i, t) in tarjetas.indexed) ...[
             if (i > 0) const SizedBox(width: AppSpacing.md),
             Aparecer(
-              paso: 6 + i,
+              paso: paso + i,
               desdeLado: true,
               child: SizedBox(width: 220, child: t),
             ),
