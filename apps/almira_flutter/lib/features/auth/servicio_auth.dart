@@ -157,11 +157,16 @@ class ServicioAuthSupabase implements ServicioAuth {
         'Correo o contraseña incorrectos.',
       );
 
+  /// Adónde vuelve el vecino después de Google o del enlace de clave: en el teléfono, a la app
+  /// (`almira://ingreso`); en el navegador, a la misma página donde está abierta la app.
+  /// En Supabase, esa dirección debe estar en Authentication → URL Configuration → Redirect URLs.
+  String get _retorno => kIsWeb ? '${Uri.base.origin}/' : Env.retornoIngreso;
+
   @override
   Future<void> ingresarConGoogle() => _intentar(
         () => _cliente.auth.signInWithOAuth(
           OAuthProvider.google,
-          redirectTo: kIsWeb ? null : Env.retornoIngreso,
+          redirectTo: _retorno,
           authScreenLaunchMode: LaunchMode.externalApplication,
         ),
         'No pudimos abrir el ingreso con Google. Inténtalo de nuevo.',
@@ -169,7 +174,7 @@ class ServicioAuthSupabase implements ServicioAuth {
 
   @override
   Future<void> enviarEnlaceClave(String correo) => _intentar(
-        () => _cliente.auth.resetPasswordForEmail(correo.trim(), redirectTo: Env.retornoIngreso),
+        () => _cliente.auth.resetPasswordForEmail(correo.trim(), redirectTo: _retorno),
         'No pudimos enviar el enlace. Revisa el correo e inténtalo de nuevo.',
       );
 
