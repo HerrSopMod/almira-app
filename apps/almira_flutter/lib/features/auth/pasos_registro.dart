@@ -189,6 +189,7 @@ class TarjetaOpcion extends StatelessWidget {
     required this.alElegir,
     this.detalle,
     this.icono = IconoA.municipalidad,
+    this.color,
   });
 
   final String titulo;
@@ -196,6 +197,9 @@ class TarjetaOpcion extends StatelessWidget {
   final bool elegida;
   final VoidCallback? alElegir;
   final IconoA icono;
+
+  /// Color de la caja del ícono; sin él, turquesa si está elegida y crema si no.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +229,7 @@ class TarjetaOpcion extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 child: Row(
                   children: [
-                    IconoColor.svg(icono, color: elegida ? AppColors.primary : AppColors.background),
+                    IconoColor.svg(icono, color: color ?? (elegida ? AppColors.primary : AppColors.background)),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(

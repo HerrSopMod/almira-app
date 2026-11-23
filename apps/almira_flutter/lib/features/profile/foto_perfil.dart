@@ -39,18 +39,24 @@ class AvatarPerfil extends ConsumerWidget {
       width: lado,
       height: lado,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(color: AppColors.onPrimary, shape: BoxShape.circle),
+      // Rediseño: cuadrado redondeado color sol con las iniciales en tinta.
+      decoration: BoxDecoration(color: AppColors.sol, borderRadius: BorderRadius.circular(lado * 0.3)),
       child: iniciales == null
-          ? Icon(Phosphor.user, size: lado * 0.5, color: AppColors.primaryDark)
+          ? Icon(Phosphor.user, size: lado * 0.5, color: AppColors.textPrimary)
           : ExcludeSemantics(
               child: Text(
                 iniciales,
-                style: textos.titleMedium!.copyWith(color: AppColors.primaryDark, fontSize: lado * 0.34),
+                style: textos.titleMedium!.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: lado * 0.34,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
     );
     if (url == null) return respaldo;
-    return ClipOval(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(lado * 0.3),
       child: Image.network(
         url,
         width: lado,

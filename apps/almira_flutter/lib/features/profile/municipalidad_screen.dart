@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
+import '../auth/pasos_registro.dart';
 import '../../shared/services/proveedores.dart';
 
 /// Cambia la municipalidad que se ve. No cierra la sesión ni borra nada.
@@ -51,31 +52,21 @@ class _MunicipalidadScreenState extends ConsumerState<MunicipalidadScreen> {
             final actual = v.municipalidad?.id;
             final elegida = _elegida ?? actual;
             return [
-              Tarjeta(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                child: RadioGroup<String>(
-                  groupValue: elegida,
-                  onChanged: (id) {
-                    if (!_guardando) setState(() => _elegida = id);
+              for (final m in v.municipalidades) ...[
+                TarjetaOpcion(
+                  titulo: m.nombre,
+                  detalle: m.zona,
+                  elegida: m.id == elegida,
+                  alElegir: () {
+                    if (!_guardando) setState(() => _elegida = m.id);
                   },
-                  child: Column(
-                    children: [
-                      for (final m in v.municipalidades)
-                        RadioListTile<String>(
-                          value: m.id,
-                          title: Text(m.nombre),
-                          subtitle: m.zona.isEmpty ? null : Text(m.zona),
-                        ),
-                    ],
-                  ),
                 ),
-              ),
+                const SizedBox(height: AppSpacing.md),
+              ],
               if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
               espacioGrande,
               FilledButton(
-                onPressed: _guardando || elegida == null || elegida == actual
-                    ? null
-                    : () => _guardar(elegida),
+                onPressed: _guardando || elegida == null || elegida == actual ? null : () => _guardar(elegida),
                 child: Text(_guardando ? 'Guardando…' : 'Guardar'),
               ),
             ];

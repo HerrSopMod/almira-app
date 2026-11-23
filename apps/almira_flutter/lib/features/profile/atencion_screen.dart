@@ -7,6 +7,9 @@ import '../../app/theme/iconos.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/componentes.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/iconos_almira.dart';
+import '../complaints/piezas_lista.dart';
 import '../../shared/services/proveedores.dart';
 
 /// Atención: solo los canales que la municipalidad publicó. Almira no tiene
@@ -36,46 +39,39 @@ class AtencionScreen extends ConsumerWidget {
                   icono: Phosphor.phoneSlash,
                 )
               else
-                Tarjeta(
-                  padding: EdgeInsets.zero,
-                  child: ListTile(
-                    leading: const Icon(Phosphor.phone),
-                    title: Text(telefono),
-                    subtitle: const Text('Teléfono de ayuda'),
-                    trailing: const Icon(Phosphor.caretRight),
-                    onTap: () async {
-                      final abierto = await launchUrl(Uri(scheme: 'tel', path: telefono))
-                          .catchError((_) => false);
-                      if (!abierto && context.mounted) {
-                        mostrarMensaje(context, 'No se pudo abrir el marcador del teléfono.');
-                      }
-                    },
-                  ),
+                GrupoTarjeta(
+                  filas: [
+                    FilaLista(
+                      inicio: const IconoColor.svg(IconoA.celular, color: AppColors.lima),
+                      titulo: telefono,
+                      detalle: DetalleFila('Teléfono de ayuda'),
+                      alTocar: () async {
+                        final abierto = await launchUrl(Uri(scheme: 'tel', path: telefono)).catchError((_) => false);
+                        if (!abierto && context.mounted) {
+                          mostrarMensaje(context, 'No se pudo abrir el marcador del teléfono.');
+                        }
+                      },
+                    ),
+                  ],
                 ),
               espacioGrande,
               const TituloSeccion('También puedes'),
               espacioChico,
-              Tarjeta(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Phosphor.megaphone),
-                      title: const Text('Enviar un reclamo'),
-                      subtitle: const Text('Con foto y ubicación, y seguir su atención.'),
-                      trailing: const Icon(Phosphor.caretRight),
-                      onTap: () => context.push(Rutas.nuevoReclamo),
-                    ),
-                    const Divider(indent: 56),
-                    ListTile(
-                      leading: const Icon(Phosphor.chatCircle),
-                      title: const Text('Preguntar al asistente'),
-                      subtitle: const Text('Respuestas automáticas sobre tus datos.'),
-                      trailing: const Icon(Phosphor.caretRight),
-                      onTap: () => context.go(Rutas.asistente),
-                    ),
-                  ],
-                ),
+              GrupoTarjeta(
+                filas: [
+                  FilaLista(
+                    inicio: const IconoColor.svg(IconoA.reclamos, color: AppColors.coral),
+                    titulo: 'Enviar un reclamo',
+                    detalle: DetalleFila('Con foto y ubicación, y seguir su atención.'),
+                    alTocar: () => context.push(Rutas.nuevoReclamo),
+                  ),
+                  FilaLista(
+                    inicio: const IconoColor.svg(IconoA.asistente, color: AppColors.primary),
+                    titulo: 'Preguntar al asistente',
+                    detalle: DetalleFila('Respuestas automáticas sobre tus datos.'),
+                    alTocar: () => context.go(Rutas.asistente),
+                  ),
+                ],
               ),
             ];
           },

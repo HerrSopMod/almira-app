@@ -164,7 +164,11 @@ class CabeceraMarca extends StatelessWidget {
     this.esDemo = false,
     this.rellenoInferior = AppSpacing.solapeHoja,
     this.decorado = false,
+    this.inicio,
   });
+
+  /// Va antes del título (por ejemplo, el botón de volver).
+  final Widget? inicio;
 
   final String? titulo;
   final List<Widget> acciones;
@@ -197,6 +201,7 @@ class CabeceraMarca extends StatelessWidget {
                     height: AppSpacing.barraSuperior,
                     child: Row(
                       children: [
+                        if (inicio != null) ...[inicio!, const SizedBox(width: AppSpacing.md)],
                         Expanded(
                           child: titulo == null
                               ? const SizedBox.shrink()

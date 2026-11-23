@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/movimiento.dart';
+import '../auth/pasos_registro.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 
@@ -18,12 +22,10 @@ String mensajeAviso(Recordatorio aviso, Deuda? deuda) {
   final concepto = deuda.concepto;
   final monto = soles(deuda.total);
   return switch (aviso.tipo) {
-    TipoRecordatorio.preventivo => vence == null
-        ? '$concepto por $monto está por vencer.'
-        : '$concepto por $monto vence el ${diaYMes(vence)}.',
-    TipoRecordatorio.mora => vence == null
-        ? '$concepto por $monto está vencido.'
-        : '$concepto por $monto venció el ${diaYMes(vence)}.',
+    TipoRecordatorio.preventivo =>
+      vence == null ? '$concepto por $monto está por vencer.' : '$concepto por $monto vence el ${diaYMes(vence)}.',
+    TipoRecordatorio.mora =>
+      vence == null ? '$concepto por $monto está vencido.' : '$concepto por $monto venció el ${diaYMes(vence)}.',
     TipoRecordatorio.previoCoactiva =>
       '$concepto por $monto podría pasar a cobranza coactiva, a cargo de tu municipalidad.',
   };
@@ -89,37 +91,45 @@ class _AvisosScreenState extends ConsumerState<AvisosScreen> {
               const TituloSeccion('Recibidos'),
               espacioChico,
               if (recibidos.isEmpty)
-                const VistaVacia(
-                  icono: Phosphor.bell,
-                  titulo: 'Aún no tienes avisos',
-                )
+                const VistaVacia(icono: Phosphor.bell, titulo: 'Aún no tienes avisos')
               else
-                for (final aviso in recibidos) ...[
-                  _TarjetaAviso(
-                    aviso: aviso,
-                    deuda: v.deudas.where((d) => d.id == aviso.deudaId).firstOrNull,
-                    hoy: hoy,
+                for (final (i, aviso) in recibidos.indexed) ...[
+                  Aparecer(
+                    paso: i,
+                    child: _TarjetaAviso(
+                      aviso: aviso,
+                      deuda: v.deudas.where((d) => d.id == aviso.deudaId).firstOrNull,
+                      hoy: hoy,
+                    ),
                   ),
-                  espacioChico,
+                  const SizedBox(height: AppSpacing.md),
                 ],
               espacio,
               const TituloSeccion('¿Por dónde te avisamos?'),
-              espacioChico,
-              Tarjeta(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                child: RadioGroup<CanalAviso>(
-                  groupValue: _guardando ?? vecino.canalPreferido,
-                  onChanged: (canal) {
-                    if (canal != null) _cambiarCanal(vecino, canal);
+              espacio,
+              for (final canal in CanalAviso.values) ...[
+                TarjetaOpcion(
+                  titulo: canal.etiqueta,
+                  detalle: switch (canal) {
+                    CanalAviso.whatsapp => 'Recordatorios por WhatsApp',
+                    CanalAviso.sms => 'Mensaje de texto',
+                    CanalAviso.app => 'Solo dentro de Almira',
                   },
-                  child: Column(
-                    children: [
-                      for (final canal in CanalAviso.values)
-                        RadioListTile<CanalAviso>(value: canal, title: Text(canal.etiqueta)),
-                    ],
-                  ),
+                  icono: switch (canal) {
+                    CanalAviso.whatsapp => IconoA.chat,
+                    CanalAviso.sms => IconoA.sms,
+                    CanalAviso.app => IconoA.campana,
+                  },
+                  color: switch (canal) {
+                    CanalAviso.whatsapp => AppColors.lima,
+                    CanalAviso.sms => AppColors.sol,
+                    CanalAviso.app => AppColors.coral,
+                  },
+                  elegida: (_guardando ?? vecino.canalPreferido) == canal,
+                  alElegir: () => _cambiarCanal(vecino, canal),
                 ),
-              ),
+                const SizedBox(height: AppSpacing.md),
+              ],
               if (_error != null) ...[espacio, Aviso('No se guardó el cambio. ${_error!}', tono: Tono.error)],
               espacioChico,
               Text(
@@ -152,28 +162,37 @@ class _TarjetaAviso extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CajaIcono(
-            aviso.tipo == TipoRecordatorio.preventivo
-                ? Phosphor.bell
-                : Phosphor.warningCircle,
-            tono: aviso.tipo == TipoRecordatorio.preventivo ? Tono.primario : Tono.aviso,
+          IconoColor.svg(
+            aviso.tipo == TipoRecordatorio.preventivo ? IconoA.campana : IconoA.alerta,
+            color: aviso.tipo == TipoRecordatorio.preventivo ? AppColors.sol : AppColors.coral,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(aviso.tipo.etiqueta, style: textos.titleSmall),
+                Text(aviso.tipo.etiqueta, style: textos.titleMedium!.copyWith(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 2),
-                Text(mensajeAviso(aviso, deuda), style: textos.bodyMedium),
-                const SizedBox(height: AppSpacing.sm),
                 Text(
-                  [
-                    if (fecha != null) '${haceDias(fecha, hoy)}, ${hora(fecha)}',
-                    aviso.canal.etiqueta,
-                    if (pagada) 'ya pagada',
-                  ].join(' · '),
-                  style: textos.bodySmall,
+                  mensajeAviso(aviso, deuda),
+                  style: textos.bodyLarge!.copyWith(fontSize: 14, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    const IconoAlmira(IconoA.chat, tamano: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        [
+                          if (fecha != null) '${haceDias(fecha, hoy)}, ${hora(fecha)}',
+                          aviso.canal.etiqueta,
+                          if (pagada) 'ya pagada',
+                        ].join(' · '),
+                        style: textos.bodySmall,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
