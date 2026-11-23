@@ -137,7 +137,7 @@ class _PagoConfirmarScreenState extends ConsumerState<PagoConfirmarScreen> {
     final total = sumarSaldos(elegidas);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pagos en línea')),
+      appBar: BarraAlmira(titulo: 'Pagos en línea'),
       bottomNavigationBar: elegidas.isEmpty
           ? null
           : Container(

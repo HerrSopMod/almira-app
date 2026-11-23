@@ -45,10 +45,7 @@ class IndicadorPasos extends StatelessWidget {
               _Circulo(numero: actual + 1, estado: _EstadoPaso.actual),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: Text(
-                  'Paso ${actual + 1} de ${titulos.length} · ${titulos[actual]}',
-                  style: textos.titleSmall,
-                ),
+                child: Text('Paso ${actual + 1} de ${titulos.length} · ${titulos[actual]}', style: textos.titleSmall),
               ),
             ],
           ),
@@ -68,24 +65,16 @@ class IndicadorPasos extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Expanded(
-                          child: i == 0
-                              ? const SizedBox.shrink()
-                              : _Linea(hecha: i <= actual),
-                        ),
+                        Expanded(child: i == 0 ? const SizedBox.shrink() : _Linea(hecha: i <= actual)),
                         _Circulo(
                           numero: i + 1,
                           estado: i < actual
                               ? _EstadoPaso.hecho
                               : i == actual
-                                  ? _EstadoPaso.actual
-                                  : _EstadoPaso.pendiente,
+                              ? _EstadoPaso.actual
+                              : _EstadoPaso.pendiente,
                         ),
-                        Expanded(
-                          child: i == titulos.length - 1
-                              ? const SizedBox.shrink()
-                              : _Linea(hecha: i < actual),
-                        ),
+                        Expanded(child: i == titulos.length - 1 ? const SizedBox.shrink() : _Linea(hecha: i < actual)),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -98,7 +87,7 @@ class IndicadorPasos extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: textos.labelMedium!.copyWith(
                           color: i <= actual ? AppColors.textPrimary : AppColors.textSecondary,
-                          fontWeight: i == actual ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: i == actual ? FontWeight.w800 : FontWeight.w600,
                         ),
                       ),
                     ),
@@ -124,16 +113,17 @@ class _Circulo extends StatelessWidget {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     return Container(
-      width: 28,
-      height: 28,
+      width: 30,
+      height: 30,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: estado == _EstadoPaso.pendiente ? AppColors.surface : AppColors.primary,
-        border: Border.all(
-          color: estado == _EstadoPaso.pendiente ? AppColors.border : AppColors.primary,
-          width: 1.5,
-        ),
+        border: Border.all(color: estado == _EstadoPaso.pendiente ? AppColors.bordeCampo : AppColors.primary, width: 2),
+        // El paso en curso lleva un halo turquesa claro.
+        boxShadow: estado == _EstadoPaso.actual
+            ? const [BoxShadow(color: AppColors.primary100, spreadRadius: 4)]
+            : null,
       ),
       child: estado == _EstadoPaso.hecho
           ? const Icon(Phosphor.check, size: AppIconos.insignia, color: Colors.white)
@@ -153,6 +143,5 @@ class _Linea extends StatelessWidget {
   final bool hecha;
 
   @override
-  Widget build(BuildContext context) =>
-      Container(height: 2, color: hecha ? AppColors.primary : AppColors.border);
+  Widget build(BuildContext context) => Container(height: 2, color: hecha ? AppColors.primary : AppColors.bordeCampo);
 }

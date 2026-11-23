@@ -3,7 +3,6 @@
 import 'package:almira_flutter/app/theme/app_colors.dart';
 import 'package:almira_flutter/app/theme/app_spacing.dart';
 import 'package:almira_flutter/app/theme/app_theme.dart';
-import 'package:almira_flutter/core/widgets/componentes.dart';
 import 'package:almira_flutter/features/carga/pantalla_carga.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,11 +20,12 @@ void main() {
       await tester.pumpWidget(const PantallaCarga());
       expect(tester.takeException(), isNull);
       expect(tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor, AppColors.primary);
-      expect(tester.widget<LogoAlmira>(find.byType(LogoAlmira)).blanco, isTrue);
+      // El ícono es la misma imagen del splash (blanca), precargada para que no parpadee.
+      expect(tester.widget<IconoCarga>(find.byType(IconoCarga)).lado, AppSpacing.logoCarga);
       expect(find.text('Almira'), findsOneWidget);
       // El ícono queda al centro de la pantalla, donde estaba el del splash nativo.
-      expect(tester.getCenter(find.byType(LogoAlmira)), const Offset(180, 320));
-      expect(tester.getSize(find.byType(LogoAlmira)), const Size.square(AppSpacing.logoCarga));
+      expect(tester.getCenter(find.byType(IconoCarga)), const Offset(180, 320));
+      expect(tester.getSize(find.byType(IconoCarga)), const Size.square(AppSpacing.logoCarga));
       // El nombre va debajo del ícono, también centrado.
       expect(tester.getCenter(find.text('Almira')).dx, 180);
       expect(tester.getTopLeft(find.text('Almira')).dy, greaterThan(320 + AppSpacing.logoCarga / 2));

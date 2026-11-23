@@ -1,4 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -6,7 +10,9 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../errors/error_app.dart';
+import 'movimiento.dart';
 
 /// Duración de las microanimaciones. Con «reducir movimiento» activado en el
 /// sistema, no se anima.
@@ -46,10 +52,7 @@ class LogoVertical extends StatelessWidget {
         children: [
           LogoAlmira(lado: altoIcono, blanco: true),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            'Almira',
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.onPrimary),
-          ),
+          Text('Almira', style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.onPrimary)),
         ],
       ),
     ),
@@ -77,10 +80,8 @@ class MarcaAlmira extends StatelessWidget {
               'Almira',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                fontWeight: FontWeight.w700,
-                color: blanco ? AppColors.onPrimary : AppColors.textPrimary,
-              ),
+              style: Theme.of(context).textTheme.titleLarge!
+                  .copyWith(fontWeight: FontWeight.w700, color: blanco ? AppColors.onPrimary : AppColors.textPrimary),
             ),
           ),
         ],
@@ -162,12 +163,20 @@ class CabeceraMarca extends StatelessWidget {
     this.hijo,
     this.esDemo = false,
     this.rellenoInferior = AppSpacing.solapeHoja,
+    this.decorado = false,
+    this.inicio,
   });
+
+  /// Va antes del título (por ejemplo, el botón de volver).
+  final Widget? inicio;
 
   final String? titulo;
   final List<Widget> acciones;
   final Widget? hijo;
   final bool esDemo;
+
+  /// Círculos extra (sol y uno oscuro abajo), solo en el encabezado alto de Inicio.
+  final bool decorado;
 
   /// Espacio turquesa bajo el contenido: la hoja blanca se monta sobre él.
   final double rellenoInferior;
@@ -176,51 +185,272 @@ class CabeceraMarca extends StatelessWidget {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     final arriba = MediaQuery.paddingOf(context).top;
-    return ColoredBox(
-      color: AppColors.primary,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(AppSpacing.margen, arriba, AppSpacing.sm, rellenoInferior),
-        child: SobreTurquesa(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: AppSpacing.barraSuperior,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: titulo == null
-                          ? const SizedBox.shrink()
-                          : Semantics(
-                              header: true,
-                              child: Text(
-                                titulo!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
-                              ),
-                            ),
+    return DecoratedBox(
+      decoration: const BoxDecoration(gradient: AppColors.degradadoCabecera),
+      child: CustomPaint(
+        painter: _CirculosCabecera(decorado: decorado),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.margen, arriba, AppSpacing.sm, rellenoInferior),
+          child: SobreTurquesa(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Sin título ni acciones (Inicio), el contenido de [hijo] ocupa la barra.
+                if (titulo != null || acciones.isNotEmpty || esDemo)
+                  SizedBox(
+                    height: AppSpacing.barraSuperior,
+                    child: Row(
+                      children: [
+                        if (inicio != null) ...[inicio!, const SizedBox(width: AppSpacing.md)],
+                        Expanded(
+                          child: titulo == null
+                              ? const SizedBox.shrink()
+                              : Semantics(
+                                  header: true,
+                                  child: Text(
+                                    titulo!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textos.headlineSmall!.copyWith(color: AppColors.onPrimary),
+                                  ),
+                                ),
+                        ),
+                        // Con letra muy grande la etiqueta no entra junto al título.
+                        if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15) ...[
+                          const EtiquetaDemo(sobreTurquesa: true),
+                          const SizedBox(width: AppSpacing.xs),
+                        ],
+                        ...acciones,
+                      ],
                     ),
-                    // Con letra muy grande la etiqueta no entra junto al título.
-                    if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15) ...[
-                      const EtiquetaDemo(sobreTurquesa: true),
-                      const SizedBox(width: AppSpacing.xs),
-                    ],
-                    ...acciones,
-                  ],
-                ),
-              ),
-              if (hijo != null)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.md),
-                  child: hijo,
-                ),
-            ],
+                  ),
+                if (hijo != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.md),
+                    child: hijo,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Encabezado de las pantallas de detalle (rediseño): degradado turquesa, botón cuadrado de volver
+/// (o de cerrar, en las que se abren como diálogo), título de 24 en 800 y, al pie, el arranque de
+/// la hoja crema con esquinas de 26. Va en `Scaffold.appBar`, con el fondo crema del tema.
+class BarraAlmira extends StatelessWidget implements PreferredSizeWidget {
+  const BarraAlmira({
+    super.key,
+    required this.titulo,
+    this.acciones = const [],
+    this.esDemo = false,
+    this.cerrar,
+    this.alVolver,
+    this.conVolver = true,
+  });
+
+  final String titulo;
+  final List<Widget> acciones;
+  final bool esDemo;
+
+  /// Muestra una X en vez de la flecha. Sin valor, la X sale si la pantalla se abrió como diálogo.
+  final bool? cerrar;
+
+  /// Qué hace el botón de volver; por defecto, cerrar la pantalla.
+  final VoidCallback? alVolver;
+
+  /// false oculta el botón de volver aunque se pueda volver.
+  final bool conVolver;
+
+  static const double _fila = 64;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(_fila + AppSpacing.sm + AppRadius.hoja);
+
+  @override
+  Widget build(BuildContext context) {
+    final arriba = MediaQuery.paddingOf(context).top;
+    final ruta = ModalRoute.of(context);
+    final puedeVolver = conVolver && (alVolver != null || (ruta?.impliesAppBarDismissal ?? false));
+    final esCerrar = cerrar ?? (ruta is PageRoute && ruta.fullscreenDialog);
+    final textos = Theme.of(context).textTheme;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: barraSobreTurquesa,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppColors.degradadoCabecera),
+        child: CustomPaint(
+          painter: const _CirculosCabecera(decorado: false),
+          child: SobreTurquesa(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: arriba),
+                SizedBox(
+                  height: _fila,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: puedeVolver ? AppSpacing.lg : AppSpacing.margen,
+                      right: AppSpacing.sm,
+                    ),
+                    child: Row(
+                      children: [
+                        if (puedeVolver) ...[
+                          BotonCuadro(
+                            semantica: esCerrar ? 'Cerrar' : 'Volver',
+                            alTocar: alVolver ?? () => Navigator.maybePop(context),
+                            child: Icon(esCerrar ? Icons.close_rounded : Phosphor.arrowLeft, size: 22),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                        ],
+                        Expanded(
+                          child: Semantics(
+                            header: true,
+                            child: Text(
+                              titulo,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: textos.headlineSmall!.copyWith(color: AppColors.onPrimary),
+                            ),
+                          ),
+                        ),
+                        if (esDemo && MediaQuery.textScalerOf(context).scale(1) <= 1.15) ...[
+                          const EtiquetaDemo(sobreTurquesa: true),
+                          const SizedBox(width: AppSpacing.xs),
+                        ],
+                        ...acciones,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Container(
+                  height: AppRadius.hoja,
+                  decoration: const BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.hoja)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botón cuadrado de 44 con radio de 14, blanco translúcido sobre el degradado.
+class BotonCuadro extends StatelessWidget {
+  const BotonCuadro({super.key, required this.semantica, required this.alTocar, required this.child, this.fondo});
+
+  final String semantica;
+  final VoidCallback alTocar;
+  final Widget child;
+  final Color? fondo;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: semantica,
+    excludeSemantics: true,
+    child: Tooltip(
+      message: semantica,
+      excludeFromSemantics: true,
+      child: Presionable(
+        child: Material(
+          color: fondo ?? Colors.white.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(AppRadius.caja),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: alTocar,
+            child: SizedBox.square(
+              dimension: AppSpacing.caja,
+              child: Center(child: child),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Círculos suaves del encabezado: uno turquesa claro arriba a la derecha y, en Inicio, uno sol
+/// y otro oscuro abajo a la izquierda. Se anclan a la esquina, sea cual sea el alto.
+class _CirculosCabecera extends CustomPainter {
+  const _CirculosCabecera({required this.decorado});
+
+  final bool decorado;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Offset.zero & size);
+    final w = size.width;
+    canvas.drawCircle(Offset(w - 30, 18), 62, Paint()..color = AppColors.primary500.withValues(alpha: 0.55));
+    if (!decorado) return;
+    canvas.drawCircle(Offset(w - 58, 104), 16, Paint()..color = AppColors.sol.withValues(alpha: 0.9));
+    canvas.drawCircle(const Offset(30, 150), 46, Paint()..color = AppColors.primaryDark.withValues(alpha: 0.55));
+  }
+
+  @override
+  bool shouldRepaint(_CirculosCabecera old) => old.decorado != decorado;
+}
+
+/// Pone [abajo] montado sobre los últimos [solape] px de [arriba]: la hoja crema (o la tarjeta
+/// del saldo) sube sobre el encabezado sin dejar un hueco al final.
+class Solape extends MultiChildRenderObjectWidget {
+  Solape({super.key, required this.solape, required Widget arriba, required Widget abajo})
+    : super(children: [arriba, abajo]);
+
+  final double solape;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSolape(solape);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) =>
+      (renderObject as _RenderSolape).solape = solape;
+}
+
+class _DatosSolape extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderSolape extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, _DatosSolape>, RenderBoxContainerDefaultsMixin<RenderBox, _DatosSolape> {
+  _RenderSolape(this._solape);
+
+  double _solape;
+  set solape(double v) {
+    if (v == _solape) return;
+    _solape = v;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _DatosSolape) child.parentData = _DatosSolape();
+  }
+
+  @override
+  void performLayout() {
+    final arriba = firstChild!;
+    final abajo = childAfter(arriba)!;
+    final ancho = BoxConstraints.tightFor(width: constraints.maxWidth);
+    arriba.layout(ancho, parentUsesSize: true);
+    abajo.layout(ancho, parentUsesSize: true);
+    final inicio = math.max(0.0, arriba.size.height - _solape);
+    (arriba.parentData! as _DatosSolape).offset = Offset.zero;
+    (abajo.parentData! as _DatosSolape).offset = Offset(0, inicio);
+    size = constraints.constrain(Size(constraints.maxWidth, math.max(arriba.size.height, inicio + abajo.size.height)));
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) => defaultPaint(context, offset);
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      defaultHitTestChildren(result, position: position);
 }
 
 /// Todo lo que va dentro de la cabecera turquesa se dibuja en blanco: texto, íconos y botones.
@@ -250,76 +480,73 @@ class SobreTurquesa extends StatelessWidget {
   );
 }
 
-/// Hoja blanca con las esquinas superiores redondeadas, que se monta sobre el color de la
-/// cabecera. Con [flotante], esa tarjeta queda a caballo entre el color y la hoja, con una
-/// sombra muy suave: la hoja empieza a la mitad de su altura.
+/// Hoja crema con las esquinas superiores de 26, que se monta sobre el encabezado. Dentro de
+/// [CuerpoAsync] sube sobre el degradado con [Solape]; sola (en una `Column` debajo de
+/// [CabeceraMarca]), pinta detrás de sus esquinas la franja final del degradado.
+/// Con [flotante], la tarjeta va arriba sobre el degradado y la hoja no tiene esquinas.
 class HojaBlanca extends StatelessWidget {
   const HojaBlanca({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.fromLTRB(
-      AppSpacing.margen,
-      AppSpacing.xl,
-      AppSpacing.margen,
-      AppSpacing.xxl,
-    ),
+    this.padding = const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.xl, AppSpacing.margen, AppSpacing.xxl),
     this.flotante,
+    this.sobreCabecera = true,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final Widget? flotante;
 
+  /// true cuando va sola debajo de [CabeceraMarca]: pinta la franja del degradado detrás de las
+  /// esquinas. Con [Solape] no hace falta (el degradado real queda detrás).
+  final bool sobreCabecera;
+
   static const _forma = BorderRadius.vertical(top: Radius.circular(AppRadius.hoja));
+
+  /// Colores del borde inferior del degradado del encabezado, de izquierda a derecha.
+  static const _franja = LinearGradient(
+    colors: [Color(0xFF0E8986), AppColors.primary, AppColors.primaryDark, AppColors.primaryDark],
+    stops: [0, 0.42, 0.8, 1],
+  );
 
   @override
   Widget build(BuildContext context) {
-    if (flotante == null) {
-      // Turquesa detrás de las esquinas: así la hoja se ve montada sobre la cabecera.
-      return ColoredBox(
-        color: AppColors.primary,
-        child: Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(color: AppColors.surface, borderRadius: _forma),
-          padding: padding,
-          child: child,
-        ),
+    final flot = flotante;
+    if (flot != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margen),
+            child: Aparecer(child: TarjetaFlotante(child: flot)),
+          ),
+          Padding(padding: padding, child: child),
+        ],
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final hoja = Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(color: AppColors.background, borderRadius: _forma),
+      padding: padding,
+      child: child,
+    );
+    if (!sobreCabecera) return hoja;
+    return Stack(
       children: [
-        Stack(
-          children: [
-            // Fondo de la unión: turquesa en la mitad de arriba, hoja blanca desde la mitad (con
-            // turquesa detrás de sus esquinas).
-            const Positioned.fill(child: ColoredBox(color: AppColors.primary)),
-            const Positioned.fill(
-              child: Column(
-                children: [
-                  Spacer(),
-                  Expanded(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: _forma),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margen),
-              child: TarjetaFlotante(child: flotante!),
-            ),
-          ],
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: AppRadius.hoja,
+          child: DecoratedBox(decoration: BoxDecoration(gradient: _franja)),
         ),
-        Container(width: double.infinity, color: AppColors.surface, padding: padding, child: child),
+        hoja,
       ],
     );
   }
 }
 
-/// Tarjeta blanca de radio 16 con la única sombra de la app, muy suave. Flota sobre la unión
-/// entre la cabecera y la hoja.
+/// Tarjeta blanca de radio 22 con sombra suave. Flota sobre el encabezado (saldo de Inicio).
 class TarjetaFlotante extends StatelessWidget {
   const TarjetaFlotante({super.key, required this.child});
 
@@ -331,8 +558,8 @@ class TarjetaFlotante extends StatelessWidget {
     padding: const EdgeInsets.all(AppSpacing.margen),
     decoration: BoxDecoration(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(AppRadius.destacado),
-      boxShadow: const [BoxShadow(color: AppColors.sombraTarjeta, blurRadius: 16, offset: Offset(0, 6))],
+      borderRadius: BorderRadius.circular(AppRadius.tarjeta),
+      boxShadow: AppColors.sombraCard,
     ),
     child: child,
   );
@@ -342,22 +569,26 @@ class TarjetaFlotante extends StatelessWidget {
 // Insignias, tarjetas y fichas
 // ---------------------------------------------------------------------------------------
 
-enum Tono { neutro, primario, exito, aviso, error }
+/// Tonos de estado: turquesa (primario), coral (acento: en curso), lima (éxito), sol (aviso) y
+/// rojo (error). Cada uno con su fondo pastel y su texto oscuro (AA).
+enum Tono { neutro, primario, acento, exito, aviso, error }
 
 extension ColoresTono on Tono {
   Color get fondo => switch (this) {
-    Tono.neutro => AppColors.surfaceSubtle,
-    Tono.primario => AppColors.primarySoft,
-    Tono.exito => AppColors.successSoft,
-    Tono.aviso => AppColors.warningSoft,
+    Tono.neutro => AppColors.primary50,
+    Tono.primario => AppColors.primary100,
+    Tono.acento => AppColors.coral100,
+    Tono.exito => AppColors.lima100,
+    Tono.aviso => AppColors.sol100,
     Tono.error => AppColors.errorSoft,
   };
 
   Color get texto => switch (this) {
     Tono.neutro => AppColors.textSecondary,
-    Tono.primario => AppColors.primaryDark,
-    Tono.exito => AppColors.success,
-    Tono.aviso => AppColors.warning,
+    Tono.primario => AppColors.primary,
+    Tono.acento => AppColors.coralTexto,
+    Tono.exito => AppColors.limaTexto,
+    Tono.aviso => AppColors.solTexto,
     Tono.error => AppColors.error,
   };
 }
@@ -374,36 +605,35 @@ class Insignia extends StatelessWidget {
   /// Reemplaza el fondo suave del tono (por ejemplo, blanco sobre la cabecera turquesa).
   final Color? fondo;
 
-  /// Crece si el texto del teléfono es más grande. Fondo del color de estado al 12 % y
-  /// texto e ícono en su tono oscuro.
+  /// Píldora de 26 que crece si el texto del teléfono es más grande: fondo pastel del tono y
+  /// texto en su color oscuro. Sin ícono, lleva un punto del mismo color.
   @override
   Widget build(BuildContext context) => Container(
     constraints: const BoxConstraints(minHeight: AppSpacing.altoInsignia),
-    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
-    decoration: BoxDecoration(
-      color:
-          fondo ??
-          (tono == Tono.neutro
-              ? AppColors.surfaceSubtle
-              : tono.texto.withValues(alpha: AppColors.alfaFondoInsignia)),
-      borderRadius: BorderRadius.circular(AppRadius.insignia),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icono != null) ...[
-          Icon(icono, size: AppIconos.insignia, color: tono.texto),
-          const SizedBox(width: AppSpacing.xs),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+    decoration: BoxDecoration(color: fondo ?? tono.fondo, borderRadius: BorderRadius.circular(AppRadius.pastilla)),
+    // En un espacio muy angosto (letra al doble junto a un monto), el contenido se achica un poco
+    // en vez de desbordarse. Con espacio, se ve a su tamaño normal.
+    child: FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icono != null) ...[
+            Icon(icono, size: AppIconos.insignia - 2, color: tono.texto),
+            const SizedBox(width: 6),
+          ] else if (tono != Tono.neutro) ...[
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(color: tono.texto, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+          ],
+          Text(texto, maxLines: 1, style: Theme.of(context).textTheme.labelMedium!.copyWith(color: tono.texto)),
         ],
-        Flexible(
-          child: Text(
-            texto,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelMedium!.copyWith(color: tono.texto),
-          ),
-        ),
-      ],
+      ),
     ),
   );
 }
@@ -419,9 +649,34 @@ class EtiquetaDemo extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     label: 'Modo demostración: datos de ejemplo',
     child: ExcludeSemantics(
-      child: sobreTurquesa
-          ? const Insignia('Demostración', tono: Tono.aviso, fondo: AppColors.surface)
-          : const Insignia('Demostración', tono: Tono.aviso),
+      child: sobreTurquesa ? const _DemoSobreTurquesa() : const Insignia('Demostración', tono: Tono.aviso),
+    ),
+  );
+}
+
+/// «● Demostración» sobre el degradado: píldora blanca translúcida con un punto sol.
+class _DemoSobreTurquesa extends StatelessWidget {
+  const _DemoSobreTurquesa();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: AppSpacing.altoInsignia + 4,
+    padding: const EdgeInsets.symmetric(horizontal: 10),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.16),
+      borderRadius: BorderRadius.circular(AppRadius.pastilla),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: const BoxDecoration(color: AppColors.sol, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text('Demostración', style: Theme.of(context).textTheme.labelMedium!.copyWith(color: AppColors.onPrimary)),
+      ],
     ),
   );
 }
@@ -444,8 +699,8 @@ class TextoPlazo extends StatelessWidget {
   );
 }
 
-/// Tarjeta blanca y ligera: borde de 1 px, radio de 12, sin sombra. Para agrupar; nunca una
-/// tarjeta dentro de otra.
+/// Tarjeta blanca de radio 22 con sombra suave sobre el fondo crema. Para agrupar; nunca una
+/// tarjeta dentro de otra. Con [conBorde] en false va plana (sin sombra).
 class Tarjeta extends StatelessWidget {
   const Tarjeta({
     super.key,
@@ -466,13 +721,10 @@ class Tarjeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final forma = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadius.tarjeta),
-      side: conBorde ? const BorderSide(color: AppColors.border) : BorderSide.none,
-    );
-    return Material(
+    final radio = BorderRadius.circular(AppRadius.tarjeta);
+    final material = Material(
       color: color,
-      shape: forma,
+      borderRadius: radio,
       clipBehavior: Clip.antiAlias,
       child: onTap == null
           ? Padding(padding: padding, child: child)
@@ -485,6 +737,11 @@ class Tarjeta extends StatelessWidget {
               ),
             ),
     );
+    final caja = DecoratedBox(
+      decoration: BoxDecoration(borderRadius: radio, boxShadow: conBorde ? AppColors.sombraCard : null),
+      child: material,
+    );
+    return onTap == null ? caja : Presionable(child: caja);
   }
 }
 
@@ -500,47 +757,62 @@ class Destacado extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: double.infinity,
     padding: padding,
-    decoration: BoxDecoration(
-      color: AppColors.primarySoft,
-      borderRadius: BorderRadius.circular(AppRadius.destacado),
-    ),
+    decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.destacado)),
     child: child,
   );
 }
 
-/// Ícono relleno en su color sobre un fondo del mismo color al 12 %: da vida a los accesos y a las
-/// filas sin llenar la pantalla de color. Cuadrado de esquinas redondas, o círculo con [circulo].
+/// Caja de ícono del rediseño (IconTile): ícono de línea en tinta, sin manchas de color, sobre
+/// un fondo pastel redondeado (turquesa, sol, coral o lima según [color]). Radio de 14 en 44,
+/// 16 en 48-52 y 20 en 58. [circulo] se conserva por compatibilidad y ya no cambia la forma.
 class IconoColor extends StatelessWidget {
   const IconoColor(
-    this.icono, {
+    IconData this.icono, {
     super.key,
     this.color = AppColors.primary,
     this.lado = AppSpacing.caja,
     this.circulo = false,
-  });
+    this.colorIcono,
+  }) : svg = null;
 
-  final IconData icono;
+  /// Con uno de los íconos propios del rediseño.
+  const IconoColor.svg(
+    IconoA this.svg, {
+    super.key,
+    this.color = AppColors.primary,
+    this.lado = AppSpacing.caja,
+    this.colorIcono,
+  }) : icono = null,
+       circulo = false;
+
+  final IconData? icono;
+  final IconoA? svg;
   final Color color;
   final double lado;
   final bool circulo;
 
+  /// Color del ícono; por defecto, tinta (sin manchas de color).
+  final Color? colorIcono;
+
   @override
-  Widget build(BuildContext context) => ExcludeSemantics(
-    child: Container(
-      width: lado,
-      height: lado,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: AppColors.alfaFondoInsignia),
-        shape: circulo ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: circulo ? null : BorderRadius.circular(AppRadius.caja + 2),
+  Widget build(BuildContext context) {
+    final radio = lado >= 58 ? AppRadius.cajaGrande : (lado >= 48 ? AppRadius.cajaMediana : AppRadius.caja);
+    final tamano = lado >= 58 ? 26.0 : (lado >= 48 ? 24.0 : 22.0);
+    return ExcludeSemantics(
+      child: Container(
+        width: lado,
+        height: lado,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: AppColors.fondoPastel(color), borderRadius: BorderRadius.circular(radio)),
+        child: svg != null
+            ? IconoAlmira(svg!, tamano: tamano, color: colorIcono ?? AppColors.textPrimary)
+            : Icon(icono, size: tamano, color: colorIcono ?? AppColors.textPrimary),
       ),
-      child: Icon(icono, size: lado * 0.5, color: color),
-    ),
-  );
+    );
+  }
 }
 
-/// Ícono dentro de un cuadrado de 40 con radio de 10. Neutro y primario van sobre gris claro
-/// con el ícono turquesa; los tonos de estado, sobre su fondo suave.
+/// Ícono en tinta dentro de una caja pastel del tono (turquesa muy claro si es neutro).
 class CajaIcono extends StatelessWidget {
   const CajaIcono(this.icono, {super.key, this.tono = Tono.primario, this.lado = AppSpacing.caja});
 
@@ -550,18 +822,17 @@ class CajaIcono extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sobreGris = tono == Tono.primario || tono == Tono.neutro;
     return Container(
       width: lado,
       height: lado,
       decoration: BoxDecoration(
-        color: sobreGris ? AppColors.surfaceSubtle : tono.fondo,
-        borderRadius: BorderRadius.circular(AppRadius.caja),
+        color: tono == Tono.neutro ? AppColors.primary50 : tono.fondo,
+        borderRadius: BorderRadius.circular(lado >= 48 ? AppRadius.cajaMediana : AppRadius.caja),
       ),
       child: Icon(
         icono,
-        size: lado >= AppSpacing.cajaGrande ? AppIconos.vacio : AppIconos.caja,
-        color: tono == Tono.primario ? AppColors.primary : tono.texto,
+        size: lado >= AppSpacing.cajaGrande ? AppIconos.vacio : AppIconos.caja - 2,
+        color: tono == Tono.error ? AppColors.error : AppColors.textPrimary,
       ),
     );
   }
@@ -576,48 +847,57 @@ class Acceso extends StatelessWidget {
     required this.texto,
     required this.alTocar,
     this.color = AppColors.primary,
+    this.svg,
   });
 
   final IconData icono;
+
+  /// Ícono propio del rediseño; si está, reemplaza a [icono].
+  final IconoA? svg;
   final Color color;
   final String texto;
   final VoidCallback alTocar;
 
   @override
   Widget build(BuildContext context) {
-    final estilo = Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w500);
+    final estilo = Theme.of(context).textTheme.labelMedium!.copyWith(height: 1.25);
     return Semantics(
       button: true,
       label: texto,
       child: ExcludeSemantics(
-        child: InkWell(
-          onTap: alTocar,
-          borderRadius: BorderRadius.circular(AppRadius.campo),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconoColor(icono, color: color, lado: AppSpacing.acceso, circulo: true),
-                const SizedBox(height: AppSpacing.sm),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                  // Una sola palabra («Cuponera») se achica antes que partirse a la mitad; varias
-                  // palabras van en hasta dos líneas.
-                  child: texto.contains(' ')
-                      ? Text(
-                          texto,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: estilo,
-                        )
-                      : FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(texto, maxLines: 1, style: estilo),
-                        ),
-                ),
-              ],
+        child: Presionable(
+          child: InkWell(
+            onTap: alTocar,
+            borderRadius: BorderRadius.circular(AppRadius.campo),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (svg != null)
+                    IconoColor.svg(svg!, color: color, lado: AppSpacing.acceso)
+                  else
+                    IconoColor(icono, color: color, lado: AppSpacing.acceso),
+                  const SizedBox(height: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    // Una sola palabra («Cuponera») se achica antes que partirse a la mitad; varias
+                    // palabras van en hasta dos líneas.
+                    child: texto.contains(' ')
+                        ? Text(
+                            texto,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: estilo,
+                          )
+                        : FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(texto, maxLines: 1, style: estilo),
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -651,8 +931,49 @@ class RotuloSeccion extends StatelessWidget {
   final String texto;
 
   @override
-  Widget build(BuildContext context) =>
-      Semantics(header: true, child: Text(texto, style: estiloRotulo(context)));
+  Widget build(BuildContext context) => Semantics(header: true, child: Text(texto, style: estiloRotulo(context)));
+}
+
+/// Rótulo de un grupo de filas del rediseño («CUENTA Y PREDIO»): 12 en 800, gris, en
+/// mayúsculas con algo de aire. Lectores de pantalla lo leen en tipo oración.
+class RotuloGrupo extends StatelessWidget {
+  const RotuloGrupo(this.texto, {super.key});
+
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    header: true,
+    label: texto,
+    excludeSemantics: true,
+    child: Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
+      child: Text(
+        texto.toUpperCase(),
+        style: Theme.of(context).textTheme.labelMedium!
+            .copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w800, letterSpacing: 0.7),
+      ),
+    ),
+  );
+}
+
+/// Grupo de filas dentro de una tarjeta blanca, con una línea fina entre ellas.
+class GrupoTarjeta extends StatelessWidget {
+  const GrupoTarjeta({super.key, required this.filas, this.padding});
+
+  final List<Widget> filas;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) => Tarjeta(
+    padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, fila) in filas.indexed) ...[if (i > 0) const Divider(), fila],
+      ],
+    ),
+  );
 }
 
 /// Ficha de un dato: rótulo pequeño en gris arriba y el valor debajo, a todo el ancho. Para
@@ -783,8 +1104,7 @@ class FilaLista extends StatelessWidget {
             ],
             if (alTocar != null || final_ != null) ...[
               const SizedBox(width: AppSpacing.sm),
-              final_ ??
-                  const Icon(Phosphor.caretRight, size: AppIconos.lista, color: AppColors.textSecondary),
+              final_ ?? const Icon(Phosphor.caretRight, size: AppIconos.lista, color: AppColors.textSecondary),
             ],
           ],
         ),
@@ -802,14 +1122,7 @@ class FilaLista extends StatelessWidget {
 /// Fila táctil con ícono, título, detalle opcional y flecha. Mínimo 56 de alto. Para agrupar
 /// varias, van separadas con [Divider].
 class FilaAccion extends StatelessWidget {
-  const FilaAccion({
-    super.key,
-    required this.titulo,
-    required this.alTocar,
-    this.icono,
-    this.detalle,
-    this.final_,
-  });
+  const FilaAccion({super.key, required this.titulo, required this.alTocar, this.icono, this.detalle, this.final_});
 
   final String titulo;
   final VoidCallback? alTocar;
@@ -830,10 +1143,7 @@ class FilaAccion extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           child: Row(
             children: [
-              if (icono != null) ...[
-                Icon(icono, size: AppIconos.caja, color: AppColors.primary),
-                const SizedBox(width: AppSpacing.md),
-              ],
+              if (icono != null) ...[IconoColor(icono!), const SizedBox(width: AppSpacing.md)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -845,8 +1155,7 @@ class FilaAccion extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              final_ ??
-                  const Icon(Phosphor.caretRight, size: AppIconos.lista, color: AppColors.textSecondary),
+              final_ ?? const Icon(Phosphor.caretRight, size: AppIconos.lista, color: AppColors.textSecondary),
             ],
           ),
         ),
@@ -919,9 +1228,13 @@ class VistaVacia extends StatelessWidget {
     this.detalle,
     this.accion,
     this.alTocar,
+    this.ilustracion,
   });
 
   final IconData icono;
+
+  /// Ilustración del rediseño en lugar de la caja con el ícono.
+  final Ilustracion? ilustracion;
   final String titulo;
   final String? detalle;
   final String? accion;
@@ -935,13 +1248,12 @@ class VistaVacia extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CajaIcono(icono, lado: AppSpacing.cajaGrande, tono: Tono.neutro),
+          if (ilustracion != null)
+            Rebote(child: ImagenIlustracion(ilustracion!, alto: 140))
+          else
+            CajaIcono(icono, lado: AppSpacing.cajaGrande, tono: Tono.neutro),
           const SizedBox(height: AppSpacing.lg),
-          Text(
-            titulo,
-            style: textos.titleMedium!.copyWith(fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center,
-          ),
+          Text(titulo, style: textos.titleLarge, textAlign: TextAlign.center),
           if (detalle != null) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(detalle!, style: textos.bodyMedium, textAlign: TextAlign.center),
@@ -988,10 +1300,8 @@ class VistaCargando extends StatefulWidget {
 }
 
 class _VistaCargandoState extends State<VistaCargando> with SingleTickerProviderStateMixin {
-  late final AnimationController _pulso = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1100),
-  )..repeat(reverse: true);
+  late final AnimationController _pulso = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))
+    ..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -1093,20 +1403,246 @@ class CuerpoAsync<T> extends StatelessWidget {
       children: encabezado == null
           ? [progreso, ...hijos]
           : [
-              encabezado(datos),
-              HojaBlanca(
-                flotante: datos == null ? null : flotante?.call(datos),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [progreso, ...hijos]),
+              Builder(
+                builder: (context) {
+                  final flot = datos == null ? null : flotante?.call(datos);
+                  return Solape(
+                    solape: flot == null ? AppSpacing.solapeHoja : AppSpacing.solapeInicio,
+                    arriba: encabezado(datos),
+                    abajo: HojaBlanca(
+                      sobreCabecera: false,
+                      flotante: flot,
+                      padding: flot == null
+                          ? const EdgeInsets.fromLTRB(
+                              AppSpacing.margen,
+                              AppSpacing.xl,
+                              AppSpacing.margen,
+                              AppSpacing.xxl,
+                            )
+                          : const EdgeInsets.fromLTRB(
+                              AppSpacing.margen,
+                              AppSpacing.margen,
+                              AppSpacing.margen,
+                              AppSpacing.xxl,
+                            ),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [progreso, ...hijos]),
+                    ),
+                  );
+                },
               ),
             ],
     );
     return RefreshIndicator(
       onRefresh: alRecargar,
       color: AppColors.primary,
-      // La hoja blanca sigue hasta el final aunque el contenido sea corto.
-      child: encabezado == null ? lista : ColoredBox(color: AppColors.surface, child: lista),
+      // El fondo crema sigue hasta el final aunque el contenido sea corto.
+      child: ColoredBox(color: AppColors.background, child: lista),
     );
   }
+}
+
+/// Selector segmentado del rediseño: una pista beige redondeada con la opción elegida en una
+/// píldora. [oscuro] pinta la elegida en tinta con texto blanco (Pagar); si no, en blanco con
+/// sombra (Estado de cuenta, Pago en línea).
+class Segmentado<T> extends StatelessWidget {
+  const Segmentado({
+    super.key,
+    required this.opciones,
+    required this.actual,
+    required this.alElegir,
+    this.oscuro = false,
+  });
+
+  final List<(T, String)> opciones;
+  final T actual;
+  final ValueChanged<T> alElegir;
+  final bool oscuro;
+
+  static const pista = Color(0xFFEDE7DC);
+
+  @override
+  Widget build(BuildContext context) {
+    final estilo = Theme.of(context).textTheme.titleSmall!;
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(color: pista, borderRadius: BorderRadius.circular(AppRadius.campo)),
+      child: Row(
+        children: [
+          for (final (valor, texto) in opciones)
+            Expanded(
+              child: Semantics(
+                button: true,
+                selected: valor == actual,
+                label: texto,
+                excludeSemantics: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => alElegir(valor),
+                  child: AnimatedContainer(
+                    duration: duracionDe(context, 220),
+                    curve: curvaAlmira,
+                    constraints: const BoxConstraints(minHeight: 44),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: valor == actual
+                          ? (oscuro ? AppColors.textPrimary : AppColors.surface)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(AppRadius.campo - 4),
+                      boxShadow: valor == actual && !oscuro ? AppColors.sombraCard : null,
+                    ),
+                    child: Text(
+                      texto,
+                      textAlign: TextAlign.center,
+                      style: estilo.copyWith(
+                        fontWeight: valor == actual ? FontWeight.w800 : FontWeight.w700,
+                        color: valor == actual
+                            ? (oscuro ? Colors.white : AppColors.textPrimary)
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Casilla de selección del rediseño: cuadrado de 26 con radio de 8; marcada, turquesa con check.
+class CasillaAlmira extends StatelessWidget {
+  const CasillaAlmira({super.key, required this.marcada, required this.alCambiar, this.semantica});
+
+  final bool marcada;
+  final ValueChanged<bool>? alCambiar;
+  final String? semantica;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    checked: marcada,
+    label: semantica,
+    excludeSemantics: true,
+    child: InkResponse(
+      onTap: alCambiar == null ? null : () => alCambiar!(!marcada),
+      radius: 24,
+      child: SizedBox.square(
+        dimension: AppSpacing.toque,
+        child: Center(
+          child: AnimatedContainer(
+            duration: duracionDe(context, 160),
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(
+              color: marcada ? AppColors.primary : AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: marcada ? AppColors.primary : AppColors.bordeControl, width: 1.5),
+            ),
+            child: marcada ? const Icon(Icons.check_rounded, size: 18, color: Colors.white) : null,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Campo con su rótulo encima (14, peso 700), como en el rediseño: el campo lleva solo el
+/// ejemplo dentro. El rótulo también es la etiqueta del campo para lectores de pantalla.
+class CampoConRotulo extends StatelessWidget {
+  const CampoConRotulo({super.key, required this.rotulo, required this.campo});
+
+  final String rotulo;
+  final Widget campo;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      ExcludeSemantics(child: Text(rotulo, style: Theme.of(context).textTheme.titleSmall!.copyWith(fontSize: 14))),
+      const SizedBox(height: AppSpacing.sm),
+      Semantics(label: rotulo, child: campo),
+    ],
+  );
+}
+
+/// Monto grande del rediseño: «S/» a la mitad del tamaño, la parte entera grande y los decimales
+/// al 55 %, en 800 con tracking negativo. Ejemplo: `S/` `120` `.50`.
+class Monto extends StatelessWidget {
+  const Monto(this.valor, {super.key, this.tamano = 44, this.color = AppColors.textPrimary});
+
+  final double valor;
+  final double tamano;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final centimos = (valor * 100).round();
+    final entero = centimos ~/ 100;
+    final decimales = (centimos % 100).toString().padLeft(2, '0');
+    final miles = entero.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
+    final base = TextStyle(
+      fontFamily: 'PlusJakartaSans',
+      fontWeight: FontWeight.w800,
+      color: color,
+      height: 1,
+      letterSpacing: -0.03 * tamano,
+      fontFeatures: cifrasTabulares,
+    );
+    return Semantics(
+      label: 'S/ $miles.$decimales',
+      excludeSemantics: true,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: 'S/ ',
+              style: base.copyWith(fontSize: tamano * 0.5, letterSpacing: 0),
+            ),
+            TextSpan(
+              text: miles,
+              style: base.copyWith(fontSize: tamano),
+            ),
+            TextSpan(
+              text: '.$decimales',
+              style: base.copyWith(fontSize: tamano * 0.55),
+            ),
+          ],
+        ),
+        maxLines: 1,
+      ),
+    );
+  }
+}
+
+/// Línea punteada de 1 px (antes del saldo en los desgloses).
+class LineaPunteada extends StatelessWidget {
+  const LineaPunteada({super.key});
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(
+    height: 1,
+    width: double.infinity,
+    child: CustomPaint(painter: _PintorPunteado()),
+  );
+}
+
+class _PintorPunteado extends CustomPainter {
+  const _PintorPunteado();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = AppColors.bordeCampo
+      ..strokeWidth = 1;
+    for (double x = 0; x < size.width; x += 7) {
+      canvas.drawLine(Offset(x, 0), Offset(math.min(x + 4, size.width), 0), p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PintorPunteado old) => false;
 }
 
 /// Separación vertical estándar entre bloques.

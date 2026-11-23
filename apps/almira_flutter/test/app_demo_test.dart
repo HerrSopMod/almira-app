@@ -8,6 +8,7 @@ import 'package:almira_flutter/shared/services/proveedores.dart';
 import 'package:almira_flutter/shared/services/repositorio_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:almira_flutter/features/complaints/reclamos_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -50,13 +51,19 @@ Future<void> _entrar(WidgetTester tester) async {
   await tester.tap(find.text('Continuar'));
   await tester.pumpAndSettle();
   expect(find.text('Crea tu clave web'), findsOneWidget);
+  await tester.ensureVisible(find.text('Ahora no'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Ahora no'));
   await tester.pumpAndSettle();
   expect(find.text('Verifica tu celular'), findsOneWidget);
   await tester.enterText(find.byType(TextFormField).first, '987654321');
+  await tester.ensureVisible(find.text('Recibir código'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Recibir código'));
   await tester.pumpAndSettle();
   await tester.enterText(find.byType(TextFormField).last, '123456');
+  await tester.ensureVisible(find.text('Verificar'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Verificar'));
   await tester.pumpAndSettle();
   expect(find.text('Privacidad'), findsWidgets);
@@ -74,7 +81,7 @@ void main() {
     expect(find.text('Demostración'), findsOneWidget);
     await _entrar(tester);
 
-    final interruptores = tester.widgetList<SwitchListTile>(find.byType(SwitchListTile));
+    final interruptores = tester.widgetList<Switch>(find.byType(Switch));
     expect(interruptores, hasLength(3));
     expect(interruptores.every((i) => i.value == false), isTrue);
 
@@ -107,11 +114,15 @@ void main() {
     expect(find.text('Total pendiente'), findsOneWidget);
     expect(find.text('S/ 120.50'), findsOneWidget);
     expect(find.textContaining('2 obligaciones'), findsOneWidget);
-    // Los S/ 40.00 vencidos salen en el aviso rojo y en su fila de la lista.
-    expect(find.text('S/ 40.00'), findsWidgets);
-    await tester.scrollUntilVisible(find.text('S/ 80.50'), 200);
+    // La barra por concepto muestra cada monto en su leyenda, y la vencida avisa cuántas hay.
+    expect(find.text('Multa S/ 40.00'), findsOneWidget);
+    expect(find.text('Arbitrios S/ 80.50'), findsOneWidget);
+    expect(find.text('1 vencida'), findsOneWidget);
+    // La lista de obligaciones repite cada monto en su fila. (El primer desplazable es la
+    // pantalla; el carrusel «En curso» es otro.)
+    await tester.scrollUntilVisible(find.text('S/ 80.50'), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text('S/ 80.50'), findsOneWidget);
-    expect(find.text('S/ 40.00'), findsNWidgets(2));
+    expect(find.text('S/ 40.00'), findsOneWidget);
     expect(find.byType(BarraInferior), findsOneWidget);
 
     // Las cinco pestañas, ida y vuelta, sin errores ni pantallas superpuestas.
@@ -137,7 +148,7 @@ void main() {
     expect(find.text('Poste sin luz en la esquina'), findsOneWidget);
     expect(find.textContaining('Respuesta hasta el'), findsOneWidget);
     expect(find.textContaining('días hábiles'), findsNothing);
-    expect(find.text('Resuelto'), findsOneWidget);
+    expect(find.descendant(of: find.byType(InsigniaReclamo), matching: find.text('Resuelto')), findsOneWidget);
     expect(find.textContaining(' de 10 días'), findsNothing);
   });
 

@@ -143,12 +143,18 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Ahora no'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Ahora no'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField).first, '987654321');
+      await tester.ensureVisible(find.text('Recibir código'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Recibir código'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField).last, '123456');
+      await tester.ensureVisible(find.text('Verificar'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Verificar'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('Continuar'), 200);
@@ -244,15 +250,17 @@ void main() {
       await abrirChat(tester);
       await _capturar(tester, 'chat-bienvenida-$etiqueta');
 
+      await tester.ensureVisible(find.text('¿Cuánto debo?'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('¿Cuánto debo?'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Mi último pago');
       await tester.pump();
-      await tester.tap(find.byIcon(Phosphor.arrowUp));
+      await tester.tap(find.byTooltip('Enviar'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Gracias, ¿y cuándo vence lo que falta?');
       await tester.pump();
-      await tester.tap(find.byIcon(Phosphor.arrowUp));
+      await tester.tap(find.byTooltip('Enviar'));
       await tester.pumpAndSettle();
       await _capturar(tester, 'chat-conversacion-$etiqueta');
     });

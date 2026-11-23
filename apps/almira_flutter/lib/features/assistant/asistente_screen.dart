@@ -2,19 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/movimiento.dart';
 import '../../shared/services/proveedores.dart';
 import 'chat_asistente.dart';
 import 'chat_modelo.dart';
 import 'widgets_chat.dart';
 
 const _maximoPregunta = 500;
-const _sugerencias = ['¿Cuánto debo?', 'Mi último pago', '¿Cómo pago?', 'Mi estado de cuenta'];
+const _sugerencias = [
+  SugerenciaChat('¿Cuánto debo?', IconoA.pagar, AppColors.sol),
+  SugerenciaChat('Mi último pago', IconoA.historial, AppColors.lima),
+  SugerenciaChat('¿Cómo pago?', IconoA.tarjeta, AppColors.coral),
+  SugerenciaChat('Mi estado de cuenta', IconoA.estado, AppColors.primary),
+];
 
 /// Chat con el asistente, con aspecto de mensajería: encabezado con el avatar, burbujas
 /// agrupadas, indicador de escritura, sugerencias y accesos rápidos. La conversación vive en
@@ -94,15 +100,14 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
     esPestana ? context.go(ruta) : context.push(ruta);
   }
 
-  String _saludo() {
+  /// «Hola, Rosa» (o solo «Hola» si no hay nombre).
+  String _hola() {
     final v = ref.read(vistaProvider).valueOrNull;
     final nombre = v?.vecino?.nombres ?? v?.vecino?.nombre ?? ref.read(sesionProvider).cuenta?.nombre;
-    final hola = nombre == null || nombre.trim().isEmpty
-        ? 'Hola'
-        : 'Hola, ${primerNombre(tipoTitulo(nombre))}';
-    return '$hola. Soy Almira. Te ayudo con tus tributos, pagos y estado de cuenta. '
-        'Las decisiones finales son de tu municipalidad.';
+    return nombre == null || nombre.trim().isEmpty ? 'Hola' : 'Hola, ${primerNombre(tipoTitulo(nombre))}';
   }
+
+  String _saludo() => '${_hola()}. Soy Almira. Te ayudo con tus tributos, pagos y estado de cuenta.';
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +115,9 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
     final hoy = ref.watch(relojProvider)();
     final esDemo = ref.watch(esDemoProvider);
 
-    // Lista que se dibuja: el saludo, lo conversado y, mientras se espera, el indicador.
+    // Antes del primer mensaje se ve la bienvenida; después, el saludo como primer mensaje, lo
+    // conversado y, mientras se espera, el indicador.
+    final bienvenida = chat.mensajes.isEmpty;
     final saludo = MensajeChat(texto: _saludo(), mio: false, hora: hoy);
     final todos = [saludo, ...chat.mensajes];
     final posiciones = agruparMensajes(todos);
@@ -124,9 +131,7 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
             titulo: 'Asistente',
             esDemo: esDemo,
             // Mientras se escribe, el turquesa se reduce para dejar sitio a la conversación.
-            rellenoInferior: _foco.hasFocus
-                ? AppSpacing.solapeHoja
-                : AppSpacing.solapeHoja + AppSpacing.lg,
+            rellenoInferior: _foco.hasFocus ? AppSpacing.solapeHoja : AppSpacing.solapeHoja + AppSpacing.lg,
           ),
           Expanded(
             child: HojaBlanca(
@@ -149,27 +154,30 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
                               AppSpacing.lg,
                             ),
                             children: [
-                              for (final (i, mensaje) in todos.indexed)
-                                BurbujaChat(
-                                  key: ValueKey('mensaje-$i'),
-                                  mensaje: mensaje,
-                                  posicion: posiciones[i],
-                                  esElPrimero: i == 0,
-                                  alAbrir: _abrir,
-                                  alReintentar: _reintentar,
-                                ),
-                              if (!chat.hayMensajesDelVecino)
-                                SugerenciasRapidas(preguntas: _sugerencias, alElegir: _enviar),
+                              if (bienvenida)
+                                BienvenidaAsistente(
+                                  titulo: '${_hola()}. Soy Almira',
+                                  sugerencias: _sugerencias,
+                                  alElegir: _enviar,
+                                )
+                              else
+                                for (final (i, mensaje) in todos.indexed)
+                                  Aparecer(
+                                    key: ValueKey('mensaje-$i'),
+                                    desdeLado: true,
+                                    child: BurbujaChat(
+                                      mensaje: mensaje,
+                                      posicion: posiciones[i],
+                                      esElPrimero: i == 0,
+                                      alAbrir: _abrir,
+                                      alReintentar: _reintentar,
+                                    ),
+                                  ),
                               if (chat.enviando) const IndicadorEscritura(),
                             ],
                           ),
                         ),
-                        _BarraEntrada(
-                          controlador: _entrada,
-                          foco: _foco,
-                          enviando: chat.enviando,
-                          alEnviar: _enviar,
-                        ),
+                        _BarraEntrada(controlador: _entrada, foco: _foco, enviando: chat.enviando, alEnviar: _enviar),
                       ],
                     ),
                     if (_lejosDelFinal)
@@ -192,12 +200,7 @@ class _AsistenteScreenState extends ConsumerState<AsistenteScreen> {
 /// Barra para escribir: campo redondeado de hasta 4 líneas y botón de enviar circular, que se
 /// apaga si no hay texto o se espera una respuesta.
 class _BarraEntrada extends StatelessWidget {
-  const _BarraEntrada({
-    required this.controlador,
-    required this.foco,
-    required this.enviando,
-    required this.alEnviar,
-  });
+  const _BarraEntrada({required this.controlador, required this.foco, required this.enviando, required this.alEnviar});
 
   final TextEditingController controlador;
   final FocusNode foco;
@@ -217,7 +220,7 @@ class _BarraEntrada extends StatelessWidget {
         // La barra de navegación ya cubre el borde del sistema, salvo con el teclado abierto.
         bottom: MediaQuery.viewInsetsOf(context).bottom > 0,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.sm, AppSpacing.sm, AppSpacing.sm),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.md, AppSpacing.margen, AppSpacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -240,7 +243,9 @@ class _BarraEntrada extends StatelessWidget {
                       hintText: 'Escribe tu pregunta',
                       counterText: '',
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
                       border: _borde(),
                       enabledBorder: _borde(),
                       focusedBorder: _borde(AppColors.foco, 1.5),
@@ -248,7 +253,7 @@ class _BarraEntrada extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.md),
               ValueListenableBuilder<TextEditingValue>(
                 valueListenable: controlador,
                 builder: (context, valor, _) {
@@ -260,9 +265,13 @@ class _BarraEntrada extends StatelessWidget {
                     child: IconButton.filled(
                       tooltip: 'Enviar',
                       onPressed: puede ? () => alEnviar(controlador.text) : null,
-                      icon: const Icon(Phosphor.arrowUp),
+                      icon: IconoAlmira(
+                        IconoA.enviar,
+                        tamano: 22,
+                        color: puede ? AppColors.onPrimary : AppColors.textSecondary,
+                      ),
                       style: IconButton.styleFrom(
-                        minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
+                        minimumSize: const Size(52, 52),
                         shape: const CircleBorder(),
                         backgroundColor: AppColors.primary,
                         disabledBackgroundColor: AppColors.track,

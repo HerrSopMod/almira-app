@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/movimiento.dart';
 import 'chat_modelo.dart';
 
-/// Avatar del asistente: un robot amable, ilustración original en `assets/bot_avatar.svg`.
-/// Para poner tu propia imagen, reemplaza ese archivo.
+/// Avatar del asistente: Almi, la casita con cara del rediseño, en un círculo turquesa claro.
 class AvatarBot extends StatelessWidget {
   const AvatarBot({super.key, this.lado = 40});
 
@@ -17,19 +17,143 @@ class AvatarBot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
-        child: ClipOval(
-          child: SvgPicture.asset('assets/bot_avatar.svg', width: lado, height: lado, fit: BoxFit.cover),
-        ),
-      );
+    child: Container(
+      width: lado,
+      height: lado,
+      padding: EdgeInsets.all(lado * 0.08),
+      decoration: const BoxDecoration(color: AppColors.primary100, shape: BoxShape.circle),
+      child: const ImagenIlustracion(Ilustracion.almiBot),
+    ),
+  );
 }
 
-const double _radioGrande = 18;
-const double _radioChico = 5;
-const double _anchoAvatar = 28;
+/// Una sugerencia de la bienvenida: pregunta, ícono y color de su caja.
+class SugerenciaChat {
+  const SugerenciaChat(this.pregunta, this.icono, this.color);
+
+  final String pregunta;
+  final IconoA icono;
+  final Color color;
+}
+
+/// Bienvenida del asistente, antes del primer mensaje: Almi flotando, el saludo, las sugerencias
+/// en tarjetas de dos en dos y el aviso de que las decisiones son de la municipalidad.
+class BienvenidaAsistente extends StatelessWidget {
+  const BienvenidaAsistente({super.key, required this.titulo, required this.sugerencias, required this.alElegir});
+
+  /// «Hola, Rosa. Soy Almira».
+  final String titulo;
+  final List<SugerenciaChat> sugerencias;
+  final void Function(String pregunta) alElegir;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: AppSpacing.sm),
+        const Center(
+          child: Rebote(child: Flotar(child: ImagenIlustracion(Ilustracion.almiBot, alto: 132))),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Aparecer(
+          paso: 1,
+          child: Semantics(
+            header: true,
+            child: Text(titulo, textAlign: TextAlign.center, style: textos.headlineSmall),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Aparecer(
+          paso: 2,
+          child: Text(
+            'Te ayudo con tus tributos, pagos y estado de cuenta.',
+            textAlign: TextAlign.center,
+            style: textos.bodyLarge!.copyWith(color: AppColors.textSecondary, height: 1.5),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        Aparecer(
+          paso: 3,
+          child: Text(
+            'PRUEBA PREGUNTANDO',
+            style: textos.labelMedium!.copyWith(
+              color: AppColors.textSecondary,
+              letterSpacing: 0.8,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // De dos en dos; cada fila tan alta como su tarjeta más alta.
+        for (var i = 0; i < sugerencias.length; i += 2) ...[
+          if (i > 0) const SizedBox(height: AppSpacing.md),
+          Aparecer(
+            paso: 4 + i ~/ 2,
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _TarjetaSugerencia(sugerencia: sugerencias[i], alElegir: alElegir),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: i + 1 < sugerencias.length
+                        ? _TarjetaSugerencia(sugerencia: sugerencias[i + 1], alElegir: alElegir)
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: AppSpacing.lg),
+        Aparecer(
+          paso: 6,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const IconoAlmira(IconoA.privacidad, tamano: 16, color: AppColors.textSecondary),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(child: Text('Las decisiones finales son de tu municipalidad.', style: textos.bodyMedium)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TarjetaSugerencia extends StatelessWidget {
+  const _TarjetaSugerencia({required this.sugerencia, required this.alElegir});
+
+  final SugerenciaChat sugerencia;
+  final void Function(String pregunta) alElegir;
+
+  @override
+  Widget build(BuildContext context) => Tarjeta(
+    onTap: () => alElegir(sugerencia.pregunta),
+    semantica: 'Preguntar: ${sugerencia.pregunta}',
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        IconoColor.svg(sugerencia.icono, color: sugerencia.color, lado: 40),
+        const SizedBox(height: AppSpacing.md),
+        Text(sugerencia.pregunta, style: Theme.of(context).textTheme.titleMedium),
+      ],
+    ),
+  );
+}
+
+const double _radioGrande = 20;
+const double _radioChico = 6;
+const double _anchoAvatar = 32;
 const double _separacionAvatar = AppSpacing.sm;
 
 /// Burbuja de un mensaje. El vecino va a la derecha, en turquesa con texto blanco; el
-/// asistente, a la izquierda, en gris muy claro, con su mini-avatar en el primer mensaje de cada
+/// asistente, a la izquierda, en blanco con sombra suave, con Almi en el último mensaje de cada
 /// grupo. Los mensajes seguidos del mismo autor se juntan; la hora sale en el último.
 class BurbujaChat extends StatelessWidget {
   const BurbujaChat({
@@ -71,9 +195,7 @@ class BurbujaChat extends StatelessWidget {
             bottomLeft: r(posicion.ultimo),
           );
 
-    final estiloTexto = textos.bodyLarge!.copyWith(
-      color: mio ? AppColors.onPrimary : AppColors.textPrimary,
-    );
+    final estiloTexto = textos.bodyLarge!.copyWith(color: mio ? AppColors.onPrimary : AppColors.textPrimary);
 
     final contenido = mensaje.fallo
         ? Column(
@@ -111,12 +233,11 @@ class BurbujaChat extends StatelessWidget {
     final burbuja = ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maximo),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: mio
-              ? AppColors.primary
-              : (mensaje.fallo ? AppColors.errorSoft : AppColors.surfaceSubtle),
+          color: mio ? AppColors.primary : (mensaje.fallo ? AppColors.errorSoft : AppColors.surface),
           borderRadius: borde,
+          boxShadow: mio || mensaje.fallo ? null : AppColors.sombraCard,
         ),
         child: contenido,
       ),
@@ -135,14 +256,16 @@ class BurbujaChat extends StatelessWidget {
               runSpacing: AppSpacing.sm,
               children: [
                 for (final a in mensaje.acciones)
-                  OutlinedButton(
+                  // Acciones del asistente: botones turquesa claro, como «Ver detalle».
+                  FilledButton(
                     onPressed: () => alAbrir(a.ruta),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 40),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                      shape: const StadiumBorder(),
-                      side: const BorderSide(color: AppColors.primary),
-                      textStyle: textos.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
+                      backgroundColor: AppColors.primary100,
+                      foregroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.caja)),
+                      textStyle: textos.titleMedium,
                     ),
                     child: Text(a.etiqueta),
                   ),
@@ -153,7 +276,7 @@ class BurbujaChat extends StatelessWidget {
         if (posicion.ultimo)
           Padding(
             padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
-            child: Text(hora(mensaje.hora), style: textos.bodyMedium!),
+            child: Text(hora(mensaje.hora), style: textos.bodySmall!),
           ),
       ],
     );
@@ -168,13 +291,18 @@ class BurbujaChat extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: mio ? MainAxisAlignment.end : MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (!mio) ...[
-              // El avatar va en el primer mensaje del grupo; en los demás queda el hueco.
+              // Almi va al pie del último mensaje del grupo; en los demás queda el hueco.
               SizedBox(
                 width: _anchoAvatar,
-                child: posicion.primero ? const AvatarBot(lado: _anchoAvatar) : null,
+                child: posicion.ultimo
+                    ? const Padding(
+                        padding: EdgeInsets.only(bottom: 20),
+                        child: AvatarBot(lado: _anchoAvatar),
+                      )
+                    : null,
               ),
               const SizedBox(width: _separacionAvatar),
             ],
@@ -195,8 +323,10 @@ class IndicadorEscritura extends StatefulWidget {
 }
 
 class _IndicadorEscrituraState extends State<IndicadorEscritura> with SingleTickerProviderStateMixin {
-  late final AnimationController _control =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+  late final AnimationController _control = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  )..repeat();
 
   @override
   void dispose() {
@@ -220,7 +350,8 @@ class _IndicadorEscrituraState extends State<IndicadorEscritura> with SingleTick
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
-                color: AppColors.surfaceSubtle,
+                color: AppColors.surface,
+                boxShadow: AppColors.sombraCard,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(_radioChico),
                   topRight: Radius.circular(_radioGrande),
@@ -266,7 +397,7 @@ class _Punto extends StatelessWidget {
         width: 8,
         height: 8,
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.4 + 0.5 * altura),
+          color: AppColors.textSecondary.withValues(alpha: 0.25 + 0.75 * altura),
           shape: BoxShape.circle,
         ),
       ),
@@ -283,26 +414,26 @@ class SugerenciasRapidas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: AppSpacing.md, left: _anchoAvatar + _separacionAvatar),
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            for (final p in preguntas)
-              // Sugerencias con borde fino: blancas, texto turquesa.
-              ActionChip(
-                label: Text(p),
-                onPressed: () => alElegir(p),
-                backgroundColor: AppColors.surface,
-                side: const BorderSide(color: AppColors.border),
-                labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primary),
-                shape: const StadiumBorder(),
-                visualDensity: VisualDensity.standard,
-                materialTapTargetSize: MaterialTapTargetSize.padded,
-              ),
-          ],
-        ),
-      );
+    padding: const EdgeInsets.only(top: AppSpacing.md, left: _anchoAvatar + _separacionAvatar),
+    child: Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        for (final p in preguntas)
+          // Sugerencias con borde fino: blancas, texto turquesa.
+          ActionChip(
+            label: Text(p),
+            onPressed: () => alElegir(p),
+            backgroundColor: AppColors.surface,
+            side: const BorderSide(color: AppColors.border),
+            labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primary),
+            shape: const StadiumBorder(),
+            visualDensity: VisualDensity.standard,
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+          ),
+      ],
+    ),
+  );
 }
 
 /// Botón flotante para volver al último mensaje.
@@ -313,22 +444,18 @@ class BotonBajar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        button: true,
-        label: 'Ir al último mensaje',
-        child: Material(
-          color: AppColors.surface,
-          shape: const CircleBorder(side: BorderSide(color: AppColors.border)),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: alTocar,
-            child: const SizedBox(
-              width: 44,
-              height: 44,
-              child: Icon(Phosphor.caretDown, color: AppColors.primary),
-            ),
-          ),
-        ),
-      );
+    button: true,
+    label: 'Ir al último mensaje',
+    child: Material(
+      color: AppColors.surface,
+      shape: const CircleBorder(side: BorderSide(color: AppColors.border)),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: alTocar,
+        child: const SizedBox(width: 44, height: 44, child: Icon(Phosphor.caretDown, color: AppColors.primary)),
+      ),
+    ),
+  );
 }
 
 /// Duración de las animaciones del chat, respetando «reducir movimiento».

@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -6,14 +9,19 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/mapa_almira.dart';
+import '../../core/widgets/movimiento.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'fotos_obra.dart';
 import 'obras_screen.dart';
 
+/// Detalle de obra (rediseño): la ilustración grande arriba con el botón de volver y el estado;
+/// la tarjeta con el nombre, la dirección, el anillo de avance físico, la meta y la última
+/// actualización; el presupuesto (cuánto se gastó del asignado) y la ubicación en el mapa.
 class ObraDetalleScreen extends ConsumerWidget {
   const ObraDetalleScreen({super.key, required this.id});
 
@@ -26,10 +34,10 @@ class ObraDetalleScreen extends ConsumerWidget {
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Obra')),
       body: CuerpoAsync<VistaMunicipal>(
         valor: vista,
         alRecargar: ref.read(datosProvider.notifier).recargar,
+        cabecera: (v) => _Portada(obra: v?.obras.where((o) => o.id == id).firstOrNull),
         construir: (v) {
           final obra = v.obras.where((o) => o.id == id).firstOrNull;
           if (obra == null) {
@@ -43,111 +51,152 @@ class ObraDetalleScreen extends ConsumerWidget {
           }
           final actualizada = obra.actualizadaEn;
           final inicio = obra.inicio;
+          final meta = obra.meta.trim();
           final gasto = obra.montoAsignado > 0
-              ? (obra.montoEjecutado / obra.montoAsignado * 100).clamp(0, 100).round()
+              ? (obra.montoEjecutado / obra.montoAsignado * 100).clamp(0, 100).toDouble()
               : null;
           return [
-            Semantics(
-              header: true,
-              child: Text(obra.nombre, style: textos.titleLarge!),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 2),
-                  child: Icon(Phosphor.mapPin, size: AppIconos.insignia + 2, color: AppColors.acentoRosa),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Expanded(child: Text(obra.ubicacion, style: textos.bodyMedium!)),
-              ],
-            ),
-            espacioChico,
-            Align(alignment: Alignment.centerLeft, child: InsigniaObra(obra.estado)),
-            espacio,
-            FotosObra(municipalidadId: obra.municipalidadId, obraId: obra.id),
-            // El mapa siempre lleva su atribución (la dibuja MapaAlmira).
-            if (obra.tieneUbicacion)
-              MarcoMapa(
-                child: MapaAlmira(
-                  centro: LatLng(obra.latitud!, obra.longitud!),
-                  zoom: ConfigMapa.zoomCalle,
-                  interactivo: false,
-                  marcadores: [
-                    MarcadorMapa(
-                      id: obra.id,
-                      punto: LatLng(obra.latitud!, obra.longitud!),
-                      etiqueta: obra.nombre,
-                      color: colorObra(obra),
+            Aparecer(
+              child: Tarjeta(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Semantics(
+                      header: true,
+                      child: Text(obra.nombre, style: textos.headlineSmall!.copyWith(fontSize: 22)),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 1),
+                          child: IconoAlmira(IconoA.ubicacion, tamano: 18, color: AppColors.textSecondary),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(child: Text(obra.ubicacion, style: textos.bodyMedium)),
+                      ],
+                    ),
+                    espacio,
+                    Row(
+                      children: [
+                        // El avance solo se muestra en obras en ejecución: una concluida no lo necesita.
+                        if (obra.estado != EstadoObra.finalizada) ...[
+                          AvanceFisico(obra),
+                          const SizedBox(width: AppSpacing.lg),
+                        ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (meta.isNotEmpty) _DatoCorto('Meta', meta),
+                              if (meta.isNotEmpty && actualizada != null) const SizedBox(height: AppSpacing.md),
+                              if (actualizada != null) _DatoCorto('Última actualización', haceDias(actualizada, hoy)),
+                              if (inicio != null) ...[
+                                const SizedBox(height: AppSpacing.md),
+                                _DatoCorto('Inicio', fechaLarga(inicio)),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                  descripcion: 'Mapa con la ubicación de la obra: ${obra.ubicacion}',
                 ),
-              )
-            else
-              Text('Sin punto en el mapa.', style: textos.bodyMedium!),
-            // El avance solo se muestra en obras en ejecución: una finalizada no lo necesita.
-            if (obra.estado != EstadoObra.finalizada) ...[
-              espacioGrande,
-              AvanceFisico(obra),
-            ],
+              ),
+            ),
+            espacio,
+            FotosObra(municipalidadId: obra.municipalidadId, obraId: obra.id),
             // Un monto en cero es un dato que no se tiene: no se muestra como si fuera real.
             if (obra.montoAsignado > 0 || obra.montoEjecutado > 0 || obra.porcentajeTributos != null) ...[
-              espacioGrande,
-              const TituloSeccion('Presupuesto'),
-              espacioChico,
-              Tarjeta(
-                child: Column(
-                  children: [
-                    if (obra.montoAsignado > 0)
-                      _FilaIcono(PhosphorFill.wallet, AppColors.acentoAzul, 'Asignado', soles(obra.montoAsignado), aLaDerecha: true),
-                    if (obra.montoEjecutado > 0)
-                      _FilaIcono(PhosphorFill.receipt, AppColors.acentoAmbar, 'Gastado', soles(obra.montoEjecutado), aLaDerecha: true),
-                    if (gasto != null && obra.montoEjecutado > 0)
-                      _FilaIcono(PhosphorFill.listChecks, AppColors.acentoVioleta, 'Gastado del presupuesto', '$gasto$_nbsp%', aLaDerecha: true),
-                    if (obra.porcentajeTributos != null)
-                      _FilaIcono(
-                        PhosphorFill.bank,
-                        AppColors.acentoVerde,
-                        'Financiado con tributos',
-                        '${obra.porcentajeTributos!.round()}$_nbsp%',
-                        aLaDerecha: true,
-                      ),
-                  ],
-                ),
-              ),
-            ],
-            if (inicio != null || obra.meta.trim().isNotEmpty || actualizada != null) ...[
-              espacioGrande,
-              Tarjeta(
-                child: Column(
-                  children: [
-                    if (inicio != null) _FilaIcono(PhosphorFill.calendarBlank, AppColors.acentoAzul, 'Inicio', fechaLarga(inicio)),
-                    if (obra.meta.trim().isNotEmpty) _FilaIcono(PhosphorFill.flag, AppColors.acentoRosa, 'Meta', obra.meta.trim()),
-                    if (actualizada != null)
-                      _FilaIcono(PhosphorFill.arrowClockwise, AppColors.acentoVerde, 'Última actualización', haceDias(actualizada, hoy)),
-                  ],
-                ),
-              ),
-            ],
-            if (obra.hitos.isNotEmpty) ...[
-              espacioGrande,
-              const TituloSeccion('Hitos'),
-              const SizedBox(height: AppSpacing.xs),
-              for (final (i, hito) in obra.hitos.indexed) ...[
-                if (i > 0) const Divider(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  child: Row(
+              Aparecer(
+                paso: 1,
+                child: Tarjeta(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _iconoHito(hito),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(child: Text(hito, style: textos.bodyLarge!)),
+                      const TituloSeccion('Presupuesto'),
+                      espacio,
+                      if (gasto != null && obra.montoEjecutado > 0) ...[
+                        _BloqueGasto(porcentaje: gasto, asignado: obra.montoAsignado),
+                        espacioChico,
+                      ],
+                      if (obra.montoAsignado > 0)
+                        _FilaMonto(IconoA.presupuesto, AppColors.primary, 'Asignado', soles(obra.montoAsignado)),
+                      if (obra.montoAsignado > 0 && obra.montoEjecutado > 0) const Divider(),
+                      if (obra.montoEjecutado > 0)
+                        _FilaMonto(IconoA.pagar, AppColors.coral, 'Gastado', soles(obra.montoEjecutado)),
+                      if (obra.porcentajeTributos != null) ...[
+                        if (obra.montoAsignado > 0 || obra.montoEjecutado > 0) const Divider(),
+                        _FilaMonto(
+                          IconoA.municipalidad,
+                          AppColors.lima,
+                          'Financiado con tributos',
+                          '${obra.porcentajeTributos!.round()}$_nbsp%',
+                        ),
+                      ],
                     ],
                   ),
                 ),
-              ],
+              ),
+              espacio,
+            ],
+            Aparecer(
+              paso: 2,
+              child: Tarjeta(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const TituloSeccion('Ubicación'),
+                    espacioChico,
+                    // El mapa siempre lleva su atribución (la dibuja MapaAlmira).
+                    if (obra.tieneUbicacion)
+                      MarcoMapa(
+                        child: MapaAlmira(
+                          centro: LatLng(obra.latitud!, obra.longitud!),
+                          zoom: ConfigMapa.zoomCalle,
+                          interactivo: false,
+                          marcadores: [
+                            MarcadorMapa(
+                              id: obra.id,
+                              punto: LatLng(obra.latitud!, obra.longitud!),
+                              etiqueta: obra.nombre,
+                              color: colorObra(obra),
+                            ),
+                          ],
+                          descripcion: 'Mapa con la ubicación de la obra: ${obra.ubicacion}',
+                        ),
+                      )
+                    else
+                      Text('Sin punto en el mapa.', style: textos.bodyMedium!),
+                  ],
+                ),
+              ),
+            ),
+            if (obra.hitos.isNotEmpty) ...[
+              espacio,
+              Tarjeta(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const TituloSeccion('Hitos'),
+                    const SizedBox(height: AppSpacing.xs),
+                    for (final (i, hito) in obra.hitos.indexed) ...[
+                      if (i > 0) const Divider(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                        child: Row(
+                          children: [
+                            _iconoHito(hito),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(child: Text(hito, style: textos.bodyLarge!)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ];
         },
@@ -157,59 +206,167 @@ class ObraDetalleScreen extends ConsumerWidget {
 }
 
 /// Espacio no separable: evita que «66 %» se parta en dos líneas.
-const _nbsp = ' ';
+const _nbsp = ' ';
+
+/// Portada: la ilustración de la obra a todo el ancho, con el botón de volver y el estado. La hoja
+/// crema sube sobre ella.
+class _Portada extends StatelessWidget {
+  const _Portada({required this.obra});
+
+  final Obra? obra;
+
+  @override
+  Widget build(BuildContext context) {
+    final arriba = MediaQuery.paddingOf(context).top;
+    final o = obra;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: barraSobreBlanco,
+      child: SizedBox(
+        height: arriba + 210,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (o != null) ImagenObra(obra: o) else const ColoredBox(color: AppColors.primary100),
+            Positioned(
+              top: arriba + AppSpacing.md,
+              left: AppSpacing.lg,
+              right: AppSpacing.lg,
+              child: Row(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.caja),
+                      boxShadow: AppColors.sombraCard,
+                    ),
+                    child: BotonCuadro(
+                      semantica: 'Volver',
+                      fondo: AppColors.surface,
+                      alTocar: () => Navigator.maybePop(context),
+                      child: const Icon(Phosphor.arrowLeft, size: 22, color: AppColors.textPrimary),
+                    ),
+                  ),
+                  const Spacer(),
+                  if (o != null) InsigniaObra(o.estado),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Rótulo pequeño en gris y valor en 800 (meta, última actualización).
+class _DatoCorto extends StatelessWidget {
+  const _DatoCorto(this.rotulo, this.valor);
+
+  final String rotulo;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(rotulo, style: textos.labelMedium!.copyWith(color: AppColors.textSecondary)),
+        Text(valor, style: textos.titleMedium!.copyWith(fontWeight: FontWeight.w800)),
+      ],
+    );
+  }
+}
+
+/// Bloque turquesa con el porcentaje gastado del presupuesto, el asignado y una barra sol.
+class _BloqueGasto extends StatelessWidget {
+  const _BloqueGasto({required this.porcentaje, required this.asignado});
+
+  final double porcentaje;
+  final double asignado;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Semantics(
+      label: 'Gastado del presupuesto: ${porcentaje.round()} por ciento de ${soles(asignado)}',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(AppRadius.campo + 2)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Gastado del presupuesto', style: textos.labelMedium!.copyWith(color: AppColors.subtextoCabecera)),
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${porcentaje.round()}$_nbsp%',
+                  style: textos.headlineMedium!.copyWith(color: AppColors.onPrimary, fontFeatures: cifrasTabulares),
+                ),
+                const Spacer(),
+                Flexible(
+                  child: Text(soles(asignado), style: textos.labelMedium!.copyWith(color: AppColors.subtextoCabecera)),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(AppRadius.pastilla),
+              ),
+              child: BarraCreciente(fraccion: porcentaje / 100, color: AppColors.sol),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Fila del presupuesto: caja pastel con el ícono, el rótulo y el monto a la derecha.
+class _FilaMonto extends StatelessWidget {
+  const _FilaMonto(this.icono, this.color, this.rotulo, this.valor);
+
+  final IconoA icono;
+  final Color color;
+  final String rotulo;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textos = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      child: Row(
+        children: [
+          IconoColor.svg(icono, color: color),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: Text(rotulo, style: textos.bodyLarge)),
+          const SizedBox(width: AppSpacing.md),
+          Text(
+            valor,
+            textAlign: TextAlign.end,
+            style: textos.titleMedium!.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              fontFeatures: cifrasTabulares,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// Ícono de un hito: completado si dice 100 %, en curso en los demás casos.
 Widget _iconoHito(String hito) {
   final pct = RegExp(r'(\d+)\s*%').firstMatch(hito)?.group(1);
   final completo = pct != null && int.parse(pct) >= 100;
   return completo
-      ? const IconoColor(PhosphorFill.checkCircle, color: AppColors.acentoVerde, lado: 36)
-      : const IconoColor(PhosphorFill.clockClockwise, color: AppColors.acentoAmbar, lado: 36);
-}
-
-/// Dato con ícono de color: rótulo y valor. Los montos y porcentajes van a la derecha
-/// ([aLaDerecha]); los demás, con el rótulo arriba y el valor debajo.
-class _FilaIcono extends StatelessWidget {
-  const _FilaIcono(this.icono, this.color, this.rotulo, this.valor, {this.aLaDerecha = false});
-
-  final IconData icono;
-  final Color color;
-  final String rotulo;
-  final String valor;
-  final bool aLaDerecha;
-
-  @override
-  Widget build(BuildContext context) {
-    final textos = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        children: [
-          IconoColor(icono, color: color, lado: 36),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: aLaDerecha
-                ? Text(rotulo, style: textos.bodyMedium)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(rotulo, style: estiloRotulo(context)),
-                      const SizedBox(height: 2),
-                      Text(valor, style: textos.bodyLarge),
-                    ],
-                  ),
-          ),
-          if (aLaDerecha) ...[
-            const SizedBox(width: AppSpacing.md),
-            Text(
-              valor,
-              textAlign: TextAlign.end,
-              style: textos.bodyLarge!.copyWith(fontWeight: FontWeight.w500, fontFeatures: cifrasTabulares),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+      ? const IconoColor(PhosphorFill.checkCircle, color: AppColors.lima, lado: 36)
+      : const IconoColor(PhosphorFill.clockClockwise, color: AppColors.sol, lado: 36);
 }

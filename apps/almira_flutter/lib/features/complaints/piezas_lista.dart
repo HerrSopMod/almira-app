@@ -30,22 +30,15 @@ class PlazoReclamo extends StatelessWidget {
       TextoPlazo(textoPlazo(plazo), vencido: plazo.estado == EstadoPlazo.vencido);
 }
 
-/// Filas ([FilaLista], [FilaInterruptor]) con un divisor de 1 px entre ellas, sin caja alrededor.
+/// Filas ([FilaLista], [FilaInterruptor]) en una tarjeta blanca, con un divisor de 1 px entre
+/// ellas (rediseño).
 class ListaFilas extends StatelessWidget {
   const ListaFilas({super.key, required this.filas});
 
   final List<Widget> filas;
 
   @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final (i, fila) in filas.indexed) ...[
-            if (i > 0) const Divider(),
-            fila,
-          ],
-        ],
-      );
+  Widget build(BuildContext context) => GrupoTarjeta(filas: filas);
 }
 
 /// Línea gris de 13 para el `detalle` de [FilaLista].

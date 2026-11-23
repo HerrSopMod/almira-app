@@ -42,9 +42,9 @@ void main() {
     await tester.tap(find.text('Nuevo reclamo'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'Asunto'), 'Poste sin luz en mi cuadra');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Ejemplo: Poste sin luz'), 'Poste sin luz en mi cuadra');
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Descripción'),
+      find.widgetWithText(TextFormField, 'Qué pasa y desde cuándo'),
       'El poste lleva varios días apagado y la cuadra queda a oscuras.',
     );
     await tester.pumpAndSettle();

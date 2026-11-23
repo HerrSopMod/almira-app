@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" width="360" height="200" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa del distrito"><title>Mapa</title>
+<rect width="360" height="200" fill="#F3EEE4"/>
+<g fill="#E9E1D3"><rect x="10" y="10" width="70" height="44" rx="6"/><rect x="96" y="10" width="80" height="44" rx="6"/><rect x="192" y="10" width="60" height="44" rx="6"/><rect x="268" y="10" width="84" height="44" rx="6"/>
+<rect x="10" y="74" width="70" height="52" rx="6"/><rect x="192" y="74" width="60" height="52" rx="6"/><rect x="268" y="74" width="84" height="52" rx="6"/>
+<rect x="10" y="146" width="70" height="46" rx="6"/><rect x="96" y="146" width="80" height="46" rx="6"/><rect x="192" y="146" width="60" height="46" rx="6"/><rect x="268" y="146" width="84" height="46" rx="6"/></g>
+<rect x="96" y="74" width="80" height="52" rx="10" fill="#CDEBB0"/>
+<circle cx="118" cy="92" r="7" fill="#9FD27A"/><circle cx="150" cy="106" r="9" fill="#9FD27A"/>
+<path d="M0 64h360M0 136h360M88 0v200M184 0v200M260 0v200" stroke="#FFFFFF" stroke-width="12"/>
+<path d="M0 64h360" stroke="#FFD98A" stroke-width="12"/>
+<path d="M-10 200L150 -10" stroke="#FFFFFF" stroke-width="9" opacity=".9"/>
+<path d="M300 0c-10 60 20 120 60 150" stroke="#BFE3F0" stroke-width="10" fill="none"/>
+</svg>

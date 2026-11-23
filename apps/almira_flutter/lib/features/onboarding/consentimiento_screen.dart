@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../core/errors/error_app.dart';
 import '../../core/widgets/componentes.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
+import '../auth/pasos_registro.dart';
 import 'privacidad_widgets.dart';
 
 /// Último paso del primer ingreso. Separa lo necesario para dar el servicio
@@ -42,57 +45,49 @@ class _ConsentimientoScreenState extends ConsumerState<ConsentimientoScreen> {
   Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Privacidad')),
+      appBar: const BarraPasos(paso: 4, nombre: 'Privacidad'),
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.margen,
-            AppSpacing.lg,
-            AppSpacing.margen,
-            AppSpacing.xl,
-          ),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.margen, AppSpacing.md, AppSpacing.margen, AppSpacing.xl),
           children: [
-            Semantics(
-              header: true,
-              child: Text('Tus datos', style: textos.headlineSmall),
-            ),
-            espacioChico,
-            Text(
-              'Almira usa los datos de tu cuenta y los que registra tu municipalidad para '
-              'mostrarte tus tributos y atender tus reclamos.',
-              style: textos.bodyLarge,
+            const CabeceraPaso(
+              ilustracion: Ilustracion.pasoPrivacidad,
+              fondo: AppColors.lima100,
+              titulo: 'Tus datos, en tus manos',
+              detalle:
+                  'Almira usa los datos de tu cuenta y los que registra tu municipalidad para '
+                  'mostrarte tus tributos y atender tus reclamos.',
             ),
             Align(
               alignment: Alignment.centerLeft,
-              child: OutlinedButton(
+              child: TextButton(
                 onPressed: () => mostrarInformacionPrivacidad(context),
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
-                child: const Text('Leer la información completa'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                  textStyle: textos.titleSmall!.copyWith(fontWeight: FontWeight.w800),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(child: Text('Leer la información completa')),
+                    SizedBox(width: 4),
+                    Icon(Icons.chevron_right_rounded, size: 18),
+                  ],
+                ),
               ),
             ),
             espacio,
-            TituloSeccion('Opcional'),
-            espacioChico,
             InterruptoresPrivacidad(
               valor: _elegidos,
               habilitado: !_guardando,
               alCambiar: (valor) => setState(() => _elegidos = valor),
             ),
-            espacioChico,
+            espacio,
             Text('Puedes cambiarlo cuando quieras en Mi perfil.', style: textos.bodySmall),
             if (_error != null) ...[espacio, Aviso(_error!, tono: Tono.error)],
             espacioGrande,
-            FilledButton(
-              onPressed: _guardando ? null : _continuar,
-              child: _guardando
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                    )
-                  : const Text('Continuar'),
-            ),
+            BotonPaso(texto: 'Continuar', alTocar: _continuar, ocupado: _guardando),
           ],
         ),
       ),

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Almira"><title>Almira</title>
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14A39A"/><stop offset="1" stop-color="#0A6E72"/></linearGradient></defs>
+<path d="M60 14 104 52H94v46a10 10 0 0 1-10 10H36a10 10 0 0 1-10-10V52H16z" fill="url(#g)" stroke="url(#g)" stroke-width="8" stroke-linejoin="round"/>
+<path d="M53 60h14a15 15 0 0 1 0 30H56l-11 8 3-10a15 15 0 0 1 5-28z" fill="#FFFFFF"/>
+<circle cx="50" cy="75" r="4.2" fill="#0A6E72"/><circle cx="60" cy="75" r="4.2" fill="#0A6E72"/><circle cx="70" cy="75" r="4.2" fill="#0A6E72"/>
+</svg>

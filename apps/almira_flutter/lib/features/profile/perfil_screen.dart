@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -10,6 +11,7 @@ import '../../core/errors/error_app.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/app_confirm_dialog.dart';
 import '../../core/widgets/componentes.dart';
+import '../../core/widgets/movimiento.dart';
 import '../../shared/services/proveedores.dart';
 import '../payments/pagos_logica.dart';
 import '../complaints/piezas_lista.dart';
@@ -34,10 +36,7 @@ class PerfilScreen extends ConsumerWidget {
   }
 
   Future<void> _crearClave(BuildContext context, WidgetRef ref) async {
-    final clave = await showDialog<String>(
-      context: context,
-      builder: (_) => const _DialogoClave(),
-    );
+    final clave = await showDialog<String>(context: context, builder: (_) => const _DialogoClave());
     if (clave == null || !context.mounted) return;
     try {
       await ref.read(servicioAuthProvider).crearClaveWeb(clave);
@@ -58,62 +57,55 @@ class PerfilScreen extends ConsumerWidget {
     final nombre = vecino?.nombre ?? sesion.cuenta?.nombre;
     final codigo = vecino?.codigoContribuyente;
 
-    // Barra compacta turquesa (con la flecha atrás), la identidad del vecino en el mismo color y
-    // las opciones en la hoja blanca que se monta encima.
+    // Encabezado con degradado (título, avatar, nombre y código) y las opciones en grupos dentro
+    // de la hoja crema que sube sobre él.
     return Scaffold(
-      appBar: AppBar(
-        // Sin pantalla anterior no hay flecha: el título toma el margen de la pantalla.
-        titleSpacing: context.canPop() ? null : AppSpacing.margen,
-        title: const Text('Mi perfil'),
-        actions: [
-          if (esDemo)
-            const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.lg),
-              child: Center(child: EtiquetaDemo(sobreTurquesa: true)),
-            ),
-        ],
-      ),
-      body: ColoredBox(
-        color: AppColors.surface,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            ColoredBox(
-              color: AppColors.primary,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.margen,
-                  AppSpacing.sm,
-                  AppSpacing.margen,
-                  AppSpacing.solapeHoja + AppSpacing.lg,
-                ),
-                child: SobreTurquesa(
-                  child: Row(
-                    children: [
-                      AvatarEditable(lado: AppSpacing.cajaGrande, nombre: nombre, editable: !esDemo),
-                      const SizedBox(width: AppSpacing.lg),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          Solape(
+            solape: AppSpacing.solapeHoja,
+            arriba: CabeceraMarca(
+              titulo: 'Mi perfil',
+              esDemo: esDemo,
+              rellenoInferior: AppSpacing.solapeHoja + AppSpacing.lg,
+              inicio: context.canPop()
+                  ? BotonCuadro(
+                      semantica: 'Volver',
+                      alTocar: () => context.pop(),
+                      child: const Icon(Phosphor.arrowLeft, size: 22),
+                    )
+                  : null,
+              hijo: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: Row(
+                  children: [
+                    Rebote(
+                      child: AvatarEditable(lado: 64, nombre: nombre, editable: !esDemo),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nombre == null ? 'Tu cuenta' : tipoTitulo(nombre),
+                            style: textos.titleLarge!.copyWith(fontSize: 20, color: AppColors.onPrimary),
+                          ),
+                          if (codigo != null || vecino == null)
                             Text(
-                              nombre == null ? 'Tu cuenta' : tipoTitulo(nombre),
-                              style: textos.titleLarge!.copyWith(color: AppColors.onPrimary),
+                              codigo == null ? 'Sin código vinculado' : 'Contribuyente $codigo',
+                              style: textos.bodyMedium!.copyWith(fontSize: 14, color: AppColors.subtextoCabecera),
                             ),
-                            if (codigo != null || vecino == null)
-                              Text(
-                                codigo == null ? 'Sin código vinculado' : 'Contribuyente $codigo',
-                                style: textos.bodyMedium!.copyWith(color: AppColors.onPrimary),
-                              ),
-                          ],
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            HojaBlanca(
+            abajo: HojaBlanca(
+              sobreCabecera: false,
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.margen,
                 AppSpacing.xl,
@@ -123,111 +115,114 @@ class PerfilScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                        _Grupo(
-                          titulo: 'Cuenta y predio',
-                          filas: [
-                            for (final predio in v?.predios ?? const [])
-                              FilaLista(
-                                inicio: const IconoColor(PhosphorFill.houseLine, color: AppColors.primary),
-                                titulo: predio.direccion,
-                                detalle: DetalleFila('Predio ${predio.codigo}'),
-                              ),
-                            FilaLista(
-                              inicio: const IconoColor(PhosphorFill.identificationBadge, color: AppColors.acentoVioleta),
-                              titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
-                              alTocar: () => context.push(Rutas.vincular),
-                            ),
-                            FilaLista(
-                              inicio: const IconoColor(PhosphorFill.buildings, color: AppColors.acentoAzul),
-                              titulo: 'Municipalidad',
-                              detalle: v?.municipalidad == null ? null : DetalleFila(v!.municipalidad!.nombre),
-                              alTocar: () => context.push(Rutas.municipalidad),
-                            ),
-                          ],
+                  _Grupo(
+                    paso: 1,
+                    titulo: 'Cuenta y predio',
+                    filas: [
+                      for (final predio in v?.predios ?? const [])
+                        FilaLista(
+                          inicio: const IconoColor.svg(IconoA.predio, color: AppColors.primary),
+                          titulo: predio.direccion,
+                          detalle: DetalleFila('Predio ${predio.codigo}'),
                         ),
-                        _Grupo(
-                          titulo: 'Preferencias',
-                          filas: [
-                            if (!esDemo)
-                              FilaLista(
-                                inicio: const IconoColor(PhosphorFill.key, color: AppColors.acentoAmbar),
-                                titulo: 'Clave web',
-                                detalle: DetalleFila('Para entrar con tu correo o tu cuponera'),
-                                alTocar: () => _crearClave(context, ref),
-                              ),
-                            FilaLista(
-                              inicio: const IconoColor(PhosphorFill.bell, color: AppColors.acentoRosa),
-                              titulo: 'Avisos y canales',
-                              alTocar: () => context.push(Rutas.avisos),
-                            ),
-                            // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
-                            if (!esDemo && vecino != null) const OpcionWhatsapp(),
-                            FilaLista(
-                              inicio: const IconoColor(PhosphorFill.shieldCheck, color: AppColors.acentoVerde),
-                              titulo: 'Privacidad',
-                              alTocar: () => context.push(Rutas.privacidad),
-                            ),
-                            FilaInterruptor(
-                              inicio: const IconoColor(PhosphorFill.textAa, color: AppColors.primary),
-                              titulo: 'Texto más grande',
-                              valor: textoGrande,
-                              alCambiar: ref.read(textoGrandeProvider.notifier).cambiar,
-                            ),
-                          ],
+                      FilaLista(
+                        inicio: const IconoColor.svg(IconoA.cuponera, color: AppColors.sol),
+                        titulo: vecino == null ? 'Vincular cuponera' : 'Vincular otra cuponera',
+                        alTocar: () => context.push(Rutas.vincular),
+                      ),
+                      FilaLista(
+                        inicio: const IconoColor.svg(IconoA.municipalidad, color: AppColors.lima),
+                        titulo: 'Municipalidad',
+                        detalle: v?.municipalidad == null ? null : DetalleFila(v!.municipalidad!.nombre),
+                        alTocar: () => context.push(Rutas.municipalidad),
+                      ),
+                    ],
+                  ),
+                  _Grupo(
+                    paso: 2,
+                    titulo: 'Preferencias',
+                    filas: [
+                      if (!esDemo)
+                        FilaLista(
+                          inicio: const IconoColor.svg(IconoA.candado, color: AppColors.sol),
+                          titulo: 'Clave web',
+                          detalle: DetalleFila('Para entrar con tu correo o tu cuponera'),
+                          alTocar: () => _crearClave(context, ref),
                         ),
-                        _Grupo(
-                          titulo: 'Trámites y ayuda',
-                          filas: [
-                            FilaLista(
-                              inicio: const IconoColor(PhosphorFill.receipt, color: AppColors.acentoAzul),
-                              titulo: 'Constancias de pago',
-                              alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
-                            ),
-                            FilaLista(
-                              inicio: const IconoColor(PhosphorFill.headset, color: AppColors.acentoVioleta),
-                              titulo: 'Atención',
-                              alTocar: () => context.push(Rutas.atencion),
-                            ),
-                          ],
-                        ),
-                        // Peligro suave, según la guía: borde gris y texto en rojo oscuro.
-                        OutlinedButton(
-                          onPressed: () => _cerrarSesion(context, ref),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.error,
-                            side: const BorderSide(color: AppColors.border),
-                          ),
-                          child: Text(esDemo ? 'Salir de la demostración' : 'Cerrar sesión'),
-                        ),
+                      FilaLista(
+                        inicio: const IconoColor.svg(IconoA.campana, color: AppColors.coral),
+                        titulo: 'Avisos y canales',
+                        alTocar: () => context.push(Rutas.avisos),
+                      ),
+                      // Los recordatorios necesitan la cuenta real y un contribuyente vinculado.
+                      if (!esDemo && vecino != null) const OpcionWhatsapp(),
+                      FilaLista(
+                        inicio: const IconoColor.svg(IconoA.privacidad, color: AppColors.lima),
+                        titulo: 'Privacidad',
+                        alTocar: () => context.push(Rutas.privacidad),
+                      ),
+                      FilaInterruptor(
+                        inicio: const IconoColor.svg(IconoA.texto, color: AppColors.primary),
+                        titulo: 'Texto más grande',
+                        valor: textoGrande,
+                        alCambiar: ref.read(textoGrandeProvider.notifier).cambiar,
+                      ),
+                    ],
+                  ),
+                  _Grupo(
+                    paso: 3,
+                    titulo: 'Trámites y ayuda',
+                    filas: [
+                      FilaLista(
+                        inicio: const IconoColor.svg(IconoA.estado, color: AppColors.primary),
+                        titulo: 'Constancias de pago',
+                        alTocar: () => context.go('${Rutas.pagos}?filtro=${FiltroDeuda.pagados.name}'),
+                      ),
+                      FilaLista(
+                        inicio: const IconoColor.svg(IconoA.ayuda, color: AppColors.coral),
+                        titulo: 'Atención',
+                        alTocar: () => context.push(Rutas.atencion),
+                      ),
+                    ],
+                  ),
+                  // Peligro suave: fondo blanco, borde gris y texto en rojo oscuro.
+                  OutlinedButton(
+                    onPressed: () => _cerrarSesion(context, ref),
+                    style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
+                    child: Text(esDemo ? 'Salir de la demostración' : 'Cerrar sesión'),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Grupo de opciones: rótulo en mayúsculas pequeñas y filas con divisor, sin caja.
+/// Grupo de opciones: rótulo en mayúsculas pequeñas y las filas en una tarjeta blanca.
 class _Grupo extends StatelessWidget {
-  const _Grupo({required this.titulo, required this.filas});
+  const _Grupo({required this.titulo, required this.filas, this.paso = 0});
 
   final String titulo;
   final List<Widget> filas;
+  final int paso;
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            RotuloSeccion(titulo),
-            const SizedBox(height: AppSpacing.xs),
-            ListaFilas(filas: filas),
-          ],
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+    child: Aparecer(
+      paso: paso,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          RotuloGrupo(titulo),
+          ListaFilas(filas: filas),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Pide la clave web dos veces. La clave no se guarda en el teléfono.
@@ -272,24 +267,18 @@ class _DialogoClaveState extends State<_DialogoClave> {
               helperText: 'Mínimo 8 caracteres.',
               suffixIcon: IconButton(
                 tooltip: _ver ? 'Ocultar clave' : 'Mostrar clave',
-                icon: Icon(
-                  _ver
-                      ? Phosphor.eyeSlash
-                      : Phosphor.eye,
-                ),
+                icon: Icon(_ver ? Phosphor.eyeSlash : Phosphor.eye),
                 onPressed: () => setState(() => _ver = !_ver),
               ),
             ),
-            validator: (v) =>
-                (v ?? '').length >= 8 ? null : 'Usa al menos 8 caracteres.',
+            validator: (v) => (v ?? '').length >= 8 ? null : 'Usa al menos 8 caracteres.',
           ),
           const SizedBox(height: AppSpacing.md),
           TextFormField(
             controller: _repetir,
             obscureText: !_ver,
             decoration: const InputDecoration(labelText: 'Repite tu clave'),
-            validator: (v) =>
-                v == _clave.text ? null : 'Las claves no coinciden.',
+            validator: (v) => v == _clave.text ? null : 'Las claves no coinciden.',
           ),
         ],
       ),

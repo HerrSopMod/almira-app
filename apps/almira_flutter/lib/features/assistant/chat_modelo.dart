@@ -50,9 +50,9 @@ class PosicionEnGrupo {
 /// Agrupa los mensajes seguidos del mismo autor: el primero lleva el avatar del asistente y el
 /// último, la hora; entre ellos el espacio es menor y las esquinas se unen.
 List<PosicionEnGrupo> agruparMensajes(List<MensajeChat> mensajes) => [
-      for (var i = 0; i < mensajes.length; i++)
-        PosicionEnGrupo(
-          primero: i == 0 || mensajes[i - 1].mio != mensajes[i].mio,
-          ultimo: i == mensajes.length - 1 || mensajes[i + 1].mio != mensajes[i].mio,
-        ),
-    ];
+  for (var i = 0; i < mensajes.length; i++)
+    PosicionEnGrupo(
+      primero: i == 0 || mensajes[i - 1].mio != mensajes[i].mio,
+      ultimo: i == mensajes.length - 1 || mensajes[i + 1].mio != mensajes[i].mio,
+    ),
+];

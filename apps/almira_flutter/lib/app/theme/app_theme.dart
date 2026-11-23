@@ -73,82 +73,61 @@ abstract final class AppTheme {
       surfaceTint: Colors.transparent,
     );
 
-    const base = TextStyle(
-      fontFamily: 'PlusJakartaSans',
-      color: AppColors.textPrimary,
-      letterSpacing: 0,
-    );
-    // Escala corta: monto principal 32, título 20, cuerpo 15 y secundario 13. Dentro de una
-    // tarjeta se usan como máximo dos tamaños.
+    const base = TextStyle(fontFamily: 'PlusJakartaSans', color: AppColors.textPrimary, letterSpacing: 0);
+    // Escala del rediseño: montos y títulos en 800 con tracking negativo, filas en 700 y apoyo
+    // en 500. Nunca menos de 12 salvo las etiquetas de la barra inferior.
     final textos = TextTheme(
       // Monto principal de una pantalla (cabecera, detalle, comprobante): 32.
       displayMedium: base.copyWith(
         fontSize: 32,
         height: 38 / 32,
-        letterSpacing: -0.64,
-        fontWeight: FontWeight.w700,
+        letterSpacing: -0.96,
+        fontWeight: FontWeight.w800,
         fontFeatures: cifrasTabulares,
       ),
       // Monto destacado dentro de una tarjeta: 32, igual que el principal.
       displaySmall: base.copyWith(
         fontSize: 32,
         height: 38 / 32,
-        letterSpacing: -0.64,
-        fontWeight: FontWeight.w700,
+        letterSpacing: -0.96,
+        fontWeight: FontWeight.w800,
         fontFeatures: cifrasTabulares,
       ),
       // Nombre de la app en el ingreso: 28.
-      headlineMedium: base.copyWith(
-        fontSize: 28,
-        height: 34 / 28,
-        letterSpacing: -0.56,
-        fontWeight: FontWeight.w700,
-      ),
+      headlineMedium: base.copyWith(fontSize: 28, height: 34 / 28, letterSpacing: -0.56, fontWeight: FontWeight.w800),
       // Saludo de la cabecera: 24.
-      headlineSmall: base.copyWith(
-        fontSize: 24,
-        height: 30 / 24,
-        letterSpacing: -0.24,
-        fontWeight: FontWeight.w700,
-      ),
+      headlineSmall: base.copyWith(fontSize: 24, height: 30 / 24, letterSpacing: -0.48, fontWeight: FontWeight.w800),
       // Título de pantalla, de la barra superior y de sección: 20.
-      titleLarge: base.copyWith(fontSize: 20, height: 26 / 20, fontWeight: FontWeight.w600),
+      titleLarge: base.copyWith(fontSize: 19, height: 24 / 19, letterSpacing: -0.19, fontWeight: FontWeight.w800),
       // Nombre en una fila o tarjeta: 15 en peso medio.
-      titleMedium: base.copyWith(fontSize: 15, height: 22 / 15, fontWeight: FontWeight.w500),
+      titleMedium: base.copyWith(fontSize: 15, height: 21 / 15, fontWeight: FontWeight.w700),
       // Rótulos cortos con peso (pestañas, etiquetas de acceso): 13.
-      titleSmall: base.copyWith(fontSize: 13, height: 18 / 13, fontWeight: FontWeight.w600),
+      titleSmall: base.copyWith(fontSize: 13, height: 18 / 13, fontWeight: FontWeight.w700),
       // Cuerpo: texto de trámite, valores de ficha y lo que se escribe en un campo: 15.
-      bodyLarge: base.copyWith(fontSize: 15, height: 22 / 15, fontWeight: FontWeight.w400),
+      bodyLarge: base.copyWith(fontSize: 15, height: 22 / 15, fontWeight: FontWeight.w500),
       // Secundario: rótulos, fechas y descripciones: 13, en gris.
       bodyMedium: base.copyWith(
         fontSize: 13,
         height: 18 / 13,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         color: AppColors.textSecondary,
       ),
       // Pies y ayudas: 12, en gris.
       bodySmall: base.copyWith(
         fontSize: 12,
         height: 16 / 12,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         color: AppColors.textSecondary,
       ),
       // Botones: 16.
-      labelLarge: base.copyWith(fontSize: 16, height: 20 / 16, fontWeight: FontWeight.w600),
+      labelLarge: base.copyWith(fontSize: 16, height: 20 / 16, fontWeight: FontWeight.w700),
       // Insignias y rótulos: 12.
-      labelMedium: base.copyWith(
-        fontSize: 12,
-        height: 16 / 12,
-        letterSpacing: 0.24,
-        fontWeight: FontWeight.w600,
-      ),
+      labelMedium: base.copyWith(fontSize: 12, height: 16 / 12, letterSpacing: 0, fontWeight: FontWeight.w700),
       // Etiquetas de la barra inferior: 11.
-      labelSmall: base.copyWith(fontSize: 11, height: 14 / 11, fontWeight: FontWeight.w500),
+      labelSmall: base.copyWith(fontSize: 11, height: 14 / 11, fontWeight: FontWeight.w700),
     );
 
-    final formaBoton = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadius.boton),
-    );
+    final formaBoton = RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.boton));
     const altoBoton = Size.fromHeight(AppSpacing.boton);
 
     return ThemeData(
@@ -201,14 +180,15 @@ abstract final class AppTheme {
           shape: formaBoton,
           textStyle: textos.labelLarge,
           foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          side: const BorderSide(color: AppColors.bordeCampo, width: 1.5),
+          backgroundColor: AppColors.surface,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           minimumSize: const Size(AppSpacing.toque, AppSpacing.toque),
           shape: formaBoton,
-          textStyle: textos.labelLarge!.copyWith(fontWeight: FontWeight.w500),
+          textStyle: textos.labelLarge!.copyWith(fontWeight: FontWeight.w700),
           foregroundColor: AppColors.primary,
         ),
       ),
@@ -221,26 +201,26 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.campo,
-        // Con texto de 16 y 24 de interlineado, el campo mide 52.
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 14),
+        // Con texto de 15 y 22 de interlineado, el campo mide 56.
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 17),
         prefixIconColor: WidgetStateColor.resolveWith(
           (e) => e.contains(WidgetState.focused) ? AppColors.primary : AppColors.textSecondary,
         ),
         suffixIconColor: AppColors.textSecondary,
         labelStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary),
-        floatingLabelStyle: textos.titleSmall!.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-        hintStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary),
+        floatingLabelStyle: textos.titleSmall!.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+        hintStyle: textos.bodyLarge!.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
         helperStyle: textos.bodySmall,
         errorStyle: textos.bodySmall!.copyWith(color: AppColors.error),
         errorMaxLines: 3,
         helperMaxLines: 3,
-        border: _borde(AppColors.border),
-        enabledBorder: _borde(AppColors.border),
-        disabledBorder: _borde(AppColors.border),
+        border: _borde(AppColors.bordeCampo, 1.5),
+        enabledBorder: _borde(AppColors.bordeCampo, 1.5),
+        disabledBorder: _borde(AppColors.border, 1.5),
         // La etiqueta ya está arriba desde el inicio: al enfocar no se mueve. El foco solo
         // engrosa el borde en turquesa.
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        focusedBorder: _borde(AppColors.foco, 1.5),
+        focusedBorder: _borde(AppColors.foco, 2),
         errorBorder: _borde(AppColors.error, 1.5),
         focusedErrorBorder: _borde(AppColors.error, 1.5),
       ),
@@ -248,10 +228,7 @@ abstract final class AppTheme {
         color: AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.tarjeta),
-          side: const BorderSide(color: AppColors.border),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.tarjeta)),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1, space: 1),
       // Barra inferior: sin píldora. La pestaña activa va en turquesa con el ícono relleno.
@@ -277,11 +254,9 @@ abstract final class AppTheme {
         ),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith(
-          (e) => e.contains(WidgetState.selected) ? Colors.white : AppColors.textSecondary,
-        ),
+        thumbColor: WidgetStateProperty.resolveWith((e) => Colors.white),
         trackColor: WidgetStateProperty.resolveWith(
-          (e) => e.contains(WidgetState.selected) ? AppColors.primary : AppColors.track,
+          (e) => e.contains(WidgetState.selected) ? AppColors.primary : AppColors.bordeCampo,
         ),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),
@@ -307,9 +282,7 @@ abstract final class AppTheme {
             (e) => e.contains(WidgetState.selected) ? Colors.white : AppColors.textPrimary,
           ),
           side: const WidgetStatePropertyAll(BorderSide(color: AppColors.bordeControl)),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.boton)),
-          ),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.boton))),
         ),
       ),
       chipTheme: ChipThemeData(
@@ -350,15 +323,13 @@ abstract final class AppTheme {
         minTileHeight: AppSpacing.cajaGrande,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
-        builders: {
-          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-        },
+        builders: {TargetPlatform.android: FadeForwardsPageTransitionsBuilder()},
       ),
     );
   }
 
   static OutlineInputBorder _borde(Color color, [double ancho = 1]) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppRadius.campo),
-        borderSide: BorderSide(color: color, width: ancho),
-      );
+    borderRadius: BorderRadius.circular(AppRadius.campo),
+    borderSide: BorderSide(color: color, width: ancho),
+  );
 }

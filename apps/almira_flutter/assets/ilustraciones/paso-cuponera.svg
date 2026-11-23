@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 150" width="220" height="150" role="img" aria-label="Cuponera vinculada a tu casa"><title>Cuponera</title>
+<ellipse cx="110" cy="136" rx="92" ry="10" fill="#F6EEDF"/>
+<circle cx="182" cy="30" r="10" fill="#FFC94A"/>
+<rect x="34" y="34" width="104" height="96" rx="10" fill="#FFFFFF" stroke="#12393A" stroke-width="3"/>
+<rect x="34" y="34" width="104" height="24" rx="10" fill="#14A39A"/>
+<rect x="34" y="48" width="104" height="10" fill="#14A39A"/>
+<circle cx="48" cy="46" r="4" fill="#FFF6EA"/><rect x="58" y="43" width="40" height="6" rx="3" fill="#FFF6EA"/>
+<rect x="48" y="72" width="54" height="7" rx="3.5" fill="#12393A"/>
+<rect x="48" y="86" width="76" height="6" rx="3" fill="#C9DCD9"/>
+<rect x="48" y="98" width="64" height="6" rx="3" fill="#C9DCD9"/>
+<path d="M48 116h76" stroke="#12393A" stroke-width="2" stroke-dasharray="4 4"/>
+<g><path d="M128 92l26-22 26 22v38h-52z" fill="#FF7A59"/><path d="M122 96l32-28 32 28" stroke="#12393A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M146 130v-16a8 8 0 0 1 16 0v16z" fill="#12393A"/><rect x="164" y="98" width="10" height="10" rx="2" fill="#FFF6EA"/></g>
+<circle cx="182" cy="112" r="14" fill="#B8E07A" stroke="#12393A" stroke-width="3"/><path d="M175 112l5 5 9-9" stroke="#12393A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<path d="M18 60l6 2-6 2-2 6-2-6-6-2 6-2 2-6zM196 66l4 1-4 1-1 4-1-4-4-1 4-1 1-4z" fill="#FF7A59"/>
+</svg>

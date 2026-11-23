@@ -33,8 +33,7 @@ class ServicioAsistenteSupabase implements ServicioAsistente {
 
   final SupabaseClient _cliente;
 
-  static const _mensajeFallo =
-      'Ahora mismo no puedo responderte. Revisa tu conexión e inténtalo de nuevo.';
+  static const _mensajeFallo = 'Ahora mismo no puedo responderte. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
   Future<RespuestaAsistente> preguntar(String mensaje, List<MensajeChat> historial) async {
@@ -43,16 +42,21 @@ class ServicioAsistenteSupabase implements ServicioAsistente {
         ? recientes.sublist(recientes.length - _maximoHistorial)
         : recientes;
     try {
-      final respuesta = await _cliente.functions.invoke('asistente', body: {
-        'mensaje': mensaje.length > _maximoTexto ? mensaje.substring(0, _maximoTexto) : mensaje,
-        'historial': [
-          for (final m in ultimos)
-            {
-              'rol': m.mio ? 'usuario' : 'asistente',
-              'texto': m.texto.length > _maximoTexto ? m.texto.substring(0, _maximoTexto) : m.texto,
+      final respuesta = await _cliente.functions
+          .invoke(
+            'asistente',
+            body: {
+              'mensaje': mensaje.length > _maximoTexto ? mensaje.substring(0, _maximoTexto) : mensaje,
+              'historial': [
+                for (final m in ultimos)
+                  {
+                    'rol': m.mio ? 'usuario' : 'asistente',
+                    'texto': m.texto.length > _maximoTexto ? m.texto.substring(0, _maximoTexto) : m.texto,
+                  },
+              ],
             },
-        ],
-      }).timeout(const Duration(seconds: 40));
+          )
+          .timeout(const Duration(seconds: 40));
       final datos = respuesta.data;
       if (datos is! Map || datos['respuesta'] is! String) return const RespuestaAsistente(_mensajeFallo, fallo: true);
       final acciones = [
@@ -61,11 +65,7 @@ class ServicioAsistenteSupabase implements ServicioAsistente {
       ];
       // Fallo del servicio (clave, cuota, caída): se ofrece reintentar. El límite de uso y la
       // falta de vínculo son respuestas normales.
-      return RespuestaAsistente(
-        datos['respuesta'] as String,
-        acciones: acciones,
-        fallo: datos['error'] == 'servicio',
-      );
+      return RespuestaAsistente(datos['respuesta'] as String, acciones: acciones, fallo: datos['error'] == 'servicio');
     } catch (_) {
       return const RespuestaAsistente(_mensajeFallo, fallo: true);
     }
@@ -100,8 +100,5 @@ class ServicioAsistenteLocal implements ServicioAsistente {
 /// Servicio en uso: la función de Supabase cuando hay conexión con el servicio; si no, el local.
 /// `main.dart` pone el de Supabase.
 final servicioAsistenteProvider = Provider<ServicioAsistente>(
-  (ref) => ServicioAsistenteLocal(
-    () => ref.read(vistaProvider).valueOrNull,
-    () => ref.read(relojProvider)(),
-  ),
+  (ref) => ServicioAsistenteLocal(() => ref.read(vistaProvider).valueOrNull, () => ref.read(relojProvider)()),
 );

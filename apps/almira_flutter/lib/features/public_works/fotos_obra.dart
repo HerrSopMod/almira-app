@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/iconos.dart';
+import '../../app/theme/iconos_almira.dart';
+import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
+import 'obras_screen.dart';
 
 /// Direcciones temporales de las fotos de una obra: (municipalidad, obra). Sin fotos, en modo
 /// demostración o sin conexión, la lista queda vacía y la pantalla no muestra nada.
@@ -150,6 +153,29 @@ class _VisorFotosState extends State<_VisorFotos> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Imagen de una obra: su primera foto real si la tiene; si no, la ilustración por tipo.
+class ImagenObra extends ConsumerWidget {
+  const ImagenObra({super.key, required this.obra});
+
+  final Obra obra;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final urls = ref.watch(fotosObraProvider((obra.municipalidadId, obra.id))).valueOrNull ?? const <String>[];
+    final ilustracion = ImagenIlustracion(ilustracionDeObra(obra), ajuste: BoxFit.cover);
+    if (urls.isEmpty) return ilustracion;
+    return Image.network(
+      urls.first,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      excludeFromSemantics: true,
+      loadingBuilder: (_, hijo, progreso) => progreso == null ? hijo : ilustracion,
+      errorBuilder: (_, _, _) => ilustracion,
     );
   }
 }

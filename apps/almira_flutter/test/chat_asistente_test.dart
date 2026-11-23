@@ -12,7 +12,6 @@ import 'package:almira_flutter/shared/services/repositorio_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _hoy = DateTime(2026, 11, 11, 10, 30);
@@ -34,11 +33,13 @@ class _Falso implements ServicioAsistente {
 }
 
 ProviderContainer _contenedor(_Falso servicio) {
-  final c = ProviderContainer(overrides: [
-    servicioAsistenteProvider.overrideWithValue(servicio),
-    relojProvider.overrideWithValue(() => _hoy),
-    sesionProvider.overrideWith(() => _SesionDePrueba()),
-  ]);
+  final c = ProviderContainer(
+    overrides: [
+      servicioAsistenteProvider.overrideWithValue(servicio),
+      relojProvider.overrideWithValue(() => _hoy),
+      sesionProvider.overrideWith(() => _SesionDePrueba()),
+    ],
+  );
   addTearDown(c.dispose);
   return c;
 }
@@ -78,10 +79,10 @@ void main() {
 
   group('conversación', () {
     test('envía, espera y agrega la respuesta con sus acciones', () async {
-      final servicio = _Falso((_, _) async => const RespuestaAsistente(
-            'Debes S/ 41.35.',
-            acciones: [AccionChat('Pagar en línea', Rutas.pagoEnLinea)],
-          ));
+      final servicio = _Falso(
+        (_, _) async =>
+            const RespuestaAsistente('Debes S/ 41.35.', acciones: [AccionChat('Pagar en línea', Rutas.pagoEnLinea)]),
+      );
       final c = _contenedor(servicio);
       final enviado = c.read(chatAsistenteProvider.notifier).enviar('  ¿Cuánto debo?  ');
       expect(c.read(chatAsistenteProvider).enviando, isTrue);
@@ -145,15 +146,15 @@ void main() {
 
   group('pantalla', () {
     Widget app(SharedPreferences p, ServicioAsistente servicio) => ProviderScope(
-          overrides: [
-            preferenciasProvider.overrideWithValue(p),
-            repositorioProvider.overrideWithValue(RepositorioDemo(p, reloj: () => _hoy)),
-            servicioAuthProvider.overrideWithValue(ServicioAuthDemo(p)),
-            relojProvider.overrideWithValue(() => _hoy),
-            servicioAsistenteProvider.overrideWithValue(servicio),
-          ],
-          child: const AlmiraApp(),
-        );
+      overrides: [
+        preferenciasProvider.overrideWithValue(p),
+        repositorioProvider.overrideWithValue(RepositorioDemo(p, reloj: () => _hoy)),
+        servicioAuthProvider.overrideWithValue(ServicioAuthDemo(p)),
+        relojProvider.overrideWithValue(() => _hoy),
+        servicioAsistenteProvider.overrideWithValue(servicio),
+      ],
+      child: const AlmiraApp(),
+    );
 
     testWidgets('muestra el saludo, las sugerencias, la respuesta, los botones y se puede reintentar', (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
@@ -185,8 +186,15 @@ void main() {
       }
 
       // El botón de enviar está apagado sin texto.
-      expect(tester.widget<IconButton>(find.widgetWithIcon(IconButton, Phosphor.arrowUp)).onPressed, isNull);
+      expect(
+        tester
+            .widget<IconButton>(find.ancestor(of: find.byTooltip('Enviar'), matching: find.byType(IconButton)))
+            .onPressed,
+        isNull,
+      );
 
+      await tester.ensureVisible(find.text('¿Cuánto debo?'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('¿Cuánto debo?'));
       await tester.pump();
       await tester.pumpAndSettle();

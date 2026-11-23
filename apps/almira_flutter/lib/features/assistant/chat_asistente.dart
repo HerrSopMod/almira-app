@@ -34,7 +34,10 @@ class ChatNotifier extends Notifier<EstadoChat> {
     final limpio = texto.trim();
     if (limpio.isEmpty || state.enviando) return;
     state = state.con(
-      mensajes: [...state.mensajes, MensajeChat(texto: limpio, mio: true, hora: _ahora)],
+      mensajes: [
+        ...state.mensajes,
+        MensajeChat(texto: limpio, mio: true, hora: _ahora),
+      ],
     );
     await _responder(limpio);
   }
