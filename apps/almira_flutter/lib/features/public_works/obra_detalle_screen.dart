@@ -85,16 +85,23 @@ class ObraDetalleScreen extends ConsumerWidget {
             else
               Text('Sin punto en el mapa.', style: textos.bodyMedium!),
             espacioGrande,
-            AvanceFisico(obra),
-            espacioGrande,
+            // El avance solo se muestra en obras en ejecución: una finalizada no lo necesita.
+            if (obra.estado != EstadoObra.finalizada) ...[
+              AvanceFisico(obra),
+              espacioGrande,
+            ],
+            // Montos en cero son datos que la municipalidad aún no registra: no se muestran.
+            if (obra.montoAsignado > 0 || obra.montoEjecutado > 0 || obra.porcentajeTributos != null) ...[
             const TituloSeccion('Presupuesto'),
             espacioChico,
             Tarjeta(
               child: Column(
                 children: [
-                  _FilaIcono(PhosphorFill.wallet, AppColors.acentoAzul, 'Asignado', soles(obra.montoAsignado), aLaDerecha: true),
-                  _FilaIcono(PhosphorFill.receipt, AppColors.acentoAmbar, 'Gastado', soles(obra.montoEjecutado), aLaDerecha: true),
-                  if (gasto != null)
+                  if (obra.montoAsignado > 0)
+                    _FilaIcono(PhosphorFill.wallet, AppColors.acentoAzul, 'Asignado', soles(obra.montoAsignado), aLaDerecha: true),
+                  if (obra.montoEjecutado > 0)
+                    _FilaIcono(PhosphorFill.receipt, AppColors.acentoAmbar, 'Gastado', soles(obra.montoEjecutado), aLaDerecha: true),
+                  if (gasto != null && obra.montoEjecutado > 0)
                     _FilaIcono(PhosphorFill.listChecks, AppColors.acentoVioleta, 'Gastado del presupuesto', '$gasto$_nbsp%', aLaDerecha: true),
                   if (obra.porcentajeTributos != null)
                     _FilaIcono(
@@ -107,6 +114,7 @@ class ObraDetalleScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            ],
             if (inicio != null || obra.meta.trim().isNotEmpty || actualizada != null) ...[
               espacioGrande,
               Tarjeta(

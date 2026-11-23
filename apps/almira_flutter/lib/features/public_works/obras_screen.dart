@@ -277,9 +277,11 @@ class _FilaObra extends StatelessWidget {
       color: seleccionada ? AppColors.surfaceSubtle : AppColors.surface,
       child: FilaLista(
         titulo: obra.nombre,
-        monto: '$pct$_nbsp%',
+        monto: obra.estado == EstadoObra.finalizada ? null : '$pct$_nbsp%',
         alTocar: () => context.go(Rutas.obra(obra.id)),
-        semantica: 'Obra ${obra.nombre}, ${obra.estado.etiqueta}, avance físico $pct por ciento. Ver detalle',
+        semantica: obra.estado == EstadoObra.finalizada
+            ? 'Obra ${obra.nombre}, ${obra.estado.etiqueta}. Ver detalle'
+            : 'Obra ${obra.nombre}, ${obra.estado.etiqueta}, avance físico $pct por ciento. Ver detalle',
         detalle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
