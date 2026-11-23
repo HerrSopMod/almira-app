@@ -136,7 +136,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '¿Cuánto debo?');
       await tester.pump();
-      await tester.tap(find.byIcon(Phosphor.arrowUp));
+      await tester.tap(find.byTooltip('Enviar'));
       await tester.pumpAndSettle();
       await _revisar(tester, 'asistente-respuesta-$etiqueta');
       tester.view.viewInsets = const FakeViewPadding(bottom: 600);

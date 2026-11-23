@@ -244,15 +244,17 @@ void main() {
       await abrirChat(tester);
       await _capturar(tester, 'chat-bienvenida-$etiqueta');
 
+      await tester.ensureVisible(find.text('¿Cuánto debo?'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('¿Cuánto debo?'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Mi último pago');
       await tester.pump();
-      await tester.tap(find.byIcon(Phosphor.arrowUp));
+      await tester.tap(find.byTooltip('Enviar'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Gracias, ¿y cuándo vence lo que falta?');
       await tester.pump();
-      await tester.tap(find.byIcon(Phosphor.arrowUp));
+      await tester.tap(find.byTooltip('Enviar'));
       await tester.pumpAndSettle();
       await _capturar(tester, 'chat-conversacion-$etiqueta');
     });

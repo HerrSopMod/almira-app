@@ -37,7 +37,7 @@ Respuesta responder(String pregunta, VistaMunicipal v, DateTime hoy) {
       resumen.alDia
           ? 'No tienes obligaciones pendientes para fraccionar.'
           : 'El pago en cuotas lo evalúa y aprueba tu municipalidad; Almira no puede tramitarlo. '
-              'Tu total pendiente es ${soles(resumen.total)}.',
+                'Tu total pendiente es ${soles(resumen.total)}.',
       accion: resumen.alDia ? null : 'Ver mis obligaciones',
       ruta: resumen.alDia ? null : Rutas.pagos,
     );
@@ -104,9 +104,11 @@ Respuesta responder(String pregunta, VistaMunicipal v, DateTime hoy) {
 
   if (tiene(r'deb|deuda|pendiente|tribut|arbitr|predial|cuanto')) {
     if (resumen.alDia) return const Respuesta('Estás al día: no tienes obligaciones pendientes.');
-    final lista = filtrarDeudas(v.deudas, FiltroDeuda.pendientes, hoy)
-        .map((d) => '${d.concepto}: ${soles(d.total)}')
-        .join('; ');
+    final lista = filtrarDeudas(
+      v.deudas,
+      FiltroDeuda.pendientes,
+      hoy,
+    ).map((d) => '${d.concepto}: ${soles(d.total)}').join('; ');
     return Respuesta(
       'Tu total pendiente es ${soles(resumen.total)} en '
       '${plural(resumen.cantidad, 'obligación', 'obligaciones')}. $lista.',
@@ -142,7 +144,7 @@ Respuesta responder(String pregunta, VistaMunicipal v, DateTime hoy) {
       enCurso.isEmpty
           ? 'No hay obras en ejecución publicadas. Hay ${plural(v.obras.length, 'obra concluida', 'obras concluidas')}.'
           : 'Hay ${plural(enCurso.length, 'obra en ejecución', 'obras en ejecución')}: '
-              '${enCurso.map((o) => '${o.nombre} (${o.avancePct.round()} % de avance físico)').join('; ')}.',
+                '${enCurso.map((o) => '${o.nombre} (${o.avancePct.round()} % de avance físico)').join('; ')}.',
       accion: 'Ver obras',
       ruta: Rutas.obras,
     );
