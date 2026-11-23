@@ -50,6 +50,7 @@ export default function DetalleObra() {
 
   const concluida = obra.estado === 'finalizada';
   const tributos = obra.porcentajeTributos;
+  const hayDinero = tributos !== null || obra.montoAsignado > 0 || obra.montoEjecutado > 0;
   const hitos = pasosHitos(obra);
 
   const enMapa = obrasConUbicacion([obra]).length > 0;
@@ -120,24 +121,31 @@ export default function DetalleObra() {
         </Texto>
       </View>
 
-      <Tarjeta grande>
-        <Texto variante="headlineSm">De dónde sale el dinero</Texto>
-        {tributos !== null ? (
-          <View style={estilos.grupo}>
-            <View style={estilos.barra}>
-              <View style={{ flex: tributos, backgroundColor: colors.chart1 }} />
-              <View style={{ flex: 100 - tributos, backgroundColor: colors.chart2 }} />
+      {hayDinero ? (
+        <Tarjeta grande>
+          <Texto variante="headlineSm">De dónde sale el dinero</Texto>
+          {tributos !== null ? (
+            <View style={estilos.grupo}>
+              <View style={estilos.barra}>
+                <View style={{ flex: tributos, backgroundColor: colors.chart1 }} />
+                <View style={{ flex: 100 - tributos, backgroundColor: colors.chart2 }} />
+              </View>
+              <View style={estilos.leyenda}>
+                <Leyenda color={colors.chart1} texto={`Tributos del distrito ${tributos} %`} />
+                <Leyenda color={colors.chart2} texto={`Transferencias ${100 - tributos} %`} />
+              </View>
             </View>
-            <View style={estilos.leyenda}>
-              <Leyenda color={colors.chart1} texto={`Tributos del distrito ${tributos} %`} />
-              <Leyenda color={colors.chart2} texto={`Transferencias ${100 - tributos} %`} />
-            </View>
-          </View>
-        ) : null}
-        <FilaDato etiqueta="Presupuesto" valor={<Valor monto={obra.montoAsignado} />} />
-        <Separador />
-        <FilaDato etiqueta="Gastado a la fecha" valor={<Valor monto={obra.montoEjecutado} />} />
-      </Tarjeta>
+          ) : null}
+          {/* 0 significa que no hay dato: no se muestra como si fuera un monto real. */}
+          {obra.montoAsignado > 0 ? (
+            <FilaDato etiqueta="Presupuesto" valor={<Valor monto={obra.montoAsignado} />} />
+          ) : null}
+          {obra.montoAsignado > 0 && obra.montoEjecutado > 0 ? <Separador /> : null}
+          {obra.montoEjecutado > 0 ? (
+            <FilaDato etiqueta="Gastado a la fecha" valor={<Valor monto={obra.montoEjecutado} />} />
+          ) : null}
+        </Tarjeta>
+      ) : null}
 
       {hitos.length > 0 ? (
         <View style={estilos.grupo}>
