@@ -10,6 +10,7 @@ import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
 import '../../core/widgets/mapa_almira.dart';
 import '../../shared/services/proveedores.dart';
+import 'fotos_obra.dart';
 import 'obras_screen.dart';
 
 class ObraDetalleScreen extends ConsumerWidget {
@@ -64,6 +65,7 @@ class ObraDetalleScreen extends ConsumerWidget {
             espacioChico,
             Align(alignment: Alignment.centerLeft, child: InsigniaObra(obra.estado)),
             espacio,
+            FotosObra(municipalidadId: obra.municipalidadId, obraId: obra.id),
             // El mapa siempre lleva su atribución (la dibuja MapaAlmira).
             if (obra.tieneUbicacion)
               MarcoMapa(

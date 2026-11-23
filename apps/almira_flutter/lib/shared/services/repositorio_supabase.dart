@@ -175,6 +175,32 @@ class RepositorioSupabase implements Repositorio {
     }
   }
 
+  // --- Fotos de obras: bucket privado `obras` ({municipalidad_id}/{obra_id}/{archivo}) ---
+
+  static const _bucketObras = 'obras';
+  static const _maxFotosObra = 12;
+
+  @override
+  Future<List<String>> urlsFotosObra(String municipalidadId, String obraId) async {
+    final carpeta = '$municipalidadId/$obraId';
+    try {
+      final archivos = await _cliente.storage.from(_bucketObras).list(path: carpeta).timeout(_espera);
+      final nombres = archivos
+          .where((a) => a.id != null && !a.name.startsWith('.'))
+          .map((a) => a.name)
+          .toList()
+        ..sort();
+      if (nombres.isEmpty) return const [];
+      final firmadas = await _cliente.storage
+          .from(_bucketObras)
+          .createSignedUrls([for (final n in nombres.take(_maxFotosObra)) '$carpeta/$n'], 3600)
+          .timeout(_espera);
+      return [for (final f in firmadas) if (f.signedUrl.isNotEmpty) f.signedUrl];
+    } catch (error) {
+      throw ErrorApp.de(error);
+    }
+  }
+
   // --- Foto de perfil: bucket privado `avatares`, un archivo por cuenta ({user_id}/perfil.jpg) ---
 
   static const _bucketAvatares = 'avatares';
