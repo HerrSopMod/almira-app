@@ -45,8 +45,8 @@ List<Obra> filtrarObras(List<Obra> obras, FiltroObra filtro) => obras
 
 Color colorObra(Obra obra) => obra.estado == EstadoObra.finalizada ? AppColors.limaTexto : AppColors.primary;
 
-/// Ilustración de una obra según su nombre (pistas, parque o veredas). La base no guarda fotos de
-/// obras: se usa la ilustración más cercana.
+/// Ilustración de una obra según su nombre (pistas, parque o veredas). Es la que se ve cuando la
+/// obra no tiene fotos.
 Ilustracion ilustracionDeObra(Obra obra) {
   final n = normalizar('${obra.nombre} ${obra.nombreCorto ?? ''}');
   if (n.contains('parque') || n.contains('plaza') || n.contains('area verde')) return Ilustracion.obraParque;

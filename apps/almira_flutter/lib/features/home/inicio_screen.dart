@@ -641,17 +641,14 @@ IconoA iconoDeReclamo(TipoReclamo tipo) => switch (tipo) {
 };
 
 /// Obra en ejecución: ilustración arriba, nombre y barra de avance con el porcentaje.
-class _TarjetaObra extends ConsumerWidget {
+class _TarjetaObra extends StatelessWidget {
   const _TarjetaObra({required this.obra});
 
   final Obra obra;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final textos = Theme.of(context).textTheme;
-    // La primera foto real de la obra; sin foto (o si no carga), la ilustración de siempre.
-    final fotos = ref.watch(fotosObraProvider((obra.municipalidadId, obra.id))).valueOrNull ?? const <String>[];
-    final ilustracion = ImagenIlustracion(ilustracionDeObra(obra), ajuste: BoxFit.cover);
     final avance = obra.avancePct.clamp(0, 100) / 100;
     return Tarjeta(
       padding: EdgeInsets.zero,
@@ -660,18 +657,8 @@ class _TarjetaObra extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: 76,
-            child: fotos.isEmpty
-                ? ilustracion
-                : Image.network(
-                    fotos.first,
-                    fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                    loadingBuilder: (_, hijo, progreso) => progreso == null ? hijo : ilustracion,
-                    errorBuilder: (_, _, _) => ilustracion,
-                  ),
-          ),
+          // La primera foto real de la obra; sin foto (o si no carga), la ilustración de siempre.
+          SizedBox(height: 76, child: ImagenObra(obra: obra)),
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
             child: Column(

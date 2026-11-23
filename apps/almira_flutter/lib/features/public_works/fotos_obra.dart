@@ -21,7 +21,7 @@ final fotosObraProvider = FutureProvider.autoDispose.family<List<String>, (Strin
   }
 });
 
-/// Fotos de la obra en una tira que se desliza. Al tocar una, se abre grande.
+/// Fotos de la obra, menos la primera (que es la portada), en una tira que se desliza. Al tocar una, se abre grande.
 class FotosObra extends ConsumerWidget {
   const FotosObra({super.key, required this.municipalidadId, required this.obraId});
 
@@ -30,7 +30,9 @@ class FotosObra extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final urls = ref.watch(fotosObraProvider((municipalidadId, obraId))).valueOrNull ?? const <String>[];
+    // La primera foto ya es la portada del detalle: la tira trae solo las demás.
+    final todas = ref.watch(fotosObraProvider((municipalidadId, obraId))).valueOrNull ?? const <String>[];
+    final urls = todas.skip(1).toList();
     if (urls.isEmpty) return const SizedBox.shrink();
     final ancho = MediaQuery.sizeOf(context).width - AppSpacing.margen * 2;
     final unica = urls.length == 1;
@@ -48,7 +50,7 @@ class FotosObra extends ConsumerWidget {
               button: true,
               label: etiqueta,
               child: GestureDetector(
-                onTap: () => _abrir(context, urls, i),
+                onTap: () => _abrir(context, todas, i + 1),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.destacado),
                   child: SizedBox(
