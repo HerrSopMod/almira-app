@@ -80,6 +80,10 @@ Hola {{1}}, te escribe Almira. Hay información disponible sobre tu cuenta en la
 
 ---
 
+## Estado
+
+Las 5 plantillas están aprobadas y activas en la cuenta de prueba de Meta (23 de noviembre de 2026). Con el número de prueba solo reciben los destinatarios registrados en Meta (hasta 5).
+
 ## Notas para la aprobación
 
 - **Categoría Utility.** Meta puede reclasificar una plantilla a *Marketing* si la lee como promocional. Las frases como «¡Gracias por cumplir con tu comunidad! 💚» son las que más arriesgan: si la rechazan o la reclasifican, quita esa frase y vuelve a enviarla.
