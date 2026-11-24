@@ -20,7 +20,6 @@ import '../complaints/reclamos_logica.dart';
 import '../payments/pagos_logica.dart';
 import '../profile/foto_perfil.dart';
 import '../public_works/fotos_obra.dart';
-import '../public_works/obras_screen.dart';
 
 /// Cuántas obligaciones se listan en Inicio; el resto está en Pagar.
 const _maximoEnInicio = 3;
