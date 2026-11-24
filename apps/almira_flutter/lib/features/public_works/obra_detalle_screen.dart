@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:latlong2/latlong.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -9,11 +8,11 @@ import '../../app/theme/iconos.dart';
 import '../../app/theme/iconos_almira.dart';
 import '../../core/utils/formato.dart';
 import '../../core/widgets/componentes.dart';
-import '../../core/widgets/mapa_almira.dart';
 import '../../core/widgets/movimiento.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'fotos_obra.dart';
+import 'mapa_obra.dart';
 import 'obras_screen.dart';
 
 /// Detalle de obra (rediseño): la barra turquesa con el botón de volver y el estado; la tarjeta
@@ -36,7 +35,10 @@ class ObraDetalleScreen extends ConsumerWidget {
       appBar: BarraAlmira(
         titulo: 'Obra',
         acciones: [
-          if (actual != null) ...[InsigniaObra(actual.estado, sobreTurquesa: true), const SizedBox(width: AppSpacing.md)],
+          if (actual != null) ...[
+            InsigniaObra(actual.estado, sobreTurquesa: true),
+            const SizedBox(width: AppSpacing.md),
+          ],
         ],
       ),
       body: CuerpoAsync<VistaMunicipal>(
@@ -153,26 +155,7 @@ class ObraDetalleScreen extends ConsumerWidget {
                   children: [
                     const TituloSeccion('Ubicación'),
                     espacioChico,
-                    // El mapa siempre lleva su atribución (la dibuja MapaAlmira).
-                    if (obra.tieneUbicacion)
-                      MarcoMapa(
-                        child: MapaAlmira(
-                          centro: LatLng(obra.latitud!, obra.longitud!),
-                          zoom: ConfigMapa.zoomCalle,
-                          interactivo: false,
-                          marcadores: [
-                            MarcadorMapa(
-                              id: obra.id,
-                              punto: LatLng(obra.latitud!, obra.longitud!),
-                              etiqueta: obra.nombre,
-                              color: colorObra(obra),
-                            ),
-                          ],
-                          descripcion: 'Mapa con la ubicación de la obra: ${obra.ubicacion}',
-                        ),
-                      )
-                    else
-                      Text('Sin punto en el mapa.', style: textos.bodyMedium!),
+                    UbicacionObra(obra: obra),
                   ],
                 ),
               ),
