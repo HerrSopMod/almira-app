@@ -15,7 +15,6 @@ import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import '../../shared/services/repositorio.dart';
 import 'reclamos_logica.dart';
-import 'piezas_lista.dart';
 import 'reclamos_screen.dart';
 
 /// Seguimiento de un reclamo: estado, plazo, foto, ubicación y cronología.

@@ -7,7 +7,6 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/iconos.dart';
 import '../../app/theme/iconos_almira.dart';
 import '../../app/router.dart';
-import '../../app/theme/app_theme.dart';
 import '../../core/utils/formato.dart';
 import '../../core/utils/rango_fechas.dart';
 import '../../core/widgets/componentes.dart';
@@ -18,7 +17,6 @@ import '../account/estado_cuenta_logica.dart';
 import '../../shared/models/modelos.dart';
 import '../../shared/services/proveedores.dart';
 import 'pagos_logica.dart';
-import 'widgets_deuda.dart';
 
 /// Pagar (rediseño): selector Pendientes / Vencidos / Pagados, filtro por fechas y las
 /// obligaciones con casilla. La barra de abajo suma lo elegido (en el teléfono) y «Pagar» abre la

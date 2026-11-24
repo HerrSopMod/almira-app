@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:almira_flutter/app/app.dart';
 import 'package:almira_flutter/app/router.dart';
-import 'package:almira_flutter/app/theme/iconos.dart';
 import 'package:almira_flutter/features/assistant/chat_modelo.dart';
 import 'package:almira_flutter/features/assistant/servicio_asistente.dart';
 import 'package:almira_flutter/features/auth/servicio_auth.dart';
