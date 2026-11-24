@@ -1,7 +1,7 @@
 name: almira_flutter
 description: "Almira: app de vecinos"
 publish_to: 'none'
-version: 2.1.0+13
+version: 2.2.0+14
 
 environment:
   sdk: ^3.13.7
@@ -61,21 +61,22 @@ flutter:
           weight: 800
 # Ícono del lanzador (Android y web), generado desde el ícono de la marca:
 # `dart run flutter_launcher_icons`.
-# En Android: casa blanca con el mensaje sobre fondo turquesa, como el splash (sin el cuadro
-# blanco de antes). `icono-lanzador.png` es el ícono completo para Android 7 o menos y
-# `icono-lanzador-frente.png` la capa delantera del ícono adaptativo, sin fondo.
+# El logo de la app (casita turquesa con el mensaje blanco) sobre fondo turquesa muy claro; el
+# celular muestra «Almira» debajo. Los PNG salen de `casita.svg`. `icono-lanzador.png` es el
+# ícono completo para Android 7 o menos y `icono-lanzador-frente.png` la capa delantera del
+# ícono adaptativo, sin fondo.
 flutter_launcher_icons:
   android: true
   ios: false
   image_path: assets/marca/icono-lanzador.png
-  adaptive_icon_background: "#0B7F86"
+  adaptive_icon_background: "#EEF8F6"
   adaptive_icon_foreground: assets/marca/icono-lanzador-frente.png
-  adaptive_icon_foreground_inset: 8
+  adaptive_icon_foreground_inset: 0
   web:
     generate: true
     image_path: assets/marca/icono-1024.png
-    background_color: "#0B7F86"
-    theme_color: "#0B7F86"
+    background_color: "#EEF8F6"
+    theme_color: "#0A6E72"
 
 # Splash nativo de Android y web: fondo turquesa completo y el ícono blanco centrado
 # (Android 12+ solo admite color de fondo e ícono, sin texto). Después sigue la pantalla de
